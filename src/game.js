@@ -100,9 +100,9 @@ const drawBrick = (ctx, widthInStuds, x, y, colorName)=> {
 }
 
 const bricks = [
-	{x: 50, y: 250, colorName: "red", widthInStuds: 1},
-	{x: 150, y: 269, colorName: "yellow", widthInStuds: 4},
-	{x: 150, y: 250, colorName: "green", widthInStuds: 2},
+	{x: 50, y: 50-100, colorName: "red", widthInStuds: 1},
+	{x: 150, y: 69-100, colorName: "yellow", widthInStuds: 4},
+	{x: 150, y: 50-100, colorName: "green", widthInStuds: 2},
 ];
 for (let row = 5; row >= 0; row--) {
 	for (let column = 0; column < 150; /* MUST increment below */) {
@@ -110,7 +110,7 @@ for (let row = 5; row >= 0; row--) {
 			const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
 			bricks.push({
 				x: column * 15,
-				y: (row + 20) * 18,
+				y: row * 18,
 				widthInStuds,
 				// colorName: brickColorNames[~~(brickColorNames.length * Math.random())], // gaudy
 				colorName: "green", // grassy
@@ -123,8 +123,38 @@ for (let row = 5; row >= 0; row--) {
 	}
 }
 
+const viewport = {leftX: 0, bottomY: 0, scale: 2};
+
+let keys = {};
+addEventListener("keydown", (event)=> {
+	keys[event.code] = true;
+	if (event.code === "Equal") {
+		viewport.scale = Math.min(10, viewport.scale + 1);
+	}
+	if (event.code === "Minus") {
+		viewport.scale = Math.max(1, viewport.scale - 1);
+	}
+});
+addEventListener("keyup", (event)=> {
+	delete keys[event.code];
+});
+
 const animate = ()=> {
 	requestAnimationFrame(animate);
+
+	if (keys.KeyW || keys.ArrowUp) {
+		viewport.bottomY -= 20;
+	}
+	if (keys.KeyS || keys.ArrowDown) {
+		viewport.bottomY += 20;
+	}
+	if (keys.KeyA || keys.ArrowLeft) {
+		viewport.leftX -= 20;
+	}
+	if (keys.KeyD || keys.ArrowRight) {
+		viewport.leftX += 20;
+	}
+
 	if (canvas.width !== innerWidth) {
 		canvas.width = innerWidth;
 	}
@@ -134,14 +164,24 @@ const animate = ()=> {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+	ctx.save();
+	ctx.scale(viewport.scale, viewport.scale);
+	ctx.translate(-viewport.leftX, -viewport.bottomY);
+	ctx.imageSmoothingEnabled = false;
+
 	for (const brick of bricks) {
 		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName);
 		// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
 	}
 
-	ctx.drawImage(images.font, 0, 90);
-	drawText(ctx, "Hello world!\nThis is only a text", 0, 50, "orange");
-	drawText(ctx, fontChars, 0, 100, "sand");
+	ctx.restore();
+
+	// ctx.drawImage(images.font, 0, 90);
+	// drawText(ctx, fontChars, 0, 100, "sand");
+	const debugInfo = `BRICKS: ${bricks.length}
+VIEWPORT: ${viewport.leftX}, ${viewport.bottomY}
+AT SCALE: ${viewport.scale}X`;
+	drawText(ctx, debugInfo, 0, 50, "white");
 };
 
 const main = async ()=> {
