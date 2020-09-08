@@ -88,14 +88,14 @@ const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
 const brickWidthsInStudsToX = {};
 for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
 	brickWidthsInStudsToX[brickWidthsInStuds[i]] = x;
-	const w = brickWidthsInStuds[i] * 15 + 20;
+	const w = brickWidthsInStuds[i] * 15 + 15;
 	x += w;
 }
 
 const drawBrick = (ctx, widthInStuds, x, y, colorName)=> {
-	const w = widthInStuds * 15 + 20;
+	const w = widthInStuds * 15 + 15;
 	const h = 35;
-	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds] + 10, brickColorToYIndex[colorName] * 35 + 9, w, h, x, y, w, h);
+	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y, w, h);
 }
 
 const bricks = [
@@ -106,7 +106,7 @@ const bricks = [
 for (let row = 5; row >= 0; row--) {
 	for (let column = 0; column < 50; /* MUST increment below */) {
 		if (Math.sin(column*13234) < row * 0.2 + 0.2) {
-			const widthInStuds = brickWidthsInStuds[~~(Math.random() * brickWidthsInStuds.length)];
+			const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
 			bricks.push({
 				x: column * 15,
 				y: (row + 20) * 18,
@@ -132,8 +132,8 @@ const animate = ()=> {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	for (const brick of bricks) {
-		// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName);
-		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
+		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName);
+		// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
 	}
 
 	ctx.drawImage(images.font, 0, 90);
