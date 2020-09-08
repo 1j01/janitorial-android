@@ -76,6 +76,21 @@ const drawText = (ctx, text, startX, startY, colorName)=> {
 	}
 };
 
+const brickColorToYIndex = {
+	white: 0,
+	red: 1,
+	green: 2,
+	blue: 3,
+	yellow: 4,
+	gray: 5,
+};
+const brickWidthInStudsToX = {1: 20, 2: 50, 3: 80, 4: 180, 5: 200, 6: 330};
+
+const drawBrick = (ctx, widthInStuds, x, y, colorName)=> {
+	const w = widthInStuds * 20;
+	const h = 30;
+	ctx.drawImage(images.coloredBlocks, brickWidthInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 50, w, h, x, y, w, h);
+}
 
 const animate = ()=> {
 	requestAnimationFrame(animate);
@@ -87,6 +102,9 @@ const animate = ()=> {
 	}
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+	drawBrick(ctx, 1, 500, 500, "red");
+
 	ctx.drawImage(images.font, 0, 90);
 	drawText(ctx, "Hello world!\nThis is only a text", 0, 50, "orange");
 	drawText(ctx, fontChars, 0, 100, "sand");
