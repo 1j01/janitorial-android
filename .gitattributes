@@ -1,0 +1,6 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Git Large File Storage
+*.png filter=lfs diff=lfs merge=lfs -text
+* !text !filter !merge !diff
