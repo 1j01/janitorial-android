@@ -105,7 +105,7 @@ const bricks = [
 ];
 for (let row = 5; row >= 0; row--) {
 	for (let column = 0; column < 50; /* MUST increment below */) {
-		if (Math.sin(column*0.013234) < row * 0.2 + 0.6) {
+		if (Math.sin(column*13234) < row * 0.2 + 0.2) {
 			const widthInStuds = brickWidthsInStuds[~~(Math.random() * brickWidthsInStuds.length)];
 			bricks.push({
 				x: column * 15,
@@ -132,7 +132,8 @@ const animate = ()=> {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	for (const brick of bricks) {
-		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName);
+		// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName);
+		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
 	}
 
 	ctx.drawImage(images.font, 0, 90);
