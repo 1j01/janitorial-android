@@ -33,19 +33,44 @@ for (let x = 0, i = 0; i < fontChars.length; i++) {
 	fontCharX.push(x);
 	x += fontCharW[i] + 1;
 }
-
 const fontCharHeight = 5;
-const drawText = (ctx, text, startX, startY)=> {
+
+const colorizeWhiteAlphaImage = (image, color)=> {
+	const canvas = document.createElement("canvas");
+	const ctx = canvas.getContext("2d");
+	canvas.width = image.width;
+	canvas.height = image.height;
+	ctx.drawImage(image, 0, 0);
+	ctx.globalCompositeOperation = "source-atop";
+	ctx.fillStyle = color;
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	return canvas;
+};
+const fontColors = {
+	blue: "#00009c",
+	sand: "#d09810",
+	orange: "#c07500",
+	gray: "#606060",
+	black: "#000000",
+	white: "#ffffff",
+};
+const fontCanvases = {};
+
+const drawText = (ctx, text, startX, startY, colorName)=> {
+	const fontImage = fontCanvases[colorName];
 	let x = startX;
 	let y = startY;
 	text = text.toUpperCase();
 	for (const char of text) {
 		if (char === " ") {
 			x += 6;
+		} else if (char === "\n") {
+			x = startX;
+			y += fontCharHeight + 4;
 		} else {
 			const index = fontChars.indexOf(char);
 			const w = fontCharW[index];
-			ctx.drawImage(images.font, fontCharX[index], 0, w, fontCharHeight, x, y, w, fontCharHeight);
+			ctx.drawImage(fontImage, fontCharX[index], 0, w, fontCharHeight, x, y, w, fontCharHeight);
 			x += w + 1;
 		}
 	}
@@ -54,15 +79,24 @@ const drawText = (ctx, text, startX, startY)=> {
 
 const animate = ()=> {
 	requestAnimationFrame(animate);
-	canvas.width = innerWidth;
-	canvas.height = innerHeight;
+	if (canvas.width !== innerWidth) {
+		canvas.width = innerWidth;
+	}
+	if (canvas.height !== innerHeight) {
+		canvas.height = innerHeight;
+	}
+	ctx.fillStyle = "black";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.drawImage(images.font, 0, 90);
-	drawText(ctx, "Hello world!", 0, 50);
-	drawText(ctx, fontChars, 0, 100);
+	drawText(ctx, "Hello world!\nThis is only a text", 0, 50, "orange");
+	drawText(ctx, fontChars, 0, 100, "sand");
 };
 
 const main = async ()=> {
 	images = await loadImages(imagePaths);
+	for (const [colorName, color] of Object.entries(fontColors)) {
+		fontCanvases[colorName] = colorizeWhiteAlphaImage(images.font, color);
+	}
 	animate();
 };
 
