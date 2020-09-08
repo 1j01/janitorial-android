@@ -84,6 +84,7 @@ const brickColorToYIndex = {
 	yellow: 4,
 	gray: 5,
 };
+const brickColorNames = Object.keys(brickColorToYIndex);
 const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
 const brickWidthsInStudsToX = {};
 for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
@@ -104,14 +105,16 @@ const bricks = [
 	{x: 150, y: 250, colorName: "green", widthInStuds: 2},
 ];
 for (let row = 5; row >= 0; row--) {
-	for (let column = 0; column < 50; /* MUST increment below */) {
-		if (Math.sin(column*13234) < row * 0.2 + 0.2) {
+	for (let column = 0; column < 150; /* MUST increment below */) {
+		if (Math.sin(column*13234) < row * 0.2 + 0.1) {
 			const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
 			bricks.push({
 				x: column * 15,
 				y: (row + 20) * 18,
 				widthInStuds,
-				colorName: "gray",
+				// colorName: brickColorNames[~~(brickColorNames.length * Math.random())], // gaudy
+				colorName: "green", // grassy
+				// colorName: "gray", // gray
 			});
 			column += widthInStuds;
 		} else {
