@@ -113,8 +113,9 @@ for (let row = 5; row >= 0; row--) {
 				y: row * 18,
 				widthInStuds,
 				// colorName: brickColorNames[~~(brickColorNames.length * Math.random())], // gaudy
-				colorName: "green", // grassy
-				// colorName: "gray", // gray
+				// colorName: "green", // grassy
+				// colorName: "gray",
+				colorName: "white",
 			});
 			column += widthInStuds;
 		} else {
@@ -171,7 +172,7 @@ const animate = ()=> {
 
 	for (const brick of bricks) {
 		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName);
-		// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
+		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
 	}
 
 	ctx.restore();
