@@ -84,12 +84,18 @@ const brickColorToYIndex = {
 	yellow: 4,
 	gray: 5,
 };
-const brickWidthInStudsToX = {1: 10, 2: 50, 3: 80, 4: 180, 5: 200, 6: 330};
+const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
+const brickWidthsInStudsToX = {};
+for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
+	brickWidthsInStudsToX[brickWidthsInStuds[i]] = x;
+	const w = brickWidthsInStuds[i] * 15 + 20;
+	x += w;
+}
 
 const drawBrick = (ctx, widthInStuds, x, y, colorName)=> {
-	const w = widthInStuds * 30;
+	const w = widthInStuds * 15 + 20;
 	const h = 35;
-	ctx.drawImage(images.coloredBlocks, brickWidthInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y, w, h);
+	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds] + 10, brickColorToYIndex[colorName] * 35 + 9, w, h, x, y, w, h);
 }
 
 const animate = ()=> {
@@ -104,6 +110,7 @@ const animate = ()=> {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	drawBrick(ctx, 1, 50, 250, "red");
+	drawBrick(ctx, 2, 150, 250, "red");
 
 	ctx.drawImage(images.font, 0, 90);
 	drawText(ctx, "Hello world!\nThis is only a text", 0, 50, "orange");
