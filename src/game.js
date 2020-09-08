@@ -26,8 +26,8 @@ const loadImages = async (imagePaths)=> {
 
 let images;
 
-const fontChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':\"";
-const fontCharW = "55555555355555555555555555355555555551221113".split("").map((s)=> Number(s));
+const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%`;
+const fontCharW = "5555555535555555555555555535555555555122111333135535".split("").map((s)=> Number(s));
 const fontCharX = [];
 for (let x = 0, i = 0; i < fontChars.length; i++) {
 	fontCharX.push(x);
