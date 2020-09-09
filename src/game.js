@@ -99,11 +99,7 @@ const drawBrick = (ctx, widthInStuds, x, y, colorName)=> {
 	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y, w, h);
 };
 
-const bricks = [
-	{x: 50, y: 50-250, colorName: "red", widthInStuds: 1},
-	{x: 150, y: 69-250, colorName: "yellow", widthInStuds: 4},
-	{x: 150, y: 50-250, colorName: "green", widthInStuds: 2},
-];
+const bricks = [];
 for (let row = 5; row >= 0; row--) {
 	for (let column = 0; column < 150; /* MUST increment below */) {
 		if (Math.sin(column*13234) < row * 0.2 + 0.1) {
@@ -114,8 +110,9 @@ for (let row = 5; row >= 0; row--) {
 				widthInStuds,
 				// colorName: brickColorNames[~~(brickColorNames.length * Math.random())], // gaudy
 				// colorName: "green", // grassy
-				// colorName: "gray",
-				colorName: "white",
+				colorName: "gray",
+				// colorName: "white",
+				fixed: true,
 			});
 			column += widthInStuds;
 		} else {
@@ -123,6 +120,22 @@ for (let row = 5; row >= 0; row--) {
 		}
 	}
 }
+bricks.push(
+	{x: 15*4, y: 18*-12, colorName: "red", widthInStuds: 1},
+	{x: 15*4, y: 18*-13, colorName: "yellow", widthInStuds: 4},
+	{x: 15*4, y: 18*-14, colorName: "green", widthInStuds: 2},
+);
+let drop_from_row = 15;
+setInterval(()=> {
+	drop_from_row += 1;
+	const brick = {
+		x: 15 * ~~(Math.random() * 9),
+		y: 18 * -drop_from_row,
+		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
+		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
+	};
+	bricks.push(brick);
+}, 1000);
 
 const viewport = {centerX: 0, centerY: 0, scale: 2};
 
@@ -140,6 +153,29 @@ addEventListener("keyup", (event)=> {
 	delete keys[event.code];
 });
 
+const simulateGravity = ()=> {
+	// TODO: order bricks/objects based on position, for rendering AND for gravity
+	for (const brick of bricks) {
+		if (!brick.fixed) {
+			let settled = false;
+			for (const other_brick of bricks) {
+				if (
+					brick.x + brick.widthInStuds * 15 > other_brick.x &&
+					brick.x < other_brick.x + other_brick.widthInStuds * 15 &&
+					// brick.y + 18 >= other_brick.y &&
+					// brick.y < other_brick.y + 18
+					brick.y + 18 === other_brick.y
+				) {
+					settled = true;
+				}
+			}
+			if (!settled) {
+				brick.y += 1;
+			}
+		}
+	}
+};
+
 const animate = ()=> {
 	requestAnimationFrame(animate);
 
@@ -156,6 +192,8 @@ const animate = ()=> {
 		viewport.centerX += 20;
 	}
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
+
+	simulateGravity();
 
 	if (canvas.width !== innerWidth) {
 		canvas.width = innerWidth;
