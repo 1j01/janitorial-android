@@ -96,7 +96,7 @@ for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
 const drawBrick = (ctx, widthInStuds, x, y, colorName)=> {
 	const w = widthInStuds * 15 + 15;
 	const h = 35;
-	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y, w, h);
+	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y - 15, w, h);
 };
 
 const bricks = [];
@@ -129,13 +129,15 @@ let drop_from_row = 15;
 setInterval(()=> {
 	drop_from_row += 1;
 	const brick = {
-		x: 15 * ~~(Math.random() * 9),
+		// x: 15 * ~~(Math.random() * 9),
+		x: 15 * ~~(Math.sin(Date.now()/400) * 9),
 		y: 18 * -drop_from_row,
-		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
+		// widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
+		widthInStuds: 2,
 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
 	};
 	bricks.push(brick);
-}, 1000);
+}, 200);
 
 const viewport = {centerX: 0, centerY: 0, scale: 2};
 
@@ -153,10 +155,40 @@ addEventListener("keyup", (event)=> {
 	delete keys[event.code];
 });
 
-const simulateGravity = ()=> {
-	// TODO: order bricks/objects based on position, for rendering AND for gravity
+let mouse = {x: 0, y: 0};
+let drag_offset = {x: 0, y: 0};
+let dragging = null;
+
+canvas.addEventListener("mousemove", (event)=> {
+	mouse.x = event.offsetX;
+	mouse.y = event.offsetY;
+});
+canvas.addEventListener("mousedown", (event)=> {
+	mouse.x = event.offsetX;
+	mouse.y = event.offsetY;
+
+	const mouseWorldX = (mouse.x - innerWidth/2) / viewport.scale + viewport.centerX;
+	const mouseWorldY = (mouse.y - innerHeight/2) / viewport.scale + viewport.centerY;
+
 	for (const brick of bricks) {
-		if (!brick.fixed) {
+		if (
+			brick.x < mouseWorldX &&
+			brick.x + brick.widthInStuds * 15 > mouseWorldX &&
+			brick.y < mouseWorldY &&
+			brick.y + 18 > mouseWorldY
+		) {
+			dragging = brick;
+			drag_offset = {x: brick.x - mouseWorldX, y: brick.y - mouseWorldY};
+		}
+	}
+});
+addEventListener("mouseup", ()=> {
+	dragging = null;
+});
+
+const simulateGravity = ()=> {
+	for (const brick of bricks) {
+		if (!brick.fixed && brick !== dragging) {
 			let settled = false;
 			for (const other_brick of bricks) {
 				if (
@@ -193,26 +225,30 @@ const animate = ()=> {
 	}
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 
-	// bricks.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
-	bricks.sort((a, b)=> {
-		if (a.y < b.y) {
-			return +1;
-		} else if (a.y > b.y) {
-			if (a.x < b.x) {
-				return +1;
-			} else {
-				return -1;
-			}
-		} else {
-			if (a.x > b.x) {
-				return -1;
-			} else {
-				return 0;
-			}
-		}
-	});
+	// bricks.sort((a, b)=> a.x - b.x);
+	// bricks.sort((a, b)=> b.y - a.y);
+	bricks.sort((a, b)=> (b.y - a.y) || (a.x + a.widthInStuds*15 - b.x));
+	// bricks.sort((a, b)=> {
+	// 	if (a.x + a.widthInStuds*15 >= b.x) {
+	// 		return -1;
+	// 	} else if (b.x + b.widthInStuds*15 >= a.x) {
+	// 		return +1;
+	// 	} else {
+	// 		return b.y - a.y;
+	// 	}
+	// });
 
 	simulateGravity();
+
+	const mouseWorldX = (mouse.x - innerWidth/2) / viewport.scale + viewport.centerX;
+	const mouseWorldY = (mouse.y - innerHeight/2) / viewport.scale + viewport.centerY;
+
+	if (dragging) {
+		// dragging.x = ~~(mouseWorldX + drag_offset.x);
+		dragging.y = ~~(mouseWorldY + drag_offset.y);
+		dragging.x = 15 * ~~((mouseWorldX + drag_offset.x)/15);
+		// dragging.y = 18 * ~~((mouseWorldY + drag_offset.y)/18);
+	}
 
 	if (canvas.width !== innerWidth) {
 		canvas.width = innerWidth;
