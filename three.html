@@ -75,6 +75,7 @@
 				// camera.position.set( 150, 200, 250 );
 				camera.position.set( 0, 0, 250 );
 				camera.lookAt(new THREE.Vector3(0, 0, 0));
+				camera.position.set( 120, 120, 250 );
 				camera.updateProjectionMatrix();
 
 				// scene
@@ -256,6 +257,10 @@
 				camera.right = frustumSize * camera.aspect / 2;
 				camera.top = frustumSize / 2;
 				camera.bottom = - frustumSize / 2;
+				// camera.left = 0;
+				// camera.right = frustumSize * camera.aspect;
+				// camera.top = frustumSize;
+				// camera.bottom = 0;
 
 				camera.updateProjectionMatrix();
 				// // actually, use a different type of projection haha
