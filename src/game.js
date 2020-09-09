@@ -170,7 +170,7 @@ addEventListener("keyup", (event)=> {
 	}
 });
 
-let mouse = {x: 0, y: 0};
+let mouse = {x: undefined, y: undefined};
 let drag_offset = {x: 0, y: 0};
 let dragging = null;
 
@@ -205,6 +205,14 @@ canvas.addEventListener("mousedown", (event)=> {
 });
 addEventListener("mouseup", ()=> {
 	dragging = null;
+});
+canvas.addEventListener("mouseleave", ()=> {
+	mouse.x = undefined;
+	mouse.y = undefined;
+});
+addEventListener("blur", ()=> {
+	mouse.x = undefined;
+	mouse.y = undefined;
 });
 
 const simulateGravity = ()=> {
@@ -243,6 +251,20 @@ const animate = ()=> {
 	}
 	if (keys.KeyD || keys.ArrowRight) {
 		viewport.centerX += 20;
+	}
+	const pan_margin_size = innerWidth * 0.07;
+	const pan_from_margin_speed = 10;
+	if (mouse.y < pan_margin_size) {
+		viewport.centerY -= pan_from_margin_speed;
+	}
+	if (mouse.y > canvas.height - pan_margin_size) {
+		viewport.centerY += pan_from_margin_speed;
+	}
+	if (mouse.x < pan_margin_size) {
+		viewport.centerX -= pan_from_margin_speed;
+	}
+	if (mouse.x > canvas.width - pan_margin_size) {
+		viewport.centerX += pan_from_margin_speed;
 	}
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 
