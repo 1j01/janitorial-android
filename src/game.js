@@ -175,6 +175,7 @@ const updateMouse = (event)=> {
 const brickUnderMouse = ()=> {
 	for (const brick of bricks) {
 		if (
+			!brick.fixed &&
 			brick.x < mouse.worldX &&
 			brick.x + brick.widthInStuds * 15 > mouse.worldX &&
 			brick.y < mouse.worldY &&
