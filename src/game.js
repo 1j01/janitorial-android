@@ -26,8 +26,8 @@ const loadImages = async (imagePaths)=> {
 
 let images;
 
-const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%`;
-const fontCharW = "5555555535555555555555555535555555555122111333135535".split("").map((s)=> Number(s));
+const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}`;
+const fontCharW = "55555555355555555555555555355555555551221113331355353525531155332233".split("").map((s)=> Number(s));
 const fontCharX = [];
 for (let x = 0, i = 0; i < fontChars.length; i++) {
 	fontCharX.push(x);
@@ -64,6 +64,8 @@ const drawText = (ctx, text, startX, startY, colorName)=> {
 	for (const char of text) {
 		if (char === " ") {
 			x += 6;
+		} else if (char === "\t") {
+			x += 6 * 4;
 		} else if (char === "\n") {
 			x = startX;
 			y += fontCharHeight + 4;
@@ -299,6 +301,9 @@ const animate = ()=> {
 VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
 AT SCALE: ${viewport.scale}X`;
 	drawText(ctx, debugInfo, 0, 50, "white");
+	if (hovered) {
+		drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
+	}
 };
 
 const main = async ()=> {
