@@ -265,9 +265,10 @@ const animate = ()=> {
 
 	if (dragging) {
 		// dragging.x = ~~(mouse.worldX + drag_offset.x);
-		dragging.y = ~~(mouse.worldY + drag_offset.y);
+		// dragging.y = ~~(mouse.worldY + drag_offset.y);
 		dragging.x = 15 * ~~((mouse.worldX + drag_offset.x)/15);
 		// dragging.y = 18 * ~~((mouse.worldY + drag_offset.y)/18);
+		dragging.y = ~~(18/3 * ~~((mouse.worldY + drag_offset.y)/18*3));
 		canvas.style.cursor = "grabbing";
 	} else {
 		canvas.style.cursor = hovered ? "grab" : "default";
