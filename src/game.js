@@ -174,11 +174,14 @@ let mouse = {x: undefined, y: undefined};
 let drag_offset = {x: 0, y: 0};
 let dragging = null;
 
+const updateMouseWorldPosition = (event)=> {
+	mouse.worldX = (mouse.x - canvas.width/2) / viewport.scale + viewport.centerX;
+	mouse.worldY = (mouse.y - canvas.height/2) / viewport.scale + viewport.centerY;
+};
 const updateMouse = (event)=> {
 	mouse.x = event.offsetX;
 	mouse.y = event.offsetY;
-	mouse.worldX = (mouse.x - canvas.width/2) / viewport.scale + viewport.centerX;
-	mouse.worldY = (mouse.y - canvas.height/2) / viewport.scale + viewport.centerY;
+	updateMouseWorldPosition();
 };
 const brickUnderMouse = ()=> {
 	for (const brick of bricks) {
@@ -267,6 +270,7 @@ const animate = ()=> {
 		viewport.centerX += pan_from_margin_speed;
 	}
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
+	updateMouseWorldPosition();
 
 	bricks.sort((a, b)=> (b.y - a.y) + (a.x - b.x) /15*18);
 	// bricks.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
