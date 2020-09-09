@@ -59,10 +59,10 @@
 				'AT-ST': 'models/10174-1-ImperialAT-ST-UCS.mpd_Packed.mpd'
 			};
 
+			const frustumSize = 200;
+
 			init();
 			animate();
-
-			var frustumSize = 200;
 
 			function init() {
 
@@ -98,6 +98,8 @@
 				container.appendChild( renderer.domElement );
 
 				// controls = new OrbitControls( camera, renderer.domElement );
+				
+				setupProjection();
 
 				//
 
@@ -112,7 +114,7 @@
 					noConstructionSteps: "No steps."
 				};
 
-				window.addEventListener( 'resize', onWindowResize, false );
+				window.addEventListener( 'resize', setupProjection, false );
 
 				progressBarDiv = document.createElement( 'div' );
 				progressBarDiv.innerText = "Loading...";
@@ -250,7 +252,7 @@
 
 			}
 
-			function onWindowResize() {
+			function setupProjection() {
 
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.left = - frustumSize * camera.aspect / 2;
@@ -295,8 +297,6 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 
 			}
-			// HACK: why is this needed?
-			setTimeout(onWindowResize);
 
 			function createGUI() {
 
