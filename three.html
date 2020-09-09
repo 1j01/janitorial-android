@@ -72,7 +72,8 @@
 				var aspect = window.innerWidth / window.innerHeight;
 				// camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
 				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 10000 );
-				camera.position.set( 150, 200, 250 );
+				// camera.position.set( 150, 200, 250 );
+				camera.position.set( 0, 0, 250 );
 				camera.lookAt(new THREE.Vector3(0, 0, 0));
 				camera.updateProjectionMatrix();
 
@@ -95,7 +96,7 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
 
-				controls = new OrbitControls( camera, renderer.domElement );
+				// controls = new OrbitControls( camera, renderer.domElement );
 
 				//
 
@@ -189,6 +190,28 @@
 						model.rotation.x = Math.PI;
 
 						scene.add( model );
+						
+						// For oblique projection
+						// https://stackoverflow.com/a/26060068/2624876
+						// Create shear matrix
+						var alpha = Math.PI / 6; // or Math.PI / 4
+
+						var Syx = 0,
+							Szx = - 0.5 * Math.cos( alpha ),
+							Sxy = 0,
+							Szy = - 0.5 * Math.sin( alpha ),
+							Sxz = 0,
+							Syz = 0;
+
+						var matrix = new THREE.Matrix4();
+
+						matrix.set(   1,   Syx,  Szx,  0,
+									Sxy,     1,  Szy,  0,
+									Sxz,   Syz,   1,   0,
+									0,     0,   0,   1  );
+
+						// Apply shear matrix to geometry
+						model.children.forEach(mesh=> mesh.applyMatrix( matrix )); // this is the work-around
 
 						// Adjust materials
 
@@ -234,9 +257,9 @@
 
 						if ( resetCamera ) {
 
-							controls.target0.copy( bbox.getCenter( new THREE.Vector3() ) );
-							controls.position0.set( - 2.3, 2, 2 ).multiplyScalar( radius ).add( controls.target0 );
-							controls.reset();
+							// controls.target0.copy( bbox.getCenter( new THREE.Vector3() ) );
+							// controls.position0.set( - 2.3, 2, 2 ).multiplyScalar( radius ).add( controls.target0 );
+							// controls.reset();
 
 						}
 
