@@ -134,19 +134,19 @@ bricks.push(
 	{x: 15*4, y: 18*-13, colorName: "yellow", widthInStuds: 4},
 	{x: 15*4, y: 18*-14, colorName: "green", widthInStuds: 2},
 );
-let drop_from_row = 15;
-setInterval(()=> {
-	drop_from_row += 1;
-	const brick = {
-		// x: 15 * ~~(Math.random() * 9),
-		x: 15 * ~~(Math.sin(Date.now()/400) * 9),
-		y: 18 * -drop_from_row,
-		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
-		// widthInStuds: 2,
-		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
-	};
-	bricks.push(brick);
-}, 200);
+// let drop_from_row = 15;
+// setInterval(()=> {
+// 	drop_from_row += 1;
+// 	const brick = {
+// 		// x: 15 * ~~(Math.random() * 9),
+// 		x: 15 * ~~(Math.sin(Date.now()/400) * 9),
+// 		y: 18 * -drop_from_row,
+// 		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
+// 		// widthInStuds: 2,
+// 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
+// 	};
+// 	bricks.push(brick);
+// }, 200);
 
 const viewport = {centerX: 0, centerY: 0, scale: 2};
 
@@ -218,6 +218,41 @@ addEventListener("blur", ()=> {
 	mouse.y = undefined;
 });
 
+// This is needed for simulation (gravity) and rendering.
+// Well, strictly only Y sorting is needed for gravity I suppose?
+const sortObjects = ()=> {
+	// bricks.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
+	// bricks.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
+	bricks.sort((a, b)=> {
+		if (a.y + 18 <= b.y) {
+			return +1;
+		}
+		if (b.y + 18 <= a.y) {
+			return -1;
+		}
+		if (b.x + b.widthInStuds*15 <= a.x) {
+			return +1;
+		}
+		if (a.x + a.widthInStuds*15 <= b.x) {
+			return -1;
+		}
+		// return a.x - a.y - b.x + b.y;
+		return 0;
+	});
+};
+
+/**
+* Shuffles array in place.
+* @param {Array} a items An array containing the items.
+*/
+function shuffle(a) {
+   for (let i = a.length - 1; i > 0; i--) {
+	   const j = Math.floor(Math.random() * (i + 1));
+	   [a[i], a[j]] = [a[j], a[i]];
+   }
+   return a;
+}
+
 const simulateGravity = ()=> {
 	for (const brick of bricks) {
 		if (!brick.fixed && brick !== dragging) {
@@ -234,7 +269,7 @@ const simulateGravity = ()=> {
 				}
 			}
 			if (!settled) {
-				brick.y += 1;
+				// brick.y += 1;
 				// brick.y += 6;
 			}
 		}
@@ -273,54 +308,7 @@ const animate = ()=> {
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 	updateMouseWorldPosition();
 
-
-	// bricks.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
-	// bricks.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
-	// bricks.sort((a, b)=> (a.x + a.widthInStuds * 15 - (b.x + b.widthInStuds * 15)) + (b.y - a.y));
-	// bricks.sort((a, b)=> (b.y - a.y) || (a.x + a.widthInStuds * 15 - (b.x + b.widthInStuds * 15)));
-	// bricks.sort((a, b)=> a.x - b.x);
-	// bricks.sort((a, b)=> b.y - a.y);
-	// bricks.sort((a, b)=> (b.y - a.y) || (a.x + a.widthInStuds*15 - b.x));
-	// bricks.sort((a, b)=> (b.y - a.y) || ((a.x + a.widthInStuds*15/2) - (b.x + b.widthInStuds*15/2)));
-	// bricks.sort((a, b)=>
-	// 	(a.x + a.widthInStuds*15 < b.x) ? -1 : 
-	// 	(b.x + b.widthInStuds*15 < a.x) ? +1 :
-	// 	b.y - a.y
-	// );
-	bricks.sort((a, b)=> {
-		if (a.y + 18 <= b.y) {
-			return +1;
-		}
-		if (b.y + 18 <= a.y) {
-			return -1;
-		}
-		if (b.x + b.widthInStuds*15 <= a.x) {
-			return +1;
-		}
-		if (a.x + a.widthInStuds*15 <= b.x) {
-			return -1;
-		}
-		// if (a.x + a.widthInStuds*15 >= b.x) {
-		// 	return -1;
-		// } else if (b.x + b.widthInStuds*15 >= a.x) {
-		// 	return +1;
-		// } else {
-		// 	return (b.y - a.y) || (a.x - b.x);
-		// 	// return b.y - a.y;
-		// 	return 0;
-		// }
-		// if (a.x + a.widthInStuds*15 >= b.x) {
-		// 	return -1;
-		// } else if (a.x + a.widthInStuds*15 <= b.x) {
-		// 	return -1;
-		// } else {
-			// return (b.y - a.y) || (a.x - b.x);
-			// return b.y - a.y;
-			return 0;
-		// }
-	});
-	
-
+	sortObjects();
 	simulateGravity();
 	const hovered = dragging || brickUnderMouse();
 
@@ -349,6 +337,9 @@ const animate = ()=> {
 	ctx.scale(viewport.scale, viewport.scale);
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
+
+	shuffle(bricks);
+	sortObjects();
 
 	for (const brick of bricks) {
 		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName, brick === hovered);
