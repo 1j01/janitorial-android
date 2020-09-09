@@ -194,10 +194,10 @@
 						// For oblique projection
 						// https://stackoverflow.com/a/26060068/2624876
 						// Create shear matrix
-						var alpha = Math.PI / 6; // or Math.PI / 4
+						var alpha = Math.PI / 4;
 
 						var Syx = 0,
-							Szx = - 0.5 * Math.cos( alpha ),
+							Szx = 0.5 * Math.cos( alpha ),
 							Sxy = 0,
 							Szy = - 0.5 * Math.sin( alpha ),
 							Sxz = 0,
