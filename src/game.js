@@ -141,8 +141,8 @@ setInterval(()=> {
 		// x: 15 * ~~(Math.random() * 9),
 		x: 15 * ~~(Math.sin(Date.now()/400) * 9),
 		y: 18 * -drop_from_row,
-		// widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
-		widthInStuds: 2,
+		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
+		// widthInStuds: 2,
 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
 	};
 	bricks.push(brick);
@@ -235,6 +235,7 @@ const simulateGravity = ()=> {
 			}
 			if (!settled) {
 				brick.y += 1;
+				// brick.y += 6;
 			}
 		}
 	}
@@ -272,25 +273,47 @@ const animate = ()=> {
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 	updateMouseWorldPosition();
 
-	bricks.sort((a, b)=> (b.y - a.y) + (a.x - b.x) /15*18);
+
 	// bricks.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
+	// bricks.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
+	// bricks.sort((a, b)=> (a.x + a.widthInStuds * 15 - (b.x + b.widthInStuds * 15)) + (b.y - a.y));
+	// bricks.sort((a, b)=> (b.y - a.y) || (a.x + a.widthInStuds * 15 - (b.x + b.widthInStuds * 15)));
 	// bricks.sort((a, b)=> a.x - b.x);
 	// bricks.sort((a, b)=> b.y - a.y);
 	// bricks.sort((a, b)=> (b.y - a.y) || (a.x + a.widthInStuds*15 - b.x));
+	// bricks.sort((a, b)=> (b.y - a.y) || ((a.x + a.widthInStuds*15/2) - (b.x + b.widthInStuds*15/2)));
 	// bricks.sort((a, b)=>
 	// 	(a.x + a.widthInStuds*15 < b.x) ? -1 : 
 	// 	(b.x + b.widthInStuds*15 < a.x) ? +1 :
 	// 	b.y - a.y
 	// );
-	// bricks.sort((a, b)=> {
-	// 	if (a.x + a.widthInStuds*15 >= b.x) {
-	// 		return -1;
-	// 	} else if (b.x + b.widthInStuds*15 >= a.x) {
-	// 		return +1;
-	// 	} else {
-	// 		return b.y - a.y;
-	// 	}
-	// });
+	bricks.sort((a, b)=> {
+		if (a.y + 18 <= b.y) {
+			return +1;
+		}
+		if (b.y + 18 <= a.y) {
+			return -1;
+		}
+		// if (a.x + a.widthInStuds*15 >= b.x) {
+		// 	return -1;
+		// } else if (b.x + b.widthInStuds*15 >= a.x) {
+		// 	return +1;
+		// } else {
+		// 	return (b.y - a.y) || (a.x - b.x);
+		// 	// return b.y - a.y;
+		// 	return 0;
+		// }
+		if (a.x + a.widthInStuds*15 >= b.x) {
+			return -1;
+		} else if (a.x + a.widthInStuds*15 < b.x) {
+			return -1;
+		} else {
+			return (b.y - a.y) || (a.x - b.x);
+			// return b.y - a.y;
+			return 0;
+		}
+	});
+	
 
 	simulateGravity();
 	const hovered = dragging || brickUnderMouse();
