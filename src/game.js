@@ -193,6 +193,25 @@ const animate = ()=> {
 	}
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 
+	// bricks.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
+	bricks.sort((a, b)=> {
+		if (a.y < b.y) {
+			return +1;
+		} else if (a.y > b.y) {
+			if (a.x < b.x) {
+				return +1;
+			} else {
+				return -1;
+			}
+		} else {
+			if (a.x > b.x) {
+				return -1;
+			} else {
+				return 0;
+			}
+		}
+	});
+
 	simulateGravity();
 
 	if (canvas.width !== innerWidth) {
@@ -212,7 +231,7 @@ const animate = ()=> {
 
 	for (const brick of bricks) {
 		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName);
-		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
+		// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
 	}
 
 	ctx.restore();
