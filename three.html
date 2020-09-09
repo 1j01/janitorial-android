@@ -62,14 +62,19 @@
 			init();
 			animate();
 
+			var frustumSize = 200;
 
 			function init() {
 
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+				var aspect = window.innerWidth / window.innerHeight;
+				// camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
+				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 10000 );
 				camera.position.set( 150, 200, 250 );
+				camera.lookAt(new THREE.Vector3(0, 0, 0));
+				camera.updateProjectionMatrix();
 
 				// scene
 
@@ -246,11 +251,25 @@
 			function onWindowResize() {
 
 				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.left = - frustumSize * camera.aspect / 2;
+				camera.right = frustumSize * camera.aspect / 2;
+				camera.top = frustumSize / 2;
+				camera.bottom = - frustumSize / 2;
+
 				camera.updateProjectionMatrix();
+				// // actually, use a different type of projection haha
+				// // camera.projectionMatrix.makeShear(-1, 1, 1);
+				// camera.projectionMatrix.fromArray(camera.projectionMatrix.toArray().map((n, i)=> 
+				// 	// i == 6 ? n + Math.random()/100 : n
+				// 	i == 2 ? -0.2 : i == 6 ? 0.2 : n
+				// ));
+				// camera.projectionMatrixInverse.getInverse( camera.projectionMatrix );
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
 
 			}
+			// HACK: why is this needed?
+			setTimeout(onWindowResize);
 
 			function createGUI() {
 
