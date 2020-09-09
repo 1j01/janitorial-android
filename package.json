@@ -5,7 +5,11 @@
   "keywords": [
     "junkbot",
     "lego",
-    "game"
+    "game",
+    "building",
+    "construction",
+    "bricks",
+    "blocks"
   ],
   "author": "Isaiah Odhner <isaiahodhner@gmail.com>",
   "scripts": {
