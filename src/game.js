@@ -238,9 +238,16 @@ const animate = ()=> {
 	}
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 
+	bricks.sort((a, b)=> (b.y - a.y) + (a.x - b.x) /15*18);
+	// bricks.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
 	// bricks.sort((a, b)=> a.x - b.x);
 	// bricks.sort((a, b)=> b.y - a.y);
-	bricks.sort((a, b)=> (b.y - a.y) || (a.x + a.widthInStuds*15 - b.x));
+	// bricks.sort((a, b)=> (b.y - a.y) || (a.x + a.widthInStuds*15 - b.x));
+	// bricks.sort((a, b)=>
+	// 	(a.x + a.widthInStuds*15 < b.x) ? -1 : 
+	// 	(b.x + b.widthInStuds*15 < a.x) ? +1 :
+	// 	b.y - a.y
+	// );
 	// bricks.sort((a, b)=> {
 	// 	if (a.x + a.widthInStuds*15 >= b.x) {
 	// 		return -1;
