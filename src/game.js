@@ -153,15 +153,21 @@ const viewport = {centerX: 0, centerY: 0, scale: 2};
 let keys = {};
 addEventListener("keydown", (event)=> {
 	keys[event.code] = true;
-	if (event.code === "Equal") {
+	if (event.key.match(/^Arrow/)) {
+		keys[event.key] = true;
+	}
+	if (event.code === "Equal" || event.code === "NumpadAdd") {
 		viewport.scale = Math.min(10, viewport.scale + 1);
 	}
-	if (event.code === "Minus") {
+	if (event.code === "Minus" || event.code === "NumpadSubtract") {
 		viewport.scale = Math.max(1, viewport.scale - 1);
 	}
 });
 addEventListener("keyup", (event)=> {
 	delete keys[event.code];
+	if (event.key.match(/^Arrow/)) {
+		delete keys[event.key];
+	}
 });
 
 let mouse = {x: 0, y: 0};
