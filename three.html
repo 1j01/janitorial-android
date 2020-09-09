@@ -117,6 +117,21 @@
 
 				window.addEventListener( 'resize', setupProjection, false );
 
+				window.addEventListener( 'keydown', (event)=> {
+					if (event.key === "ArrowUp") {
+						model.rotation.x -= Math.PI / 2;
+					}
+					if (event.key === "ArrowDown") {
+						model.rotation.x += Math.PI / 2;
+					}
+					if (event.key === "ArrowRight") {
+						model.rotation.y -= Math.PI / 2;
+					}
+					if (event.key === "ArrowLeft") {
+						model.rotation.y += Math.PI / 2;
+					}
+				});
+
 				progressBarDiv = document.createElement( 'div' );
 				progressBarDiv.innerText = "Loading...";
 				progressBarDiv.style.fontSize = "3em";
