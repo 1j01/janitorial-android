@@ -100,9 +100,9 @@ const drawBrick = (ctx, widthInStuds, x, y, colorName)=> {
 };
 
 const bricks = [
-	{x: 50, y: 50-100, colorName: "red", widthInStuds: 1},
-	{x: 150, y: 69-100, colorName: "yellow", widthInStuds: 4},
-	{x: 150, y: 50-100, colorName: "green", widthInStuds: 2},
+	{x: 50, y: 50-250, colorName: "red", widthInStuds: 1},
+	{x: 150, y: 69-250, colorName: "yellow", widthInStuds: 4},
+	{x: 150, y: 50-250, colorName: "green", widthInStuds: 2},
 ];
 for (let row = 5; row >= 0; row--) {
 	for (let column = 0; column < 150; /* MUST increment below */) {
@@ -110,7 +110,7 @@ for (let row = 5; row >= 0; row--) {
 			const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
 			bricks.push({
 				x: column * 15,
-				y: row * 18,
+				y: (row - 6) * 18,
 				widthInStuds,
 				// colorName: brickColorNames[~~(brickColorNames.length * Math.random())], // gaudy
 				// colorName: "green", // grassy
@@ -155,6 +155,7 @@ const animate = ()=> {
 	if (keys.KeyD || keys.ArrowRight) {
 		viewport.centerX += 20;
 	}
+	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 
 	if (canvas.width !== innerWidth) {
 		canvas.width = innerWidth;
