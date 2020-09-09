@@ -97,7 +97,7 @@ const drawBrick = (ctx, widthInStuds, x, y, colorName)=> {
 	const w = widthInStuds * 15 + 15;
 	const h = 35;
 	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y, w, h);
-}
+};
 
 const bricks = [
 	{x: 50, y: 50-100, colorName: "red", widthInStuds: 1},
@@ -124,7 +124,7 @@ for (let row = 5; row >= 0; row--) {
 	}
 }
 
-const viewport = {leftX: 0, bottomY: 0, scale: 2};
+const viewport = {centerX: 0, centerY: 0, scale: 2};
 
 let keys = {};
 addEventListener("keydown", (event)=> {
@@ -144,16 +144,16 @@ const animate = ()=> {
 	requestAnimationFrame(animate);
 
 	if (keys.KeyW || keys.ArrowUp) {
-		viewport.bottomY -= 20;
+		viewport.centerY -= 20;
 	}
 	if (keys.KeyS || keys.ArrowDown) {
-		viewport.bottomY += 20;
+		viewport.centerY += 20;
 	}
 	if (keys.KeyA || keys.ArrowLeft) {
-		viewport.leftX -= 20;
+		viewport.centerX -= 20;
 	}
 	if (keys.KeyD || keys.ArrowRight) {
-		viewport.leftX += 20;
+		viewport.centerX += 20;
 	}
 
 	if (canvas.width !== innerWidth) {
@@ -166,8 +166,9 @@ const animate = ()=> {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	ctx.save();
+	ctx.translate(canvas.width/2, canvas.height/2);
 	ctx.scale(viewport.scale, viewport.scale);
-	ctx.translate(-viewport.leftX, -viewport.bottomY);
+	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
 
 	for (const brick of bricks) {
@@ -180,7 +181,7 @@ const animate = ()=> {
 	// ctx.drawImage(images.font, 0, 90);
 	// drawText(ctx, fontChars, 0, 100, "sand");
 	const debugInfo = `BRICKS: ${bricks.length}
-VIEWPORT: ${viewport.leftX}, ${viewport.bottomY}
+VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
 AT SCALE: ${viewport.scale}X`;
 	drawText(ctx, debugInfo, 0, 50, "white");
 };
