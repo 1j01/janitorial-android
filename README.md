@@ -4,6 +4,9 @@ Maybe somewhat of a Junkbot recreation?
 
 ## Ideas
 
+- Metroidvania
+- Tetris area
+- Pacman area with wrapping
 - Ridable giant robots / cars?
 - Open world? (OpenJunkbot? Junkbot Open?)
 - More of a sandbox? idk
