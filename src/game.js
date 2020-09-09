@@ -294,6 +294,12 @@ const animate = ()=> {
 		if (b.y + 18 <= a.y) {
 			return -1;
 		}
+		if (b.x + b.widthInStuds*15 <= a.x) {
+			return +1;
+		}
+		if (a.x + a.widthInStuds*15 <= b.x) {
+			return -1;
+		}
 		// if (a.x + a.widthInStuds*15 >= b.x) {
 		// 	return -1;
 		// } else if (b.x + b.widthInStuds*15 >= a.x) {
@@ -303,15 +309,15 @@ const animate = ()=> {
 		// 	// return b.y - a.y;
 		// 	return 0;
 		// }
-		if (a.x + a.widthInStuds*15 >= b.x) {
-			return -1;
-		} else if (a.x + a.widthInStuds*15 < b.x) {
-			return -1;
-		} else {
-			return (b.y - a.y) || (a.x - b.x);
+		// if (a.x + a.widthInStuds*15 >= b.x) {
+		// 	return -1;
+		// } else if (a.x + a.widthInStuds*15 <= b.x) {
+		// 	return -1;
+		// } else {
+			// return (b.y - a.y) || (a.x - b.x);
 			// return b.y - a.y;
 			return 0;
-		}
+		// }
 	});
 	
 
