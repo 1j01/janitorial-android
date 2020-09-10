@@ -284,6 +284,7 @@ function parseObject( fileName, isRoot ) {
 				if ( ! subobjectPath ) {
 
 					// Add new object
+					console.log("from", objectPath);
 					subobjectPath = parseObject( subobjectFileName );
 
 				}
