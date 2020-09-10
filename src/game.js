@@ -108,12 +108,20 @@ const drawBrick = (ctx, widthInStuds, x, y, colorName, isHovered)=> {
 	// }
 };
 
-const bricks = [];
+const drawBot = (ctx, bot, isHovered)=> {
+	const w = 2 * 15 + 15;
+	const h = 100;
+	ctx.globalAlpha = isHovered ? 0.8 : 1;
+	ctx.drawImage(images.junkbot, 17, 150, w, h, bot.x, bot.y - 64, w, h);
+};
+
+
+const entities = [];
 for (let row = 5; row >= 0; row--) {
 	for (let column = 0; column < 150; /* MUST increment below */) {
 		if (Math.sin(column*13234) < row * 0.2 + 0.1) {
 			const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
-			bricks.push({
+			entities.push({
 				x: column * 15,
 				y: (row - 6) * 18,
 				widthInStuds,
@@ -129,10 +137,11 @@ for (let row = 5; row >= 0; row--) {
 		}
 	}
 }
-bricks.push(
+entities.push(
 	{x: 15*4, y: 18*-12, colorName: "red", widthInStuds: 1},
 	{x: 15*4, y: 18*-13, colorName: "yellow", widthInStuds: 4},
 	{x: 15*4, y: 18*-14, colorName: "green", widthInStuds: 2},
+	{x: 15*9, y: 18*-8, type: "junkbot", widthInStuds: 2}
 );
 // let drop_from_row = 15;
 // setInterval(()=> {
@@ -145,7 +154,7 @@ bricks.push(
 // 		// widthInStuds: 2,
 // 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
 // 	};
-// 	bricks.push(brick);
+// 	entities.push(brick);
 // }, 200);
 
 const viewport = {centerX: 0, centerY: 0, scale: 2};
@@ -184,7 +193,7 @@ const updateMouse = (event)=> {
 	updateMouseWorldPosition();
 };
 const brickUnderMouse = ()=> {
-	for (const brick of bricks) {
+	for (const brick of entities) {
 		if (
 			!brick.fixed &&
 			brick.x < mouse.worldX &&
@@ -220,10 +229,10 @@ addEventListener("blur", ()=> {
 
 // This is needed for simulation (gravity) and rendering.
 // Well, strictly only Y sorting is needed for gravity I suppose?
-const sortObjects = ()=> {
-	// bricks.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
-	// bricks.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
-	bricks.sort((a, b)=> {
+const sortEntities = ()=> {
+	// entities.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
+	// entities.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
+	entities.sort((a, b)=> {
 		if (a.y + 18 <= b.y) {
 			return +1;
 		}
@@ -254,23 +263,23 @@ function shuffle(a) {
 }
 
 const simulateGravity = ()=> {
-	for (const brick of bricks) {
-		if (!brick.fixed && brick !== dragging) {
+	for (const entity of entities) {
+		if (!entity.fixed && entity !== dragging) {
 			let settled = false;
-			for (const other_brick of bricks) {
+			for (const other_entity of entities) {
 				if (
-					brick.x + brick.widthInStuds * 15 > other_brick.x &&
-					brick.x < other_brick.x + other_brick.widthInStuds * 15 &&
-					// brick.y + 18 >= other_brick.y &&
-					// brick.y < other_brick.y + 18
-					brick.y + 18 === other_brick.y
+					entity.x + entity.widthInStuds * 15 > other_entity.x &&
+					entity.x < other_entity.x + other_entity.widthInStuds * 15 &&
+					// entity.y + 18 >= other_entity.y &&
+					// entity.y < other_entity.y + 18
+					entity.y + 18 === other_entity.y
 				) {
 					settled = true;
 				}
 			}
 			if (!settled) {
-				// brick.y += 1;
-				// brick.y += 6;
+				entity.y += 1;
+				// entity.y += 6;
 			}
 		}
 	}
@@ -308,7 +317,7 @@ const animate = ()=> {
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 	updateMouseWorldPosition();
 
-	sortObjects();
+	sortEntities();
 	simulateGravity();
 	const hovered = dragging || brickUnderMouse();
 
@@ -338,19 +347,24 @@ const animate = ()=> {
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
 
-	shuffle(bricks);
-	sortObjects();
+	shuffle(entities);
+	sortEntities();
 
-	for (const brick of bricks) {
-		drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName, brick === hovered);
-		// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
+	for (const entity of entities) {
+		if (entity.type === "junkbot") {
+			drawBot(ctx, entity, entity === hovered);
+		} else {
+			const brick = entity;
+			drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName, brick === hovered);
+			// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
+		}
 	}
 
 	ctx.restore();
 
 	// ctx.drawImage(images.font, 0, 90);
 	// drawText(ctx, fontChars, 0, 100, "sand");
-	const debugInfo = `BRICKS: ${bricks.length}
+	const debugInfo = `ENTITIES: ${entities.length}
 VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
 AT SCALE: ${viewport.scale}X`;
 	drawText(ctx, debugInfo, 0, 50, "white");
