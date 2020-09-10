@@ -163,11 +163,11 @@ function parseObject( fileName, isRoot ) {
 							break;
 
 						} catch ( e ) {
-	console.error(e);
 							if ( attempt === 1 ) {
 
 								// The file has not been found, add to list of not found
 								listOfNotFound.push( originalFileName );
+								console.error(e);
 
 							}
 
