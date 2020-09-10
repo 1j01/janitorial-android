@@ -9,7 +9,12 @@
     "building",
     "construction",
     "bricks",
-    "blocks"
+    "blocks",
+    "puzzle-platformer",
+    "puzzle-game",
+    "trash",
+    "junk",
+    "janitorial-android"
   ],
   "author": "Isaiah Odhner <isaiahodhner@gmail.com>",
   "scripts": {
