@@ -4,19 +4,19 @@
  * Usage:
  *
  * - Download official parts library from LDraw.org and unzip in a directory (e.g. ldraw/)
+ * 	 - On Ubuntu: `sudo apt install ldraw-parts` installs to /usr/share/ldraw
+ * 
+ * - Update the ldrawPath variable below
  *
- * - Download your desired model file and place in the ldraw/models/ subfolder.
+ * - Issue command 'node packLDrawModel <path to model (.ldr file)>'
  *
- * - Place this script also in ldraw/
- *
- * - Issue command 'node packLDrawModel models/<modelFileName>'
- *
- * The packed object will be in ldraw/models/<modelFileName>_Packed.mpd and will contain all the object subtree as embedded files.
- *
+ * The packed object file will be output to the same folder as the input file. 
+ * It will be named <modelFileName>_Packed.mpd and will contain all the object subtree as embedded files.
  *
  */
 
-var ldrawPath = './';
+// var ldrawPath = './'; if you want to place this script in the ldraw folder
+var ldrawPath = '/usr/share/ldraw';
 var materialsFileName = 'LDConfig.ldr';
 
 
@@ -116,7 +116,7 @@ function parseObject( fileName, isRoot ) {
 
 		}
 
-		var absoluteObjectPath = path.join( ldrawPath, fileName );
+		var absoluteObjectPath = path.resolve( fileName );
 
 		try {
 
@@ -125,19 +125,18 @@ function parseObject( fileName, isRoot ) {
 
 		} catch ( e ) {
 
-			prefix = "parts/";
-			absoluteObjectPath = path.join( ldrawPath, prefix, fileName );
+			absoluteObjectPath = path.join( ldrawPath, fileName );
 
 			try {
 
 				objectContent = fs.readFileSync( absoluteObjectPath, { encoding: "utf8" } );
 				break;
-
+	
 			} catch ( e ) {
-
-				prefix = "p/";
+	
+				prefix = "parts/";
 				absoluteObjectPath = path.join( ldrawPath, prefix, fileName );
-
+	
 				try {
 
 					objectContent = fs.readFileSync( absoluteObjectPath, { encoding: "utf8" } );
@@ -145,20 +144,32 @@ function parseObject( fileName, isRoot ) {
 
 				} catch ( e ) {
 
-					try {
+					prefix = "p/";
+					absoluteObjectPath = path.join( ldrawPath, prefix, fileName );
 
-						prefix = "models/";
-						absoluteObjectPath = path.join( ldrawPath, prefix, fileName );
+					try {
 
 						objectContent = fs.readFileSync( absoluteObjectPath, { encoding: "utf8" } );
 						break;
 
 					} catch ( e ) {
 
-						if ( attempt === 1 ) {
+						try {
 
-							// The file has not been found, add to list of not found
-							listOfNotFound.push( originalFileName );
+							prefix = "models/";
+							absoluteObjectPath = path.join( ldrawPath, prefix, fileName );
+
+							objectContent = fs.readFileSync( absoluteObjectPath, { encoding: "utf8" } );
+							break;
+
+						} catch ( e ) {
+	console.error(e);
+							if ( attempt === 1 ) {
+
+								// The file has not been found, add to list of not found
+								listOfNotFound.push( originalFileName );
+
+							}
 
 						}
 
