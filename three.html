@@ -44,6 +44,7 @@
 				'Car': 'models/car.ldr_Packed.mpd',
 				'Basic Bricks': 'models/basic-bricks.ldr_Packed.mpd',
 				'Test0': 'models/test0.ldr_Packed.mpd',
+				'Test0.1': 'models/test0.1.ldr_Packed.mpd',
 				'Test1': 'models/test1.ldr_Packed.mpd',
 				'Lunar Vehicle': 'models/1621-1-LunarMPVVehicle.mpd_Packed.mpd',
 				'Radar Truck': 'models/889-1-RadarTruck.mpd_Packed.mpd',
@@ -63,7 +64,7 @@
 			};
 
 			const frustumSize = 200;
-			const renderSize = [640, 150];
+			const renderSize = [2000, 150];
 
 			init();
 			animate();
@@ -79,7 +80,7 @@
 				// camera.position.set( 150, 200, 250 );
 				camera.position.set( 0, 0, 250 );
 				camera.lookAt(new THREE.Vector3(0, 0, 0));
-				camera.position.set( 120, 120, 250 );
+				camera.position.set( 520, 120, 250 );
 				camera.updateProjectionMatrix();
 
 				// scene
@@ -108,7 +109,7 @@
 				//
 
 				guiData = {
-					modelFileName: modelFileList[ 'Basic Bricks' ],
+					modelFileName: modelFileList[ 'Test0.1' ],
 					envMapActivated: false,
 					separateObjects: false,
 					displayLines: true,
