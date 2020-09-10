@@ -5,11 +5,12 @@ Maybe somewhat of a Junkbot recreation?
 ## Ideas
 
 - Metroidvania
-- Tetris area
-- Pacman area with wrapping
+	- Instead of abilities like Jump, you collect blocks like Jump Block
+- Gear systems
 - Ridable giant robots / cars?
-- Open world? (OpenJunkbot? Junkbot Open?)
-- More of a sandbox? idk
+- Or could be more open world / sandbox-y
+	- Tetris area
+	- Pacman area with wrapping
 - Convert LDraw models into pixel art [with Three.js](https://threejs.org/examples/?q=ldraw#webgl_loader_ldraw) and the proper perspective and lighting and postprocessing (selective outlining would be difficult)
 
 ## Development Setup
