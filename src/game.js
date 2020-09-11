@@ -139,7 +139,7 @@ const drawBot = (ctx, bot, isHovered)=> {
 	const w = 2 * 15 + 15;
 	const h = 100;
 	ctx.globalAlpha = isHovered ? 0.8 : 1;
-	const frame = resources.actorsAtlas[`minifig_walk_r_${1 + ~~(Date.now() / 500 % 10)}`];
+	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(Date.now() / 100 % 10)}`];
 	const bounds = frame.bounds;
 	ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], bot.x, bot.y - 64, bounds[2], bounds[3]);
 };
@@ -170,8 +170,10 @@ entities.push(
 	{x: 15*4, y: 18*-12, colorName: "red", widthInStuds: 1},
 	{x: 15*4, y: 18*-13, colorName: "yellow", widthInStuds: 4},
 	{x: 15*4, y: 18*-14, colorName: "green", widthInStuds: 2},
-	{x: 15*9, y: 18*-8, type: "junkbot", widthInStuds: 2}
 );
+const junkbot = {x: 15*9, y: 18*-8, type: "junkbot", widthInStuds: 2, facing: 1};
+entities.push(junkbot);
+
 // let drop_from_row = 15;
 // setInterval(()=> {
 // 	drop_from_row += 1;
@@ -304,6 +306,7 @@ const simulateGravity = ()=> {
 					entity.y + 18 === other_entity.y
 				) {
 					settled = true;
+					break;
 				}
 			}
 			if (!settled) {
@@ -311,6 +314,29 @@ const simulateGravity = ()=> {
 				// entity.y += 6;
 			}
 		}
+	}
+};
+
+const simulateJunkbot = ()=> {
+	const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
+	let collision = false;
+	for (const other_entity of entities) {
+		if (
+			other_entity.type !== "junkbot" &&
+			posInFront.x + junkbot.widthInStuds * 15 > other_entity.x &&
+			posInFront.x < other_entity.x + other_entity.widthInStuds * 15 &&
+			posInFront.y + 18 > other_entity.y &&
+			posInFront.y < other_entity.y + 18
+		) {
+			collision = true;
+			break;
+		}
+	}
+	if (collision) {
+		junkbot.facing = -junkbot.facing;
+	} else {
+		junkbot.x = posInFront.x;
+		junkbot.y = posInFront.y;
 	}
 };
 
@@ -348,6 +374,8 @@ const animate = ()=> {
 
 	sortEntities();
 	simulateGravity();
+	simulateJunkbot();
+
 	const hovered = dragging || brickUnderMouse();
 
 	if (dragging) {
