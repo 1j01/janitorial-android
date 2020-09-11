@@ -3,28 +3,54 @@ const ctx = canvas.getContext("2d");
 
 document.body.append(canvas);
 
-const imagePaths = {
-	junkbot: "images/junkbot.png",
+const resourcePaths = {
+	actors: "images/actors-atlas.png",
+	actorsAtlas: "images/actors-atlas.json",
 	coloredBlocks: "images/colored-blocks.png",
 	font: "images/font.png",
 };
 
-const loadImages = async (imagePaths)=> {
-	return Object.fromEntries(await Promise.all(Object.entries(imagePaths).map(([id, path])=> {
-		const image = new Image();
-		return new Promise((resolve, reject)=> {
-			image.onload = ()=> {
-				resolve([id, image]);	
-			};
-			image.onerror = ()=> {
-				reject(new Error(`Image failed to load ('${path}')`));
-			};
-			image.src = path;
-		});
+const loadImage = (imagePath)=> {
+	const image = new Image();
+	return new Promise((resolve, reject)=> {
+		image.onload = ()=> {
+			resolve(image);	
+		};
+		image.onerror = ()=> {
+			reject(new Error(`Image failed to load ('${imagePath}')`));
+		};
+		image.src = imagePath;
+	});
+};
+
+const loadJSON = async (path)=> {
+	const response = await fetch(path);
+	if (response.ok) { // if HTTP-status is 200-299
+		// get the response body (the method explained below)
+		return await response.json();
+	} else {
+		throw new Error(`got HTTP ${response.status} fetching '${path}'`);
+	}
+};
+
+const loadAtlasJSON = async (path)=> {
+	const data = await loadJSON(path);
+	return data;
+};
+
+const loadResources = async (resourcePathsByID)=> {
+	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path])=> {
+		if (path.match(/atlas\.json$/)) {
+			return loadAtlasJSON(path).then((atlas)=> [id, atlas]);
+		} else if (path.match(/\.json$/)) {
+			return loadJSON(path).then((json)=> [id, json]);
+		} else {
+			return loadImage(path).then((image)=> [id, image]);;
+		}
 	})));
 };
 
-let images;
+let resources;
 
 const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}`;
 const fontCharW = "55555555355555555555555555355555555551221113331355353525531155332233".split("").map((s)=> Number(s));
@@ -99,7 +125,7 @@ const drawBrick = (ctx, widthInStuds, x, y, colorName, isHovered)=> {
 	const w = widthInStuds * 15 + 15;
 	const h = 35;
 	ctx.globalAlpha = isHovered ? 0.8 : 1;
-	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y - 15, w, h);
+	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y - 15, w, h);
 	// if (isHovered) {
 	// 	ctx.save();
 	// 	ctx.globalCompositeOperation = "multiply";
@@ -112,7 +138,11 @@ const drawBot = (ctx, bot, isHovered)=> {
 	const w = 2 * 15 + 15;
 	const h = 100;
 	ctx.globalAlpha = isHovered ? 0.8 : 1;
-	ctx.drawImage(images.junkbot, 17, 150, w, h, bot.x, bot.y - 64, w, h);
+	// const frame = resources.actorsAtlas.minifig_walk_r;
+	// const bounds = frame.bounds;
+	const frame = resources.actorsAtlas[~~(Date.now() / 300 % resources.actorsAtlas.length)];
+	const bounds = frame.Bounds.split(", ");
+	ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], bot.x, bot.y - 64, bounds[2], bounds[3]);
 };
 
 
@@ -374,9 +404,9 @@ AT SCALE: ${viewport.scale}X`;
 };
 
 const main = async ()=> {
-	images = await loadImages(imagePaths);
+	resources = await loadResources(resourcePaths);
 	for (const [colorName, color] of Object.entries(fontColors)) {
-		fontCanvases[colorName] = colorizeWhiteAlphaImage(images.font, color);
+		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
 	animate();
 };
