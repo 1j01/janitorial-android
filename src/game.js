@@ -34,8 +34,9 @@ const loadJSON = async (path)=> {
 };
 
 const loadAtlasJSON = async (path)=> {
-	const data = await loadJSON(path);
-	return data;
+	return Object.fromEntries((await loadJSON(path)).map(
+		({Name, Bounds})=> [Name, {bounds: Bounds.split(", ").map((numberString)=> Number(numberString))}]
+	));
 };
 
 const loadResources = async (resourcePathsByID)=> {
@@ -138,10 +139,8 @@ const drawBot = (ctx, bot, isHovered)=> {
 	const w = 2 * 15 + 15;
 	const h = 100;
 	ctx.globalAlpha = isHovered ? 0.8 : 1;
-	// const frame = resources.actorsAtlas.minifig_walk_r;
-	// const bounds = frame.bounds;
-	const frame = resources.actorsAtlas[~~(Date.now() / 300 % resources.actorsAtlas.length)];
-	const bounds = frame.Bounds.split(", ");
+	const frame = resources.actorsAtlas[`minifig_walk_r_${1 + ~~(Date.now() / 500 % 10)}`];
+	const bounds = frame.bounds;
 	ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], bot.x, bot.y - 64, bounds[2], bounds[3]);
 };
 
