@@ -59,8 +59,9 @@
 				'AT-ST': 'models/10174-1-ImperialAT-ST-UCS.mpd_Packed.mpd'
 			};
 
-			const frustumSize = 200;
-			const renderSize = [2000, 150];
+			const renderSize = [2000, 1000];
+			const aspect = renderSize[0] / renderSize[1];
+			const frustumSize = renderSize[1] * 1.35;
 
 			init();
 			animate();
@@ -70,7 +71,6 @@
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
-				var aspect = renderSize[0] / renderSize[1];
 				// camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
 				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 10000 );
 				// camera.position.set( 150, 200, 250 );
