@@ -1002,7 +1002,8 @@ var LDrawLoader = ( function () {
 
 				// This is the material used for edges
 				edgeMaterial = new LineBasicMaterial( {
-					color: edgeColour,
+					// color: edgeColour,
+					color: material.color.clone().multiplyScalar(0.6),
 					transparent: isTransparent,
 					opacity: alpha,
 					depthWrite: ! isTransparent
