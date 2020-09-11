@@ -39,29 +39,29 @@
 			var modelFileList = {
 				'Car': 'models/car.ldr_Packed.mpd',
 				'Basic Bricks': 'models/basic-bricks.ldr_Packed.mpd',
-				'Test0': 'models/test0.ldr_Packed.mpd',
-				'Test0.1': 'models/test0.1.ldr_Packed.mpd',
-				'Test1': 'models/test1.ldr_Packed.mpd',
-				'Lunar Vehicle': 'models/1621-1-LunarMPVVehicle.mpd_Packed.mpd',
-				'Radar Truck': 'models/889-1-RadarTruck.mpd_Packed.mpd',
-				'Trailer': 'models/4838-1-MiniVehicles.mpd_Packed.mpd',
-				'Bulldozer': 'models/4915-1-MiniConstruction.mpd_Packed.mpd',
-				'Helicopter': 'models/4918-1-MiniFlyers.mpd_Packed.mpd',
-				'Plane': 'models/5935-1-IslandHopper.mpd_Packed.mpd',
-				'Lighthouse': 'models/30023-1-Lighthouse.ldr_Packed.mpd',
-				'X-Wing mini': 'models/30051-1-X-wingFighter-Mini.mpd_Packed.mpd',
-				'AT-ST mini': 'models/30054-1-AT-ST-Mini.mpd_Packed.mpd',
-				'AT-AT mini': 'models/4489-1-AT-AT-Mini.mpd_Packed.mpd',
-				'Shuttle': 'models/4494-1-Imperial Shuttle-Mini.mpd_Packed.mpd',
-				'TIE Interceptor': 'models/6965-1-TIEIntercep_4h4MXk5.mpd_Packed.mpd',
-				'Star fighter': 'models/6966-1-JediStarfighter-Mini.mpd_Packed.mpd',
-				'X-Wing': 'models/7140-1-X-wingFighter.mpd_Packed.mpd',
-				'AT-ST': 'models/10174-1-ImperialAT-ST-UCS.mpd_Packed.mpd'
+				'Bots': 'models/bots.ldr_Packed.mpd',
+				'Misc': 'models/misc.ldr_Packed.mpd',
+				// 'Much Stuff': 'models/much-stuff.ldr_Packed.mpd',
+				// 'Lunar Vehicle': 'models/1621-1-LunarMPVVehicle.mpd_Packed.mpd',
+				// 'Radar Truck': 'models/889-1-RadarTruck.mpd_Packed.mpd',
+				// 'Trailer': 'models/4838-1-MiniVehicles.mpd_Packed.mpd',
+				// 'Bulldozer': 'models/4915-1-MiniConstruction.mpd_Packed.mpd',
+				// 'Helicopter': 'models/4918-1-MiniFlyers.mpd_Packed.mpd',
+				// 'Plane': 'models/5935-1-IslandHopper.mpd_Packed.mpd',
+				// 'Lighthouse': 'models/30023-1-Lighthouse.ldr_Packed.mpd',
+				// 'X-Wing mini': 'models/30051-1-X-wingFighter-Mini.mpd_Packed.mpd',
+				// 'AT-ST mini': 'models/30054-1-AT-ST-Mini.mpd_Packed.mpd',
+				// 'AT-AT mini': 'models/4489-1-AT-AT-Mini.mpd_Packed.mpd',
+				// 'Shuttle': 'models/4494-1-Imperial Shuttle-Mini.mpd_Packed.mpd',
+				// 'TIE Interceptor': 'models/6965-1-TIEIntercep_4h4MXk5.mpd_Packed.mpd',
+				// 'Star fighter': 'models/6966-1-JediStarfighter-Mini.mpd_Packed.mpd',
+				// 'X-Wing': 'models/7140-1-X-wingFighter.mpd_Packed.mpd',
+				// 'AT-ST': 'models/10174-1-ImperialAT-ST-UCS.mpd_Packed.mpd'
 			};
 
 			const renderSize = [2000, 1000];
 			const aspect = renderSize[0] / renderSize[1];
-			const frustumSize = renderSize[1] * 1.35;
+			const frustumSize = renderSize[1] * 1.35; // TODO: play around with this, get more exact
 
 			init();
 			animate();
@@ -105,7 +105,7 @@
 				//
 
 				guiData = {
-					modelFileName: modelFileList[ 'Test0.1' ],
+					modelFileName: modelFileList[ 'Basic Bricks' ],
 					envMapActivated: false,
 					separateObjects: false,
 					displayLines: true,
