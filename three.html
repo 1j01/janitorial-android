@@ -93,7 +93,7 @@
 
 				//
 
-				renderer = new THREE.WebGLRenderer( { antialias: false, alpha: true } );
+				renderer = new THREE.WebGLRenderer( { antialias: false, alpha: true, preserveDrawingBuffer: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( ...renderSize );
 				container.appendChild( renderer.domElement );
@@ -112,7 +112,8 @@
 					conditionalLines: false,
 					smoothNormals: false,
 					constructionStep: 0,
-					noConstructionSteps: "No steps."
+					noConstructionSteps: "No steps.",
+					exportImages: exportImages,
 				};
 
 				window.addEventListener( 'resize', setupProjection, false );
@@ -358,6 +359,8 @@
 				gui.add( guiData, 'displayLines' ).name( 'Display Lines' ).onChange( updateObjectsVisibility );
 				gui.add( guiData, 'conditionalLines' ).name( 'Conditional Lines' ).onChange( updateObjectsVisibility );
 
+				gui.add( guiData, 'exportImages' ).name( 'Export Image(s)' );
+
 			}
 
 			//
@@ -410,6 +413,25 @@
 			function updateProgressBar( fraction ) {
 
 				progressBarDiv.innerText = 'Loading... ' + Math.round( fraction * 100, 2 ) + '%';
+
+			}
+
+			function exportImages() {
+
+				renderer.domElement.toBlob((blob)=> {
+					const blobURL = URL.createObjectURL(blob);
+					// someEl.innerHTML = `<a href="${blobURL}" download="${guiData.modelFileName}.png">Download Image</a>`;
+					const a = document.createElement("a");
+					a.href = blobURL;
+					a.download = `${guiData.modelFileName}.png`;
+					document.body.appendChild(a);
+					console.log("In case download is blocked by browser, save this manually:", blobURL);
+					a.click();
+					setTimeout(function() {
+						document.body.removeChild(a);
+						window.URL.revokeObjectURL(blobURL);  
+					}, 0);
+				});
 
 			}
 
