@@ -356,7 +356,7 @@ const animate = ()=> {
 		viewport.centerX += 20;
 	}
 	const pan_margin_size = innerWidth * 0.07;
-	const pan_from_margin_speed = 10;
+	const pan_from_margin_speed = 10 * document.hasFocus();
 	if (mouse.y < pan_margin_size) {
 		viewport.centerY -= pan_from_margin_speed;
 	}
