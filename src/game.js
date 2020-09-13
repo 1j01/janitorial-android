@@ -360,15 +360,13 @@ const rectanglesIntersect = (a_x, a_y, a_w, a_h, b_x, b_y, b_w, b_h)=>
 	a_y + a_h > b_y &&
 	a_y < b_y + b_h;
 
-const simulateJunkbot = ()=> {
-	const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
-	let collision = false;
+const junkbotCollisionTest = (junkbot_x, junkbot_y)=> {
 	for (const other_entity of entities) {
 		if (
 			other_entity.type !== "junkbot" &&
 			rectanglesIntersect(
-				posInFront.x,
-				posInFront.y,
+				junkbot_x,
+				junkbot_y,
 				junkbot.widthInStuds * 15,
 				18,
 				other_entity.x,
@@ -377,15 +375,43 @@ const simulateJunkbot = ()=> {
 				18,
 			)
 		) {
-			collision = true;
-			break;
+			return true;
 		}
 	}
-	if (collision) {
-		junkbot.facing = -junkbot.facing;
+	return false;
+};
+
+const simulateJunkbot = ()=> {
+	const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
+	// const posInFront = {x: junkbot.x + junkbot.facing * 15, y: junkbot.y};
+	if (junkbotCollisionTest(posInFront.x, posInFront.y)) {
+		// can we step up?
+		posInFront.y -= 18;
+		if (!junkbotCollisionTest(posInFront.x, posInFront.y)) {
+			// step up
+			junkbot.x = posInFront.x;
+			junkbot.y = posInFront.y;
+		} else {
+			// reached wall; turn around
+			junkbot.facing *= -1;
+		}
 	} else {
-		junkbot.x = posInFront.x;
-		junkbot.y = posInFront.y;
+		// is there solid ground ahead to walk on?
+		if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
+			junkbot.x = posInFront.x;
+			junkbot.y = posInFront.y;
+		} else {
+			// can we step down?
+			posInFront.y += 18;
+			if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
+				// step down
+				junkbot.x = posInFront.x;
+				junkbot.y = posInFront.y;
+			} else {
+				// reached cliff/ledge/edge/precipice; turn around
+				junkbot.facing *= -1;
+			}
+		}
 	}
 };
 
