@@ -169,13 +169,17 @@ const drawBrick = (ctx, widthInStuds, x, y, colorName, isHovered)=> {
 	// }
 };
 
-const drawBot = (ctx, bot, isHovered)=> {
+const drawJunkbot = (ctx, junkbot, isHovered)=> {
 	const w = 2 * 15 + 15;
 	const h = 100;
 	ctx.globalAlpha = isHovered ? 0.8 : 1;
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(Date.now() / 100 % 10)}`];
 	const bounds = frame.bounds;
-	ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], bot.x, bot.y - 64, bounds[2], bounds[3]);
+	if (junkbot.facing === 1) {
+		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x - bounds[2] + 41, junkbot.y + 18 - 1 - bounds[3], bounds[2], bounds[3]);
+	} else {
+		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x, junkbot.y + 18 - 1 - bounds[3], bounds[2], bounds[3]);
+	}
 };
 
 const entities = [];
@@ -442,7 +446,7 @@ const animate = ()=> {
 
 	for (const entity of entities) {
 		if (entity.type === "junkbot") {
-			drawBot(ctx, entity, entity === hovered);
+			drawJunkbot(ctx, entity, entity === hovered);
 		} else {
 			const brick = entity;
 			drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName, brick === hovered);
