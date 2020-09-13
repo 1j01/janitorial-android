@@ -198,7 +198,7 @@ const drawBrick = (ctx, brick, isHovered)=> {
 	const {x, y, widthInStuds, colorName} = brick;
 	const w = widthInStuds * 15 + 15; // sprite width
 	const h = 35; // sprite row height
-	ctx.globalAlpha = isHovered ? 0.8 : 1;
+	ctx.globalAlpha = brick.grabbed ? 0.8 : 1;
 	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * h + 9, w, h, x, y - 15, w, h);
 	// if (isHovered) {
 	// 	ctx.save();
@@ -206,10 +206,11 @@ const drawBrick = (ctx, brick, isHovered)=> {
 	// 	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex.white * h + 9, w, h, x, y - 15, w, h);
 	// 	ctx.restore();
 	// }
+	ctx.globalAlpha = 1;
 };
 
 const drawJunkbot = (ctx, junkbot, isHovered)=> {
-	ctx.globalAlpha = isHovered ? 0.8 : 1;
+	ctx.globalAlpha = junkbot.grabbed ? 0.8 : 1;
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(junkbot.animationFrame % 10)}`];
 	const bounds = frame.bounds;
 	if (junkbot.facing === 1) {
@@ -217,6 +218,7 @@ const drawJunkbot = (ctx, junkbot, isHovered)=> {
 	} else {
 		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x, junkbot.y + junkbot.height - 1 - bounds[3], bounds[2], bounds[3]);
 	}
+	ctx.globalAlpha = 1;
 };
 
 const entities = [];
