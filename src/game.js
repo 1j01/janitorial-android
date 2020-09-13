@@ -8,6 +8,7 @@ const resourcePaths = {
 	actorsAtlas: "images/actors-atlas.json",
 	coloredBlocks: "images/colored-blocks.png",
 	font: "images/font.png",
+	level: "levels/Which Switch.txt",
 };
 
 const loadImage = (imagePath)=> {
@@ -39,12 +40,46 @@ const loadAtlasJSON = async (path)=> {
 	));
 };
 
+const loadLevelFromText = (levelData)=> {
+	const sections = {};
+	let section_name = "";
+	for (const line of levelData.split(/\r?\n/g)) {
+		if (line.match(/^\s*(#.*)?$/)) {
+			continue;
+		}
+		const match = line.match(/^\[(.*)\]$/);
+		if (match) {
+			section_name = match[1];
+		} else {
+			sections[section_name] = sections[section_name] || [];
+			sections[section_name].push(line.split("="));
+		}
+	}
+	console.log(sections);
+};
+
+const loadTextFile = async (path)=> {
+	const response = await fetch(path);
+	if (response.ok) { // if HTTP-status is 200-299
+		// get the response body (the method explained below)
+		return await response.text();
+	} else {
+		throw new Error(`got HTTP ${response.status} fetching '${path}'`);
+	}
+};
+
+const loadLevelFromTextFile = async (path)=> {
+	return loadLevelFromText(await loadTextFile(path));
+};
+
 const loadResources = async (resourcePathsByID)=> {
 	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path])=> {
 		if (path.match(/atlas\.json$/)) {
 			return loadAtlasJSON(path).then((atlas)=> [id, atlas]);
 		} else if (path.match(/\.json$/)) {
 			return loadJSON(path).then((json)=> [id, json]);
+		} else if (path.match(/levels\/.*\.txt$/)) {
+			return loadLevelFromTextFile(path).then((level)=> [id, level]);
 		} else {
 			return loadImage(path).then((image)=> [id, image]);;
 		}
