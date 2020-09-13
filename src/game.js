@@ -303,8 +303,7 @@ addEventListener("keyup", (event)=> {
 });
 
 let mouse = {x: undefined, y: undefined};
-let drag_offset = {x: 0, y: 0};
-let dragging = null;
+let dragging = [];
 
 const updateMouseWorldPosition = (event)=> {
 	mouse.worldX = (mouse.x - canvas.width/2) / viewport.scale + viewport.centerX;
@@ -328,21 +327,57 @@ const brickUnderMouse = ()=> {
 		}
 	}
 };
+const possibleGrabs = ()=> {
+	const brick = brickUnderMouse();
+	if (!brick) {
+		return [];
+	}
+	const grabs = [];
+	const findAttached = (brick, direction)=>
+		entities.filter((entity)=>
+			entity.type === "brick" &&
+			!entity.fixed &&
+			rectanglesIntersect(
+				brick.x,
+				brick.y + direction,
+				brick.width,
+				brick.height,
+				entity.x,
+				entity.y,
+				entity.width,
+				entity.height,
+			)
+		);
+	
+	// findAttached(brick, 1);
+	// findAttached(brick, -1);
+	// if (grabs.length === 0) {
+	// 	grabs.push([brick]);
+	// }
+	grabs.push([brick, ...findAttached(brick, -1), ...findAttached(brick, 1)]);
+
+	return grabs;
+};
 
 canvas.addEventListener("mousemove", updateMouse);
 canvas.addEventListener("mousedown", (event)=> {
 	updateMouse(event);
-	const brick = brickUnderMouse();
-	if (brick) {
-		dragging = brick;
-		brick.grabbed = true;
-		drag_offset = {x: brick.x - mouse.worldX, y: brick.y - mouse.worldY};
+	const grabs = possibleGrabs();
+	if (grabs.length === 1) {
+		dragging = [...grabs[0]];
+		for (const brick of dragging) {
+			brick.grabbed = true;
+			brick.grabOffset = {x: brick.x - mouse.worldX, y: brick.y - mouse.worldY};
+		}
 	}
 });
 addEventListener("mouseup", ()=> {
-	if (dragging) {
-		dragging.grabbed = false;
-		dragging = null;
+	if (dragging.length) {
+		dragging.forEach((entity)=> {
+			entity.grabbed = false;
+			entity.grabOffset = null;
+		});
+		dragging = [];
 	}
 });
 canvas.addEventListener("mouseleave", ()=> {
@@ -545,17 +580,19 @@ const animate = ()=> {
 	simulateGravity();
 	simulateJunkbot();
 
-	const hovered = dragging || brickUnderMouse();
+	const hovered = possibleGrabs();
 
-	if (dragging) {
-		// dragging.x = ~~(mouse.worldX + drag_offset.x);
-		// dragging.y = ~~(mouse.worldY + drag_offset.y);
-		dragging.x = 15 * ~~((mouse.worldX + drag_offset.x)/15);
-		// dragging.y = 18 * ~~((mouse.worldY + drag_offset.y)/18);
-		dragging.y = ~~(18/3 * ~~((mouse.worldY + drag_offset.y)/18*3));
+	if (dragging.length) {
+		for (const brick of dragging) {
+			// brick.x = ~~(mouse.worldX + brick.grabOffset.x);
+			// brick.y = ~~(mouse.worldY + brick.grabOffset.y);
+			brick.x = 15 * ~~((mouse.worldX + brick.grabOffset.x)/15);
+			// brick.y = 18 * ~~((mouse.worldY + brick.grabOffset.y)/18);
+			brick.y = ~~(18/3 * ~~((mouse.worldY + brick.grabOffset.y)/18*3));
+		}
 		canvas.style.cursor = "grabbing";
 	} else {
-		canvas.style.cursor = hovered ? "grab" : "default";
+		canvas.style.cursor = hovered.length ? "grab" : "default";
 	}
 
 	if (canvas.width !== innerWidth) {
@@ -578,10 +615,9 @@ const animate = ()=> {
 
 	for (const entity of entities) {
 		if (entity.type === "junkbot") {
-			drawJunkbot(ctx, entity, entity === hovered);
+			drawJunkbot(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity);
 		} else {
-			const brick = entity;
-			drawBrick(ctx, brick, brick === hovered);
+			drawBrick(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity);
 		}
 	}
 
@@ -597,7 +633,9 @@ ${debugInfoForJunkbot}
 
 ${debugInfoForFrame}`;
 	drawText(ctx, debugInfo, 0, 50, "white");
-	if (hovered) {
+	if (dragging.length) {
+		drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
+	} else if (hovered.length) {
 		drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
 	}
 	debugInfoForFrame = "";
