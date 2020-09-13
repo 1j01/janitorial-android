@@ -354,16 +354,28 @@ const simulateGravity = ()=> {
 	}
 };
 
+const rectanglesIntersect = (a_x, a_y, a_w, a_h, b_x, b_y, b_w, b_h)=>
+	a_x + a_w > b_x &&
+	a_x < b_x + b_w &&
+	a_y + a_h > b_y &&
+	a_y < b_y + b_h;
+
 const simulateJunkbot = ()=> {
 	const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
 	let collision = false;
 	for (const other_entity of entities) {
 		if (
 			other_entity.type !== "junkbot" &&
-			posInFront.x + junkbot.widthInStuds * 15 > other_entity.x &&
-			posInFront.x < other_entity.x + other_entity.widthInStuds * 15 &&
-			posInFront.y + 18 > other_entity.y &&
-			posInFront.y < other_entity.y + 18
+			rectanglesIntersect(
+				posInFront.x,
+				posInFront.y,
+				junkbot.widthInStuds * 15,
+				18,
+				other_entity.x,
+				other_entity.y,
+				other_entity.widthInStuds * 15,
+				18,
+			)
 		) {
 			collision = true;
 			break;
