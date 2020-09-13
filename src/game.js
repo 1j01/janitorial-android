@@ -389,16 +389,27 @@ const rectanglesIntersect = (a_x, a_y, a_w, a_h, b_x, b_y, b_w, b_h)=>
 const junkbotCollisionTest = (junkbot_x, junkbot_y)=> {
 	for (const other_entity of entities) {
 		if (
-			other_entity.type !== "junkbot" &&
-			rectanglesIntersect(
-				junkbot_x,
-				junkbot_y,
-				junkbot.width,
-				junkbot.height,
-				other_entity.x,
-				other_entity.y,
-				other_entity.width,
-				other_entity.height,
+			other_entity.type !== "junkbot" && (
+				rectanglesIntersect(
+					junkbot_x + (junkbot.facing === 1 ? 0 : 15),
+					junkbot_y,
+					junkbot.width / 2,
+					junkbot.height,
+					other_entity.x,
+					other_entity.y,
+					other_entity.width,
+					other_entity.height,
+				) ||
+				rectanglesIntersect(
+					junkbot_x,
+					junkbot_y + 18,
+					junkbot.width,
+					junkbot.height - 18,
+					other_entity.x,
+					other_entity.y,
+					other_entity.width,
+					other_entity.height,
+				)
 			)
 		) {
 			return true;
