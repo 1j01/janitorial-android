@@ -178,6 +178,7 @@ const makeJunkbot = ({x, y, facing=1, armored=false})=> {
 		height: 4 * 18,
 		facing,
 		armored,
+		timer: 0,
 		animationFrame: 0,
 	};
 };
@@ -408,7 +409,11 @@ const junkbotCollisionTest = (junkbot_x, junkbot_y)=> {
 
 const simulateJunkbot = ()=> {
 	// const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
-	if (junkbot.animationFrame % 5 === 0) {
+	junkbot.timer += 1;
+	if (junkbot.timer % 3 > 0) {
+		return;
+	}
+	if (junkbot.animationFrame % 5 === 3) {
 		const posInFront = {x: junkbot.x + junkbot.facing * 15, y: junkbot.y};
 		if (junkbotCollisionTest(posInFront.x, posInFront.y)) {
 			// can we step up?
