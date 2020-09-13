@@ -1,0 +1,23 @@
+﻿[info]
+title=Off and On
+par=3
+hint=It's all in the timing.  Figure out when the fire will be off, and then keep Junkbot away from the other switches.
+
+
+[background]
+backdrop=bkg1
+decals=485;102;safetystrip_vert,472;107;safetystrip_vert,460;112;safetystrip_vert
+decals=451;105;safetystrip_vert,439;110;safetystrip_vert,426;114;safetystrip_vert
+decals=414;104;safetystrip_vert,401;108;safetystrip_vert,388;112;safetystrip_vert
+decals=259;268;safetystrip_horiz,249;280;safetystrip_horiz,308;280;safetystrip_horiz
+decals=318;268;safetystrip_horiz,223;263;fusebox,223;287;fusebox
+decals=339;262;fusebox,339;287;fusebox,375;135;fusebox,399;135;fusebox
+decals=423;135;fusebox,447;135;fusebox,471;135;fusebox,495;135;fusebox
+decals=374;74;fusebox,398;74;fusebox,422;74;fusebox,446;74;fusebox
+decals=470;74;fusebox,494;74;fusebox
+
+
+[playfield]
+size=35,22
+spacing=15,18
+scale=1
