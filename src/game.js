@@ -178,6 +178,7 @@ const makeJunkbot = ({x, y, facing=1, armored=false})=> {
 		height: 4 * 18,
 		facing,
 		armored,
+		animationFrame: 0,
 	};
 };
 
@@ -197,7 +198,7 @@ const drawBrick = (ctx, brick, isHovered)=> {
 
 const drawJunkbot = (ctx, junkbot, isHovered)=> {
 	ctx.globalAlpha = isHovered ? 0.8 : 1;
-	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(Date.now() / 100 % 10)}`];
+	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(junkbot.animationFrame % 10)}`];
 	const bounds = frame.bounds;
 	if (junkbot.facing === 1) {
 		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x - bounds[2] + 41, junkbot.y + junkbot.height - 1 - bounds[3], bounds[2], bounds[3]);
@@ -406,37 +407,40 @@ const junkbotCollisionTest = (junkbot_x, junkbot_y)=> {
 };
 
 const simulateJunkbot = ()=> {
-	const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
-	// const posInFront = {x: junkbot.x + junkbot.facing * 15, y: junkbot.y};
-	if (junkbotCollisionTest(posInFront.x, posInFront.y)) {
-		// can we step up?
-		posInFront.y -= 18;
-		if (!junkbotCollisionTest(posInFront.x, posInFront.y)) {
-			// step up
-			junkbot.x = posInFront.x;
-			junkbot.y = posInFront.y;
-		} else {
-			// reached wall; turn around
-			junkbot.facing *= -1;
-		}
-	} else {
-		// is there solid ground ahead to walk on?
-		if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
-			junkbot.x = posInFront.x;
-			junkbot.y = posInFront.y;
-		} else {
-			// can we step down?
-			posInFront.y += 18;
-			if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
-				// step down
+	// const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
+	if (junkbot.animationFrame % 5 === 0) {
+		const posInFront = {x: junkbot.x + junkbot.facing * 15, y: junkbot.y};
+		if (junkbotCollisionTest(posInFront.x, posInFront.y)) {
+			// can we step up?
+			posInFront.y -= 18;
+			if (!junkbotCollisionTest(posInFront.x, posInFront.y)) {
+				// step up
 				junkbot.x = posInFront.x;
 				junkbot.y = posInFront.y;
 			} else {
-				// reached cliff/ledge/edge/precipice; turn around
+				// reached wall; turn around
 				junkbot.facing *= -1;
+			}
+		} else {
+			// is there solid ground ahead to walk on?
+			if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
+				junkbot.x = posInFront.x;
+				junkbot.y = posInFront.y;
+			} else {
+				// can we step down?
+				posInFront.y += 18;
+				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
+					// step down
+					junkbot.x = posInFront.x;
+					junkbot.y = posInFront.y;
+				} else {
+					// reached cliff/ledge/edge/precipice; turn around
+					junkbot.facing *= -1;
+				}
 			}
 		}
 	}
+	junkbot.animationFrame += 1;
 };
 
 const animate = ()=> {
