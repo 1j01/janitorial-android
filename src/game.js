@@ -3,6 +3,15 @@ const ctx = canvas.getContext("2d");
 
 document.body.append(canvas);
 
+let debugInfoForFrame = "";
+let debugInfoForJunkbot = "";
+const debug = (text)=> {
+	debugInfoForFrame += text + "\n";
+};
+const debugJunkbot = (text)=> {
+	debugInfoForJunkbot += text + "\n";
+};
+
 const resourcePaths = {
 	actors: "images/actors-atlas.png",
 	actorsAtlas: "images/actors-atlas.json",
@@ -441,37 +450,47 @@ const simulateJunkbot = ()=> {
 		return;
 	}
 	if (junkbot.animationFrame % 5 === 3) {
+		debugInfoForJunkbot = "";
 		const posInFront = {x: junkbot.x + junkbot.facing * 15, y: junkbot.y};
-		if (junkbotCollisionTest(posInFront.x, posInFront.y, true)) {
+		if (junkbotCollisionTest(junkbot.x, junkbot.y)) {
+			debugJunkbot("STUCK IN WALL - GO UP");
+			junkbot.y -= 18;
+		} else if (junkbotCollisionTest(posInFront.x, posInFront.y, true)) {
 			// can we step up?
 			posInFront.y -= 18;
 			if (!junkbotCollisionTest(posInFront.x, posInFront.y)) {
 				// step up
+				debugJunkbot("STEP UP");
 				junkbot.x = posInFront.x;
 				junkbot.y = posInFront.y;
 			} else {
 				// reached wall; turn around
+				debugJunkbot("WALL - TURN AROUND");
 				junkbot.facing *= -1;
 			}
 		} else {
 			// is there solid ground ahead to walk on?
-			if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, true)) {
-				// really? even on the triangle
+			if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, true) && !junkbotCollisionTest(posInFront.x, posInFront.y)) {
+				// what about that triangle tho
 				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
+					debugJunkbot("WALK");
 					junkbot.x = posInFront.x;
 					junkbot.y = posInFront.y;
 				} else {
+					debugJunkbot("NOPE");
 					junkbot.facing *= -1;
 				}
 			} else {
 				// can we step down?
 				posInFront.y += 18;
-				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, true)) {
+				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, true) && !junkbotCollisionTest(posInFront.x, posInFront.y, true)) {
 					// step down
+					debugJunkbot("STEP DOWN");
 					junkbot.x = posInFront.x;
 					junkbot.y = posInFront.y;
 				} else {
-					// reached cliff/ledge/edge/precipice; turn around
+					// reached cliff/ledge/edge/precipice or wall would bonk head; turn around
+					debugJunkbot("CLIFF/WALL - TURN AROUND");
 					junkbot.facing *= -1;
 				}
 			}
@@ -562,11 +581,16 @@ const animate = ()=> {
 	// drawText(ctx, fontChars, 0, 100, "sand");
 	const debugInfo = `ENTITIES: ${entities.length}
 VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
-AT SCALE: ${viewport.scale}X`;
+AT SCALE: ${viewport.scale}X
+
+${debugInfoForJunkbot}
+
+${debugInfoForFrame}`;
 	drawText(ctx, debugInfo, 0, 50, "white");
 	if (hovered) {
 		drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
 	}
+	debugInfoForFrame = "";
 };
 
 const main = async ()=> {
