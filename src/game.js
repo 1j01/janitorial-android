@@ -229,15 +229,31 @@ for (let row = 5; row >= 0; row--) {
 		}
 	}
 }
+for (let staircase = 5; staircase >= 0; staircase--) {
+	for (let stair = 0; stair < 10; stair++) {
+		entities.push(makeBrick({
+			x: staircase * 15 * 7 + stair * 15 * (staircase > 3 ? 1 : -1),
+			y: (-stair - 8) * 18,
+			widthInStuds: 2,
+			colorName: "gray",
+			fixed: true,
+		}));
+	}
+}
 entities.push(
-	makeBrick({x: 15*4, y: 18*-12, colorName: "red", widthInStuds: 1}),
+	makeBrick({x: 15*5, y: 18*-12, colorName: "red", widthInStuds: 1}),
 	makeBrick({x: 15*4, y: 18*-13, colorName: "yellow", widthInStuds: 4}),
 	makeBrick({x: 15*4, y: 18*-14, colorName: "green", widthInStuds: 2}),
+);
+entities.push(
+	makeBrick({x: 15*20, y: 18*-16, colorName: "gray", fixed: true, widthInStuds: 6}),
+	makeBrick({x: 15*26, y: 18*-16, colorName: "gray", fixed: true, widthInStuds: 6}),
+	makeBrick({x: 15*24, y: 18*-20, colorName: "gray", fixed: true, widthInStuds: 6}),
 );
 const junkbot = makeJunkbot({x: 15*9, y: 18*-8, facing: 1});
 entities.push(junkbot);
 
-let drop_from_row = 15;
+let drop_from_row = 25;
 setInterval(()=> {
 	drop_from_row += 1;
 	const brick = makeBrick({
@@ -386,7 +402,7 @@ const rectanglesIntersect = (a_x, a_y, a_w, a_h, b_x, b_y, b_w, b_h)=>
 	a_y + a_h > b_y &&
 	a_y < b_y + b_h;
 
-const junkbotCollisionTest = (junkbot_x, junkbot_y)=> {
+const junkbotCollisionTest = (junkbot_x, junkbot_y, irregular=false)=> {
 	for (const other_entity of entities) {
 		if (
 			other_entity.type !== "junkbot" && (
@@ -402,9 +418,9 @@ const junkbotCollisionTest = (junkbot_x, junkbot_y)=> {
 				) ||
 				rectanglesIntersect(
 					junkbot_x,
-					junkbot_y + 18,
+					junkbot_y + 18 * irregular,
 					junkbot.width,
-					junkbot.height - 18,
+					junkbot.height - 18 * irregular,
 					other_entity.x,
 					other_entity.y,
 					other_entity.width,
@@ -426,7 +442,7 @@ const simulateJunkbot = ()=> {
 	}
 	if (junkbot.animationFrame % 5 === 3) {
 		const posInFront = {x: junkbot.x + junkbot.facing * 15, y: junkbot.y};
-		if (junkbotCollisionTest(posInFront.x, posInFront.y)) {
+		if (junkbotCollisionTest(posInFront.x, posInFront.y, true)) {
 			// can we step up?
 			posInFront.y -= 18;
 			if (!junkbotCollisionTest(posInFront.x, posInFront.y)) {
@@ -439,13 +455,18 @@ const simulateJunkbot = ()=> {
 			}
 		} else {
 			// is there solid ground ahead to walk on?
-			if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
-				junkbot.x = posInFront.x;
-				junkbot.y = posInFront.y;
+			if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, true)) {
+				// really? even on the triangle
+				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
+					junkbot.x = posInFront.x;
+					junkbot.y = posInFront.y;
+				} else {
+					junkbot.facing *= -1;
+				}
 			} else {
 				// can we step down?
 				posInFront.y += 18;
-				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
+				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, true)) {
 					// step down
 					junkbot.x = posInFront.x;
 					junkbot.y = posInFront.y;
