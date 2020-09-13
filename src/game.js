@@ -8,7 +8,6 @@ const resourcePaths = {
 	actorsAtlas: "images/actors-atlas.json",
 	coloredBlocks: "images/colored-blocks.png",
 	font: "images/font.png",
-	level: "levels/Undercover Exclusive/Pipe Organ.txt",
 };
 
 const loadImage = (imagePath)=> {
@@ -55,7 +54,6 @@ const loadLevelFromText = (levelData)=> {
 			sections[section_name].push(line.split("="));
 		}
 	}
-	// console.log(sections);
 	return sections;
 };
 
@@ -181,7 +179,6 @@ const drawBot = (ctx, bot, isHovered)=> {
 };
 
 const entities = [];
-/*
 for (let row = 5; row >= 0; row--) {
 	for (let column = 0; column < 150; ) { // MUST increment below
 		if (Math.sin(column*13234) < row * 0.2 + 0.1) {
@@ -209,45 +206,20 @@ entities.push(
 );
 const junkbot = {x: 15*9, y: 18*-8, type: "junkbot", widthInStuds: 2, facing: 1};
 entities.push(junkbot);
-*/
 
-// let drop_from_row = 15;
-// setInterval(()=> {
-// 	drop_from_row += 1;
-// 	const brick = {
-// 		// x: 15 * ~~(Math.random() * 9),
-// 		x: 15 * ~~(Math.sin(Date.now()/400) * 9),
-// 		y: 18 * -drop_from_row,
-// 		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
-// 		// widthInStuds: 2,
-// 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
-// 	};
-// 	entities.push(brick);
-// }, 200);
-
-let junkbot;
-const instantiateLevel = (level)=> {
-	let y = -18;
-	for (const def of level.partslist) {
-		if (def[0] === "parts") {
-			const cells = def[1].split(";");
-			let x = 0;
-			for (let cell_def of cells) {
-				if (cell_def.match(/WALK/i)) {
-					junkbot = {x, y, type: "junkbot", widthInStuds: 2, facing: cell_def === "WALK_R" ? 1 : -1};
-					entities.push(junkbot);
-				} else if (cell_def.match(/None/i) || cell_def === "0") {
-
-				} else {
-					const brick = {x, y, widthInStuds: 1, colorName: "red", fixed: true};
-					entities.push(brick);
-				}
-				x += 15;
-			}
-		}
-		y -= 18;
-	}
-};
+let drop_from_row = 15;
+setInterval(()=> {
+	drop_from_row += 1;
+	const brick = {
+		// x: 15 * ~~(Math.random() * 9),
+		x: 15 * ~~(Math.sin(Date.now()/400) * 9),
+		y: 18 * -drop_from_row,
+		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
+		// widthInStuds: 2,
+		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
+	};
+	entities.push(brick);
+}, 200);
 
 const viewport = {centerX: 0, centerY: 0, scale: 2};
 
@@ -493,8 +465,6 @@ AT SCALE: ${viewport.scale}X`;
 
 const main = async ()=> {
 	resources = await loadResources(resourcePaths);
-	// console.log(resources);
-	instantiateLevel(resources.level);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
