@@ -156,29 +156,53 @@ for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
 	x += w;
 }
 
-const drawBrick = (ctx, widthInStuds, x, y, colorName, isHovered)=> {
-	const w = widthInStuds * 15 + 15;
-	const h = 35;
+const makeBrick = ({x, y, widthInStuds, colorName, fixed=false})=> {
+	return {
+		type: "brick",
+		x,
+		y,
+		widthInStuds,
+		width: widthInStuds * 15,
+		height: 18,
+		colorName,
+		fixed,
+	};
+};
+
+const makeJunkbot = ({x, y, facing=1, armored=false})=> {
+	return {
+		type: "junkbot",
+		x,
+		y,
+		width: 2 * 15,
+		height: 4 * 18,
+		facing,
+		armored,
+	};
+};
+
+const drawBrick = (ctx, brick, isHovered)=> {
+	const {x, y, widthInStuds, colorName} = brick;
+	const w = widthInStuds * 15 + 15; // sprite width
+	const h = 35; // sprite row height
 	ctx.globalAlpha = isHovered ? 0.8 : 1;
-	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * 35 + 9, w, h, x, y - 15, w, h);
+	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * h + 9, w, h, x, y - 15, w, h);
 	// if (isHovered) {
 	// 	ctx.save();
 	// 	ctx.globalCompositeOperation = "multiply";
-	// 	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex.white * 35 + 9, w, h, x, y - 15, w, h);
+	// 	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex.white * h + 9, w, h, x, y - 15, w, h);
 	// 	ctx.restore();
 	// }
 };
 
 const drawJunkbot = (ctx, junkbot, isHovered)=> {
-	const w = 2 * 15 + 15;
-	const h = 100;
 	ctx.globalAlpha = isHovered ? 0.8 : 1;
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(Date.now() / 100 % 10)}`];
 	const bounds = frame.bounds;
 	if (junkbot.facing === 1) {
-		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x - bounds[2] + 41, junkbot.y + 18 - 1 - bounds[3], bounds[2], bounds[3]);
+		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x - bounds[2] + 41, junkbot.y + junkbot.height - 1 - bounds[3], bounds[2], bounds[3]);
 	} else {
-		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x, junkbot.y + 18 - 1 - bounds[3], bounds[2], bounds[3]);
+		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x, junkbot.y + junkbot.height - 1 - bounds[3], bounds[2], bounds[3]);
 	}
 };
 
@@ -187,7 +211,7 @@ for (let row = 5; row >= 0; row--) {
 	for (let column = 0; column < 150; ) { // MUST increment below
 		if (Math.sin(column*13234) < row * 0.2 + 0.1) {
 			const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
-			entities.push({
+			entities.push(makeBrick({
 				x: column * 15,
 				y: (row - 6) * 18,
 				widthInStuds,
@@ -196,7 +220,7 @@ for (let row = 5; row >= 0; row--) {
 				colorName: "gray",
 				// colorName: "white",
 				fixed: true,
-			});
+			}));
 			column += widthInStuds;
 		} else {
 			column += ~~(Math.random()*5+1);
@@ -204,24 +228,24 @@ for (let row = 5; row >= 0; row--) {
 	}
 }
 entities.push(
-	{x: 15*4, y: 18*-12, colorName: "red", widthInStuds: 1},
-	{x: 15*4, y: 18*-13, colorName: "yellow", widthInStuds: 4},
-	{x: 15*4, y: 18*-14, colorName: "green", widthInStuds: 2},
+	makeBrick({x: 15*4, y: 18*-12, colorName: "red", widthInStuds: 1}),
+	makeBrick({x: 15*4, y: 18*-13, colorName: "yellow", widthInStuds: 4}),
+	makeBrick({x: 15*4, y: 18*-14, colorName: "green", widthInStuds: 2}),
 );
-const junkbot = {x: 15*9, y: 18*-8, type: "junkbot", widthInStuds: 2, facing: 1};
+const junkbot = makeJunkbot({x: 15*9, y: 18*-8, facing: 1});
 entities.push(junkbot);
 
 let drop_from_row = 15;
 setInterval(()=> {
 	drop_from_row += 1;
-	const brick = {
+	const brick = makeBrick({
 		// x: 15 * ~~(Math.random() * 9),
 		x: 15 * ~~(Math.sin(Date.now()/400) * 9),
 		y: 18 * -drop_from_row,
 		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
 		// widthInStuds: 2,
 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
-	};
+	});
 	entities.push(brick);
 }, 200);
 
@@ -261,15 +285,15 @@ const updateMouse = (event)=> {
 	updateMouseWorldPosition();
 };
 const brickUnderMouse = ()=> {
-	for (const brick of entities) {
+	for (const entity of entities) {
 		if (
-			!brick.fixed &&
-			brick.x < mouse.worldX &&
-			brick.x + brick.widthInStuds * 15 > mouse.worldX &&
-			brick.y < mouse.worldY &&
-			brick.y + 18 > mouse.worldY
+			!entity.fixed &&
+			entity.x < mouse.worldX &&
+			entity.x + entity.width > mouse.worldX &&
+			entity.y < mouse.worldY &&
+			entity.y + entity.height > mouse.worldY
 		) {
-			return brick;
+			return entity;
 		}
 	}
 };
@@ -301,16 +325,16 @@ const sortEntities = ()=> {
 	// entities.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
 	// entities.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
 	entities.sort((a, b)=> {
-		if (a.y + 18 <= b.y) {
+		if (a.y + a.height <= b.y) {
 			return +1;
 		}
-		if (b.y + 18 <= a.y) {
+		if (b.y + b.height <= a.y) {
 			return -1;
 		}
-		if (b.x + b.widthInStuds*15 <= a.x) {
+		if (b.x + b.width <= a.x) {
 			return +1;
 		}
-		if (a.x + a.widthInStuds*15 <= b.x) {
+		if (a.x + a.width <= b.x) {
 			return -1;
 		}
 		// return a.x - a.y - b.x + b.y;
@@ -336,11 +360,11 @@ const simulateGravity = ()=> {
 			let settled = false;
 			for (const other_entity of entities) {
 				if (
-					entity.x + entity.widthInStuds * 15 > other_entity.x &&
-					entity.x < other_entity.x + other_entity.widthInStuds * 15 &&
-					// entity.y + 18 >= other_entity.y &&
-					// entity.y < other_entity.y + 18
-					entity.y + 18 === other_entity.y
+					entity.x + entity.width > other_entity.x &&
+					entity.x < other_entity.x + other_entity.width &&
+					// entity.y + entity.height >= other_entity.y &&
+					// entity.y < other_entity.y + other_entity.height
+					entity.y + entity.height === other_entity.y
 				) {
 					settled = true;
 					break;
@@ -367,12 +391,12 @@ const junkbotCollisionTest = (junkbot_x, junkbot_y)=> {
 			rectanglesIntersect(
 				junkbot_x,
 				junkbot_y,
-				junkbot.widthInStuds * 15,
-				18,
+				junkbot.width,
+				junkbot.height,
 				other_entity.x,
 				other_entity.y,
-				other_entity.widthInStuds * 15,
-				18,
+				other_entity.width,
+				other_entity.height,
 			)
 		) {
 			return true;
@@ -487,8 +511,7 @@ const animate = ()=> {
 			drawJunkbot(ctx, entity, entity === hovered);
 		} else {
 			const brick = entity;
-			drawBrick(ctx, brick.widthInStuds, brick.x, brick.y, brick.colorName, brick === hovered);
-			// drawBrick(ctx, brick.widthInStuds, brick.x, brick.y*2-500 + ~~(Math.sin(Date.now()/1000 + brick.x)*5), brick.colorName);
+			drawBrick(ctx, brick, brick === hovered);
 		}
 	}
 
