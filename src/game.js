@@ -175,6 +175,7 @@ const makeBrick = ({x, y, widthInStuds, colorName, fixed=false})=> {
 		height: 18,
 		colorName,
 		fixed,
+		grabbed: false,
 	};
 };
 
@@ -189,6 +190,7 @@ const makeJunkbot = ({x, y, facing=1, armored=false})=> {
 		armored,
 		timer: 0,
 		animationFrame: 0,
+		grabbed: false,
 	};
 };
 
@@ -331,11 +333,15 @@ canvas.addEventListener("mousedown", (event)=> {
 	const brick = brickUnderMouse();
 	if (brick) {
 		dragging = brick;
+		brick.grabbed = true;
 		drag_offset = {x: brick.x - mouse.worldX, y: brick.y - mouse.worldY};
 	}
 });
 addEventListener("mouseup", ()=> {
-	dragging = null;
+	if (dragging) {
+		dragging.grabbed = false;
+		dragging = null;
+	}
 });
 canvas.addEventListener("mouseleave", ()=> {
 	mouse.x = undefined;
@@ -383,10 +389,11 @@ function shuffle(a) {
 
 const simulateGravity = ()=> {
 	for (const entity of entities) {
-		if (!entity.fixed && entity !== dragging) {
+		if (!entity.fixed && !entity.grabbed) {
 			let settled = false;
 			for (const other_entity of entities) {
 				if (
+					!other_entity.grabbed &&
 					entity.x + entity.width > other_entity.x &&
 					entity.x < other_entity.x + other_entity.width &&
 					// entity.y + entity.height >= other_entity.y &&
@@ -414,6 +421,7 @@ const rectanglesIntersect = (a_x, a_y, a_w, a_h, b_x, b_y, b_w, b_h)=>
 const junkbotCollisionTest = (junkbot_x, junkbot_y, irregular=false)=> {
 	for (const other_entity of entities) {
 		if (
+			!other_entity.grabbed &&
 			other_entity.type !== "junkbot" && (
 				rectanglesIntersect(
 					junkbot_x + (junkbot.facing === 1 ? 0 : 15),
