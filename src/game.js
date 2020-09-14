@@ -822,20 +822,20 @@ const animate = () => {
 
 	// ctx.drawImage(images.font, 0, 90);
 	// drawText(ctx, fontChars, 0, 100, "sand");
-// 	const debugInfo = `ENTITIES: ${entities.length}
-// VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
-// AT SCALE: ${viewport.scale}X
+	// 	const debugInfo = `ENTITIES: ${entities.length}
+	// VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
+	// AT SCALE: ${viewport.scale}X
 
-// ${debugInfoForJunkbot}
+	// ${debugInfoForJunkbot}
 
-// ${debugInfoForFrame}`;
-// 	drawText(ctx, debugInfo, 0, 50, "white");
-// 	if (dragging.length) {
-// 		drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
-// 	} else if (hovered.length) {
-// 		drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
-// 	}
-// 	debugInfoForFrame = "";
+	// ${debugInfoForFrame}`;
+	// 	drawText(ctx, debugInfo, 0, 50, "white");
+	// 	if (dragging.length) {
+	// 		drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
+	// 	} else if (hovered.length) {
+	// 		drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
+	// 	}
+	// 	debugInfoForFrame = "";
 };
 
 const main = async () => {
