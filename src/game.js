@@ -833,12 +833,11 @@ const animate = () => {
 	sortEntitiesForRendering(entities);
 
 	const shouldHilight = (entity) => {
-		if (dragging.length) {
-			return dragging.indexOf(entity) > -1;
-		}
-		// return hovered[0] && hovered[0].indexOf(entity) > -1;
-		// return hovered.some((grab)=> grab.indexOf(entity) > -1);
-		return hovered[0] && hovered[~~(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
+		return false;
+		// if (dragging.length) {
+		// 	return dragging.indexOf(entity) > -1;
+		// }
+		// return hovered.length && hovered[~~(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
 	};
 
 	for (const entity of entities) {
