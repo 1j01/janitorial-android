@@ -686,9 +686,8 @@ const animate = ()=> {
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 	updateMouseWorldPosition();
 
-	// one of these would theoretically help in cases where two objects are falling together
-	// entities.sort((a, b)=> a.y - b.y);
-	// entities.sort((a, b)=> b.y - a.y);
+	// sort for gravity
+	entities.sort((a, b)=> b.y - a.y);
 	simulateGravity();
 	simulateJunkbot();
 
