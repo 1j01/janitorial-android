@@ -680,7 +680,7 @@ const animate = () => {
 	if (keys.KeyD || keys.ArrowRight) {
 		viewport.centerX += 20;
 	}
-	const panMarginSize = innerWidth * 0.07;
+	const panMarginSize = Math.min(innerWidth, innerHeight) * 0.07;
 	const panFromMarginSpeed = 10 * document.hasFocus();
 	if (mouse.y < panMarginSize) {
 		viewport.centerY -= panFromMarginSpeed;
