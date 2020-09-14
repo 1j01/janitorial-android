@@ -6,11 +6,18 @@ document.body.append(canvas);
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
 // const debug = (text) => {
-// 	debugInfoForFrame += text + "\n";
+// 	debugInfoForFrame += `${text}\n`;
 // };
 const debugJunkbot = (text) => {
-	debugInfoForJunkbot += text + "\n";
+	debugInfoForJunkbot += `${text}\n`;
 };
+
+const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
+	ax + aw > bx &&
+	ax < bx + bw &&
+	ay + ah > by &&
+	ay < by + bh
+);
 
 const resourcePaths = {
 	actors: "images/actors-atlas.png",
@@ -96,7 +103,7 @@ const loadResources = async (resourcePathsByID) => {
 let resources;
 
 const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}`;
-const fontCharW = "55555555355555555555555555355555555551221113331355353525531155332233".split("").map((s) => Number(s));
+const fontCharW = "55555555355555555555555555355555555551221113331355353525531155332233".split("").map((digit) => Number(digit));
 const fontCharX = [];
 for (let x = 0, i = 0; i < fontChars.length; i++) {
 	fontCharX.push(x);
@@ -285,7 +292,7 @@ const iid = setInterval(() => {
 
 const viewport = { centerX: 0, centerY: 0, scale: 2 };
 
-let keys = {};
+const keys = {};
 addEventListener("keydown", (event) => {
 	keys[event.code] = true;
 	if (event.key.match(/^Arrow/)) {
@@ -305,7 +312,7 @@ addEventListener("keyup", (event) => {
 	}
 });
 
-let mouse = { x: undefined, y: undefined };
+const mouse = { x: undefined, y: undefined };
 let dragging = [];
 
 const updateMouseWorldPosition = () => {
@@ -360,15 +367,6 @@ const connectsToSomething = (entity, direction) => {
 };
 
 const possibleGrabs = () => {
-	const brick = brickUnderMouse();
-	if (!brick) {
-		return [];
-	}
-	const grabs = [];
-	if (brick.type !== "brick") {
-		grabs.push(grabs.upward = [brick]);
-		return grabs;
-	}
 	const findAttached = (brick, direction, attached) => {
 		for (const entity of entities) {
 			if (
@@ -388,6 +386,16 @@ const possibleGrabs = () => {
 		}
 		return true;
 	};
+
+	const brick = brickUnderMouse();
+	if (!brick) {
+		return [];
+	}
+	const grabs = [];
+	if (brick.type !== "brick") {
+		grabs.push(grabs.upward = [brick]);
+		return grabs;
+	}
 
 	const grabDownward = [brick];
 	const grabUpward = [brick];
@@ -552,12 +560,6 @@ const simulateGravity = () => {
 		}
 	}
 };
-
-const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) =>
-	ax + aw > bx &&
-	ax < bx + bw &&
-	ay + ah > by &&
-	ay < by + bh;
 
 const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) => {
 	// Note: make sure not to use junkbot.x/y!
