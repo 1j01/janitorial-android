@@ -219,11 +219,11 @@ const drawBrick = (ctx, brick, isHovered) => {
 const drawJunkbot = (ctx, junkbot) => {
 	ctx.globalAlpha = junkbot.grabbed ? 0.8 : 1;
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(junkbot.animationFrame % 10)}`];
-	const bounds = frame.bounds;
+	const [left, top, width, height] = frame.bounds;
 	if (junkbot.facing === 1) {
-		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x - bounds[2] + 41, junkbot.y + junkbot.height - 1 - bounds[3], bounds[2], bounds[3]);
+		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x - width + 41, junkbot.y + junkbot.height - 1 - height, width, height);
 	} else {
-		ctx.drawImage(resources.actors, bounds[0], bounds[1], bounds[2], bounds[3], junkbot.x, junkbot.y + junkbot.height - 1 - bounds[3], bounds[2], bounds[3]);
+		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x, junkbot.y + junkbot.height - 1 - height, width, height);
 	}
 	ctx.globalAlpha = 1;
 };
