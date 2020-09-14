@@ -203,7 +203,7 @@ const drawBrick = (ctx, brick, isHovered)=> {
 	// if (isHovered) {
 	// 	ctx.save();
 	// 	ctx.globalCompositeOperation = "multiply";
-	// 	ctx.drawImage(images.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex.white * h + 9, w, h, x, y - 15, w, h);
+	// 	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex.white * h + 9, w, h, x, y - 15, w, h);
 	// 	ctx.restore();
 	// }
 	ctx.globalAlpha = 1;
@@ -332,29 +332,46 @@ const possibleGrabs = ()=> {
 	if (!brick) {
 		return [];
 	}
+	if (brick.type !== "brick") {
+		return [[brick]];
+	}
 	const grabs = [];
-	const findAttached = (brick, direction)=>
-		entities.filter((entity)=>
-			entity.type === "brick" &&
-			!entity.fixed &&
-			rectanglesIntersect(
-				brick.x,
-				brick.y + direction,
-				brick.width,
-				brick.height,
-				entity.x,
-				entity.y,
-				entity.width,
-				entity.height,
-			)
-		);
+	const findAttached = (brick, direction, attached)=> {
+		for (const entity of entities) {
+			if (
+				entity !== brick &&
+				entity.type === "brick" &&
+				!entity.fixed &&
+				rectanglesIntersect(
+					brick.x,
+					brick.y + direction,
+					brick.width,
+					brick.height,
+					entity.x,
+					entity.y,
+					entity.width,
+					entity.height,
+				)
+			) {
+				attached.push(entity);
+				findAttached(entity, direction, attached);
+			}
+		}
+	};
 	
-	// findAttached(brick, 1);
-	// findAttached(brick, -1);
-	// if (grabs.length === 0) {
-	// 	grabs.push([brick]);
-	// }
-	grabs.push([brick, ...findAttached(brick, -1), ...findAttached(brick, 1)]);
+	const grabA = [brick];
+	const grabB = [brick];
+	findAttached(brick, +1, grabA);
+	findAttached(brick, -1, grabB);
+	if (grabA.length > 1) {
+		grabs.push(grabA);
+	}
+	if (grabB.length > 1) {
+		grabs.push(grabB);
+	}
+	if (grabs.length === 0) {
+		grabs.push([brick]);
+	}
 
 	return grabs;
 };
@@ -363,7 +380,7 @@ canvas.addEventListener("mousemove", updateMouse);
 canvas.addEventListener("mousedown", (event)=> {
 	updateMouse(event);
 	const grabs = possibleGrabs();
-	if (grabs.length === 1) {
+	if (grabs.length > 0) {
 		dragging = [...grabs[0]];
 		for (const brick of dragging) {
 			brick.grabbed = true;
@@ -391,7 +408,7 @@ addEventListener("blur", ()=> {
 
 // This is needed for simulation (gravity) and rendering.
 // Well, strictly only Y sorting is needed for gravity I suppose?
-const sortEntities = ()=> {
+const sortEntities = (entities)=> {
 	// entities.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
 	// entities.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
 	entities.sort((a, b)=> {
@@ -576,11 +593,11 @@ const animate = ()=> {
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 	updateMouseWorldPosition();
 
-	sortEntities();
+	sortEntities(entities);
 	simulateGravity();
 	simulateJunkbot();
 
-	const hovered = possibleGrabs();
+	const hovered = dragging.length ? [] : possibleGrabs();
 
 	if (dragging.length) {
 		for (const brick of dragging) {
@@ -611,7 +628,7 @@ const animate = ()=> {
 	ctx.imageSmoothingEnabled = false;
 
 	shuffle(entities);
-	sortEntities();
+	sortEntities(entities);
 
 	for (const entity of entities) {
 		if (entity.type === "junkbot") {
@@ -619,6 +636,21 @@ const animate = ()=> {
 		} else {
 			drawBrick(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity);
 		}
+	}
+
+	for (const grab of hovered) {
+		sortEntities(grab);
+		ctx.save();
+		ctx.translate(Math.sin(Date.now()/10) * 1, Math.cos(Date.now()/10) * 1);
+		for (const entity of grab) {
+			if (entity.type === "junkbot") {
+				// drawJunkbot(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
+			} else {
+				drawBrick(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
+			}
+		}
+		ctx.restore();
+		break;
 	}
 
 	ctx.restore();
