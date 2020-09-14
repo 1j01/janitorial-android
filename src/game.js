@@ -385,18 +385,21 @@ const possibleGrabs = ()=> {
 		}
 	};
 	
-	const grabA = [brick];
-	const grabB = [brick];
-	findAttached(brick, +1, grabA);
-	findAttached(brick, -1, grabB);
-	if (grabA.length > 1) {
-		grabs.push(grabA);
+	const grabDownward = [brick];
+	const grabUpward = [brick];
+	findAttached(brick, +1, grabDownward);
+	findAttached(brick, -1, grabUpward);
+	if (grabDownward.length > 1) {
+		grabs.push(grabDownward);
+		grabs.downward = grabDownward;
 	}
-	if (grabB.length > 1) {
-		grabs.push(grabB);
+	if (grabUpward.length > 1) {
+		grabs.push(grabUpward);
+		grabs.upward = grabUpward;
 	}
 	if (grabs.length === 0) {
 		grabs.push([brick]);
+		grabs.upward = [brick];
 	}
 
 	return grabs;
@@ -661,8 +664,14 @@ const animate = ()=> {
 			brick.y = 18 * ~~((mouse.worldY)/18) + brick.grabOffset.y;
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
+	} else if (hovered.length >= 2) {
+		canvas.style.cursor = `url("images/cursors/cursor-grab-either.png") 8 8, grab`;
+	} else if (hovered.upward) {
+		canvas.style.cursor = `url("images/cursors/cursor-grab-upward.png") 8 8, grab`;
+	} else if (hovered.downward) {
+		canvas.style.cursor = `url("images/cursors/cursor-grab-downward.png") 8 8, grab`;
 	} else {
-		canvas.style.cursor = hovered.length ? `url("images/cursors/cursor-grab.png") 8 8, grab` : "default";
+		canvas.style.cursor = "default";
 	}
 
 	if (canvas.width !== innerWidth) {
