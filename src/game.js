@@ -340,7 +340,7 @@ const connects = (entity_a, entity_b, direction=0)=> {
 		return connects(entity_a, entity_b, +1) || connects(entity_a, entity_b, -1);
 	}
 	return (
-		entity_b.type === "brick" &&
+		// entity_b.type === "brick" &&
 		(direction === 1 ? entity_b.y === entity_a.y + entity_a.height : entity_b.y + entity_b.height === entity_a.y) &&
 		entity_a.x + entity_a.width > entity_b.x &&
 		entity_a.x < entity_b.x + entity_b.width
@@ -355,6 +355,7 @@ const connectsToSomething = (entity, direction)=> {
 		if (
 			other_entity !== entity &&
 			!other_entity.grabbed &&
+			other_entity.type === "brick" &&
 			connects(entity, other_entity, direction)
 		) {
 			return true;
@@ -377,9 +378,9 @@ const possibleGrabs = ()=> {
 		for (const entity of entities) {
 			if (
 				entity !== brick &&
-				connects(brick, entity, direction)
+				connects(brick, entity, entity.type === "junkbot" ? -1 : direction)
 			) {
-				if (entity.fixed) {
+				if (entity.fixed || entity.type === "junkbot") {
 					return false;
 				} else {
 					attached.push(entity);
@@ -484,6 +485,7 @@ addEventListener("mouseup", ()=> {
 			for (const other_entity of entities) {
 				if (
 					!other_entity.grabbed &&
+					other_entity.type === "brick" &&
 					connects(entity, other_entity) &&
 					(other_entity.fixed || connectsToSomething(other_entity))
 				) {
