@@ -41,8 +41,7 @@ const loadImage = (imagePath) => {
 
 const loadJSON = async (path) => {
 	const response = await fetch(path);
-	if (response.ok) { // if HTTP-status is 200-299
-		// get the response body (the method explained below)
+	if (response.ok) {
 		return await response.json();
 	} else {
 		throw new Error(`got HTTP ${response.status} fetching '${path}'`);
@@ -74,8 +73,7 @@ const loadLevelFromText = (levelData) => {
 
 const loadTextFile = async (path) => {
 	const response = await fetch(path);
-	if (response.ok) { // if HTTP-status is 200-299
-		// get the response body (the method explained below)
+	if (response.ok) {
 		return await response.text();
 	} else {
 		throw new Error(`got HTTP ${response.status} fetching '${path}'`);
@@ -237,10 +235,7 @@ for (let row = 5; row >= 0; row--) {
 				x: column * 15,
 				y: (row - 6) * 18,
 				widthInStuds,
-				// colorName: brickColorNames[~~(brickColorNames.length * Math.random())], // gaudy
-				// colorName: "green", // grassy
 				colorName: "gray",
-				// colorName: "white",
 				fixed: true,
 			}));
 			column += widthInStuds;
@@ -277,11 +272,9 @@ let dropFromRow = 25;
 const iid = setInterval(() => {
 	dropFromRow += 1;
 	const brick = makeBrick({
-		// x: 15 * ~~(Math.random() * 9),
 		x: 15 * ~~(Math.sin(Date.now() / 400) * 9),
 		y: 18 * -dropFromRow,
 		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
-		// widthInStuds: 2,
 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
 	});
 	entities.push(brick);
@@ -351,14 +344,6 @@ const connects = (a, b, direction = 0) => {
 
 const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 	const connectedToFixed = [];
-	// for (const entity of entities) {
-	// 	if (
-	// 		ignoreEntities.indexOf(entity) === -1 &&
-	// 		entity.fixed
-	// 	) {
-	// 		connectedToFixed.push(entity);
-	// 	}
-	// }
 	const addAnyAttached = (entity) => {
 		for (const otherEntity of entities) {
 			if (
@@ -409,24 +394,6 @@ const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
 		return false;
 	};
 	return search(fromEntity);
-};
-
-const connectsToSomething = (entity, direction, ignoreEntities = []) => {
-	if (direction === 0) {
-		return connectsToSomething(entity, +1) || connectsToSomething(entity, -1);
-	}
-	for (const otherEntity of entities) {
-		if (
-			otherEntity !== entity &&
-			!otherEntity.grabbed &&
-			otherEntity.type === "brick" &&
-			connects(entity, otherEntity, direction) &&
-			ignoreEntities.indexOf(entity) === -1
-		) {
-			return true;
-		}
-	}
-	return false;
 };
 
 const possibleGrabs = () => {
@@ -600,14 +567,6 @@ addEventListener("mouseup", () => {
 		}
 	}
 });
-canvas.addEventListener("mouseleave", () => {
-	mouse.x = undefined;
-	mouse.y = undefined;
-});
-addEventListener("blur", () => {
-	mouse.x = undefined;
-	mouse.y = undefined;
-});
 
 const sortEntitiesForRendering = (entities) => {
 	// entities.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
@@ -692,7 +651,6 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 };
 
 const simulateJunkbot = (junkbot) => {
-	// const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
 	junkbot.timer += 1;
 	if (junkbot.timer % 3 > 0) {
 		return;
