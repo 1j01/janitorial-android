@@ -368,10 +368,11 @@ const possibleGrabs = ()=> {
 	if (!brick) {
 		return [];
 	}
-	if (brick.type !== "brick") {
-		return [[brick]];
-	}
 	const grabs = [];
+	if (brick.type !== "brick") {
+		grabs.push(grabs.upward = [brick]);
+		return grabs;
+	}
 	const findAttached = (brick, direction, attached)=> {
 		for (const entity of entities) {
 			if (
