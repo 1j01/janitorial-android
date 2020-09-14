@@ -70,10 +70,7 @@ module.exports = {
         "func-names": "error",
         "func-style": [
             "error",
-            "declaration",
-            {
-                "allowArrowFunctions": true
-            }
+            "expression",
         ],
         "function-call-argument-newline": [
             "error",
@@ -89,8 +86,11 @@ module.exports = {
         "id-denylist": "error",
         "id-length": "off",
         "id-match": "error",
-        "implicit-arrow-linebreak": "off",
-        "indent": "off",
+        "implicit-arrow-linebreak": "error",
+        "indent": [
+            "error",
+            "tab"
+        ],
         "indent-legacy": "off",
         "init-declarations": "off",
         "jsx-quotes": "error",
@@ -216,7 +216,7 @@ module.exports = {
         "no-unneeded-ternary": "error",
         "no-unreachable-loop": "error",
         "no-unused-expressions": "error",
-        "no-use-before-define": "off",
+        "no-use-before-define": "error",
         "no-useless-backreference": "error",
         "no-useless-call": "error",
         "no-useless-computed-key": "error",
@@ -245,7 +245,7 @@ module.exports = {
         "padded-blocks": "off",
         "padding-line-between-statements": "error",
         "prefer-arrow-callback": "error",
-        "prefer-const": "off",
+        "prefer-const": "error",
         "prefer-destructuring": "off",
         "prefer-exponentiation-operator": "error",
         "prefer-named-capture-group": "off",
@@ -256,9 +256,15 @@ module.exports = {
         "prefer-regex-literals": "error",
         "prefer-rest-params": "error",
         "prefer-spread": "error",
-        "prefer-template": "off",
+        "prefer-template": "error",
         "quote-props": "off",
-        "quotes": "off",
+        "quotes": [
+            "error",
+            "double",
+            {
+                "allowTemplateLiterals": true
+            }
+        ],
         "radix": "error",
         "require-atomic-updates": "error",
         "require-await": "error",
@@ -284,7 +290,7 @@ module.exports = {
         "sort-keys": "off",
         "sort-vars": "off",
         "space-before-blocks": "error",
-        "space-before-function-paren": "off",
+        "space-before-function-paren": "error",
         "space-in-parens": [
             "error",
             "never"
