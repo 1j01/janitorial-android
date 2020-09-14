@@ -392,19 +392,14 @@ const possibleGrabs = ()=> {
 	const grabUpward = [brick];
 	findAttached(brick, +1, grabDownward);
 	findAttached(brick, -1, grabUpward);
-	if (grabDownward.length > 1) {
+	if (grabDownward.length) {
 		grabs.push(grabDownward);
 		grabs.downward = grabDownward;
 	}
-	if (grabUpward.length > 1) {
+	if (grabUpward.length) {
 		grabs.push(grabUpward);
 		grabs.upward = grabUpward;
 	}
-	if (grabs.length === 0) {
-		grabs.push([brick]);
-		grabs.upward = [brick];
-	}
-
 	return grabs;
 };
 
