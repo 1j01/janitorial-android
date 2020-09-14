@@ -386,28 +386,28 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 	return connectedToFixed;
 };
 
-const connectsToFixed = (entity, { ignoreEntities = [] } = {}) => {
-	// if (direction === 0) {
-	// 	return connectsToFixed(entity, +1) || connectsToFixed(entity, -1);
-	// }
-	// const connectedToFixed = [];
-	// for (const otherEntity of entities) {
-	// 	if (
-	// 		otherEntity !== entity &&
-	// 		!otherEntity.grabbed &&
-	// 		otherEntity.type === "brick" &&
-	// 		connects(entity, otherEntity, direction) &&
-	// 		ignoreEntities.indexOf(entity) === -1
-	// 	) {
-	// 		if (otherEntity.fixed) {
-	// 			return true;
-	// 		} else {
-	// 			return connectsToFixed();
-	// 		}
-	// 	}
-	// }
-	// return false;
-	return allConnectedToFixed({ ignoreEntities }).indexOf(entity) !== -1;
+const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
+	const visited = [];
+	const search = (fromEntity) => {
+		for (const otherEntity of entities) {
+			if (
+				ignoreEntities.indexOf(otherEntity) === -1 &&
+				visited.indexOf(otherEntity) === -1
+			) {
+				if (connects(fromEntity, otherEntity)) {
+					visited.push(otherEntity);
+					if (otherEntity.fixed) {
+						return true;
+					}
+					if (search(otherEntity)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	};
+	return search(fromEntity);
 };
 
 const connectsToSomething = (entity, direction, ignoreEntities = []) => {
