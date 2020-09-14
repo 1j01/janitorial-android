@@ -396,24 +396,6 @@ const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
 	return search(fromEntity);
 };
 
-const connectsToSomething = (entity, direction, ignoreEntities = []) => {
-	if (direction === 0) {
-		return connectsToSomething(entity, +1) || connectsToSomething(entity, -1);
-	}
-	for (const otherEntity of entities) {
-		if (
-			otherEntity !== entity &&
-			!otherEntity.grabbed &&
-			otherEntity.type === "brick" &&
-			connects(entity, otherEntity, direction) &&
-			ignoreEntities.indexOf(entity) === -1
-		) {
-			return true;
-		}
-	}
-	return false;
-};
-
 const possibleGrabs = () => {
 	const findAttached = (brick, direction, attached, topLevel) => {
 		for (const entity of entities) {
