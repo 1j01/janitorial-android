@@ -683,28 +683,32 @@ const animate = ()=> {
 	shuffle(entities);
 	sortEntities(entities);
 
+	const isDraggedOrHovered = (entity)=>
+		// dragging.length ? dragging.indexOf(entity) > -1 : hovered.some((grab)=> grab.indexOf(entity) > -1);
+		dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[0].indexOf(entity) > -1;
+	
 	for (const entity of entities) {
 		if (entity.type === "junkbot") {
-			drawJunkbot(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity);
+			drawJunkbot(ctx, entity, isDraggedOrHovered(entity));
 		} else {
-			drawBrick(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity);
+			drawBrick(ctx, entity, isDraggedOrHovered(entity));
 		}
 	}
 
-	for (const grab of hovered) {
-		sortEntities(grab);
-		ctx.save();
-		// ctx.translate(Math.sin(Date.now()/10) * 1, Math.cos(Date.now()/10) * 1);
-		for (const entity of grab) {
-			if (entity.type === "junkbot") {
-				// drawJunkbot(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
-			} else {
-				drawBrick(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
-			}
-		}
-		ctx.restore();
-		break;
-	}
+	// for (const grab of hovered) {
+	// 	sortEntities(grab);
+	// 	ctx.save();
+	// 	// ctx.translate(Math.sin(Date.now()/10) * 1, Math.cos(Date.now()/10) * 1);
+	// 	for (const entity of grab) {
+	// 		if (entity.type === "junkbot") {
+	// 			// drawJunkbot(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
+	// 		} else {
+	// 			drawBrick(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
+	// 		}
+	// 	}
+	// 	ctx.restore();
+	// 	break;
+	// }
 
 	ctx.restore();
 
