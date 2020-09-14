@@ -391,6 +391,7 @@ const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
 	const search = (fromEntity) => {
 		for (const otherEntity of entities) {
 			if (
+				!otherEntity.grabbed &&
 				ignoreEntities.indexOf(otherEntity) === -1 &&
 				visited.indexOf(otherEntity) === -1
 			) {
@@ -433,9 +434,9 @@ const possibleGrabs = () => {
 		for (const entity of entities) {
 			if (
 				entity !== brick &&
-				connects(brick, entity, entity.type === "junkbot" ? -1 : direction)
+				connects(brick, entity, entity.type === "brick" ? direction : -1)
 			) {
-				if (entity.fixed || entity.type === "junkbot") {
+				if (entity.fixed || entity.type !== "brick") {
 					return false;
 				} else {
 					attached.push(entity);
@@ -453,6 +454,13 @@ const possibleGrabs = () => {
 						if (connects(brick, entity)) {
 							if (!entity.fixed && entity.type === "brick") {
 								if (!connectsToFixed(entity, { ignoreEntities: attached })) {
+									for (const junk of entities) {
+										if (junk.type !== "brick") {
+											if (connects(entity, junk, -1)) {
+												return false;
+											}
+										}
+									}
 									attached.push(entity);
 								}
 							}
