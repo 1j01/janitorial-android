@@ -403,23 +403,54 @@ const possibleGrabs = ()=> {
 	return grabs;
 };
 
-canvas.addEventListener("mousemove", updateMouse);
+let pendingGrabs = [];
+let pendingGrabsMouseWorldX;
+const startGrab = (grab)=> {
+	dragging = [...grab];
+	for (const brick of dragging) {
+		brick.grabbed = true;
+		brick.grabOffset = {
+			// x: brick.x - (15 * ~~(mouse.worldX/15)),
+			// y: brick.y - (18 * ~~(mouse.worldY/18)),
+			// so you can place blocks that were grabbed when they weren't on the grid:
+			x: (15 * ~~(brick.x/15)) - (15 * ~~(mouse.worldX/15)),
+			y: (18 * ~~(brick.y/18)) - (18 * ~~(mouse.worldY/18)),
+		};
+	}
+};
+
+canvas.addEventListener("mousemove", (event)=> {
+	updateMouse(event);
+	if (pendingGrabs.length) {
+		const threshold = 10;
+		if (
+			mouse.y < mouse.atDragStart.y - threshold
+		) {
+			startGrab(pendingGrabs.upward);
+			pendingGrabs = [];
+		}
+		if (
+			mouse.y > mouse.atDragStart.y + threshold
+		) {
+			startGrab(pendingGrabs.downward);
+			pendingGrabs = [];
+		}
+	}
+});
 canvas.addEventListener("mousedown", (event)=> {
 	updateMouse(event);
+	mouse.atDragStart = {
+		x: mouse.x,
+		y: mouse.y,
+		worldX: mouse.worldX,
+		worldY: mouse.worldY,
+	};
 	if (dragging.length === 0) {
 		const grabs = possibleGrabs();
-		if (grabs.length > 0) {
-			dragging = [...grabs[0]];
-			for (const brick of dragging) {
-				brick.grabbed = true;
-				brick.grabOffset = {
-					// x: brick.x - (15 * ~~(mouse.worldX/15)),
-					// y: brick.y - (18 * ~~(mouse.worldY/18)),
-					// so you can place blocks that were grabbed when they weren't on the grid:
-					x: (15 * ~~(brick.x/15)) - (15 * ~~(mouse.worldX/15)),
-					y: (18 * ~~(brick.y/18)) - (18 * ~~(mouse.worldY/18)),
-				};
-			}
+		if (grabs.length === 1) {
+			startGrab(grabs[0]);
+		} else {
+			pendingGrabs = grabs;
 		}
 	}
 });
