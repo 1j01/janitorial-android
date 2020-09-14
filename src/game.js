@@ -376,11 +376,14 @@ const possibleGrabs = ()=> {
 		for (const entity of entities) {
 			if (
 				entity !== brick &&
-				!entity.fixed &&
 				connects(brick, entity, direction)
 			) {
-				attached.push(entity);
-				findAttached(entity, direction, attached);
+				if (entity.fixed) {
+					attached.length = 0;
+				} else {
+					attached.push(entity);
+					findAttached(entity, direction, attached);
+				}
 			}
 		}
 	};
