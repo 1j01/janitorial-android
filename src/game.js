@@ -372,6 +372,7 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 };
 
 const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
+	ignoreEntities.push(fromEntity);
 	const unvisited = [...entities].filter((entity) => ignoreEntities.indexOf(entity) === -1);
 	const search = (fromEntity) => {
 		while (unvisited.length) {
