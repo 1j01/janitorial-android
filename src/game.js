@@ -341,7 +341,23 @@ const connects = (entity_a, entity_b, direction=0)=> {
 		entity_a.x + entity_a.width > entity_b.x &&
 		entity_a.x < entity_b.x + entity_b.width
 	);
-}
+};
+
+const connectsToSomething = (entity, direction)=> {
+	if (direction === 0) {
+		return connectsToSomething(entity, +1) || connectsToSomething(entity, -1);
+	}
+	for (const other_entity of entities) {
+		if (
+			other_entity !== entity &&
+			!other_entity.grabbed &&
+			connects(entity, other_entity, direction)
+		) {
+			return true;
+		}
+	}
+	return false;
+};
 
 const possibleGrabs = ()=> {
 	const brick = brickUnderMouse();
@@ -421,7 +437,8 @@ addEventListener("mouseup", ()=> {
 			for (const other_entity of entities) {
 				if (
 					!other_entity.grabbed &&
-					connects(entity, other_entity)
+					connects(entity, other_entity) &&
+					(other_entity.fixed || connectsToSomething(other_entity))
 				) {
 					return true;
 				}
