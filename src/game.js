@@ -383,7 +383,7 @@ const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
 				!otherEntity.grabbed &&
 				connects(fromEntity, otherEntity)
 			) {
-				unvisited.splice(unvisited.indexOf(otherEntity), 1);
+				// unvisited.splice(unvisited.indexOf(otherEntity), 1);
 				if (otherEntity.fixed) {
 					return true;
 				}
