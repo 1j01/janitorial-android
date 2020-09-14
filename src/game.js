@@ -372,22 +372,23 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 };
 
 const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
-	const visited = [];
+	const unvisited = [...entities].filter((entity) => ignoreEntities.indexOf(entity) === -1);
 	const search = (fromEntity) => {
-		for (const otherEntity of entities) {
+		while (unvisited.length) {
+			const otherEntity = unvisited.pop();
+			if (!otherEntity) {
+				break;
+			}
 			if (
 				!otherEntity.grabbed &&
-				ignoreEntities.indexOf(otherEntity) === -1 &&
-				visited.indexOf(otherEntity) === -1
+				connects(fromEntity, otherEntity)
 			) {
-				if (connects(fromEntity, otherEntity)) {
-					visited.push(otherEntity);
-					if (otherEntity.fixed) {
-						return true;
-					}
-					if (search(otherEntity)) {
-						return true;
-					}
+				unvisited.splice(unvisited.indexOf(otherEntity), 1);
+				if (otherEntity.fixed) {
+					return true;
+				}
+				if (search(otherEntity)) {
+					return true;
 				}
 			}
 		}
