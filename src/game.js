@@ -139,6 +139,9 @@ const drawText = (ctx, text, startX, startY, colorName)=> {
 		} else if (char === "\n") {
 			x = startX;
 			y += fontCharHeight + 4;
+			if (y > innerHeight) {
+				return; // optimization for lazily-implemented debug text
+			}
 		} else {
 			const index = fontChars.indexOf(char);
 			const w = fontCharW[index];
