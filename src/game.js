@@ -407,7 +407,7 @@ canvas.addEventListener("mousedown", (event)=> {
 			dragging = [...grabs[0]];
 			for (const brick of dragging) {
 				brick.grabbed = true;
-				brick.grabOffset = {x: brick.x - mouse.worldX, y: brick.y - mouse.worldY};
+				brick.grabOffset = {x: brick.x - (15 * ~~(mouse.worldX/15)), y: brick.y - (18 * ~~(mouse.worldY/18))};
 			}
 		}
 	}
@@ -649,9 +649,11 @@ const animate = ()=> {
 		for (const brick of dragging) {
 			// brick.x = ~~(mouse.worldX + brick.grabOffset.x);
 			// brick.y = ~~(mouse.worldY + brick.grabOffset.y);
-			brick.x = 15 * ~~((mouse.worldX + brick.grabOffset.x)/15);
-			// brick.y = 18 * ~~((mouse.worldY + brick.grabOffset.y)/18);
-			brick.y = ~~(18/3 * ~~((mouse.worldY + brick.grabOffset.y)/18*3));
+			// brick.x = 15 * (~~((mouse.worldX)/15) + ~~((brick.grabOffset.x)/15));
+			// brick.y = 18 * (~~((mouse.worldY)/18) + ~~((brick.grabOffset.y)/18));
+			// brick.y = 6 * (~~((mouse.worldY)/6) + ~~((brick.grabOffset.y)/6));
+			brick.x = 15 * ~~((mouse.worldX)/15) + brick.grabOffset.x;
+			brick.y = 18 * ~~((mouse.worldY)/18) + brick.grabOffset.y;
 		}
 		canvas.style.cursor = "grabbing";
 	} else {
