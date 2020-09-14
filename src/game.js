@@ -263,8 +263,8 @@ entities.push(
 	makeBrick({ x: 15 * 26, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
 	makeBrick({ x: 15 * 24, y: 18 * -20, colorName: "gray", fixed: true, widthInStuds: 6 }),
 );
-const junkbot = makeJunkbot({ x: 15 * 9, y: 18 * -8, facing: 1 });
-entities.push(junkbot);
+entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -8, facing: 1 }));
+entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -20, facing: 1 }));
 
 let dropFromRow = 25;
 const iid = setInterval(() => {
@@ -559,7 +559,8 @@ const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) =>
 	ay + ah > by &&
 	ay < by + bh;
 
-const junkbotCollisionTest = (junkbotX, junkbotY, irregular = false) => {
+const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) => {
+	// Note: make sure not to use junkbot.x/y!
 	for (const otherEntity of entities) {
 		if (
 			!otherEntity.grabbed &&
@@ -592,7 +593,7 @@ const junkbotCollisionTest = (junkbotX, junkbotY, irregular = false) => {
 	return false;
 };
 
-const simulateJunkbot = () => {
+const simulateJunkbot = (junkbot) => {
 	// const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
 	junkbot.timer += 1;
 	if (junkbot.timer % 3 > 0) {
@@ -601,13 +602,13 @@ const simulateJunkbot = () => {
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-		if (junkbotCollisionTest(junkbot.x, junkbot.y)) {
+		if (junkbotCollisionTest(junkbot.x, junkbot.y, junkbot)) {
 			debugJunkbot("STUCK IN WALL - GO UP");
 			junkbot.y -= 18;
-		} else if (junkbotCollisionTest(posInFront.x, posInFront.y, true)) {
+		} else if (junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true)) {
 			// can we step up?
 			posInFront.y -= 18;
-			if (!junkbotCollisionTest(posInFront.x, posInFront.y)) {
+			if (!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot)) {
 				// step up
 				debugJunkbot("STEP UP");
 				junkbot.x = posInFront.x;
@@ -619,9 +620,12 @@ const simulateJunkbot = () => {
 			}
 		} else {
 			// is there solid ground ahead to walk on?
-			if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, true) && !junkbotCollisionTest(posInFront.x, posInFront.y)) {
+			if (
+				junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot, true) &&
+				!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot)
+			) {
 				// what about that triangle tho
-				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1)) {
+				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot)) {
 					debugJunkbot("WALK");
 					junkbot.x = posInFront.x;
 					junkbot.y = posInFront.y;
@@ -632,7 +636,10 @@ const simulateJunkbot = () => {
 			} else {
 				// can we step down?
 				posInFront.y += 18;
-				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, true) && !junkbotCollisionTest(posInFront.x, posInFront.y, true)) {
+				if (
+					junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot, true) &&
+					!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true)
+				) {
 					// step down
 					debugJunkbot("STEP DOWN");
 					junkbot.x = posInFront.x;
@@ -682,8 +689,14 @@ const animate = () => {
 
 	// sort for gravity
 	entities.sort((a, b) => b.y - a.y);
+
 	simulateGravity();
-	simulateJunkbot();
+
+	for (const entity of entities) {
+		if (entity.type === "junkbot") {
+			simulateJunkbot(entity);
+		}
+	}
 
 	const hovered = dragging.length ? [] : possibleGrabs();
 
