@@ -342,6 +342,7 @@ const possibleGrabs = ()=> {
 				entity !== brick &&
 				entity.type === "brick" &&
 				!entity.fixed &&
+				(direction === 1 ? entity.y === brick.y + brick.height : entity.y + entity.height === brick.y) &&
 				rectanglesIntersect(
 					brick.x,
 					brick.y + direction,
