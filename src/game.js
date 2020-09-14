@@ -647,17 +647,12 @@ const animate = ()=> {
 
 	if (dragging.length) {
 		for (const brick of dragging) {
-			// brick.x = ~~(mouse.worldX + brick.grabOffset.x);
-			// brick.y = ~~(mouse.worldY + brick.grabOffset.y);
-			// brick.x = 15 * (~~((mouse.worldX)/15) + ~~((brick.grabOffset.x)/15));
-			// brick.y = 18 * (~~((mouse.worldY)/18) + ~~((brick.grabOffset.y)/18));
-			// brick.y = 6 * (~~((mouse.worldY)/6) + ~~((brick.grabOffset.y)/6));
 			brick.x = 15 * ~~((mouse.worldX)/15) + brick.grabOffset.x;
 			brick.y = 18 * ~~((mouse.worldY)/18) + brick.grabOffset.y;
 		}
-		canvas.style.cursor = "grabbing";
+		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
 	} else {
-		canvas.style.cursor = hovered.length ? "grab" : "default";
+		canvas.style.cursor = hovered.length ? `url("images/cursors/cursor-grab.png") 8 8, grab` : "default";
 	}
 
 	if (canvas.width !== innerWidth) {
