@@ -487,11 +487,7 @@ const simulateGravity = ()=> {
 			for (const other_entity of entities) {
 				if (
 					!other_entity.grabbed &&
-					entity.x + entity.width > other_entity.x &&
-					entity.x < other_entity.x + other_entity.width &&
-					// entity.y + entity.height >= other_entity.y &&
-					// entity.y < other_entity.y + other_entity.height
-					entity.y + entity.height === other_entity.y
+					connects(entity, other_entity, entity.type === "brick" ? 0 : 1)
 				) {
 					settled = true;
 					break;
