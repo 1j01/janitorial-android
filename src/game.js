@@ -483,24 +483,32 @@ addEventListener("mouseup", () => {
 				}
 			}
 			return true;
-		}) && dragging.some((entity) => {
-			for (const otherEntity of entities) {
-				if (
-					!otherEntity.grabbed &&
-					otherEntity.type === "brick" &&
-					connects(entity, otherEntity) &&
-					(otherEntity.fixed || connectsToSomething(otherEntity))
-				) {
-					return true;
-				}
-			}
-			return false;
 		})) {
+			let connectsToCeiling = false;
+			let connectsToFloor = false;
 			dragging.forEach((entity) => {
-				entity.grabbed = false;
-				entity.grabOffset = null;
+				for (const otherEntity of entities) {
+					if (
+						!otherEntity.grabbed &&
+						otherEntity.type === "brick" &&
+						(otherEntity.fixed || connectsToSomething(otherEntity))
+					) {
+						if (connects(entity, otherEntity, -1)) {
+							connectsToCeiling = true;
+						}
+						if (connects(entity, otherEntity, +1)) {
+							connectsToFloor = true;
+						}
+					}
+				}
 			});
-			dragging = [];
+			if (connectsToCeiling ^ connectsToFloor) {
+				dragging.forEach((entity) => {
+					entity.grabbed = false;
+					entity.grabOffset = null;
+				});
+				dragging = [];
+			}
 		}
 	}
 });
