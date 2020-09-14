@@ -271,7 +271,7 @@ const junkbot = makeJunkbot({x: 15*9, y: 18*-8, facing: 1});
 entities.push(junkbot);
 
 let drop_from_row = 25;
-setInterval(()=> {
+const iid = setInterval(()=> {
 	drop_from_row += 1;
 	const brick = makeBrick({
 		// x: 15 * ~~(Math.random() * 9),
@@ -282,6 +282,9 @@ setInterval(()=> {
 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
 	});
 	entities.push(brick);
+	if (drop_from_row > 100) {
+		clearInterval(iid);
+	}
 }, 200);
 
 const viewport = {centerX: 0, centerY: 0, scale: 2};
