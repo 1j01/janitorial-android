@@ -411,7 +411,13 @@ canvas.addEventListener("mousedown", (event)=> {
 			dragging = [...grabs[0]];
 			for (const brick of dragging) {
 				brick.grabbed = true;
-				brick.grabOffset = {x: brick.x - (15 * ~~(mouse.worldX/15)), y: brick.y - (18 * ~~(mouse.worldY/18))};
+				brick.grabOffset = {
+					// x: brick.x - (15 * ~~(mouse.worldX/15)),
+					// y: brick.y - (18 * ~~(mouse.worldY/18)),
+					// so you can place blocks that were grabbed when they weren't on the grid:
+					x: (15 * ~~(brick.x/15)) - (15 * ~~(mouse.worldX/15)),
+					y: (18 * ~~(brick.y/18)) - (18 * ~~(mouse.worldY/18)),
+				};
 			}
 		}
 	}
