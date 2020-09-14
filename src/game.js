@@ -368,13 +368,18 @@ const connectsToSomething = (entity, direction) => {
 
 const possibleGrabs = () => {
 	const findAttached = (brick, direction, attached) => {
+		// console.log(brick, direction, attached.length);
 		for (const entity of entities) {
 			if (
 				entity !== brick &&
-				connects(brick, entity, entity.type === "junkbot" ? -1 : direction)
+				attached.indexOf(entity) === -1 &&
+				// connects(brick, entity, entity.type === "junkbot" ? -1 : direction)
+				connects(brick, entity)
 			) {
 				if (entity.fixed || entity.type === "junkbot") {
-					return false;
+					if (connects(brick, entity, direction)) {
+						return false;
+					}
 				} else {
 					attached.push(entity);
 					const okay = findAttached(entity, direction, attached);
