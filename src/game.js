@@ -509,9 +509,7 @@ addEventListener("blur", ()=> {
 	mouse.y = undefined;
 });
 
-// This is needed for simulation (gravity) and rendering.
-// Well, strictly only Y sorting is needed for gravity I suppose?
-const sortEntities = (entities)=> {
+const sortEntitiesForRendering = (entities)=> {
 	// entities.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
 	// entities.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
 	entities.sort((a, b)=> {
@@ -686,7 +684,9 @@ const animate = ()=> {
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 	updateMouseWorldPosition();
 
-	sortEntities(entities);
+	// one of these would theoretically help in cases where two objects are falling together
+	// entities.sort((a, b)=> a.y - b.y);
+	// entities.sort((a, b)=> b.y - a.y);
 	simulateGravity();
 	simulateJunkbot();
 
@@ -724,7 +724,7 @@ const animate = ()=> {
 	ctx.imageSmoothingEnabled = false;
 
 	shuffle(entities);
-	sortEntities(entities);
+	sortEntitiesForRendering(entities);
 
 	const shouldHilight = (entity)=>
 	// dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[0].indexOf(entity) > -1;
@@ -740,7 +740,7 @@ const animate = ()=> {
 	}
 
 	// for (const grab of hovered) {
-	// 	sortEntities(grab);
+	// 	sortEntitiesForRendering(grab);
 	// 	ctx.save();
 	// 	// ctx.translate(Math.sin(Date.now()/10) * 1, Math.cos(Date.now()/10) * 1);
 	// 	for (const entity of grab) {
