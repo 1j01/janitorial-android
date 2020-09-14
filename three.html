@@ -1,450 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>three.js LDraw - Junkbot</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="three-stuff/main.css">
-		<style>
-			body {
-				color: #444;
-			}
-			a {
-				color: #08f;
-			}
-		</style>
-	</head>
-
-	<body>
-		<script type="module">
-
-			import * as THREE from './three-stuff/three.module.js';
-
-			import { GUI } from './three-stuff/dat.gui.module.js';
-
-			import { OrbitControls } from './three-stuff/OrbitControls.js';
-			import { LDrawLoader } from './three-stuff/LDrawLoader.js';
-
-			var container, progressBarDiv;
-
-			var camera, scene, renderer, controls, gui, guiData;
-
-			var modelFileList, model, textureCube;
-
-			var envMapActivated = false;
-
-			// var ldrawPath = 'models/ldraw/officialLibrary/';
-			var ldrawPath = 'three-stuff/';
-
-			var modelFileList = {
-				'Car': 'models/car.ldr_Packed.mpd',
-				'Basic Bricks': 'models/basic-bricks.ldr_Packed.mpd',
-				'Bots': 'models/bots.ldr_Packed.mpd',
-				'Misc': 'models/misc.ldr_Packed.mpd',
-				'Much Stuff': 'models/much-stuff.ldr_Packed.mpd',
-				// 'Lunar Vehicle': 'models/1621-1-LunarMPVVehicle.mpd_Packed.mpd',
-				// 'Radar Truck': 'models/889-1-RadarTruck.mpd_Packed.mpd',
-				// 'Trailer': 'models/4838-1-MiniVehicles.mpd_Packed.mpd',
-				// 'Bulldozer': 'models/4915-1-MiniConstruction.mpd_Packed.mpd',
-				// 'Helicopter': 'models/4918-1-MiniFlyers.mpd_Packed.mpd',
-				// 'Plane': 'models/5935-1-IslandHopper.mpd_Packed.mpd',
-				// 'Lighthouse': 'models/30023-1-Lighthouse.ldr_Packed.mpd',
-				// 'X-Wing mini': 'models/30051-1-X-wingFighter-Mini.mpd_Packed.mpd',
-				// 'AT-ST mini': 'models/30054-1-AT-ST-Mini.mpd_Packed.mpd',
-				// 'AT-AT mini': 'models/4489-1-AT-AT-Mini.mpd_Packed.mpd',
-				// 'Shuttle': 'models/4494-1-Imperial Shuttle-Mini.mpd_Packed.mpd',
-				// 'TIE Interceptor': 'models/6965-1-TIEIntercep_4h4MXk5.mpd_Packed.mpd',
-				// 'Star fighter': 'models/6966-1-JediStarfighter-Mini.mpd_Packed.mpd',
-				// 'X-Wing': 'models/7140-1-X-wingFighter.mpd_Packed.mpd',
-				// 'AT-ST': 'models/10174-1-ImperialAT-ST-UCS.mpd_Packed.mpd'
-			};
-
-			const renderSize = [2000, 1000];
-			const aspect = renderSize[0] / renderSize[1];
-			const frustumSize = renderSize[1] * 1.35; // TODO: play around with this, get more exact
-
-			init();
-			animate();
-
-			function init() {
-
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
-
-				// camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
-				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 10000 );
-				// camera.position.set( 150, 200, 250 );
-				camera.position.set( 0, 0, 250 );
-				camera.lookAt(new THREE.Vector3(0, 0, 0));
-				camera.position.set( 1210, 120, 250 );
-				camera.updateProjectionMatrix();
 
-				// scene
-
-				scene = new THREE.Scene();
-				// scene.background = new THREE.Color( 0xdeebed );
-
-				var ambientLight = new THREE.AmbientLight( 0xdedede, 0.8 );
-				scene.add( ambientLight );
-
-				var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-				directionalLight.position.set( - 1000, 3200, 1500 );
-				scene.add( directionalLight );
-
-				//
-
-				renderer = new THREE.WebGLRenderer( { antialias: false, alpha: true, preserveDrawingBuffer: true } );
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( ...renderSize );
-				container.appendChild( renderer.domElement );
-
-				// controls = new OrbitControls( camera, renderer.domElement );
-				
-				setupProjection();
-
-				//
-
-				guiData = {
-					modelFileName: modelFileList[ 'Basic Bricks' ],
-					envMapActivated: false,
-					separateObjects: false,
-					displayLines: true,
-					conditionalLines: false,
-					smoothNormals: false,
-					constructionStep: 0,
-					noConstructionSteps: "No steps.",
-					exportImages: exportImages,
-				};
-
-				window.addEventListener( 'resize', setupProjection, false );
-
-				window.addEventListener( 'keydown', (event)=> {
-					if (event.key === "ArrowUp") {
-						model.rotation.x -= Math.PI / 2;
-					}
-					if (event.key === "ArrowDown") {
-						model.rotation.x += Math.PI / 2;
-					}
-					if (event.key === "ArrowRight") {
-						model.rotation.y -= Math.PI / 2;
-					}
-					if (event.key === "ArrowLeft") {
-						model.rotation.y += Math.PI / 2;
-					}
-				});
-
-				progressBarDiv = document.createElement( 'div' );
-				progressBarDiv.innerText = "Loading...";
-				progressBarDiv.style.fontSize = "3em";
-				progressBarDiv.style.color = "#888";
-				progressBarDiv.style.display = "block";
-				progressBarDiv.style.position = "absolute";
-				progressBarDiv.style.top = "50%";
-				progressBarDiv.style.width = "100%";
-				progressBarDiv.style.textAlign = "center";
-
-
-				// load materials and then the model
-
-				reloadObject( true );
-
-			}
-
-			function updateObjectsVisibility() {
-
-				model.traverse( c => {
-
-					if ( c.isLineSegments ) {
-
-						if ( c.isConditionalLine ) {
-
-							c.visible = guiData.conditionalLines;
-
-						} else {
-
-							c.visible = guiData.displayLines;
-
-						}
-
-					}
-					else if ( c.isGroup ) {
-
-						// Hide objects with construction step > gui setting
-						c.visible = c.userData.constructionStep <= guiData.constructionStep;
-
-					}
-
-				} );
-
-			}
-
-			function reloadObject( resetCamera ) {
-
-				if ( model ) {
-
-					scene.remove( model );
-
-				}
-
-				model = null;
-
-				updateProgressBar( 0 );
-				showProgressBar();
-
-				var lDrawLoader = new LDrawLoader();
-				lDrawLoader.separateObjects = guiData.separateObjects;
-				lDrawLoader.smoothNormals = guiData.smoothNormals;
-				lDrawLoader
-					.setPath( ldrawPath )
-					.load( guiData.modelFileName, function ( group2 ) {
-
-						if ( model ) {
-
-							scene.remove( model );
-
-						}
-
-						model = group2;
-
-						// Convert from LDraw coordinates: rotate 180 degrees around OX
-						model.rotation.x = Math.PI;
-
-						scene.add( model );
-
-						// Adjust materials
-
-						var materials = lDrawLoader.materials;
-
-						if ( envMapActivated ) {
-
-							if ( ! textureCube ) {
-
-								// Envmap texture
-								var r = "textures/cube/Bridge2/";
-								var urls = [ r + "posx.jpg", r + "negx.jpg",
-									r + "posy.jpg", r + "negy.jpg",
-									r + "posz.jpg", r + "negz.jpg" ];
-								textureCube = new THREE.CubeTextureLoader().load( urls );
-								textureCube.mapping = THREE.CubeReflectionMapping;
-
-							}
-
-							for ( var i = 0, n = materials.length; i < n; i ++ ) {
-
-								var material = materials[ i ];
-
-								if ( material.userData.canHaveEnvMap ) {
-
-									material.envMap = textureCube;
-
-								}
-
-							}
-
-						}
-
-						guiData.constructionStep = model.userData.numConstructionSteps - 1;
-
-						updateObjectsVisibility();
-
-						// Adjust camera and light
-
-						var bbox = new THREE.Box3().setFromObject( model );
-						var size = bbox.getSize( new THREE.Vector3() );
-						var radius = Math.max( size.x, Math.max( size.y, size.z ) ) * 0.5;
-
-						if ( resetCamera ) {
-
-							// controls.target0.copy( bbox.getCenter( new THREE.Vector3() ) );
-							// controls.position0.set( - 2.3, 2, 2 ).multiplyScalar( radius ).add( controls.target0 );
-							// controls.reset();
-
-						}
-
-						createGUI();
-
-						hideProgressBar();
-
-					}, onProgress, onError );
-
-			}
-
-			function setupProjection() {
-
-				camera.aspect = renderSize[0] / renderSize[1];
-				camera.left = - frustumSize * camera.aspect / 2;
-				camera.right = frustumSize * camera.aspect / 2;
-				camera.top = frustumSize / 2;
-				camera.bottom = - frustumSize / 2;
-				// camera.left = 0;
-				// camera.right = frustumSize * camera.aspect;
-				// camera.top = frustumSize;
-				// camera.bottom = 0;
-
-				camera.updateProjectionMatrix();
-
-				// code based on https://stackoverflow.com/a/26060068/2624876
-				// Create shear matrix
-				var alpha = Math.PI / 4;
-
-				var Syx = 0,
-					Szx = - 0.5 * Math.cos( alpha ),
-					Sxy = 0,
-					Szy = - 0.5 * Math.sin( alpha ),
-					Sxz = 0,
-					Syz = 0;
-
-				var matrix = new THREE.Matrix4();
-
-				matrix.set(   1,   Syx,  Szx,  0,
-							Sxy,     1,  Szy,  0,
-							Sxz,   Syz,   1,   0,
-							0,     0,   0,   1  );
-
-				camera.projectionMatrix.multiply(matrix);
-				camera.projectionMatrixInverse.getInverse( camera.projectionMatrix );
-
-				renderer.setSize( ...renderSize );
-
-			}
-
-			function createGUI() {
-
-				if ( gui ) {
-
-					gui.destroy();
-				}
-
-				gui = new GUI();
-
-				gui.add( guiData, 'modelFileName', modelFileList ).name( 'Model' ).onFinishChange( function () {
-
-					reloadObject( true );
-
-				} );
-
-				gui.add( guiData, 'separateObjects' ).name( 'Separate Objects' ).onChange( function ( value ) {
-
-					reloadObject( false );
-
-				} );
-
-				if ( guiData.separateObjects ) {
-
-					if ( model.userData.numConstructionSteps > 1  ) {
-
-						gui.add( guiData, 'constructionStep', 0, model.userData.numConstructionSteps - 1 ).step( 1 ).name( 'Construction step' ).onChange( updateObjectsVisibility );
-
-					}
-					else {
-
-						gui.add( guiData, 'noConstructionSteps' ).name( 'Construction step' ).onChange( updateObjectsVisibility );
-
-					}
-				}
-
-				gui.add( guiData, 'envMapActivated' ).name( 'Env. map' ).onChange( function changeEnvMap ( value ) {
-
-					envMapActivated = value;
-					reloadObject( false );
-
-				} );
-
-				gui.add( guiData, 'smoothNormals' ).name( 'Smooth Normals' ).onChange( function changeNormals ( value ) {
-
-					reloadObject( false );
-
-				} );
-
-				gui.add( guiData, 'displayLines' ).name( 'Display Lines' ).onChange( updateObjectsVisibility );
-				gui.add( guiData, 'conditionalLines' ).name( 'Conditional Lines' ).onChange( updateObjectsVisibility );
-
-				gui.add( guiData, 'exportImages' ).name( 'Export Image(s)' );
-
-			}
+<head>
+	<title>three.js LDraw - Junkbot</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="three-stuff/main.css">
+	<style>
+		body {
+			color: #444;
+		}
+
+		a {
+			color: #08f;
+		}
+	</style>
+</head>
+
+<body>
+	<script type="module">
+
+		import * as THREE from './three-stuff/three.module.js';
+
+		import { GUI } from './three-stuff/dat.gui.module.js';
+
+		import { OrbitControls } from './three-stuff/OrbitControls.js';
+		import { LDrawLoader } from './three-stuff/LDrawLoader.js';
+
+		var container, progressBarDiv;
+
+		var camera, scene, renderer, controls, gui, guiData;
+
+		var modelFileList, model, textureCube;
+
+		var envMapActivated = false;
+
+		// var ldrawPath = 'models/ldraw/officialLibrary/';
+		var ldrawPath = 'three-stuff/';
+
+		var modelFileList = {
+			'Car': 'models/car.ldr_Packed.mpd',
+			'Basic Bricks': 'models/basic-bricks.ldr_Packed.mpd',
+			'Bots': 'models/bots.ldr_Packed.mpd',
+			'Misc': 'models/misc.ldr_Packed.mpd',
+			'Much Stuff': 'models/much-stuff.ldr_Packed.mpd',
+			// 'Lunar Vehicle': 'models/1621-1-LunarMPVVehicle.mpd_Packed.mpd',
+			// 'Radar Truck': 'models/889-1-RadarTruck.mpd_Packed.mpd',
+			// 'Trailer': 'models/4838-1-MiniVehicles.mpd_Packed.mpd',
+			// 'Bulldozer': 'models/4915-1-MiniConstruction.mpd_Packed.mpd',
+			// 'Helicopter': 'models/4918-1-MiniFlyers.mpd_Packed.mpd',
+			// 'Plane': 'models/5935-1-IslandHopper.mpd_Packed.mpd',
+			// 'Lighthouse': 'models/30023-1-Lighthouse.ldr_Packed.mpd',
+			// 'X-Wing mini': 'models/30051-1-X-wingFighter-Mini.mpd_Packed.mpd',
+			// 'AT-ST mini': 'models/30054-1-AT-ST-Mini.mpd_Packed.mpd',
+			// 'AT-AT mini': 'models/4489-1-AT-AT-Mini.mpd_Packed.mpd',
+			// 'Shuttle': 'models/4494-1-Imperial Shuttle-Mini.mpd_Packed.mpd',
+			// 'TIE Interceptor': 'models/6965-1-TIEIntercep_4h4MXk5.mpd_Packed.mpd',
+			// 'Star fighter': 'models/6966-1-JediStarfighter-Mini.mpd_Packed.mpd',
+			// 'X-Wing': 'models/7140-1-X-wingFighter.mpd_Packed.mpd',
+			// 'AT-ST': 'models/10174-1-ImperialAT-ST-UCS.mpd_Packed.mpd'
+		};
+
+		const renderSize = [2000, 1000];
+		const aspect = renderSize[0] / renderSize[1];
+		const frustumSize = renderSize[1] * 1.35; // TODO: play around with this, get more exact
+
+		init();
+		animate();
+
+		function init() {
+
+			container = document.createElement('div');
+			document.body.appendChild(container);
+
+			// camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
+			camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 10000);
+			// camera.position.set( 150, 200, 250 );
+			camera.position.set(0, 0, 250);
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+			camera.position.set(1210, 120, 250);
+			camera.updateProjectionMatrix();
+
+			// scene
+
+			scene = new THREE.Scene();
+			// scene.background = new THREE.Color( 0xdeebed );
+
+			var ambientLight = new THREE.AmbientLight(0xdedede, 0.8);
+			scene.add(ambientLight);
+
+			var directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+			directionalLight.position.set(- 1000, 3200, 1500);
+			scene.add(directionalLight);
 
 			//
 
-			function animate() {
+			renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, preserveDrawingBuffer: true });
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(...renderSize);
+			container.appendChild(renderer.domElement);
 
-				requestAnimationFrame( animate );
-				render();
+			// controls = new OrbitControls( camera, renderer.domElement );
 
-			}
+			setupProjection();
 
-			function render() {
+			//
 
-				renderer.render( scene, camera );
+			guiData = {
+				modelFileName: modelFileList['Basic Bricks'],
+				envMapActivated: false,
+				separateObjects: false,
+				displayLines: true,
+				conditionalLines: false,
+				smoothNormals: false,
+				constructionStep: 0,
+				noConstructionSteps: "No steps.",
+				exportImages: exportImages,
+			};
 
-			}
+			window.addEventListener('resize', setupProjection, false);
 
-			function onProgress( xhr ) {
+			window.addEventListener('keydown', (event) => {
+				if (event.key === "ArrowUp") {
+					model.rotation.x -= Math.PI / 2;
+				}
+				if (event.key === "ArrowDown") {
+					model.rotation.x += Math.PI / 2;
+				}
+				if (event.key === "ArrowRight") {
+					model.rotation.y -= Math.PI / 2;
+				}
+				if (event.key === "ArrowLeft") {
+					model.rotation.y += Math.PI / 2;
+				}
+			});
 
-				if ( xhr.lengthComputable ) {
+			progressBarDiv = document.createElement('div');
+			progressBarDiv.innerText = "Loading...";
+			progressBarDiv.style.fontSize = "3em";
+			progressBarDiv.style.color = "#888";
+			progressBarDiv.style.display = "block";
+			progressBarDiv.style.position = "absolute";
+			progressBarDiv.style.top = "50%";
+			progressBarDiv.style.width = "100%";
+			progressBarDiv.style.textAlign = "center";
 
-					updateProgressBar( xhr.loaded / xhr.total );
 
-					console.log( Math.round( xhr.loaded / xhr.total * 100, 2 ) + '% downloaded' );
+			// load materials and then the model
+
+			reloadObject(true);
+
+		}
+
+		function updateObjectsVisibility() {
+
+			model.traverse(c => {
+
+				if (c.isLineSegments) {
+
+					if (c.isConditionalLine) {
+
+						c.visible = guiData.conditionalLines;
+
+					} else {
+
+						c.visible = guiData.displayLines;
+
+					}
+
+				}
+				else if (c.isGroup) {
+
+					// Hide objects with construction step > gui setting
+					c.visible = c.userData.constructionStep <= guiData.constructionStep;
 
 				}
 
-			}
+			});
 
-			function onError() {
+		}
 
-				var message = "Error loading model";
-				progressBarDiv.innerText = message;
-				console.log( message );
+		function reloadObject(resetCamera) {
 
-			}
+			if (model) {
 
-			function showProgressBar() {
-
-				document.body.appendChild( progressBarDiv );
+				scene.remove(model);
 
 			}
 
-			function hideProgressBar() {
+			model = null;
 
-				document.body.removeChild( progressBarDiv );
+			updateProgressBar(0);
+			showProgressBar();
+
+			var lDrawLoader = new LDrawLoader();
+			lDrawLoader.separateObjects = guiData.separateObjects;
+			lDrawLoader.smoothNormals = guiData.smoothNormals;
+			lDrawLoader
+				.setPath(ldrawPath)
+				.load(guiData.modelFileName, function (group2) {
+
+					if (model) {
+
+						scene.remove(model);
+
+					}
+
+					model = group2;
+
+					// Convert from LDraw coordinates: rotate 180 degrees around OX
+					model.rotation.x = Math.PI;
+
+					scene.add(model);
+
+					// Adjust materials
+
+					var materials = lDrawLoader.materials;
+
+					if (envMapActivated) {
+
+						if (!textureCube) {
+
+							// Envmap texture
+							var r = "textures/cube/Bridge2/";
+							var urls = [r + "posx.jpg", r + "negx.jpg",
+							r + "posy.jpg", r + "negy.jpg",
+							r + "posz.jpg", r + "negz.jpg"];
+							textureCube = new THREE.CubeTextureLoader().load(urls);
+							textureCube.mapping = THREE.CubeReflectionMapping;
+
+						}
+
+						for (var i = 0, n = materials.length; i < n; i++) {
+
+							var material = materials[i];
+
+							if (material.userData.canHaveEnvMap) {
+
+								material.envMap = textureCube;
+
+							}
+
+						}
+
+					}
+
+					guiData.constructionStep = model.userData.numConstructionSteps - 1;
+
+					updateObjectsVisibility();
+
+					// Adjust camera and light
+
+					var bbox = new THREE.Box3().setFromObject(model);
+					var size = bbox.getSize(new THREE.Vector3());
+					var radius = Math.max(size.x, Math.max(size.y, size.z)) * 0.5;
+
+					if (resetCamera) {
+
+						// controls.target0.copy( bbox.getCenter( new THREE.Vector3() ) );
+						// controls.position0.set( - 2.3, 2, 2 ).multiplyScalar( radius ).add( controls.target0 );
+						// controls.reset();
+
+					}
+
+					createGUI();
+
+					hideProgressBar();
+
+				}, onProgress, onError);
+
+		}
+
+		function setupProjection() {
+
+			camera.aspect = renderSize[0] / renderSize[1];
+			camera.left = - frustumSize * camera.aspect / 2;
+			camera.right = frustumSize * camera.aspect / 2;
+			camera.top = frustumSize / 2;
+			camera.bottom = - frustumSize / 2;
+			// camera.left = 0;
+			// camera.right = frustumSize * camera.aspect;
+			// camera.top = frustumSize;
+			// camera.bottom = 0;
+
+			camera.updateProjectionMatrix();
+
+			// code based on https://stackoverflow.com/a/26060068/2624876
+			// Create shear matrix
+			var alpha = Math.PI / 4;
+
+			var Syx = 0,
+				Szx = - 0.5 * Math.cos(alpha),
+				Sxy = 0,
+				Szy = - 0.5 * Math.sin(alpha),
+				Sxz = 0,
+				Syz = 0;
+
+			var matrix = new THREE.Matrix4();
+
+			matrix.set(1, Syx, Szx, 0,
+				Sxy, 1, Szy, 0,
+				Sxz, Syz, 1, 0,
+				0, 0, 0, 1);
+
+			camera.projectionMatrix.multiply(matrix);
+			camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+
+			renderer.setSize(...renderSize);
+
+		}
+
+		function createGUI() {
+
+			if (gui) {
+
+				gui.destroy();
+			}
+
+			gui = new GUI();
+
+			gui.add(guiData, 'modelFileName', modelFileList).name('Model').onFinishChange(function () {
+
+				reloadObject(true);
+
+			});
+
+			gui.add(guiData, 'separateObjects').name('Separate Objects').onChange(function (value) {
+
+				reloadObject(false);
+
+			});
+
+			if (guiData.separateObjects) {
+
+				if (model.userData.numConstructionSteps > 1) {
+
+					gui.add(guiData, 'constructionStep', 0, model.userData.numConstructionSteps - 1).step(1).name('Construction step').onChange(updateObjectsVisibility);
+
+				}
+				else {
+
+					gui.add(guiData, 'noConstructionSteps').name('Construction step').onChange(updateObjectsVisibility);
+
+				}
+			}
+
+			gui.add(guiData, 'envMapActivated').name('Env. map').onChange(function changeEnvMap(value) {
+
+				envMapActivated = value;
+				reloadObject(false);
+
+			});
+
+			gui.add(guiData, 'smoothNormals').name('Smooth Normals').onChange(function changeNormals(value) {
+
+				reloadObject(false);
+
+			});
+
+			gui.add(guiData, 'displayLines').name('Display Lines').onChange(updateObjectsVisibility);
+			gui.add(guiData, 'conditionalLines').name('Conditional Lines').onChange(updateObjectsVisibility);
+
+			gui.add(guiData, 'exportImages').name('Export Image(s)');
+
+		}
+
+		//
+
+		function animate() {
+
+			requestAnimationFrame(animate);
+			render();
+
+		}
+
+		function render() {
+
+			renderer.render(scene, camera);
+
+		}
+
+		function onProgress(xhr) {
+
+			if (xhr.lengthComputable) {
+
+				updateProgressBar(xhr.loaded / xhr.total);
+
+				console.log(Math.round(xhr.loaded / xhr.total * 100, 2) + '% downloaded');
 
 			}
 
-			function updateProgressBar( fraction ) {
+		}
 
-				progressBarDiv.innerText = 'Loading... ' + Math.round( fraction * 100, 2 ) + '%';
+		function onError() {
 
-			}
+			var message = "Error loading model";
+			progressBarDiv.innerText = message;
+			console.log(message);
 
-			function exportImages() {
+		}
 
-				renderer.domElement.toBlob((blob)=> {
-					const blobURL = URL.createObjectURL(blob);
-					// someEl.innerHTML = `<a href="${blobURL}" download="${guiData.modelFileName}.png">Download Image</a>`;
-					const a = document.createElement("a");
-					a.href = blobURL;
-					a.download = `${guiData.modelFileName}.png`;
-					document.body.appendChild(a);
-					console.log("In case download is blocked by browser, save this manually:", blobURL);
-					a.click();
-					setTimeout(function() {
-						document.body.removeChild(a);
-						window.URL.revokeObjectURL(blobURL);  
-					}, 0);
-				});
+		function showProgressBar() {
 
-			}
+			document.body.appendChild(progressBarDiv);
 
-		</script>
+		}
 
-		<!-- LDraw.org CC BY 2.0 Parts Library attribution -->
-		<div style="display: block; position: fixed; bottom: 8px; left: 8px; width: 160px; padding: 10px; background-color: #F3F7F8;">
-			<center>
-				<a href="http://www.ldraw.org"><img style="width: 145px" src="three-stuff/ldraw.org-logo.png"></a>
-				<br />
-				<a href="http://www.ldraw.org/">This software uses the LDraw Parts Library</a>
-			</center>
-		</div>
+		function hideProgressBar() {
 
-	</body>
+			document.body.removeChild(progressBarDiv);
+
+		}
+
+		function updateProgressBar(fraction) {
+
+			progressBarDiv.innerText = 'Loading... ' + Math.round(fraction * 100, 2) + '%';
+
+		}
+
+		function exportImages() {
+
+			renderer.domElement.toBlob((blob) => {
+				const blobURL = URL.createObjectURL(blob);
+				// someEl.innerHTML = `<a href="${blobURL}" download="${guiData.modelFileName}.png">Download Image</a>`;
+				const a = document.createElement("a");
+				a.href = blobURL;
+				a.download = `${guiData.modelFileName}.png`;
+				document.body.appendChild(a);
+				console.log("In case download is blocked by browser, save this manually:", blobURL);
+				a.click();
+				setTimeout(function () {
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(blobURL);
+				}, 0);
+			});
+
+		}
+
+	</script>
+
+	<!-- LDraw.org CC BY 2.0 Parts Library attribution -->
+	<div
+		style="display: block; position: fixed; bottom: 8px; left: 8px; width: 160px; padding: 10px; background-color: #F3F7F8;">
+		<center>
+			<a href="http://www.ldraw.org"><img style="width: 145px" src="three-stuff/ldraw.org-logo.png"></a>
+			<br />
+			<a href="http://www.ldraw.org/">This software uses the LDraw Parts Library</a>
+		</center>
+	</div>
+
+</body>
+
 </html>
