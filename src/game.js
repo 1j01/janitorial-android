@@ -5,9 +5,9 @@ document.body.append(canvas);
 
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
-const debug = (text) => {
-	debugInfoForFrame += text + "\n";
-};
+// const debug = (text) => {
+// 	debugInfoForFrame += text + "\n";
+// };
 const debugJunkbot = (text) => {
 	debugInfoForJunkbot += text + "\n";
 };
@@ -52,15 +52,14 @@ const loadLevelFromText = (levelData) => {
 	const sections = {};
 	let section_name = "";
 	for (const line of levelData.split(/\r?\n/g)) {
-		if (line.match(/^\s*(#.*)?$/)) {
-			continue;
-		}
-		const match = line.match(/^\[(.*)\]$/);
-		if (match) {
-			section_name = match[1];
-		} else {
-			sections[section_name] = sections[section_name] || [];
-			sections[section_name].push(line.split("="));
+		if (!line.match(/^\s*(#.*)?$/)) {
+			const match = line.match(/^\[(.*)\]$/);
+			if (match) {
+				section_name = match[1];
+			} else {
+				sections[section_name] = sections[section_name] || [];
+				sections[section_name].push(line.split("="));
+			}
 		}
 	}
 	return sections;
@@ -204,16 +203,13 @@ const drawBrick = (ctx, brick, isHovered) => {
 	ctx.globalAlpha = brick.grabbed ? 0.8 : 1;
 	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * h + 9, w, h, x, y - 15, w, h);
 	if (isHovered) {
-		ctx.save();
 		ctx.globalAlpha = 0.5;
-		// ctx.globalCompositeOperation = "multiply";
 		ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, x, y - 15, w, h);
-		ctx.restore();
 	}
 	ctx.globalAlpha = 1;
 };
 
-const drawJunkbot = (ctx, junkbot, isHovered) => {
+const drawJunkbot = (ctx, junkbot) => {
 	ctx.globalAlpha = junkbot.grabbed ? 0.8 : 1;
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(junkbot.animationFrame % 10)}`];
 	const bounds = frame.bounds;
@@ -535,13 +531,13 @@ const sortEntitiesForRendering = (entities) => {
 * Shuffles array in place.
 * @param {Array} a items An array containing the items.
 */
-function shuffle(a) {
+const shuffle = (a) => {
 	for (let i = a.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
 		[a[i], a[j]] = [a[j], a[i]];
 	}
 	return a;
-}
+};
 
 const simulateGravity = () => {
 	for (const entity of entities) {
@@ -726,14 +722,18 @@ const animate = () => {
 	shuffle(entities);
 	sortEntitiesForRendering(entities);
 
-	const shouldHilight = (entity) =>
-		// dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[0].indexOf(entity) > -1;
-		// dragging.length ? dragging.indexOf(entity) > -1 : hovered.some((grab)=> grab.indexOf(entity) > -1);
-		dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[~~(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
+	const shouldHilight = (entity) => {
+		if (dragging.length) {
+			return dragging.indexOf(entity) > -1;
+		}
+		// return hovered[0] && hovered[0].indexOf(entity) > -1;
+		// return hovered.some((grab)=> grab.indexOf(entity) > -1);
+		return hovered[0] && hovered[~~(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
+	};
 
 	for (const entity of entities) {
 		if (entity.type === "junkbot") {
-			drawJunkbot(ctx, entity, shouldHilight(entity));
+			drawJunkbot(ctx, entity);
 		} else {
 			drawBrick(ctx, entity, shouldHilight(entity));
 		}

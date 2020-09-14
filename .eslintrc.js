@@ -132,10 +132,10 @@ module.exports = {
         "no-buffer-constructor": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",
-        "no-confusing-arrow": "off",
+        "no-confusing-arrow": "error",
         "no-console": "error",
         "no-constructor-return": "error",
-        "no-continue": "off",
+        "no-continue": "error",
         "no-div-regex": "error",
         "no-duplicate-imports": "error",
         "no-else-return": "off",
@@ -148,7 +148,12 @@ module.exports = {
         "no-extra-parens": "off",
         "no-floating-decimal": "error",
         "no-implicit-coercion": "error",
-        "no-implicit-globals": "off",
+        "no-implicit-globals": [
+            "error",
+            {
+                "lexicalBindings": false
+            }
+        ],
         "no-implied-eval": "error",
         "no-inline-comments": "off",
         "no-invalid-this": "error",
