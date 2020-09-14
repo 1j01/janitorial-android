@@ -5,10 +5,10 @@ document.body.append(canvas);
 
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
-const debug = (text)=> {
+const debug = (text) => {
 	debugInfoForFrame += text + "\n";
 };
-const debugJunkbot = (text)=> {
+const debugJunkbot = (text) => {
 	debugInfoForJunkbot += text + "\n";
 };
 
@@ -19,20 +19,20 @@ const resourcePaths = {
 	font: "images/font.png",
 };
 
-const loadImage = (imagePath)=> {
+const loadImage = (imagePath) => {
 	const image = new Image();
-	return new Promise((resolve, reject)=> {
-		image.onload = ()=> {
-			resolve(image);	
+	return new Promise((resolve, reject) => {
+		image.onload = () => {
+			resolve(image);
 		};
-		image.onerror = ()=> {
+		image.onerror = () => {
 			reject(new Error(`Image failed to load ('${imagePath}')`));
 		};
 		image.src = imagePath;
 	});
 };
 
-const loadJSON = async (path)=> {
+const loadJSON = async (path) => {
 	const response = await fetch(path);
 	if (response.ok) { // if HTTP-status is 200-299
 		// get the response body (the method explained below)
@@ -42,13 +42,13 @@ const loadJSON = async (path)=> {
 	}
 };
 
-const loadAtlasJSON = async (path)=> {
+const loadAtlasJSON = async (path) => {
 	return Object.fromEntries((await loadJSON(path)).map(
-		({Name, Bounds})=> [Name, {bounds: Bounds.split(", ").map((numberString)=> Number(numberString))}]
+		({ Name, Bounds }) => [Name, { bounds: Bounds.split(", ").map((numberString) => Number(numberString)) }]
 	));
 };
 
-const loadLevelFromText = (levelData)=> {
+const loadLevelFromText = (levelData) => {
 	const sections = {};
 	let section_name = "";
 	for (const line of levelData.split(/\r?\n/g)) {
@@ -66,7 +66,7 @@ const loadLevelFromText = (levelData)=> {
 	return sections;
 };
 
-const loadTextFile = async (path)=> {
+const loadTextFile = async (path) => {
 	const response = await fetch(path);
 	if (response.ok) { // if HTTP-status is 200-299
 		// get the response body (the method explained below)
@@ -76,20 +76,20 @@ const loadTextFile = async (path)=> {
 	}
 };
 
-const loadLevelFromTextFile = async (path)=> {
+const loadLevelFromTextFile = async (path) => {
 	return loadLevelFromText(await loadTextFile(path));
 };
 
-const loadResources = async (resourcePathsByID)=> {
-	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path])=> {
+const loadResources = async (resourcePathsByID) => {
+	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path]) => {
 		if (path.match(/atlas\.json$/)) {
-			return loadAtlasJSON(path).then((atlas)=> [id, atlas]);
+			return loadAtlasJSON(path).then((atlas) => [id, atlas]);
 		} else if (path.match(/\.json$/)) {
-			return loadJSON(path).then((json)=> [id, json]);
+			return loadJSON(path).then((json) => [id, json]);
 		} else if (path.match(/levels\/.*\.txt$/)) {
-			return loadLevelFromTextFile(path).then((level)=> [id, level]);
+			return loadLevelFromTextFile(path).then((level) => [id, level]);
 		} else {
-			return loadImage(path).then((image)=> [id, image]);;
+			return loadImage(path).then((image) => [id, image]);;
 		}
 	})));
 };
@@ -97,7 +97,7 @@ const loadResources = async (resourcePathsByID)=> {
 let resources;
 
 const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}`;
-const fontCharW = "55555555355555555555555555355555555551221113331355353525531155332233".split("").map((s)=> Number(s));
+const fontCharW = "55555555355555555555555555355555555551221113331355353525531155332233".split("").map((s) => Number(s));
 const fontCharX = [];
 for (let x = 0, i = 0; i < fontChars.length; i++) {
 	fontCharX.push(x);
@@ -105,7 +105,7 @@ for (let x = 0, i = 0; i < fontChars.length; i++) {
 }
 const fontCharHeight = 5;
 
-const colorizeWhiteAlphaImage = (image, color)=> {
+const colorizeWhiteAlphaImage = (image, color) => {
 	const canvas = document.createElement("canvas");
 	const ctx = canvas.getContext("2d");
 	canvas.width = image.width;
@@ -126,7 +126,7 @@ const fontColors = {
 };
 const fontCanvases = {};
 
-const drawText = (ctx, text, startX, startY, colorName)=> {
+const drawText = (ctx, text, startX, startY, colorName) => {
 	const fontImage = fontCanvases[colorName];
 	let x = startX;
 	let y = startY;
@@ -168,7 +168,7 @@ for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
 	x += w;
 }
 
-const makeBrick = ({x, y, widthInStuds, colorName, fixed=false})=> {
+const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 	return {
 		type: "brick",
 		x,
@@ -182,7 +182,7 @@ const makeBrick = ({x, y, widthInStuds, colorName, fixed=false})=> {
 	};
 };
 
-const makeJunkbot = ({x, y, facing=1, armored=false})=> {
+const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 	return {
 		type: "junkbot",
 		x,
@@ -197,8 +197,8 @@ const makeJunkbot = ({x, y, facing=1, armored=false})=> {
 	};
 };
 
-const drawBrick = (ctx, brick, isHovered)=> {
-	const {x, y, widthInStuds, colorName} = brick;
+const drawBrick = (ctx, brick, isHovered) => {
+	const { x, y, widthInStuds, colorName } = brick;
 	const w = widthInStuds * 15 + 15; // sprite width
 	const h = 35; // sprite row height
 	ctx.globalAlpha = brick.grabbed ? 0.8 : 1;
@@ -213,7 +213,7 @@ const drawBrick = (ctx, brick, isHovered)=> {
 	ctx.globalAlpha = 1;
 };
 
-const drawJunkbot = (ctx, junkbot, isHovered)=> {
+const drawJunkbot = (ctx, junkbot, isHovered) => {
 	ctx.globalAlpha = junkbot.grabbed ? 0.8 : 1;
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(junkbot.animationFrame % 10)}`];
 	const bounds = frame.bounds;
@@ -227,8 +227,8 @@ const drawJunkbot = (ctx, junkbot, isHovered)=> {
 
 const entities = [];
 for (let row = 5; row >= 0; row--) {
-	for (let column = 0; column < 150; ) { // MUST increment below
-		if (Math.sin(column*13234) < row * 0.2 + 0.1) {
+	for (let column = 0; column < 150;) { // MUST increment below
+		if (Math.sin(column * 13234) < row * 0.2 + 0.1) {
 			const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
 			entities.push(makeBrick({
 				x: column * 15,
@@ -242,7 +242,7 @@ for (let row = 5; row >= 0; row--) {
 			}));
 			column += widthInStuds;
 		} else {
-			column += ~~(Math.random()*5+1);
+			column += ~~(Math.random() * 5 + 1);
 		}
 	}
 }
@@ -258,24 +258,24 @@ for (let staircase = 5; staircase >= 0; staircase--) {
 	}
 }
 entities.push(
-	makeBrick({x: 15*5, y: 18*-12, colorName: "red", widthInStuds: 1}),
-	makeBrick({x: 15*4, y: 18*-13, colorName: "yellow", widthInStuds: 4}),
-	makeBrick({x: 15*4, y: 18*-14, colorName: "green", widthInStuds: 2}),
+	makeBrick({ x: 15 * 5, y: 18 * -12, colorName: "red", widthInStuds: 1 }),
+	makeBrick({ x: 15 * 4, y: 18 * -13, colorName: "yellow", widthInStuds: 4 }),
+	makeBrick({ x: 15 * 4, y: 18 * -14, colorName: "green", widthInStuds: 2 }),
 );
 entities.push(
-	makeBrick({x: 15*20, y: 18*-16, colorName: "gray", fixed: true, widthInStuds: 6}),
-	makeBrick({x: 15*26, y: 18*-16, colorName: "gray", fixed: true, widthInStuds: 6}),
-	makeBrick({x: 15*24, y: 18*-20, colorName: "gray", fixed: true, widthInStuds: 6}),
+	makeBrick({ x: 15 * 20, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
+	makeBrick({ x: 15 * 26, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
+	makeBrick({ x: 15 * 24, y: 18 * -20, colorName: "gray", fixed: true, widthInStuds: 6 }),
 );
-const junkbot = makeJunkbot({x: 15*9, y: 18*-8, facing: 1});
+const junkbot = makeJunkbot({ x: 15 * 9, y: 18 * -8, facing: 1 });
 entities.push(junkbot);
 
 let drop_from_row = 25;
-const iid = setInterval(()=> {
+const iid = setInterval(() => {
 	drop_from_row += 1;
 	const brick = makeBrick({
 		// x: 15 * ~~(Math.random() * 9),
-		x: 15 * ~~(Math.sin(Date.now()/400) * 9),
+		x: 15 * ~~(Math.sin(Date.now() / 400) * 9),
 		y: 18 * -drop_from_row,
 		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
 		// widthInStuds: 2,
@@ -287,10 +287,10 @@ const iid = setInterval(()=> {
 	}
 }, 200);
 
-const viewport = {centerX: 0, centerY: 0, scale: 2};
+const viewport = { centerX: 0, centerY: 0, scale: 2 };
 
 let keys = {};
-addEventListener("keydown", (event)=> {
+addEventListener("keydown", (event) => {
 	keys[event.code] = true;
 	if (event.key.match(/^Arrow/)) {
 		keys[event.key] = true;
@@ -302,26 +302,26 @@ addEventListener("keydown", (event)=> {
 		viewport.scale = Math.max(1, viewport.scale - 1);
 	}
 });
-addEventListener("keyup", (event)=> {
+addEventListener("keyup", (event) => {
 	delete keys[event.code];
 	if (event.key.match(/^Arrow/)) {
 		delete keys[event.key];
 	}
 });
 
-let mouse = {x: undefined, y: undefined};
+let mouse = { x: undefined, y: undefined };
 let dragging = [];
 
-const updateMouseWorldPosition = (event)=> {
-	mouse.worldX = (mouse.x - canvas.width/2) / viewport.scale + viewport.centerX;
-	mouse.worldY = (mouse.y - canvas.height/2) / viewport.scale + viewport.centerY;
+const updateMouseWorldPosition = (event) => {
+	mouse.worldX = (mouse.x - canvas.width / 2) / viewport.scale + viewport.centerX;
+	mouse.worldY = (mouse.y - canvas.height / 2) / viewport.scale + viewport.centerY;
 };
-const updateMouse = (event)=> {
+const updateMouse = (event) => {
 	mouse.x = event.offsetX;
 	mouse.y = event.offsetY;
 	updateMouseWorldPosition();
 };
-const brickUnderMouse = ()=> {
+const brickUnderMouse = () => {
 	for (const entity of entities) {
 		if (
 			!entity.fixed &&
@@ -335,7 +335,7 @@ const brickUnderMouse = ()=> {
 	}
 };
 
-const connects = (entity_a, entity_b, direction=0)=> {
+const connects = (entity_a, entity_b, direction = 0) => {
 	if (direction === 0) {
 		return connects(entity_a, entity_b, +1) || connects(entity_a, entity_b, -1);
 	}
@@ -347,7 +347,7 @@ const connects = (entity_a, entity_b, direction=0)=> {
 	);
 };
 
-const connectsToSomething = (entity, direction)=> {
+const connectsToSomething = (entity, direction) => {
 	if (direction === 0) {
 		return connectsToSomething(entity, +1) || connectsToSomething(entity, -1);
 	}
@@ -364,7 +364,7 @@ const connectsToSomething = (entity, direction)=> {
 	return false;
 };
 
-const possibleGrabs = ()=> {
+const possibleGrabs = () => {
 	const brick = brickUnderMouse();
 	if (!brick) {
 		return [];
@@ -374,7 +374,7 @@ const possibleGrabs = ()=> {
 		grabs.push(grabs.upward = [brick]);
 		return grabs;
 	}
-	const findAttached = (brick, direction, attached)=> {
+	const findAttached = (brick, direction, attached) => {
 		for (const entity of entities) {
 			if (
 				entity !== brick &&
@@ -393,7 +393,7 @@ const possibleGrabs = ()=> {
 		}
 		return true;
 	};
-	
+
 	const grabDownward = [brick];
 	const grabUpward = [brick];
 	const canGrabDownward = findAttached(brick, +1, grabDownward);
@@ -411,7 +411,7 @@ const possibleGrabs = ()=> {
 
 let pendingGrabs = [];
 let pendingGrabsMouseWorldX;
-const startGrab = (grab)=> {
+const startGrab = (grab) => {
 	dragging = [...grab];
 	for (const brick of dragging) {
 		brick.grabbed = true;
@@ -419,13 +419,13 @@ const startGrab = (grab)=> {
 			// x: brick.x - (15 * ~~(mouse.worldX/15)),
 			// y: brick.y - (18 * ~~(mouse.worldY/18)),
 			// so you can place blocks that were grabbed when they weren't on the grid:
-			x: (15 * ~~(brick.x/15)) - (15 * ~~(mouse.worldX/15)),
-			y: (18 * ~~(brick.y/18)) - (18 * ~~(mouse.worldY/18)),
+			x: (15 * ~~(brick.x / 15)) - (15 * ~~(mouse.worldX / 15)),
+			y: (18 * ~~(brick.y / 18)) - (18 * ~~(mouse.worldY / 18)),
 		};
 	}
 };
 
-canvas.addEventListener("mousemove", (event)=> {
+canvas.addEventListener("mousemove", (event) => {
 	updateMouse(event);
 	if (pendingGrabs.length) {
 		const threshold = 10;
@@ -443,7 +443,7 @@ canvas.addEventListener("mousemove", (event)=> {
 		}
 	}
 });
-canvas.addEventListener("mousedown", (event)=> {
+canvas.addEventListener("mousedown", (event) => {
 	updateMouse(event);
 	mouse.atDragStart = {
 		x: mouse.x,
@@ -460,9 +460,9 @@ canvas.addEventListener("mousedown", (event)=> {
 		}
 	}
 });
-addEventListener("mouseup", ()=> {
+addEventListener("mouseup", () => {
 	if (dragging.length) {
-		if(dragging.every((entity)=> {
+		if (dragging.every((entity) => {
 			for (const other_entity of entities) {
 				if (
 					!other_entity.grabbed &&
@@ -481,7 +481,7 @@ addEventListener("mouseup", ()=> {
 				}
 			}
 			return true;
-		}) && dragging.some((entity)=> {
+		}) && dragging.some((entity) => {
 			for (const other_entity of entities) {
 				if (
 					!other_entity.grabbed &&
@@ -494,7 +494,7 @@ addEventListener("mouseup", ()=> {
 			}
 			return false;
 		})) {
-			dragging.forEach((entity)=> {
+			dragging.forEach((entity) => {
 				entity.grabbed = false;
 				entity.grabOffset = null;
 			});
@@ -502,19 +502,19 @@ addEventListener("mouseup", ()=> {
 		}
 	}
 });
-canvas.addEventListener("mouseleave", ()=> {
+canvas.addEventListener("mouseleave", () => {
 	mouse.x = undefined;
 	mouse.y = undefined;
 });
-addEventListener("blur", ()=> {
+addEventListener("blur", () => {
 	mouse.x = undefined;
 	mouse.y = undefined;
 });
 
-const sortEntitiesForRendering = (entities)=> {
+const sortEntitiesForRendering = (entities) => {
 	// entities.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
 	// entities.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
-	entities.sort((a, b)=> {
+	entities.sort((a, b) => {
 		if (a.y + a.height <= b.y) {
 			return +1;
 		}
@@ -537,14 +537,14 @@ const sortEntitiesForRendering = (entities)=> {
 * @param {Array} a items An array containing the items.
 */
 function shuffle(a) {
-   for (let i = a.length - 1; i > 0; i--) {
-	   const j = Math.floor(Math.random() * (i + 1));
-	   [a[i], a[j]] = [a[j], a[i]];
-   }
-   return a;
+	for (let i = a.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[a[i], a[j]] = [a[j], a[i]];
+	}
+	return a;
 }
 
-const simulateGravity = ()=> {
+const simulateGravity = () => {
 	for (const entity of entities) {
 		if (!entity.fixed && !entity.grabbed) {
 			let settled = false;
@@ -559,13 +559,13 @@ const simulateGravity = ()=> {
 	}
 };
 
-const rectanglesIntersect = (a_x, a_y, a_w, a_h, b_x, b_y, b_w, b_h)=>
+const rectanglesIntersect = (a_x, a_y, a_w, a_h, b_x, b_y, b_w, b_h) =>
 	a_x + a_w > b_x &&
 	a_x < b_x + b_w &&
 	a_y + a_h > b_y &&
 	a_y < b_y + b_h;
 
-const junkbotCollisionTest = (junkbot_x, junkbot_y, irregular=false)=> {
+const junkbotCollisionTest = (junkbot_x, junkbot_y, irregular = false) => {
 	for (const other_entity of entities) {
 		if (
 			!other_entity.grabbed &&
@@ -598,7 +598,7 @@ const junkbotCollisionTest = (junkbot_x, junkbot_y, irregular=false)=> {
 	return false;
 };
 
-const simulateJunkbot = ()=> {
+const simulateJunkbot = () => {
 	// const posInFront = {x: junkbot.x + junkbot.facing, y: junkbot.y};
 	junkbot.timer += 1;
 	if (junkbot.timer % 3 > 0) {
@@ -606,7 +606,7 @@ const simulateJunkbot = ()=> {
 	}
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
-		const posInFront = {x: junkbot.x + junkbot.facing * 15, y: junkbot.y};
+		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
 		if (junkbotCollisionTest(junkbot.x, junkbot.y)) {
 			debugJunkbot("STUCK IN WALL - GO UP");
 			junkbot.y -= 18;
@@ -654,7 +654,7 @@ const simulateJunkbot = ()=> {
 	junkbot.animationFrame += 1;
 };
 
-const animate = ()=> {
+const animate = () => {
 	requestAnimationFrame(animate);
 
 	if (keys.KeyW || keys.ArrowUp) {
@@ -687,7 +687,7 @@ const animate = ()=> {
 	updateMouseWorldPosition();
 
 	// sort for gravity
-	entities.sort((a, b)=> b.y - a.y);
+	entities.sort((a, b) => b.y - a.y);
 	simulateGravity();
 	simulateJunkbot();
 
@@ -695,8 +695,8 @@ const animate = ()=> {
 
 	if (dragging.length) {
 		for (const brick of dragging) {
-			brick.x = 15 * ~~((mouse.worldX)/15) + brick.grabOffset.x;
-			brick.y = 18 * ~~((mouse.worldY)/18) + brick.grabOffset.y;
+			brick.x = 15 * ~~((mouse.worldX) / 15) + brick.grabOffset.x;
+			brick.y = 18 * ~~((mouse.worldY) / 18) + brick.grabOffset.y;
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
 	} else if (hovered.length >= 2) {
@@ -719,7 +719,7 @@ const animate = ()=> {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	ctx.save();
-	ctx.translate(canvas.width/2, canvas.height/2);
+	ctx.translate(canvas.width / 2, canvas.height / 2);
 	ctx.scale(viewport.scale, viewport.scale);
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
@@ -727,11 +727,11 @@ const animate = ()=> {
 	shuffle(entities);
 	sortEntitiesForRendering(entities);
 
-	const shouldHilight = (entity)=>
-	// dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[0].indexOf(entity) > -1;
+	const shouldHilight = (entity) =>
+		// dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[0].indexOf(entity) > -1;
 		// dragging.length ? dragging.indexOf(entity) > -1 : hovered.some((grab)=> grab.indexOf(entity) > -1);
-	dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[~~(Date.now()/500 % hovered.length)].indexOf(entity) > -1;
-	
+		dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[~~(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
+
 	for (const entity of entities) {
 		if (entity.type === "junkbot") {
 			drawJunkbot(ctx, entity, shouldHilight(entity));
@@ -775,7 +775,7 @@ ${debugInfoForFrame}`;
 	debugInfoForFrame = "";
 };
 
-const main = async ()=> {
+const main = async () => {
 	resources = await loadResources(resourcePaths);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
