@@ -50,15 +50,15 @@ const loadAtlasJSON = async (path) => {
 
 const loadLevelFromText = (levelData) => {
 	const sections = {};
-	let section_name = "";
+	let sectionName = "";
 	for (const line of levelData.split(/\r?\n/g)) {
 		if (!line.match(/^\s*(#.*)?$/)) {
 			const match = line.match(/^\[(.*)\]$/);
 			if (match) {
-				section_name = match[1];
+				sectionName = match[1];
 			} else {
-				sections[section_name] = sections[section_name] || [];
-				sections[section_name].push(line.split("="));
+				sections[sectionName] = sections[sectionName] || [];
+				sections[sectionName].push(line.split("="));
 			}
 		}
 	}
@@ -266,19 +266,19 @@ entities.push(
 const junkbot = makeJunkbot({ x: 15 * 9, y: 18 * -8, facing: 1 });
 entities.push(junkbot);
 
-let drop_from_row = 25;
+let dropFromRow = 25;
 const iid = setInterval(() => {
-	drop_from_row += 1;
+	dropFromRow += 1;
 	const brick = makeBrick({
 		// x: 15 * ~~(Math.random() * 9),
 		x: 15 * ~~(Math.sin(Date.now() / 400) * 9),
-		y: 18 * -drop_from_row,
+		y: 18 * -dropFromRow,
 		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
 		// widthInStuds: 2,
 		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
 	});
 	entities.push(brick);
-	if (drop_from_row > 100) {
+	if (dropFromRow > 100) {
 		clearInterval(iid);
 	}
 }, 200);
@@ -331,15 +331,14 @@ const brickUnderMouse = () => {
 	}
 };
 
-const connects = (entity_a, entity_b, direction = 0) => {
+const connects = (a, b, direction = 0) => {
 	if (direction === 0) {
-		return connects(entity_a, entity_b, +1) || connects(entity_a, entity_b, -1);
+		return connects(a, b, +1) || connects(a, b, -1);
 	}
 	return (
-		// entity_b.type === "brick" &&
-		(direction === 1 ? entity_b.y === entity_a.y + entity_a.height : entity_b.y + entity_b.height === entity_a.y) &&
-		entity_a.x + entity_a.width > entity_b.x &&
-		entity_a.x < entity_b.x + entity_b.width
+		(direction === 1 ? b.y === a.y + a.height : b.y + b.height === a.y) &&
+		a.x + a.width > b.x &&
+		a.x < b.x + b.width
 	);
 };
 
@@ -347,12 +346,12 @@ const connectsToSomething = (entity, direction) => {
 	if (direction === 0) {
 		return connectsToSomething(entity, +1) || connectsToSomething(entity, -1);
 	}
-	for (const other_entity of entities) {
+	for (const otherEntity of entities) {
 		if (
-			other_entity !== entity &&
-			!other_entity.grabbed &&
-			other_entity.type === "brick" &&
-			connects(entity, other_entity, direction)
+			otherEntity !== entity &&
+			!otherEntity.grabbed &&
+			otherEntity.type === "brick" &&
+			connects(entity, otherEntity, direction)
 		) {
 			return true;
 		}
@@ -458,18 +457,18 @@ canvas.addEventListener("mousedown", (event) => {
 addEventListener("mouseup", () => {
 	if (dragging.length) {
 		if (dragging.every((entity) => {
-			for (const other_entity of entities) {
+			for (const otherEntity of entities) {
 				if (
-					!other_entity.grabbed &&
+					!otherEntity.grabbed &&
 					rectanglesIntersect(
 						entity.x,
 						entity.y,
 						entity.width,
 						entity.height,
-						other_entity.x,
-						other_entity.y,
-						other_entity.width,
-						other_entity.height,
+						otherEntity.x,
+						otherEntity.y,
+						otherEntity.width,
+						otherEntity.height,
 					)
 				) {
 					return false;
@@ -477,12 +476,12 @@ addEventListener("mouseup", () => {
 			}
 			return true;
 		}) && dragging.some((entity) => {
-			for (const other_entity of entities) {
+			for (const otherEntity of entities) {
 				if (
-					!other_entity.grabbed &&
-					other_entity.type === "brick" &&
-					connects(entity, other_entity) &&
-					(other_entity.fixed || connectsToSomething(other_entity))
+					!otherEntity.grabbed &&
+					otherEntity.type === "brick" &&
+					connects(entity, otherEntity) &&
+					(otherEntity.fixed || connectsToSomething(otherEntity))
 				) {
 					return true;
 				}
@@ -554,36 +553,36 @@ const simulateGravity = () => {
 	}
 };
 
-const rectanglesIntersect = (a_x, a_y, a_w, a_h, b_x, b_y, b_w, b_h) =>
-	a_x + a_w > b_x &&
-	a_x < b_x + b_w &&
-	a_y + a_h > b_y &&
-	a_y < b_y + b_h;
+const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) =>
+	ax + aw > bx &&
+	ax < bx + bw &&
+	ay + ah > by &&
+	ay < by + bh;
 
-const junkbotCollisionTest = (junkbot_x, junkbot_y, irregular = false) => {
-	for (const other_entity of entities) {
+const junkbotCollisionTest = (junkbotX, junkbotY, irregular = false) => {
+	for (const otherEntity of entities) {
 		if (
-			!other_entity.grabbed &&
-			other_entity.type !== "junkbot" && (
+			!otherEntity.grabbed &&
+			otherEntity.type !== "junkbot" && (
 				rectanglesIntersect(
-					junkbot_x + (junkbot.facing === 1 ? 0 : 15),
-					junkbot_y,
+					junkbotX + (junkbot.facing === 1 ? 0 : 15),
+					junkbotY,
 					junkbot.width / 2,
 					junkbot.height,
-					other_entity.x,
-					other_entity.y,
-					other_entity.width,
-					other_entity.height,
+					otherEntity.x,
+					otherEntity.y,
+					otherEntity.width,
+					otherEntity.height,
 				) ||
 				rectanglesIntersect(
-					junkbot_x,
-					junkbot_y + 18 * irregular,
+					junkbotX,
+					junkbotY + 18 * irregular,
 					junkbot.width,
 					junkbot.height - 18 * irregular,
-					other_entity.x,
-					other_entity.y,
-					other_entity.width,
-					other_entity.height,
+					otherEntity.x,
+					otherEntity.y,
+					otherEntity.width,
+					otherEntity.height,
 				)
 			)
 		) {
@@ -664,19 +663,19 @@ const animate = () => {
 	if (keys.KeyD || keys.ArrowRight) {
 		viewport.centerX += 20;
 	}
-	const pan_margin_size = innerWidth * 0.07;
-	const pan_from_margin_speed = 10 * document.hasFocus();
-	if (mouse.y < pan_margin_size) {
-		viewport.centerY -= pan_from_margin_speed;
+	const panMarginSize = innerWidth * 0.07;
+	const panFromMarginSpeed = 10 * document.hasFocus();
+	if (mouse.y < panMarginSize) {
+		viewport.centerY -= panFromMarginSpeed;
 	}
-	if (mouse.y > canvas.height - pan_margin_size) {
-		viewport.centerY += pan_from_margin_speed;
+	if (mouse.y > canvas.height - panMarginSize) {
+		viewport.centerY += panFromMarginSpeed;
 	}
-	if (mouse.x < pan_margin_size) {
-		viewport.centerX -= pan_from_margin_speed;
+	if (mouse.x < panMarginSize) {
+		viewport.centerX -= panFromMarginSpeed;
 	}
-	if (mouse.x > canvas.width - pan_margin_size) {
-		viewport.centerX += pan_from_margin_speed;
+	if (mouse.x > canvas.width - panMarginSize) {
+		viewport.centerX += panFromMarginSpeed;
 	}
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 	updateMouseWorldPosition();
