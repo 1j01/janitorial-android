@@ -330,6 +330,19 @@ const brickUnderMouse = ()=> {
 		}
 	}
 };
+
+const connects = (entity_a, entity_b, direction=0)=> {
+	if (direction === 0) {
+		return connects(entity_a, entity_b, +1) || connects(entity_a, entity_b, -1);
+	}
+	return (
+		entity_b.type === "brick" &&
+		(direction === 1 ? entity_b.y === entity_a.y + entity_a.height : entity_b.y + entity_b.height === entity_a.y) &&
+		entity_a.x + entity_a.width > entity_b.x &&
+		entity_a.x < entity_b.x + entity_b.width
+	);
+}
+
 const possibleGrabs = ()=> {
 	const brick = brickUnderMouse();
 	if (!brick) {
@@ -343,19 +356,8 @@ const possibleGrabs = ()=> {
 		for (const entity of entities) {
 			if (
 				entity !== brick &&
-				entity.type === "brick" &&
 				!entity.fixed &&
-				(direction === 1 ? entity.y === brick.y + brick.height : entity.y + entity.height === brick.y) &&
-				rectanglesIntersect(
-					brick.x,
-					brick.y + direction,
-					brick.width,
-					brick.height,
-					entity.x,
-					entity.y,
-					entity.width,
-					entity.height,
-				)
+				connects(brick, entity, direction)
 			) {
 				attached.push(entity);
 				findAttached(entity, direction, attached);
@@ -415,6 +417,16 @@ addEventListener("mouseup", ()=> {
 				}
 			}
 			return true;
+		}) && dragging.some((entity)=> {
+			for (const other_entity of entities) {
+				if (
+					!other_entity.grabbed &&
+					connects(entity, other_entity)
+				) {
+					return true;
+				}
+			}
+			return false;
 		})) {
 			dragging.forEach((entity)=> {
 				entity.grabbed = false;
