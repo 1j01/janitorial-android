@@ -380,9 +380,13 @@ const possibleGrabs = ()=> {
 			) {
 				if (entity.fixed) {
 					attached.length = 0;
+					return;
 				} else {
 					attached.push(entity);
 					findAttached(entity, direction, attached);
+					if (attached.length === 0) {
+						return;
+					}
 				}
 			}
 		}
