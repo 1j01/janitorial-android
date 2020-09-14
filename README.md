@@ -7,10 +7,12 @@ Maybe somewhat of a Junkbot recreation?
 - Metroidvania
 	- Instead of abilities like Jump, you collect blocks like Jump Block
 - Gear systems
+- Machine that clones Junkbot
+	- You can win as long as one Junkbot remains
 - Ridable giant robots / cars?
-- Or could be more open world / sandbox-y
-	- Tetris area
-	- Pacman area with wrapping
+- Tetris area where you need to fix machinery that pushes the bottom four rows into trucks
+- Pacman area with wrapping
+- Dunkbot (basketball)
 - Convert LDraw models into pixel art [with Three.js](https://threejs.org/examples/?q=ldraw#webgl_loader_ldraw) and the proper perspective and lighting and postprocessing (selective outlining would be difficult)
 
 ## Development Setup
