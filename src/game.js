@@ -721,15 +721,16 @@ const animate = ()=> {
 	shuffle(entities);
 	sortEntities(entities);
 
-	const isDraggedOrHovered = (entity)=>
+	const shouldHilight = (entity)=>
+	// dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[0].indexOf(entity) > -1;
 		// dragging.length ? dragging.indexOf(entity) > -1 : hovered.some((grab)=> grab.indexOf(entity) > -1);
-		dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[0].indexOf(entity) > -1;
+	dragging.length ? dragging.indexOf(entity) > -1 : hovered[0] && hovered[~~(Date.now()/500 % hovered.length)].indexOf(entity) > -1;
 	
 	for (const entity of entities) {
 		if (entity.type === "junkbot") {
-			drawJunkbot(ctx, entity, isDraggedOrHovered(entity));
+			drawJunkbot(ctx, entity, shouldHilight(entity));
 		} else {
-			drawBrick(ctx, entity, isDraggedOrHovered(entity));
+			drawBrick(ctx, entity, shouldHilight(entity));
 		}
 	}
 
