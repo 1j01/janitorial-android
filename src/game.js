@@ -379,28 +379,28 @@ const possibleGrabs = ()=> {
 				connects(brick, entity, direction)
 			) {
 				if (entity.fixed) {
-					attached.length = 0;
-					return;
+					return false;
 				} else {
 					attached.push(entity);
-					findAttached(entity, direction, attached);
-					if (attached.length === 0) {
-						return;
+					const okay = findAttached(entity, direction, attached);
+					if (!okay) {
+						return false;
 					}
 				}
 			}
 		}
+		return true;
 	};
 	
 	const grabDownward = [brick];
 	const grabUpward = [brick];
-	findAttached(brick, +1, grabDownward);
-	findAttached(brick, -1, grabUpward);
-	if (grabDownward.length) {
+	const canGrabDownward = findAttached(brick, +1, grabDownward);
+	const canGrabUpward = findAttached(brick, -1, grabUpward);
+	if (canGrabDownward) {
 		grabs.push(grabDownward);
 		grabs.downward = grabDownward;
 	}
-	if (grabUpward.length) {
+	if (canGrabUpward) {
 		grabs.push(grabUpward);
 		grabs.upward = grabUpward;
 	}
