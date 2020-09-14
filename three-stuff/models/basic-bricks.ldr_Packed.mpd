@@ -380,39 +380,39 @@
 0
 
 1 1 0 -24 80 1 0 0 0 1 0 0 0 1 parts/3001.dat
-1 1 -80 -24 80 1 0 0 0 1 0 0 0 1 parts/3003.dat
+1 1 -160 -24 80 1 0 0 0 1 0 0 0 1 parts/3003.dat
 1 1 120 -24 80 1 0 0 0 1 0 0 0 1 parts/2456.dat
-1 1 -130 -24 80 0 0 1 0 1 0 -1 0 0 parts/3004.dat
+1 1 -210 -24 80 0 0 1 0 1 0 -1 0 0 parts/3004.dat
 1 1 480 -24 80 1 0 0 0 1 0 0 0 1 parts/3006.dat
 1 1 280 -24 80 1 0 0 0 1 0 0 0 1 parts/3007.dat
 1 14 0 -24 -60 1 0 0 0 1 0 0 0 1 parts/3001.dat
-1 14 -80 -24 -60 1 0 0 0 1 0 0 0 1 parts/3003.dat
+1 14 -160 -24 -60 1 0 0 0 1 0 0 0 1 parts/3003.dat
 1 14 120 -24 -60 1 0 0 0 1 0 0 0 1 parts/2456.dat
-1 14 -130 -24 -60 0 0 1 0 1 0 -1 0 0 parts/3004.dat
+1 14 -210 -24 -60 0 0 1 0 1 0 -1 0 0 parts/3004.dat
 1 14 480 -24 -60 1 0 0 0 1 0 0 0 1 parts/3006.dat
 1 14 280 -24 -60 1 0 0 0 1 0 0 0 1 parts/3007.dat
 1 71 0 -24 -200 1 0 0 0 1 0 0 0 1 parts/3001.dat
-1 71 -80 -24 -200 1 0 0 0 1 0 0 0 1 parts/3003.dat
+1 71 -160 -24 -200 1 0 0 0 1 0 0 0 1 parts/3003.dat
 1 71 120 -24 -200 1 0 0 0 1 0 0 0 1 parts/2456.dat
-1 71 -130 -24 -200 0 0 1 0 1 0 -1 0 0 parts/3004.dat
+1 71 -210 -24 -200 0 0 1 0 1 0 -1 0 0 parts/3004.dat
 1 71 480 -24 -200 1 0 0 0 1 0 0 0 1 parts/3006.dat
 1 71 280 -24 -200 1 0 0 0 1 0 0 0 1 parts/3007.dat
 1 15 0 -24 500 1 0 0 0 1 0 0 0 1 parts/3001.dat
-1 15 -80 -24 500 1 0 0 0 1 0 0 0 1 parts/3003.dat
+1 15 -160 -24 500 1 0 0 0 1 0 0 0 1 parts/3003.dat
 1 15 120 -24 500 1 0 0 0 1 0 0 0 1 parts/2456.dat
-1 15 -130 -24 500 0 0 1 0 1 0 -1 0 0 parts/3004.dat
+1 15 -210 -24 500 0 0 1 0 1 0 -1 0 0 parts/3004.dat
 1 15 480 -24 500 1 0 0 0 1 0 0 0 1 parts/3006.dat
 1 15 280 -24 500 1 0 0 0 1 0 0 0 1 parts/3007.dat
 1 4 0 -24 360 1 0 0 0 1 0 0 0 1 parts/3001.dat
-1 4 -80 -24 360 1 0 0 0 1 0 0 0 1 parts/3003.dat
+1 4 -160 -24 360 1 0 0 0 1 0 0 0 1 parts/3003.dat
 1 4 120 -24 360 1 0 0 0 1 0 0 0 1 parts/2456.dat
-1 4 -130 -24 360 0 0 1 0 1 0 -1 0 0 parts/3004.dat
+1 4 -210 -24 360 0 0 1 0 1 0 -1 0 0 parts/3004.dat
 1 4 480 -24 360 1 0 0 0 1 0 0 0 1 parts/3006.dat
 1 4 280 -24 360 1 0 0 0 1 0 0 0 1 parts/3007.dat
 1 2 0 -24 220 1 0 0 0 1 0 0 0 1 parts/3001.dat
-1 2 -80 -24 220 1 0 0 0 1 0 0 0 1 parts/3003.dat
+1 2 -160 -24 220 1 0 0 0 1 0 0 0 1 parts/3003.dat
 1 2 120 -24 220 1 0 0 0 1 0 0 0 1 parts/2456.dat
-1 2 -130 -24 220 0 0 1 0 1 0 -1 0 0 parts/3004.dat
+1 2 -210 -24 220 0 0 1 0 1 0 -1 0 0 parts/3004.dat
 1 2 480 -24 220 1 0 0 0 1 0 0 0 1 parts/3006.dat
 1 2 280 -24 220 1 0 0 0 1 0 0 0 1 parts/3007.dat
 1 71 980 -192 -200 1 0 0 0 1 0 0 0 1 parts/30646.dat
@@ -422,6 +422,80 @@
 1 71 1160 -312 -200 1 0 0 0 1 0 0 0 1 parts/91176.dat
 1 71 1360 -48 -200 1 0 0 0 1 0 0 0 1 parts/30518.dat
 1 71 920 -280 -200 1 0 0 0 1 0 0 0 1 parts/2580.dat
+1 4 -90 -24 360 1 0 0 0 1 0 0 0 1 parts/3002.dat
+1 15 -90 -24 500 1 0 0 0 1 0 0 0 1 parts/3002.dat
+1 2 -90 -24 220 1 0 0 0 1 0 0 0 1 parts/3002.dat
+1 1 -90 -24 80 1 0 0 0 1 0 0 0 1 parts/3002.dat
+1 14 -90 -24 -60 1 0 0 0 1 0 0 0 1 parts/3002.dat
+1 71 -90 -24 -200 1 0 0 0 1 0 0 0 1 parts/3002.dat
+
+0 FILE parts/3002.dat
+0 Brick  2 x  3
+0 Name: 3002.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Part UPDATE 2003-03
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2001-10-26 [PTadmin] Official Update 2001-01
+0 !HISTORY 2002-05-07 [unknown] BFC Certification
+0 !HISTORY 2002-06-11 [PTadmin] Official Update 2002-03
+0 !HISTORY 2003-07-03 [Steffen] Subfiled for patterns
+0 !HISTORY 2003-12-19 [PTadmin] Official Update 2003-03
+0 !HISTORY 2007-05-07 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 parts/s/3002s01.dat
+4 16 -30 0 -20 -30 24 -20 30 24 -20 30 0 -20
+0
+
+0 FILE parts/s/3002s01.dat
+0 ~Brick  2 x  3 without Front Face
+0 Name: s\3002s01.dat
+0 Author: James Jessiman
+0 !LDRAW_ORG Subpart UPDATE 2003-03
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 BFC CERTIFY CCW
+
+0 !HISTORY 2002-05-07 [unknown] BFC Certification
+0 !HISTORY 2003-07-03 [Steffen] Subfiled for patterns
+0 !HISTORY 2003-12-19 [PTadmin] Official Update 2003-03
+0 !HISTORY 2007-08-29 [PTadmin] Header formatted for Contributor Agreement
+0 !HISTORY 2008-07-01 [PTadmin] Official Update 2008-01
+
+1 16 10 4 0 1 0 0 0 -5 0 0 0 1 p/stud4.dat
+1 16 -10 4 0 1 0 0 0 -5 0 0 0 1 p/stud4.dat
+0 BFC INVERTNEXT
+1 16 0 24 0 26 0 0 0 -20 0 0 0 16 p/box5.dat
+4 16 30 24 20 26 24 16 -26 24 16 -30 24 20
+4 16 -30 24 20 -26 24 16 -26 24 -16 -30 24 -20
+4 16 -30 24 -20 -26 24 -16 26 24 -16 30 24 -20
+4 16 30 24 -20 26 24 -16 26 24 16 30 24 20
+2 24 30 0 20 -30 0 20
+2 24 -30 0 20 -30 0 -20
+2 24 -30 0 -20 30 0 -20
+2 24 30 0 -20 30 0 20
+2 24 30 24 20 -30 24 20
+2 24 -30 24 20 -30 24 -20
+2 24 -30 24 -20 30 24 -20
+2 24 30 24 -20 30 24 20
+2 24 30 24 20 30 0 20
+2 24 -30 24 20 -30 0 20
+2 24 30 24 -20 30 0 -20
+2 24 -30 24 -20 -30 0 -20
+4 16 -30 0 -20 30 0 -20 30 0 20 -30 0 20
+4 16 30 0 20 30 24 20 -30 24 20 -30 0 20
+4 16 -30 0 20 -30 24 20 -30 24 -20 -30 0 -20
+4 16 30 0 -20 30 24 -20 30 24 20 30 0 20
+1 16 20 0 10 1 0 0 0 1 0 0 0 1 p/stud.dat
+1 16 0 0 10 1 0 0 0 1 0 0 0 1 p/stud.dat
+1 16 -20 0 10 1 0 0 0 1 0 0 0 1 p/stud.dat
+1 16 20 0 -10 1 0 0 0 1 0 0 0 1 p/stud.dat
+1 16 0 0 -10 1 0 0 0 1 0 0 0 1 p/stud.dat
+1 16 -20 0 -10 1 0 0 0 1 0 0 0 1 p/stud.dat
+0
 
 0 FILE parts/30518.dat
 0 Support  2 x 16 x  2 Girder Triangular
