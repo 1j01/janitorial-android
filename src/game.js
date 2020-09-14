@@ -349,7 +349,68 @@ const connects = (a, b, direction = 0) => {
 	);
 };
 
-const connectsToSomething = (entity, direction) => {
+const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
+	const connectedToFixed = [];
+	// for (const entity of entities) {
+	// 	if (
+	// 		ignoreEntities.indexOf(entity) === -1 &&
+	// 		entity.fixed
+	// 	) {
+	// 		connectedToFixed.push(entity);
+	// 	}
+	// }
+	const addAnyAttached = (entity) => {
+		for (const otherEntity of entities) {
+			if (
+				ignoreEntities.indexOf(otherEntity) === -1 &&
+				connectedToFixed.indexOf(otherEntity) === -1
+			) {
+				if (connects(entity, otherEntity)) {
+					connectedToFixed.push(otherEntity);
+					addAnyAttached(otherEntity);
+				}
+			}
+		}
+	};
+	for (const entity of entities) {
+		if (
+			ignoreEntities.indexOf(entity) === -1 &&
+			connectedToFixed.indexOf(entity) === -1
+		) {
+			if (entity.fixed) {
+				connectedToFixed.push(entity);
+				addAnyAttached(entity);
+			}
+		}
+	}
+	return connectedToFixed;
+};
+
+const connectsToFixed = (entity, { ignoreEntities = [] } = {}) => {
+	// if (direction === 0) {
+	// 	return connectsToFixed(entity, +1) || connectsToFixed(entity, -1);
+	// }
+	// const connectedToFixed = [];
+	// for (const otherEntity of entities) {
+	// 	if (
+	// 		otherEntity !== entity &&
+	// 		!otherEntity.grabbed &&
+	// 		otherEntity.type === "brick" &&
+	// 		connects(entity, otherEntity, direction) &&
+	// 		ignoreEntities.indexOf(entity) === -1
+	// 	) {
+	// 		if (otherEntity.fixed) {
+	// 			return true;
+	// 		} else {
+	// 			return connectsToFixed();
+	// 		}
+	// 	}
+	// }
+	// return false;
+	return allConnectedToFixed({ ignoreEntities }).indexOf(entity) !== -1;
+};
+
+const connectsToSomething = (entity, direction, ignoreEntities = []) => {
 	if (direction === 0) {
 		return connectsToSomething(entity, +1) || connectsToSomething(entity, -1);
 	}
@@ -358,7 +419,8 @@ const connectsToSomething = (entity, direction) => {
 			otherEntity !== entity &&
 			!otherEntity.grabbed &&
 			otherEntity.type === "brick" &&
-			connects(entity, otherEntity, direction)
+			connects(entity, otherEntity, direction) &&
+			ignoreEntities.indexOf(entity) === -1
 		) {
 			return true;
 		}
@@ -367,7 +429,7 @@ const connectsToSomething = (entity, direction) => {
 };
 
 const possibleGrabs = () => {
-	const findAttached = (brick, direction, attached) => {
+	const findAttached = (brick, direction, attached, topLevel) => {
 		for (const entity of entities) {
 			if (
 				entity !== brick &&
@@ -380,6 +442,21 @@ const possibleGrabs = () => {
 					const okay = findAttached(entity, direction, attached);
 					if (!okay) {
 						return false;
+					}
+				}
+			}
+		}
+		if (topLevel) {
+			for (const brick of attached) {
+				for (const entity of entities) {
+					if (attached.indexOf(entity) === -1) {
+						if (connects(brick, entity)) {
+							if (!entity.fixed && entity.type === "brick") {
+								if (!connectsToFixed(entity, { ignoreEntities: attached })) {
+									attached.push(entity);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -399,8 +476,8 @@ const possibleGrabs = () => {
 
 	const grabDownward = [brick];
 	const grabUpward = [brick];
-	const canGrabDownward = findAttached(brick, +1, grabDownward);
-	const canGrabUpward = findAttached(brick, -1, grabUpward);
+	const canGrabDownward = findAttached(brick, +1, grabDownward, true);
+	const canGrabUpward = findAttached(brick, -1, grabUpward, true);
 	if (canGrabDownward) {
 		grabs.push(grabDownward);
 		grabs.downward = grabDownward;
@@ -464,6 +541,9 @@ canvas.addEventListener("mousedown", (event) => {
 });
 addEventListener("mouseup", () => {
 	if (dragging.length) {
+
+		const connectedToFixed = allConnectedToFixed();
+
 		if (dragging.every((entity) => {
 			for (const otherEntity of entities) {
 				if (
@@ -491,7 +571,7 @@ addEventListener("mouseup", () => {
 					if (
 						!otherEntity.grabbed &&
 						otherEntity.type === "brick" &&
-						(otherEntity.fixed || connectsToSomething(otherEntity))
+						connectedToFixed.indexOf(otherEntity) !== -1
 					) {
 						if (connects(entity, otherEntity, -1)) {
 							connectsToCeiling = true;
@@ -735,7 +815,7 @@ const animate = () => {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	ctx.save();
+	ctx.save(); // world viewport
 	ctx.translate(canvas.width / 2, canvas.height / 2);
 	ctx.scale(viewport.scale, viewport.scale);
 	ctx.translate(-viewport.centerX, -viewport.centerY);
@@ -761,22 +841,18 @@ const animate = () => {
 		}
 	}
 
-	// for (const grab of hovered) {
-	// 	sortEntitiesForRendering(grab);
-	// 	ctx.save();
-	// 	// ctx.translate(Math.sin(Date.now()/10) * 1, Math.cos(Date.now()/10) * 1);
-	// 	for (const entity of grab) {
-	// 		if (entity.type === "junkbot") {
-	// 			// drawJunkbot(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
-	// 		} else {
-	// 			drawBrick(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
-	// 		}
+	// const connectedToFixed = allConnectedToFixed({ ignoreEntities: [brickUnderMouse() || {}] });
+	// sortEntitiesForRendering(connectedToFixed);
+	// ctx.save(); // shake
+	// ctx.translate(Math.sin(Date.now() / 10), Math.cos(Date.now() / 10));
+	// for (const entity of connectedToFixed) {
+	// 	if (entity.type === "brick") {
+	// 		drawBrick(ctx, entity);
 	// 	}
-	// 	ctx.restore();
-	// 	break;
 	// }
+	// ctx.restore(); // shake
 
-	ctx.restore();
+	ctx.restore(); // world viewport
 
 	// ctx.drawImage(images.font, 0, 90);
 	// drawText(ctx, fontChars, 0, 100, "sand");
