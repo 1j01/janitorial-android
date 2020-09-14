@@ -203,12 +203,13 @@ const drawBrick = (ctx, brick, isHovered)=> {
 	const h = 35; // sprite row height
 	ctx.globalAlpha = brick.grabbed ? 0.8 : 1;
 	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * h + 9, w, h, x, y - 15, w, h);
-	// if (isHovered) {
-	// 	ctx.save();
-	// 	ctx.globalCompositeOperation = "multiply";
-	// 	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex.white * h + 9, w, h, x, y - 15, w, h);
-	// 	ctx.restore();
-	// }
+	if (isHovered) {
+		ctx.save();
+		ctx.globalAlpha = 0.5;
+		// ctx.globalCompositeOperation = "multiply";
+		ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, x, y - 15, w, h);
+		ctx.restore();
+	}
 	ctx.globalAlpha = 1;
 };
 
@@ -684,7 +685,7 @@ const animate = ()=> {
 	for (const grab of hovered) {
 		sortEntities(grab);
 		ctx.save();
-		ctx.translate(Math.sin(Date.now()/10) * 1, Math.cos(Date.now()/10) * 1);
+		// ctx.translate(Math.sin(Date.now()/10) * 1, Math.cos(Date.now()/10) * 1);
 		for (const entity of grab) {
 			if (entity.type === "junkbot") {
 				// drawJunkbot(ctx, entity, dragging.length ? dragging.indexOf(entity) > -1 : brickUnderMouse() === entity, true);
