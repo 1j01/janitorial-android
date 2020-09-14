@@ -383,22 +383,45 @@ const possibleGrabs = ()=> {
 canvas.addEventListener("mousemove", updateMouse);
 canvas.addEventListener("mousedown", (event)=> {
 	updateMouse(event);
-	const grabs = possibleGrabs();
-	if (grabs.length > 0) {
-		dragging = [...grabs[0]];
-		for (const brick of dragging) {
-			brick.grabbed = true;
-			brick.grabOffset = {x: brick.x - mouse.worldX, y: brick.y - mouse.worldY};
+	if (dragging.length === 0) {
+		const grabs = possibleGrabs();
+		if (grabs.length > 0) {
+			dragging = [...grabs[0]];
+			for (const brick of dragging) {
+				brick.grabbed = true;
+				brick.grabOffset = {x: brick.x - mouse.worldX, y: brick.y - mouse.worldY};
+			}
 		}
 	}
 });
 addEventListener("mouseup", ()=> {
 	if (dragging.length) {
-		dragging.forEach((entity)=> {
-			entity.grabbed = false;
-			entity.grabOffset = null;
-		});
-		dragging = [];
+		if(dragging.every((entity)=> {
+			for (const other_entity of entities) {
+				if (
+					!other_entity.grabbed &&
+					rectanglesIntersect(
+						entity.x,
+						entity.y,
+						entity.width,
+						entity.height,
+						other_entity.x,
+						other_entity.y,
+						other_entity.width,
+						other_entity.height,
+					)
+				) {
+					return false;
+				}
+			}
+			return true;
+		})) {
+			dragging.forEach((entity)=> {
+				entity.grabbed = false;
+				entity.grabOffset = null;
+			});
+			dragging = [];
+		}
 	}
 });
 canvas.addEventListener("mouseleave", ()=> {
