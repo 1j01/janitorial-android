@@ -89,7 +89,7 @@ const loadResources = async (resourcePathsByID) => {
 		} else if (path.match(/levels\/.*\.txt$/)) {
 			return loadLevelFromTextFile(path).then((level) => [id, level]);
 		} else {
-			return loadImage(path).then((image) => [id, image]);;
+			return loadImage(path).then((image) => [id, image]);
 		}
 	})));
 };
@@ -312,7 +312,7 @@ addEventListener("keyup", (event) => {
 let mouse = { x: undefined, y: undefined };
 let dragging = [];
 
-const updateMouseWorldPosition = (event) => {
+const updateMouseWorldPosition = () => {
 	mouse.worldX = (mouse.x - canvas.width / 2) / viewport.scale + viewport.centerX;
 	mouse.worldY = (mouse.y - canvas.height / 2) / viewport.scale + viewport.centerY;
 };
@@ -410,7 +410,6 @@ const possibleGrabs = () => {
 };
 
 let pendingGrabs = [];
-let pendingGrabsMouseWorldX;
 const startGrab = (grab) => {
 	dragging = [...grab];
 	for (const brick of dragging) {
