@@ -229,12 +229,12 @@ const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 	};
 };
 
-const drawBrick = (ctx, brick, isHovered) => {
+const drawBrick = (ctx, brick, hilight) => {
 	const { x, y, widthInStuds, colorName } = brick;
 	const w = widthInStuds * 15 + 15; // sprite width
 	const h = 35; // sprite row height
 	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * h + 9, w, h, x, y - 15, w, h);
-	if (isHovered) {
+	if (hilight) {
 		ctx.save();
 		ctx.globalAlpha = 0.5;
 		ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, x, y - 15, w, h);
@@ -242,13 +242,23 @@ const drawBrick = (ctx, brick, isHovered) => {
 	}
 };
 
-const drawJunkbot = (ctx, junkbot) => {
+const drawJunkbot = (ctx, junkbot, hilight) => {
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(junkbot.animationFrame % 10)}`];
 	const [left, top, width, height] = frame.bounds;
 	if (junkbot.facing === 1) {
 		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x - width + 41, junkbot.y + junkbot.height - 1 - height, width, height);
 	} else {
 		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x, junkbot.y + junkbot.height - 1 - height, width, height);
+	}
+	if (hilight) {
+		ctx.save();
+		ctx.globalAlpha = 0.5;
+		const w = 2 * 15 + 15; // sprite width
+		const h = 35; // sprite row height
+		for (let iy = 0; iy < junkbot.height; iy += 18) {
+			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[2], (brickColorToYIndex.gray + 1) * h + 9, w, h, junkbot.x, junkbot.y - 15 + iy, w, h);
+		}
+		ctx.restore();
 	}
 };
 
@@ -350,6 +360,8 @@ canvas.addEventListener("mouseleave", () => {
 
 const mouse = { x: undefined, y: undefined };
 let dragging = [];
+let selectionBox;
+// let selectionBox = { x1: undefined, y1: undefined, x2: undefined, y2: undefined };
 
 const updateMouseWorldPosition = () => {
 	mouse.worldX = (mouse.x - canvas.width / 2) / viewport.scale + viewport.centerX;
@@ -360,10 +372,10 @@ const updateMouse = (event) => {
 	mouse.y = event.offsetY;
 	updateMouseWorldPosition();
 };
-const brickUnderMouse = () => {
+const brickUnderMouse = (includeFixed) => {
 	for (const entity of entities) {
 		if (
-			!entity.fixed &&
+			(includeFixed || !entity.fixed) &&
 			entity.x < mouse.worldX &&
 			entity.x + entity.width > mouse.worldX &&
 			entity.y < mouse.worldY &&
@@ -483,11 +495,15 @@ const possibleGrabs = () => {
 		return true;
 	};
 
-	const brick = brickUnderMouse();
+	const brick = brickUnderMouse() || brickUnderMouse(true);
 	if (!brick) {
 		return [];
 	}
 	const grabs = [];
+	if (brick.selected) {
+		grabs.push(grabs.selection = entities.filter((entity)=> entity.selected));
+		return grabs;
+	}
 	if (keys.ControlLeft || keys.ControlRight) {
 		grabs.push(grabs.upward = [brick]);
 		return grabs;
@@ -543,6 +559,9 @@ canvas.addEventListener("mousemove", (event) => {
 			startGrab(pendingGrabs.downward);
 			pendingGrabs = [];
 		}
+	} else if (selectionBox) {
+		selectionBox.x2 = mouse.worldX;
+		selectionBox.y2 = mouse.worldY;
 	}
 });
 canvas.addEventListener("mousedown", (event) => {
@@ -561,9 +580,37 @@ canvas.addEventListener("mousedown", (event) => {
 		} else if (grabs.length) {
 			pendingGrabs = grabs;
 			playSound(resources.blockClick);
+		} else if (event.ctrlKey) {
+			selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
+			playSound(resources.blockClick);
+		}
+		if (!grabs.selection) {
+			for (const entity of entities) {
+				entity.selected = false;
+			}
 		}
 	}
 });
+
+const entitiesWithinSelection = ()=> {
+	const minX = Math.min(selectionBox.x1, selectionBox.x2);
+	const maxX = Math.max(selectionBox.x1, selectionBox.x2);
+	const minY = Math.min(selectionBox.y1, selectionBox.y2);
+	const maxY = Math.max(selectionBox.y1, selectionBox.y2);
+	return entities.filter((entity)=> (
+		rectanglesIntersect(
+			entity.x,
+			entity.y,
+			entity.width,
+			entity.height,
+			minX,
+			minY,
+			maxX - minX,
+			maxY - minY,
+		)
+	));
+};
+
 const canRelease = () => {
 	if (keys.ControlLeft || keys.ControlRight) {
 		return true;
@@ -625,6 +672,11 @@ addEventListener("mouseup", () => {
 			dragging = [];
 			playSound(resources.blockDrop);
 		}
+	} else if (selectionBox) {
+		entitiesWithinSelection().forEach((entity)=> {
+			entity.selected = true;	
+		});
+		selectionBox = null;
 	}
 });
 
@@ -842,6 +894,8 @@ const animate = () => {
 		canvas.style.cursor = `url("images/cursors/cursor-grab-upward.png") 8 8, grab`;
 	} else if (hovered.downward) {
 		canvas.style.cursor = `url("images/cursors/cursor-grab-downward.png") 8 8, grab`;
+	} else if (hovered.length) {
+		canvas.style.cursor = `url("images/cursors/cursor-grab.png") 8 8, grab`;
 	} else {
 		canvas.style.cursor = "default";
 	}
@@ -866,7 +920,7 @@ const animate = () => {
 	sortEntitiesForRendering(entities);
 
 	const shouldHilight = (entity) => {
-		return false;
+		return entity.selected;
 		// if (dragging.length) {
 		// 	return dragging.indexOf(entity) > -1;
 		// }
@@ -878,7 +932,7 @@ const animate = () => {
 	for (const entity of entities) {
 		ctx.globalAlpha = entity.grabbed ? placeable ? 0.8 : 0.3 : 1;
 		if (entity.type === "junkbot") {
-			drawJunkbot(ctx, entity);
+			drawJunkbot(ctx, entity, shouldHilight(entity));
 		} else {
 			drawBrick(ctx, entity, shouldHilight(entity));
 		}
@@ -895,6 +949,21 @@ const animate = () => {
 	// 	}
 	// }
 	// ctx.restore(); // shake
+
+	if (selectionBox) {
+		ctx.save()
+		ctx.beginPath()
+		if (viewport.scale === 1) {
+			ctx.translate(0.5, 0.5)
+		}
+		ctx.rect(selectionBox.x1, selectionBox.y1, selectionBox.x2 - selectionBox.x1, selectionBox.y2 - selectionBox.y1)
+		ctx.fillStyle = "rgba(0, 155, 255, 0.1)"
+		ctx.strokeStyle = "rgba(0, 155, 255, 0.8)"
+		ctx.lineWidth = 1 / viewport.scale
+		ctx.fill()
+		ctx.stroke()
+		ctx.restore()
+	}
 
 	ctx.restore(); // world viewport
 
