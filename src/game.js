@@ -621,7 +621,7 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 	for (const otherEntity of entities) {
 		if (
 			!otherEntity.grabbed &&
-			otherEntity.type !== "junkbot" && (
+			otherEntity !== junkbot && (
 				rectanglesIntersect(
 					junkbotX + (junkbot.facing === 1 ? 0 : 15),
 					junkbotY,
