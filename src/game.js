@@ -441,6 +441,9 @@ const viewport = { centerX: 0, centerY: 0, scale: 2 };
 
 let keys = {};
 addEventListener("keydown", (event) => {
+	if (event.defaultPrevented) {
+		return; // Do nothing if the event was already processed
+	}
 	if (event.target.tagName.match(/input|textarea|select|button/i)) {
 		return;
 	}
@@ -454,15 +457,15 @@ addEventListener("keydown", (event) => {
 	if (event.code === "Minus" || event.code === "NumpadSubtract") {
 		viewport.scale = Math.max(1, viewport.scale - 1);
 	}
-	switch (event.keyCode) {
-		// case 32: // Space
-		// case 80: // P
+	switch (event.key.toUpperCase()) {
+		// case " ": // Spacebar
+		// case "P":
 		// 	toggleEditing();
 		// 	break;
-		case 46: // Delete
+		case "DELETE":
 			deleteSelected();
 			break;
-		case 90: // Z
+		case "Z":
 			if (event.ctrlKey) {
 				if (event.shiftKey) {
 					redo();
@@ -471,22 +474,26 @@ addEventListener("keydown", (event) => {
 				}
 			}
 			break;
-		case 89: // Y
+		case "Y":
 			if (event.ctrlKey) { redo(); }
 			break;
-		case 88: // X
+		case "X":
 			if (event.ctrlKey) { cutSelected(); }
 			break;
-		case 67: // C
+		case "C":
 			if (event.ctrlKey) { copySelected(); }
 			break;
-		case 86: // V
+		case "V":
 			if (event.ctrlKey) { paste(); }
 			break;
-		case 65: // A
+		case "A":
 			if (event.ctrlKey) { selectAll(); }
 			break;
+		default:
+			// Prevent preventing default action if event not handled
+			return;
 	}
+	event.preventDefault();
 });
 addEventListener("keyup", (event) => {
 	delete keys[event.code];
