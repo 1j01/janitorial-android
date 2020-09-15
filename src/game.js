@@ -654,7 +654,7 @@ const possibleGrabs = () => {
 		grabs.push(grabs.upward = [brick]);
 		return grabs;
 	}
-	if (brick.type !== "brick") {
+	if (brick.type !== "brick" || brick.fixed) {
 		return [];
 	}
 
