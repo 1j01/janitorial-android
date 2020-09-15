@@ -686,10 +686,10 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 				)
 			)
 		) {
-			return true;
+			return otherEntity;
 		}
 	}
-	return false;
+	return null;
 };
 
 const simulateJunkbot = (junkbot) => {
@@ -697,13 +697,16 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.timer % 3 > 0) {
 		return;
 	}
+	const inside = junkbotCollisionTest(junkbot.x, junkbot.y, junkbot);
+	if (inside) {
+		debugJunkbot("STUCK IN WALL - GO UP");
+		junkbot.y = inside.y - junkbot.height;
+		return;
+	}
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-		if (junkbotCollisionTest(junkbot.x, junkbot.y, junkbot)) {
-			debugJunkbot("STUCK IN WALL - GO UP");
-			junkbot.y -= 18;
-		} else if (junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true)) {
+		if (junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true)) {
 			// can we step up?
 			posInFront.y -= 18;
 			if (!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot)) {
