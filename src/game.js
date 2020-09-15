@@ -3,6 +3,9 @@ const ctx = canvas.getContext("2d");
 
 document.body.append(canvas);
 
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+const context = new AudioContext();
+
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
 // const debug = (text) => {
@@ -24,6 +27,11 @@ const resourcePaths = {
 	actorsAtlas: "images/actors-atlas.json",
 	coloredBlocks: "images/colored-blocks.png",
 	font: "images/font.png",
+	turn: "audio/sound-effects/turn1.ogg",
+	blockPickUp: "audio/sound-effects/blockpickup.ogg",
+	blockDrop: "audio/sound-effects/blockdrop.ogg",
+	blockClick: "audio/sound-effects/blockclick.ogg",
+	fall: "audio/sound-effects/fall.ogg",
 };
 
 const loadImage = (imagePath) => {
@@ -84,6 +92,15 @@ const loadLevelFromTextFile = async (path) => {
 	return loadLevelFromText(await loadTextFile(path));
 };
 
+const loadSound = async (path) => {
+	const response = await fetch(path);
+	if (response.ok) {
+		return await context.decodeAudioData(await response.arrayBuffer());
+	} else {
+		throw new Error(`got HTTP ${response.status} fetching '${path}'`);
+	}
+};
+
 const loadResources = async (resourcePathsByID) => {
 	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path]) => {
 		if (path.match(/atlas\.json$/)) {
@@ -92,10 +109,19 @@ const loadResources = async (resourcePathsByID) => {
 			return loadJSON(path).then((json) => [id, json]);
 		} else if (path.match(/levels\/.*\.txt$/)) {
 			return loadLevelFromTextFile(path).then((level) => [id, level]);
+		} else if (path.match(/\.(ogg|mp3|wav)$/)) {
+			return loadSound(path).then((audioBuffer) => [id, audioBuffer]);
 		} else {
 			return loadImage(path).then((image) => [id, image]);
 		}
 	})));
+};
+
+const playSound = (audioBuffer) => {
+	var source = context.createBufferSource();
+	source.buffer = audioBuffer;
+	source.connect(context.destination);
+	source.start(0);
 };
 
 let resources;
@@ -480,6 +506,7 @@ const startGrab = (grab) => {
 			y: (18 * ~~(brick.y / 18)) - (18 * ~~(mouse.worldY / 18)),
 		};
 	}
+	playSound(resources.blockPickUp);
 };
 
 canvas.addEventListener("mousemove", (event) => {
@@ -512,8 +539,10 @@ canvas.addEventListener("mousedown", (event) => {
 		const grabs = possibleGrabs();
 		if (grabs.length === 1) {
 			startGrab(grabs[0]);
-		} else {
+			playSound(resources.blockClick);
+		} else if (grabs.length) {
 			pendingGrabs = grabs;
+			playSound(resources.blockClick);
 		}
 	}
 });
@@ -576,6 +605,7 @@ addEventListener("mouseup", () => {
 				entity.grabOffset = null;
 			});
 			dragging = [];
+			playSound(resources.blockDrop);
 		}
 	}
 });
@@ -685,6 +715,7 @@ const simulateJunkbot = (junkbot) => {
 				// reached wall; turn around
 				debugJunkbot("WALL - TURN AROUND");
 				junkbot.facing *= -1;
+				playSound(resources.turn);
 			}
 		} else {
 			// is there solid ground ahead to walk on?
@@ -700,6 +731,7 @@ const simulateJunkbot = (junkbot) => {
 				} else {
 					debugJunkbot("NOPE");
 					junkbot.facing *= -1;
+					playSound(resources.turn);
 				}
 			} else {
 				// can we step down?
@@ -716,6 +748,7 @@ const simulateJunkbot = (junkbot) => {
 					// reached cliff/ledge/edge/precipice or wall would bonk head; turn around
 					debugJunkbot("CLIFF/WALL - TURN AROUND");
 					junkbot.facing *= -1;
+					playSound(resources.turn);
 				}
 			}
 		}
