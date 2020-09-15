@@ -787,7 +787,8 @@ const animate = () => {
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
 
-	shuffle(entities);
+	// for debug: shows where the sorting can in SOME CASES fail
+	// shuffle(entities);
 	sortEntitiesForRendering(entities);
 
 	const shouldHilight = (entity) => {
