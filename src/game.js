@@ -371,7 +371,7 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 	return connectedToFixed;
 };
 
-const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
+const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {}) => {
 	const visited = [];
 	const search = (fromEntity) => {
 		for (const otherEntity of entities) {
@@ -380,7 +380,7 @@ const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
 				ignoreEntities.indexOf(otherEntity) === -1 &&
 				visited.indexOf(otherEntity) === -1
 			) {
-				if (connects(fromEntity, otherEntity)) {
+				if (connects(fromEntity, otherEntity, fromEntity === startEntity ? direction : 0)) {
 					visited.push(otherEntity);
 					if (otherEntity.fixed) {
 						return true;
@@ -393,7 +393,7 @@ const connectsToFixed = (fromEntity, { ignoreEntities = [] } = {}) => {
 		}
 		return false;
 	};
-	return search(fromEntity);
+	return search(startEntity);
 };
 
 const possibleGrabs = () => {
@@ -617,7 +617,7 @@ const simulateGravity = () => {
 	for (const entity of entities) {
 		if (!entity.fixed && !entity.grabbed) {
 			let settled = false;
-			if (connectsToFixed(entity, entity.type === "brick" ? 0 : 1)) {
+			if (connectsToFixed(entity, { direction: entity.type === "brick" ? 0 : 1 })) {
 				settled = true;
 			}
 			if (!settled) {
