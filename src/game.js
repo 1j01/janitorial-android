@@ -311,7 +311,7 @@ const iid = setInterval(() => {
 
 const viewport = { centerX: 0, centerY: 0, scale: 2 };
 
-const keys = {};
+let keys = {};
 addEventListener("keydown", (event) => {
 	keys[event.code] = true;
 	if (event.key.match(/^Arrow/)) {
@@ -329,6 +329,9 @@ addEventListener("keyup", (event) => {
 	if (event.key.match(/^Arrow/)) {
 		delete keys[event.key];
 	}
+});
+addEventListener("blur", () => {
+	keys = {};
 });
 
 const mouse = { x: undefined, y: undefined };
