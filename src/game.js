@@ -683,6 +683,7 @@ const possibleGrabs = () => {
 
 let pendingGrabs = [];
 const startGrab = (grab) => {
+	undoable();
 	dragging = [...grab];
 	for (const brick of dragging) {
 		brick.grabbed = true;
@@ -825,6 +826,7 @@ addEventListener("mouseup", () => {
 			});
 			dragging = [];
 			playSound(resources.blockDrop);
+			save();
 		}
 	} else if (selectionBox) {
 		entitiesWithinSelection().forEach((entity) => {
