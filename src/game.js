@@ -1003,17 +1003,19 @@ const simulateJunkbot = (junkbot) => {
 const animate = () => {
 	requestAnimationFrame(animate);
 
-	if (keys.KeyW || keys.ArrowUp) {
-		viewport.centerY -= 20;
-	}
-	if (keys.KeyS || keys.ArrowDown) {
-		viewport.centerY += 20;
-	}
-	if (keys.KeyA || keys.ArrowLeft) {
-		viewport.centerX -= 20;
-	}
-	if (keys.KeyD || keys.ArrowRight) {
-		viewport.centerX += 20;
+	if (!keys.ControlLeft && !keys.ControlRight) {
+		if (keys.KeyW || keys.ArrowUp) {
+			viewport.centerY -= 20;
+		}
+		if (keys.KeyS || keys.ArrowDown) {
+			viewport.centerY += 20;
+		}
+		if (keys.KeyA || keys.ArrowLeft) {
+			viewport.centerX -= 20;
+		}
+		if (keys.KeyD || keys.ArrowRight) {
+			viewport.centerX += 20;
+		}
 	}
 	const panMarginSize = Math.min(innerWidth, innerHeight) * 0.07;
 	const panFromMarginSpeed = 10 * document.hasFocus();
