@@ -233,17 +233,16 @@ const drawBrick = (ctx, brick, isHovered) => {
 	const { x, y, widthInStuds, colorName } = brick;
 	const w = widthInStuds * 15 + 15; // sprite width
 	const h = 35; // sprite row height
-	ctx.globalAlpha = brick.grabbed ? 0.8 : 1;
 	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * h + 9, w, h, x, y - 15, w, h);
 	if (isHovered) {
+		ctx.save();
 		ctx.globalAlpha = 0.5;
 		ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, x, y - 15, w, h);
+		ctx.restore();
 	}
-	ctx.globalAlpha = 1;
 };
 
 const drawJunkbot = (ctx, junkbot) => {
-	ctx.globalAlpha = junkbot.grabbed ? 0.8 : 1;
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(junkbot.animationFrame % 10)}`];
 	const [left, top, width, height] = frame.bounds;
 	if (junkbot.facing === 1) {
@@ -251,7 +250,6 @@ const drawJunkbot = (ctx, junkbot) => {
 	} else {
 		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x, junkbot.y + junkbot.height - 1 - height, width, height);
 	}
-	ctx.globalAlpha = 1;
 };
 
 const entities = [];
@@ -858,12 +856,16 @@ const animate = () => {
 		// return hovered.length && hovered[~~(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
 	};
 
+	const placeable = canRelease();
+
 	for (const entity of entities) {
+		ctx.globalAlpha = entity.grabbed ? placeable ? 0.8 : 0.3 : 1;
 		if (entity.type === "junkbot") {
 			drawJunkbot(ctx, entity);
 		} else {
 			drawBrick(ctx, entity, shouldHilight(entity));
 		}
+		ctx.globalAlpha = 1;
 	}
 
 	// const connectedToFixed = allConnectedToFixed({ ignoreEntities: [brickUnderMouse() || {}] });
