@@ -262,9 +262,119 @@ const drawJunkbot = (ctx, junkbot, hilight) => {
 	}
 };
 
-const entities = [];
+let entities = [];
+const undos = [];
+const redos = [];
+const clipboard = {};
 
-const initTestLevel = ()=> {
+const serialize = () => {
+	return JSON.stringify({ entities, version: 0.1 });
+};
+
+const deserialize = (json) => {
+	const state = JSON.parse(json);
+	entities = state.entities;
+};
+
+const undoable = (fn) => {
+	undos.push(serialize());
+	redos.length = 0;
+	if (fn) {
+		fn();
+		// save();
+	}
+};
+
+const undo = () => {
+	// if (editing) {
+	undoOrRedo(undos, redos);
+	// } else {
+	// 	toggleEditing();
+	// 	undo();
+	// }
+	// TODO: undo view too
+};
+
+const redo = () => {
+	// if (editing) {
+	undoOrRedo(redos, undos);
+	// }
+};
+
+const undoOrRedo = (undos, redos) => {
+	if (undos.length === 0) {
+		return;
+	}
+	redos.push(serialize());
+	deserialize(undos.pop());
+	// for (const entity of entities) {
+	// 	entity.grabbed = false;
+	// }
+	// save();
+};
+
+const selectAll = () => {
+	entities.forEach((entity) => {
+		entity.selected = true;
+	});
+};
+
+const deleteSelected = () => {
+	undoable(() => {
+		entities = entities.filter((entity) => !entity.selected)
+	});
+};
+const cutSelected = () => {
+	copySelected();
+	deleteSelected();
+};
+const copySelected = () => {
+	clipboard.entitiesJSON = JSON.stringify(entities.filter((entity) => entity.selected));
+};
+const paste = () => {
+	undoable(() => {
+		for (const entity of entities) {
+			entity.selected = false;
+			entity.grabbed = false;
+		}
+		dragging = [];
+
+		const newEntities = JSON.parse(clipboard.entitiesJSON);
+		for (const entity of newEntities) {
+			entity.selected = true;
+			entity.grabbed = false;
+			// entity.grabbed = true;
+			entities.push(entity);
+			// dragging.push(entity);
+		}
+
+		const centers = newEntities.map((entity) => ({
+			x: entity.x + entity.width / 2,
+			y: entity.y + entity.height / 2,
+		}));
+		const collectiveCenter = { x: 0, y: 0 };
+		for (const entityCenter of centers) {
+			collectiveCenter.x += entityCenter.x
+			collectiveCenter.y += entityCenter.y
+		}
+		collectiveCenter.x /= centers.length;
+		collectiveCenter.y /= centers.length;
+
+		const offsetX = 15 * ~~(mouse.worldX / 15) - 15 * ~~(collectiveCenter.x / 15);
+		const offsetY = 18 * ~~(mouse.worldY / 18) - 18 * ~~(collectiveCenter.y / 18);
+
+		for (const entity of newEntities) {
+			entity.x += offsetX;
+			entity.y += offsetY;
+			// entity.grabOffset = {
+			// 	x: offsetX,
+			// 	y: offsetY,
+			// };
+		}
+	});
+};
+
+const initTestLevel = () => {
 	for (let row = 5; row >= 0; row--) {
 		for (let column = 0; column < 150;) { // MUST increment below
 			if (Math.sin(column * 13234) < row * 0.2 + 0.1) {
@@ -326,6 +436,9 @@ const viewport = { centerX: 0, centerY: 0, scale: 2 };
 
 let keys = {};
 addEventListener("keydown", (event) => {
+	if (event.target.tagName.match(/input|textarea|select|button/i)) {
+		return;
+	}
 	keys[event.code] = true;
 	if (event.key.match(/^Arrow/)) {
 		keys[event.key] = true;
@@ -335,6 +448,39 @@ addEventListener("keydown", (event) => {
 	}
 	if (event.code === "Minus" || event.code === "NumpadSubtract") {
 		viewport.scale = Math.max(1, viewport.scale - 1);
+	}
+	switch (event.keyCode) {
+		// case 32: // Space
+		// case 80: // P
+		// 	toggleEditing();
+		// 	break;
+		case 46: // Delete
+			deleteSelected();
+			break;
+		case 90: // Z
+			if (event.ctrlKey) {
+				if (event.shiftKey) {
+					redo();
+				} else {
+					undo();
+				}
+			}
+			break;
+		case 89: // Y
+			if (event.ctrlKey) { redo(); }
+			break;
+		case 88: // X
+			if (event.ctrlKey) { cutSelected(); }
+			break;
+		case 67: // C
+			if (event.ctrlKey) { copySelected(); }
+			break;
+		case 86: // V
+			if (event.ctrlKey) { paste(); }
+			break;
+		case 65: // A
+			if (event.ctrlKey) { selectAll(); }
+			break;
 	}
 });
 addEventListener("keyup", (event) => {
@@ -504,7 +650,7 @@ const possibleGrabs = () => {
 	}
 	const grabs = [];
 	if (brick.selected) {
-		grabs.push(grabs.selection = entities.filter((entity)=> entity.selected));
+		grabs.push(grabs.selection = entities.filter((entity) => entity.selected));
 		return grabs;
 	}
 	if (keys.ControlLeft || keys.ControlRight) {
@@ -595,12 +741,12 @@ canvas.addEventListener("mousedown", (event) => {
 	}
 });
 
-const entitiesWithinSelection = ()=> {
+const entitiesWithinSelection = () => {
 	const minX = Math.min(selectionBox.x1, selectionBox.x2);
 	const maxX = Math.max(selectionBox.x1, selectionBox.x2);
 	const minY = Math.min(selectionBox.y1, selectionBox.y2);
 	const maxY = Math.max(selectionBox.y1, selectionBox.y2);
-	return entities.filter((entity)=> (
+	return entities.filter((entity) => (
 		rectanglesIntersect(
 			entity.x,
 			entity.y,
@@ -676,8 +822,8 @@ addEventListener("mouseup", () => {
 			playSound(resources.blockDrop);
 		}
 	} else if (selectionBox) {
-		entitiesWithinSelection().forEach((entity)=> {
-			entity.selected = true;	
+		entitiesWithinSelection().forEach((entity) => {
+			entity.selected = true;
 		});
 		selectionBox = null;
 	}
