@@ -263,61 +263,64 @@ const drawJunkbot = (ctx, junkbot, hilight) => {
 };
 
 const entities = [];
-for (let row = 5; row >= 0; row--) {
-	for (let column = 0; column < 150;) { // MUST increment below
-		if (Math.sin(column * 13234) < row * 0.2 + 0.1) {
-			const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
+
+const initTestLevel = ()=> {
+	for (let row = 5; row >= 0; row--) {
+		for (let column = 0; column < 150;) { // MUST increment below
+			if (Math.sin(column * 13234) < row * 0.2 + 0.1) {
+				const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
+				entities.push(makeBrick({
+					x: column * 15,
+					y: (row - 6) * 18,
+					widthInStuds,
+					colorName: "gray",
+					fixed: true,
+				}));
+				column += widthInStuds;
+			} else {
+				column += ~~(Math.random() * 5 + 1);
+			}
+		}
+	}
+	for (let staircase = 5; staircase >= 0; staircase--) {
+		for (let stair = 0; stair < 10; stair++) {
 			entities.push(makeBrick({
-				x: column * 15,
-				y: (row - 6) * 18,
-				widthInStuds,
+				x: staircase * 15 * 7 + stair * 15 * (staircase > 3 ? 1 : -1),
+				y: (-stair - 8) * 18,
+				widthInStuds: 2,
 				colorName: "gray",
 				fixed: true,
 			}));
-			column += widthInStuds;
-		} else {
-			column += ~~(Math.random() * 5 + 1);
 		}
 	}
-}
-for (let staircase = 5; staircase >= 0; staircase--) {
-	for (let stair = 0; stair < 10; stair++) {
-		entities.push(makeBrick({
-			x: staircase * 15 * 7 + stair * 15 * (staircase > 3 ? 1 : -1),
-			y: (-stair - 8) * 18,
-			widthInStuds: 2,
-			colorName: "gray",
-			fixed: true,
-		}));
-	}
-}
-entities.push(
-	makeBrick({ x: 15 * 5, y: 18 * -12, colorName: "red", widthInStuds: 1 }),
-	makeBrick({ x: 15 * 4, y: 18 * -13, colorName: "yellow", widthInStuds: 4 }),
-	makeBrick({ x: 15 * 4, y: 18 * -14, colorName: "green", widthInStuds: 2 }),
-);
-entities.push(
-	makeBrick({ x: 15 * 20, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
-	makeBrick({ x: 15 * 26, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
-	makeBrick({ x: 15 * 24, y: 18 * -20, colorName: "gray", fixed: true, widthInStuds: 6 }),
-);
-entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -8, facing: 1 }));
-entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -20, facing: 1 }));
+	entities.push(
+		makeBrick({ x: 15 * 5, y: 18 * -12, colorName: "red", widthInStuds: 1 }),
+		makeBrick({ x: 15 * 4, y: 18 * -13, colorName: "yellow", widthInStuds: 4 }),
+		makeBrick({ x: 15 * 4, y: 18 * -14, colorName: "green", widthInStuds: 2 }),
+	);
+	entities.push(
+		makeBrick({ x: 15 * 20, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
+		makeBrick({ x: 15 * 26, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
+		makeBrick({ x: 15 * 24, y: 18 * -20, colorName: "gray", fixed: true, widthInStuds: 6 }),
+	);
+	entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -8, facing: 1 }));
+	entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -20, facing: 1 }));
 
-let dropFromRow = 25;
-const iid = setInterval(() => {
-	dropFromRow += 1;
-	const brick = makeBrick({
-		x: 15 * ~~(Math.sin(Date.now() / 400) * 9),
-		y: 18 * -dropFromRow,
-		widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
-		colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
-	});
-	entities.push(brick);
-	if (dropFromRow > 100) {
-		clearInterval(iid);
-	}
-}, 200);
+	let dropFromRow = 25;
+	const iid = setInterval(() => {
+		dropFromRow += 1;
+		const brick = makeBrick({
+			x: 15 * ~~(Math.sin(Date.now() / 400) * 9),
+			y: 18 * -dropFromRow,
+			widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
+			colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
+		});
+		entities.push(brick);
+		if (dropFromRow > 100) {
+			clearInterval(iid);
+		}
+	}, 200);
+};
 
 const viewport = { centerX: 0, centerY: 0, scale: 2 };
 
@@ -986,6 +989,7 @@ const animate = () => {
 };
 
 const main = async () => {
+	initTestLevel();
 	resources = await loadResources(resourcePaths);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
