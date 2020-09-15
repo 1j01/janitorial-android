@@ -331,7 +331,21 @@ addEventListener("keyup", (event) => {
 	}
 });
 addEventListener("blur", () => {
+	// prevent stuck keys
 	keys = {};
+	// prevent margin panning until mousemove
+	mouse.x = undefined;
+	mouse.y = undefined;
+	mouse.worldX = undefined;
+	mouse.worldY = undefined;
+});
+// sort of planning for in case game is embedded (without an iframe)
+canvas.addEventListener("mouseleave", () => {
+	// prevent margin panning until mousemove
+	mouse.x = undefined;
+	mouse.y = undefined;
+	mouse.worldX = undefined;
+	mouse.worldY = undefined;
 });
 
 const mouse = { x: undefined, y: undefined };
