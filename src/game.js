@@ -937,6 +937,9 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 };
 
 const simulateJunkbot = (junkbot) => {
+	if (junkbot.grabbed) {
+		return;
+	}
 	junkbot.timer += 1;
 	const aboveHead = junkbotCollisionTest(junkbot.x, junkbot.y - 1, junkbot);
 	const headLoaded = aboveHead && !aboveHead.fixed && !connectsToFixed(aboveHead, { ignoreEntities: [junkbot] });
