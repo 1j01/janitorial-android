@@ -330,8 +330,18 @@ const cutSelected = () => {
 };
 const copySelected = () => {
 	clipboard.entitiesJSON = JSON.stringify(entities.filter((entity) => entity.selected));
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(clipboard.entitiesJSON);
+	}
 };
-const paste = () => {
+const paste = async () => {
+	let {entitiesJSON} = clipboard;
+	if (navigator.clipboard && navigator.clipboard.readText) {
+		const text = await navigator.clipboard.readText();
+		if (text && text.trim()[0] === "{") {
+			entitiesJSON = text;
+		}
+	}
 	undoable(() => {
 		for (const entity of entities) {
 			entity.selected = false;
@@ -339,7 +349,7 @@ const paste = () => {
 		}
 		dragging = [];
 
-		const newEntities = JSON.parse(clipboard.entitiesJSON);
+		const newEntities = JSON.parse(entitiesJSON);
 		for (const entity of newEntities) {
 			entity.selected = true;
 			entity.grabbed = true;
