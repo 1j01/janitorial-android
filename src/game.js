@@ -342,10 +342,9 @@ const paste = () => {
 		const newEntities = JSON.parse(clipboard.entitiesJSON);
 		for (const entity of newEntities) {
 			entity.selected = true;
-			entity.grabbed = false;
-			// entity.grabbed = true;
+			entity.grabbed = true;
 			entities.push(entity);
-			// dragging.push(entity);
+			dragging.push(entity);
 		}
 
 		const centers = newEntities.map((entity) => ({
@@ -360,16 +359,14 @@ const paste = () => {
 		collectiveCenter.x /= centers.length;
 		collectiveCenter.y /= centers.length;
 
-		const offsetX = 15 * ~~(mouse.worldX / 15) - 15 * ~~(collectiveCenter.x / 15);
-		const offsetY = 18 * ~~(mouse.worldY / 18) - 18 * ~~(collectiveCenter.y / 18);
+		const offsetX = - 15 * ~~(collectiveCenter.x / 15);
+		const offsetY = - 18 * ~~(collectiveCenter.y / 18);
 
 		for (const entity of newEntities) {
-			entity.x += offsetX;
-			entity.y += offsetY;
-			// entity.grabOffset = {
-			// 	x: offsetX,
-			// 	y: offsetY,
-			// };
+			entity.grabOffset = {
+				x: entity.x + offsetX,
+				y: entity.y + offsetY,
+			};
 		}
 	});
 };
