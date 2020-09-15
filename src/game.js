@@ -32,6 +32,7 @@ const resourcePaths = {
 	blockDrop: "audio/sound-effects/blockdrop.ogg",
 	blockClick: "audio/sound-effects/blockclick.ogg",
 	fall: "audio/sound-effects/fall.ogg",
+	headBonk: "audio/sound-effects/headbonk1.ogg",
 };
 
 const loadImage = (imagePath) => {
@@ -224,6 +225,7 @@ const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 		timer: 0,
 		animationFrame: 0,
 		grabbed: false,
+		headLoaded: false,
 	};
 };
 
@@ -376,6 +378,7 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 				ignoreEntities.indexOf(otherEntity) === -1 &&
 				connectedToFixed.indexOf(otherEntity) === -1
 			) {
+				// TODO: handle non-bricks? but allow them as end results?
 				if (connects(entity, otherEntity)) {
 					connectedToFixed.push(otherEntity);
 					addAnyAttached(otherEntity);
@@ -403,17 +406,17 @@ const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {
 		for (const otherEntity of entities) {
 			if (
 				!otherEntity.grabbed &&
+				// otherEntity.type === "brick" && // TODO? but don't break behavior of bricks falling on junkbot...
 				ignoreEntities.indexOf(otherEntity) === -1 &&
-				visited.indexOf(otherEntity) === -1
+				visited.indexOf(otherEntity) === -1 &&
+				connects(fromEntity, otherEntity, fromEntity === startEntity ? direction : 0)
 			) {
-				if (connects(fromEntity, otherEntity, fromEntity === startEntity ? direction : 0)) {
-					visited.push(otherEntity);
-					if (otherEntity.fixed) {
-						return true;
-					}
-					if (search(otherEntity)) {
-						return true;
-					}
+				visited.push(otherEntity);
+				if (otherEntity.fixed) {
+					return true;
+				}
+				if (search(otherEntity)) {
+					return true;
 				}
 			}
 		}
@@ -694,6 +697,14 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 
 const simulateJunkbot = (junkbot) => {
 	junkbot.timer += 1;
+	const aboveHead = junkbotCollisionTest(junkbot.x, junkbot.y - 1, junkbot);
+	const headLoaded = aboveHead && !aboveHead.fixed && !connectsToFixed(aboveHead, { ignoreEntities: [junkbot] });
+	if (junkbot.headLoaded && !headLoaded) {
+		junkbot.headLoaded = false;
+	} else if (headLoaded && !junkbot.headLoaded && !junkbot.grabbed) {
+		junkbot.headLoaded = true;
+		playSound(resources.headBonk);
+	}
 	if (junkbot.timer % 3 > 0) {
 		return;
 	}
