@@ -444,9 +444,12 @@ const possibleGrabs = () => {
 		return [];
 	}
 	const grabs = [];
-	if (brick.type !== "brick") {
+	if (keys.ControlLeft || keys.ControlRight) {
 		grabs.push(grabs.upward = [brick]);
 		return grabs;
+	}
+	if (brick.type !== "brick") {
+		return [];
 	}
 
 	const grabDownward = [brick];
@@ -514,56 +517,65 @@ canvas.addEventListener("mousedown", (event) => {
 		}
 	}
 });
-addEventListener("mouseup", () => {
-	if (dragging.length) {
+const canRelease = () => {
+	if (keys.ControlLeft || keys.ControlRight) {
+		return true;
+	}
 
-		const connectedToFixed = allConnectedToFixed();
+	const connectedToFixed = allConnectedToFixed();
 
-		if (dragging.every((entity) => {
+	if (dragging.every((entity) => {
+		for (const otherEntity of entities) {
+			if (
+				!otherEntity.grabbed &&
+				rectanglesIntersect(
+					entity.x,
+					entity.y,
+					entity.width,
+					entity.height,
+					otherEntity.x,
+					otherEntity.y,
+					otherEntity.width,
+					otherEntity.height,
+				)
+			) {
+				return false;
+			}
+		}
+		return true;
+	})) {
+		let connectsToCeiling = false;
+		let connectsToFloor = false;
+		dragging.forEach((entity) => {
 			for (const otherEntity of entities) {
 				if (
 					!otherEntity.grabbed &&
-					rectanglesIntersect(
-						entity.x,
-						entity.y,
-						entity.width,
-						entity.height,
-						otherEntity.x,
-						otherEntity.y,
-						otherEntity.width,
-						otherEntity.height,
-					)
+					otherEntity.type === "brick" &&
+					connectedToFixed.indexOf(otherEntity) !== -1
 				) {
-					return false;
-				}
-			}
-			return true;
-		})) {
-			let connectsToCeiling = false;
-			let connectsToFloor = false;
-			dragging.forEach((entity) => {
-				for (const otherEntity of entities) {
-					if (
-						!otherEntity.grabbed &&
-						otherEntity.type === "brick" &&
-						connectedToFixed.indexOf(otherEntity) !== -1
-					) {
-						if (connects(entity, otherEntity, -1)) {
-							connectsToCeiling = true;
-						}
-						if (connects(entity, otherEntity, +1)) {
-							connectsToFloor = true;
-						}
+					if (connects(entity, otherEntity, -1)) {
+						connectsToCeiling = true;
+					}
+					if (connects(entity, otherEntity, +1)) {
+						connectsToFloor = true;
 					}
 				}
-			});
-			if (connectsToCeiling ^ connectsToFloor) {
-				dragging.forEach((entity) => {
-					entity.grabbed = false;
-					entity.grabOffset = null;
-				});
-				dragging = [];
 			}
+		});
+		if (connectsToCeiling ^ connectsToFloor) {
+			return true;
+		}
+	}
+	return false;
+};
+addEventListener("mouseup", () => {
+	if (dragging.length) {
+		if (canRelease()) {
+			dragging.forEach((entity) => {
+				entity.grabbed = false;
+				entity.grabOffset = null;
+			});
+			dragging = [];
 		}
 	}
 });
