@@ -852,7 +852,7 @@ const animate = () => {
 	if (canvas.height !== innerHeight) {
 		canvas.height = innerHeight;
 	}
-	ctx.fillStyle = "black";
+	ctx.fillStyle = "#bbb";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	ctx.save(); // world viewport
