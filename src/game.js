@@ -118,7 +118,15 @@ const loadResources = async (resourcePathsByID) => {
 	})));
 };
 
+let muted = false;
+const toggleMute = ()=> {
+	muted = !muted;
+};
+
 const playSound = (audioBuffer) => {
+	if (muted) {
+		return;
+	}
 	var source = context.createBufferSource();
 	source.buffer = audioBuffer;
 	source.connect(context.destination);
@@ -462,6 +470,9 @@ addEventListener("keydown", (event) => {
 		// case "P":
 		// 	toggleEditing();
 		// 	break;
+		case "M":
+			toggleMute();
+			break;
 		case "DELETE":
 			deleteSelected();
 			break;
