@@ -119,8 +119,12 @@ const loadResources = async (resourcePathsByID) => {
 };
 
 let muted = false;
+let paused = false;
 const toggleMute = ()=> {
 	muted = !muted;
+};
+const togglePause = ()=> {
+	paused = !paused;
 };
 
 const playSound = (audioBuffer) => {
@@ -466,10 +470,11 @@ addEventListener("keydown", (event) => {
 		viewport.scale = Math.max(1, viewport.scale - 1);
 	}
 	switch (event.key.toUpperCase()) {
-		// case " ": // Spacebar
-		// case "P":
-		// 	toggleEditing();
-		// 	break;
+		case " ": // Spacebar
+		case "P":
+			// toggleEditing();
+			togglePause();
+			break;
 		case "M":
 			toggleMute();
 			break;
@@ -1051,11 +1056,13 @@ const animate = () => {
 	// sort for gravity
 	entities.sort((a, b) => b.y - a.y);
 
-	simulateGravity();
+	if (!paused) {
+		simulateGravity();
 
-	for (const entity of entities) {
-		if (entity.type === "junkbot") {
-			simulateJunkbot(entity);
+		for (const entity of entities) {
+			if (entity.type === "junkbot") {
+				simulateJunkbot(entity);
+			}
 		}
 	}
 
