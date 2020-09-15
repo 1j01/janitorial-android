@@ -270,10 +270,12 @@ const clipboard = {};
 const serialize = () => {
 	return JSON.stringify({ entities, version: 0.1 });
 };
-
 const deserialize = (json) => {
 	const state = JSON.parse(json);
 	entities = state.entities;
+};
+const save = () => {
+	localStorage["JWorld"] = serialize()
 };
 
 const undoable = (fn) => {
@@ -281,10 +283,9 @@ const undoable = (fn) => {
 	redos.length = 0;
 	if (fn) {
 		fn();
-		// save();
+		save();
 	}
 };
-
 const undo = () => {
 	// if (editing) {
 	undoOrRedo(undos, redos);
@@ -294,13 +295,11 @@ const undo = () => {
 	// }
 	// TODO: undo view too
 };
-
 const redo = () => {
 	// if (editing) {
 	undoOrRedo(redos, undos);
 	// }
 };
-
 const undoOrRedo = (undos, redos) => {
 	if (undos.length === 0) {
 		return;
@@ -310,7 +309,7 @@ const undoOrRedo = (undos, redos) => {
 	// for (const entity of entities) {
 	// 	entity.grabbed = false;
 	// }
-	// save();
+	save();
 };
 
 const selectAll = () => {
@@ -318,7 +317,6 @@ const selectAll = () => {
 		entity.selected = true;
 	});
 };
-
 const deleteSelected = () => {
 	undoable(() => {
 		entities = entities.filter((entity) => !entity.selected)
@@ -1142,7 +1140,12 @@ const animate = () => {
 };
 
 const main = async () => {
-	initTestLevel();
+	try {
+		deserialize(localStorage["JWorld"]);
+		dragging = entities.filter((entity)=> entity.grabbed);
+	} catch(error) {
+		initTestLevel();
+	}
 	resources = await loadResources(resourcePaths);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
