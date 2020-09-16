@@ -237,6 +237,7 @@ const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 		colorName,
 		fixed,
 		grabbed: false,
+		bottomConnected: false,
 	};
 };
 
@@ -932,6 +933,10 @@ const simulateGravity = () => {
 				entity.y += 1;
 				// entity.y += 6;
 			}
+			if (settled && !entity.bottomConnected) {
+				playSound(resources.blockDrop);
+			}
+			entity.bottomConnected = settled;
 		}
 	}
 };
