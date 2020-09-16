@@ -22,6 +22,7 @@
 	<script type="module">
 
 		import * as THREE from './three-stuff/three.module.js';
+		window.THREE = THREE; // for debugging in the console (not for three-devtools)
 
 		import { GUI } from './three-stuff/dat.gui.module.js';
 
@@ -33,6 +34,8 @@
 		var camera, scene, renderer, controls, gui, guiData;
 
 		var modelFileList, model, textureCube;
+
+		var testSprite, testSpriteTexture;
 
 		var envMapActivated = false;
 
@@ -85,7 +88,7 @@
 			// scene
 
 			scene = new THREE.Scene();
-			// scene.background = new THREE.Color( 0xdeebed );
+			scene.background = new THREE.Color( 0xdeebed );
 
 			var ambientLight = new THREE.AmbientLight(0xdedede, 0.8);
 			scene.add(ambientLight);
@@ -105,6 +108,13 @@
 
 			setupProjection();
 
+			// Observe a scene or a renderer
+			// https://github.com/threejs/three-devtools
+			if (typeof __THREE_DEVTOOLS__ !== 'undefined') {
+				__THREE_DEVTOOLS__.dispatchEvent(new CustomEvent('observe', { detail: scene }));
+				__THREE_DEVTOOLS__.dispatchEvent(new CustomEvent('observe', { detail: renderer }));
+			}
+			
 			//
 
 			guiData = {
@@ -182,6 +192,19 @@
 		}
 
 		function reloadObject(resetCamera) {
+
+			if (testSprite) {
+				scene.remove(testSprite);
+			}
+
+			var textureLoader = new THREE.TextureLoader();
+			var testSpriteTextureMap = textureLoader.load( "images/green-1x1-brick-26x26.png" );
+			var testSpriteMaterial = new THREE.SpriteMaterial( { map: testSpriteTextureMap, color: 0xffffff } );
+			testSprite = new THREE.Sprite( testSpriteMaterial );
+			// testSprite.position.set( 40, 0, 40 );
+			testSprite.position.set( -50, 12, 75 );
+			testSprite.scale.multiplyScalar( 30 );
+			scene.add(testSprite);
 
 			if (model) {
 
