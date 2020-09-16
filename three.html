@@ -26,7 +26,7 @@
 
 		import { GUI } from './three-stuff/dat.gui.module.js';
 
-		import { OrbitControls } from './three-stuff/OrbitControls.js';
+		// import { OrbitControls } from './three-stuff/OrbitControls.js';
 		import { LDrawLoader } from './three-stuff/LDrawLoader.js';
 
 		var container, progressBarDiv;
@@ -198,13 +198,20 @@
 			}
 
 			var textureLoader = new THREE.TextureLoader();
-			var testSpriteTextureMap = textureLoader.load( "images/green-1x1-brick-26x26.png" );
-			var testSpriteMaterial = new THREE.SpriteMaterial( { map: testSpriteTextureMap, color: 0xffffff } );
-			testSprite = new THREE.Sprite( testSpriteMaterial );
-			// testSprite.position.set( 40, 0, 40 );
-			testSprite.position.set( -50, 12, 75 );
-			testSprite.scale.multiplyScalar( 30 );
-			scene.add(testSprite);
+			var testSpriteTextureMap = textureLoader.load( "images/colored-blocks.png", ()=> {
+					
+				// console.log("testSpriteTextureMap", testSpriteTextureMap);
+				// console.log("testSpriteTextureMap.image", testSpriteTextureMap.image);
+				var testSpriteMaterial = new THREE.SpriteMaterial( { map: testSpriteTextureMap, color: 0xffffff } );
+				testSprite = new THREE.Sprite( testSpriteMaterial );
+				// testSprite.position.set( 40, 0, 40 );
+				testSprite.position.set( -50, 12, 75 );
+				// testSprite.scale.set( 650, 400, 1 );
+				testSprite.scale.set( testSpriteTextureMap.image.naturalWidth, testSpriteTextureMap.image.naturalHeight, 1 );
+				testSprite.scale.multiplyScalar(1.25);
+				scene.add(testSprite);
+
+			});
 
 			if (model) {
 
@@ -279,13 +286,13 @@
 					var size = bbox.getSize(new THREE.Vector3());
 					var radius = Math.max(size.x, Math.max(size.y, size.z)) * 0.5;
 
-					if (resetCamera) {
+					// if (resetCamera && typeof controls !== "undefined") {
 
-						// controls.target0.copy( bbox.getCenter( new THREE.Vector3() ) );
-						// controls.position0.set( - 2.3, 2, 2 ).multiplyScalar( radius ).add( controls.target0 );
-						// controls.reset();
+					// 	controls.target0.copy( bbox.getCenter( new THREE.Vector3() ) );
+					// 	controls.position0.set( - 2.3, 2, 2 ).multiplyScalar( radius ).add( controls.target0 );
+					// 	controls.reset();
 
-					}
+					// }
 
 					createGUI();
 
