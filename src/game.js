@@ -29,10 +29,25 @@ const resourcePaths = {
 	font: "images/font.png",
 	turn: "audio/sound-effects/turn1.ogg",
 	blockPickUp: "audio/sound-effects/blockpickup.ogg",
+	// blockPickUpFromAir: "audio/sound-effects/custom/pick-up-from-air.wav",
 	blockDrop: "audio/sound-effects/blockdrop.ogg",
 	blockClick: "audio/sound-effects/blockclick.ogg",
 	fall: "audio/sound-effects/fall.ogg",
 	headBonk: "audio/sound-effects/headbonk1.ogg",
+	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
+	// selectEnd: "audio/sound-effects/custom/select-end.wav",
+	// selectStart: "audio/sound-effects/custom/select2.wav",
+	// selectEnd: "audio/sound-effects/custom/heavy-click.wav",
+	// selectEnd: "audio/sound-effects/custom/heavy-click-2.wav",
+	// selectStart: "audio/sound-effects/custom/select2.wav",
+	// selectEnd: "audio/sound-effects/custom/select-end.wav",
+	// selectEnd: "audio/sound-effects/lego-creator/insert-I0506.wav",
+	selectEnd: "audio/sound-effects/custom/select2.wav",
+	// selectStart: "audio/sound-effects/custom/heavy-click-2.wav",
+	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
+	copyPaste: "audio/sound-effects/lego-creator/copy-I0510.wav",
+	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
+	redo: "audio/sound-effects/lego-creator/redo-I0513.wav",
 };
 
 const loadImage = (imagePath) => {
@@ -300,7 +315,10 @@ const undoable = (fn) => {
 };
 const undo = () => {
 	// if (editing) {
-	undoOrRedo(undos, redos);
+	const didSomething = undoOrRedo(undos, redos);
+	if (didSomething) {
+		playSound(resources.undo);
+	}
 	// } else {
 	// 	toggleEditing();
 	// 	undo();
@@ -309,12 +327,15 @@ const undo = () => {
 };
 const redo = () => {
 	// if (editing) {
-	undoOrRedo(redos, undos);
+	const didSomething = undoOrRedo(redos, undos);
+	if (didSomething) {
+		playSound(resources.redo);
+	}
 	// }
 };
 const undoOrRedo = (undos, redos) => {
 	if (undos.length === 0) {
-		return;
+		return false;
 	}
 	redos.push(serialize());
 	deserialize(undos.pop());
@@ -322,6 +343,7 @@ const undoOrRedo = (undos, redos) => {
 	// 	entity.grabbed = false;
 	// }
 	save();
+	return true;
 };
 
 const selectAll = () => {
@@ -333,6 +355,7 @@ const deleteSelected = () => {
 	undoable(() => {
 		entities = entities.filter((entity) => !entity.selected)
 	});
+	playSound(resources.delete);
 };
 const cutSelected = () => {
 	copySelected();
@@ -343,6 +366,7 @@ const copySelected = () => {
 	if (navigator.clipboard && navigator.clipboard.writeText) {
 		navigator.clipboard.writeText(clipboard.entitiesJSON);
 	}
+	playSound(resources.copyPaste);
 };
 const paste = async () => {
 	let {entitiesJSON} = clipboard;
@@ -388,6 +412,7 @@ const paste = async () => {
 				y: entity.y + offsetY,
 			};
 		}
+		playSound(resources.copyPaste);
 	});
 };
 
@@ -760,7 +785,7 @@ canvas.addEventListener("mousedown", (event) => {
 			playSound(resources.blockClick);
 		} else if (event.ctrlKey) {
 			selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
-			playSound(resources.blockClick);
+			playSound(resources.selectStart);
 		}
 		if (!grabs.selection) {
 			for (const entity of entities) {
@@ -852,10 +877,14 @@ addEventListener("mouseup", () => {
 			save();
 		}
 	} else if (selectionBox) {
-		entitiesWithinSelection().forEach((entity) => {
+		const toSelect = entitiesWithinSelection();
+		toSelect.forEach((entity) => {
 			entity.selected = true;
 		});
 		selectionBox = null;
+		if (toSelect.length) {
+			playSound(resources.selectEnd);
+		}
 	}
 });
 
