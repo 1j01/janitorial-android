@@ -239,6 +239,47 @@ for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
 	x += w;
 }
 
+const paintsTray = document.createElement("div");
+paintsTray.style.position = "fixed";
+paintsTray.style.left = "0px";
+paintsTray.style.top = "0px";
+paintsTray.style.bottom = "0px";
+paintsTray.style.width = "200px";
+paintsTray.style.backgroundColor = "black";
+
+document.body.append(paintsTray);
+
+let paintSelected;
+const exitPaintMode = () => {
+	paintSelected = null;
+	paintOptions.forEach((el) => {
+		el.style.boxShadow = "";
+		el.style.borderStyle = "";
+		el.style.borderColor = "";
+	});
+};
+const paintOptions = Object.keys(brickColorToYIndex).map((color) => {
+	const paintOption = document.createElement("button");
+	paintOption.style.width = "180px";
+	paintOption.style.height = "60px";
+	paintOption.style.margin = "10px";
+	paintOption.style.borderWidth = "3px";
+	paintOption.style.backgroundColor = color;
+	paintOption.onclick = () => {
+		if (paintSelected === color) {
+			exitPaintMode();
+		} else {
+			exitPaintMode();
+			paintSelected = color;
+			paintOption.style.boxShadow = "0 0 0 5px white";
+			paintOption.style.borderStyle = "dotted";
+			paintOption.style.borderColor = "black";
+		}
+	};
+	paintsTray.append(paintOption);
+	return paintOption;
+});
+
 const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 	return {
 		type: "brick",
@@ -586,6 +627,10 @@ addEventListener("keydown", (event) => {
 				selectAll();
 			}
 			break;
+		case "ESCAPE":
+		case "ESC":
+			exitPaintMode();
+			break;
 		default:
 			// Prevent preventing default action if event not handled
 			return;
@@ -853,15 +898,24 @@ canvas.addEventListener("mousedown", (event) => {
 	};
 	if (dragging.length === 0) {
 		const grabs = possibleGrabs();
-		if (grabs.length === 1) {
-			startGrab(grabs[0]);
-			playSound(resources.blockClick);
-		} else if (grabs.length) {
-			pendingGrabs = grabs;
-			playSound(resources.blockClick);
-		} else if (event.ctrlKey) {
-			selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
-			playSound(resources.selectStart);
+		if (paintSelected) {
+			const brick = brickUnderMouse(true);
+			if (brick) {
+				undoable(() => {
+					brick.colorName = paintSelected;
+				});
+			}
+		} else {
+			if (grabs.length === 1) {
+				startGrab(grabs[0]);
+				playSound(resources.blockClick);
+			} else if (grabs.length) {
+				pendingGrabs = grabs;
+				playSound(resources.blockClick);
+			} else if (event.ctrlKey) {
+				selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
+				playSound(resources.selectStart);
+			}
 		}
 		if (!grabs.selection) {
 			for (const entity of entities) {
@@ -1223,6 +1277,8 @@ const animate = () => {
 			entityMoved(brick);
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
+	} else if (paintSelected) {
+		canvas.style.cursor = `url("images/cursors/cursor-paint.png") 8 8, crosshair`;
 	} else if (hovered.length >= 2) {
 		canvas.style.cursor = `url("images/cursors/cursor-grab-either.png") 8 8, grab`;
 	} else if (hovered.upward) {
