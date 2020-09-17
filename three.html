@@ -67,7 +67,7 @@
 
 		const renderSize = [2000, 1000];
 		const aspect = renderSize[0] / renderSize[1];
-		const frustumSize = renderSize[1] * 1.35; // TODO: play around with this, get more exact
+		const frustumSize = renderSize[1];// * 1.35; // TODO: play around with this, get more exact
 
 		init();
 		animate();
@@ -204,11 +204,11 @@
 				// console.log("testSpriteTextureMap.image", testSpriteTextureMap.image);
 				var testSpriteMaterial = new THREE.SpriteMaterial( { map: testSpriteTextureMap, color: 0xffffff } );
 				testSprite = new THREE.Sprite( testSpriteMaterial );
-				// testSprite.position.set( 40, 0, 40 );
-				testSprite.position.set( -50, 12, 75 );
-				// testSprite.scale.set( 650, 400, 1 );
+				testSprite.position.set( 550, 0.75, 0 );
 				testSprite.scale.set( testSpriteTextureMap.image.naturalWidth, testSpriteTextureMap.image.naturalHeight, 1 );
-				testSprite.scale.multiplyScalar(1.25);
+				// testSprite.scale.multiplyScalar(1.35);
+				// testSprite.scale.multiply(new THREE.Vector3(innerWidth, innerHeight, 1));
+				testSprite.scale.multiplyScalar(Math.min(...renderSize) * 0.001);
 				scene.add(testSprite);
 
 			});
@@ -303,6 +303,9 @@
 		}
 
 		function setupProjection() {
+
+			renderSize[0] = innerWidth;
+			renderSize[1] = innerHeight;
 
 			camera.aspect = renderSize[0] / renderSize[1];
 			camera.left = - frustumSize * camera.aspect / 2;
