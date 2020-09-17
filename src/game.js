@@ -135,10 +135,10 @@ const loadResources = async (resourcePathsByID) => {
 
 let muted = false;
 let paused = false;
-const toggleMute = ()=> {
+const toggleMute = () => {
 	muted = !muted;
 };
-const togglePause = ()=> {
+const togglePause = () => {
 	paused = !paused;
 };
 
@@ -369,7 +369,7 @@ const copySelected = () => {
 	playSound(resources.copyPaste);
 };
 const paste = async () => {
-	let {entitiesJSON} = clipboard;
+	let { entitiesJSON } = clipboard;
 	if (navigator.clipboard && navigator.clipboard.readText) {
 		const text = await navigator.clipboard.readText();
 		if (text && text.trim()[0] === "{") {
@@ -1203,8 +1203,8 @@ const animate = () => {
 const main = async () => {
 	try {
 		deserialize(localStorage["JWorld"]);
-		dragging = entities.filter((entity)=> entity.grabbed);
-	} catch(error) {
+		dragging = entities.filter((entity) => entity.grabbed);
+	} catch (error) {
 		initTestLevel();
 	}
 	resources = await loadResources(resourcePaths);
