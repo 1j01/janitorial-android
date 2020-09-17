@@ -894,7 +894,7 @@ const sortEntitiesForRendering = (entities) => {
 			const a = entities[i];
 			const b = entities[i + 1];
 			if (
-				a.y + a.height <= b.y ||
+				a.y + a.height < b.y ||
 				b.x + b.width <= a.x
 			) {
 				[entities[i], entities[i + 1]] = [entities[i + 1], entities[i]];
