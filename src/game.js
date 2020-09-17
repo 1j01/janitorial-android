@@ -270,12 +270,14 @@ const drawBrick = (ctx, brick, hilight) => {
 };
 
 const drawJunkbot = (ctx, junkbot, hilight) => {
-	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + ~~(junkbot.animationFrame % 10)}`];
+	const frame_index = ~~(junkbot.animationFrame % 10);
+	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + frame_index}`];
 	const [left, top, width, height] = frame.bounds;
+	const fwd = (frame_index === 3) * (junkbot.facing === 1 ? 3 : -3);
 	if (junkbot.facing === 1) {
-		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x - width + 41, junkbot.y + junkbot.height - 1 - height, width, height);
+		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	} else {
-		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x, junkbot.y + junkbot.height - 1 - height, width, height);
+		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	}
 	if (hilight) {
 		ctx.save();
