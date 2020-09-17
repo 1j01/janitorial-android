@@ -889,24 +889,18 @@ addEventListener("mouseup", () => {
 });
 
 const sortEntitiesForRendering = (entities) => {
-	// entities.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
-	// entities.sort((a, b)=> (b.y - a.y) + (a.x - b.x));
-	entities.sort((a, b) => {
-		if (a.y + a.height <= b.y) {
-			return +1;
+	for (let j = 0; j < entities.length - 1; j++) {
+		for (let i = 0; i < entities.length - 1; i++) {
+			const a = entities[i];
+			const b = entities[i + 1];
+			if (
+				a.y + a.height <= b.y ||
+				b.x + b.width <= a.x
+			) {
+				[entities[i], entities[i + 1]] = [entities[i + 1], entities[i]];
+			}
 		}
-		if (b.y + b.height <= a.y) {
-			return -1;
-		}
-		if (b.x + b.width <= a.x) {
-			return +1;
-		}
-		if (a.x + a.width <= b.x) {
-			return -1;
-		}
-		// return a.x - a.y - b.x + b.y;
-		return 0;
-	});
+	}
 };
 
 /**
