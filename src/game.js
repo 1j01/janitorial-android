@@ -815,6 +815,9 @@ const entitiesWithinSelection = () => {
 };
 
 const canRelease = () => {
+	if (dragging.length === 0) {
+		return false; // optimization mainly - don't do allConnectedToFixed()
+	}
 	if (keys.ControlLeft || keys.ControlRight) {
 		return true;
 	}
