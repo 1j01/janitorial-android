@@ -1066,8 +1066,14 @@ const simulateJunkbot = (junkbot) => {
 	junkbot.animationFrame += 1;
 };
 
+let rafid;
+window.addEventListener("error", () => {
+	// so my computer doesn't freeze up from the console logging messages about repeated errors
+	cancelAnimationFrame(rafid);
+});
+
 const animate = () => {
-	requestAnimationFrame(animate);
+	rafid = requestAnimationFrame(animate);
 
 	if (!keys.ControlLeft && !keys.ControlRight) {
 		if (keys.KeyW || keys.ArrowUp) {
