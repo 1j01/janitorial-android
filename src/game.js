@@ -23,7 +23,9 @@ const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 );
 
 const remove = (array, value) => {
-	if (!array) console.warn(array, value);
+	if (!array) {
+		console.warn(array, value);
+	}
 	const index = array.indexOf(value);
 	if (value !== -1) {
 		array.splice(index, 1);
@@ -154,7 +156,7 @@ const playSound = (audioBuffer) => {
 	if (muted) {
 		return;
 	}
-	var source = context.createBufferSource();
+	const source = context.createBufferSource();
 	source.buffer = audioBuffer;
 	source.connect(context.destination);
 	source.start(0);
@@ -278,10 +280,10 @@ const drawBrick = (ctx, brick, hilight) => {
 };
 
 const drawJunkbot = (ctx, junkbot, hilight) => {
-	const frame_index = ~~(junkbot.animationFrame % 10);
-	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + frame_index}`];
+	const frameIndex = ~~(junkbot.animationFrame % 10);
+	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	const fwd = (frame_index === 3) * (junkbot.facing === 1 ? 3 : -3);
+	const fwd = (frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
 	if (junkbot.facing === 1) {
 		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	} else {
@@ -303,7 +305,7 @@ let entities = [];
 // acceleration structures
 const entitiesByTopY = {}; // y to array of entities with that y as their top
 const entitiesByBottomY = {}; // y to array of entities with that y as their bottom
-const lastKeys = new Map; // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
+const lastKeys = new Map(); // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
 
 const entityMoved = (entity) => {
 	const yKeys = lastKeys.get(entity) || {};
@@ -319,7 +321,7 @@ const entityMoved = (entity) => {
 	yKeys.bottomY = entity.y + entity.height;
 	entitiesByTopY[yKeys.topY].push(entity);
 	entitiesByBottomY[yKeys.bottomY].push(entity);
-	lastKeys.set(entity, yKeys)
+	lastKeys.set(entity, yKeys);
 };
 
 const undos = [];
@@ -333,10 +335,12 @@ const deserialize = (json) => {
 	const state = JSON.parse(json);
 	entities = state.entities;
 	dragging.length = 0;
-	entities.forEach((entity) => { entity.grabbed = false; });
+	entities.forEach((entity) => {
+		entity.grabbed = false;
+	});
 };
 const save = () => {
-	localStorage["JWorld"] = serialize()
+	localStorage.JWorld = serialize();
 };
 
 const undoable = (fn) => {
@@ -387,7 +391,7 @@ const selectAll = () => {
 };
 const deleteSelected = () => {
 	undoable(() => {
-		entities = entities.filter((entity) => !entity.selected)
+		entities = entities.filter((entity) => !entity.selected);
 	});
 	playSound(resources.delete);
 };
@@ -431,14 +435,14 @@ const paste = async () => {
 		}));
 		const collectiveCenter = { x: 0, y: 0 };
 		for (const entityCenter of centers) {
-			collectiveCenter.x += entityCenter.x
-			collectiveCenter.y += entityCenter.y
+			collectiveCenter.x += entityCenter.x;
+			collectiveCenter.y += entityCenter.y;
 		}
 		collectiveCenter.x /= centers.length;
 		collectiveCenter.y /= centers.length;
 
-		const offsetX = - 15 * ~~(collectiveCenter.x / 15);
-		const offsetY = - 18 * ~~(collectiveCenter.y / 18);
+		const offsetX = -15 * ~~(collectiveCenter.x / 15);
+		const offsetY = -18 * ~~(collectiveCenter.y / 18);
 
 		for (const entity of newEntities) {
 			entity.grabOffset = {
@@ -550,19 +554,29 @@ addEventListener("keydown", (event) => {
 			}
 			break;
 		case "Y":
-			if (event.ctrlKey) { redo(); }
+			if (event.ctrlKey) {
+				redo();
+			}
 			break;
 		case "X":
-			if (event.ctrlKey) { cutSelected(); }
+			if (event.ctrlKey) {
+				cutSelected();
+			}
 			break;
 		case "C":
-			if (event.ctrlKey) { copySelected(); }
+			if (event.ctrlKey) {
+				copySelected();
+			}
 			break;
 		case "V":
-			if (event.ctrlKey) { paste(); }
+			if (event.ctrlKey) {
+				paste();
+			}
 			break;
 		case "A":
-			if (event.ctrlKey) { selectAll(); }
+			if (event.ctrlKey) {
+				selectAll();
+			}
 			break;
 		default:
 			// Prevent preventing default action if event not handled
@@ -1279,18 +1293,18 @@ const animate = () => {
 	// ctx.restore(); // shake
 
 	if (selectionBox) {
-		ctx.save()
-		ctx.beginPath()
+		ctx.save();
+		ctx.beginPath();
 		if (viewport.scale === 1) {
-			ctx.translate(0.5, 0.5)
+			ctx.translate(0.5, 0.5);
 		}
-		ctx.rect(selectionBox.x1, selectionBox.y1, selectionBox.x2 - selectionBox.x1, selectionBox.y2 - selectionBox.y1)
-		ctx.fillStyle = "rgba(0, 155, 255, 0.1)"
-		ctx.strokeStyle = "rgba(0, 155, 255, 0.8)"
-		ctx.lineWidth = 1 / viewport.scale
-		ctx.fill()
-		ctx.stroke()
-		ctx.restore()
+		ctx.rect(selectionBox.x1, selectionBox.y1, selectionBox.x2 - selectionBox.x1, selectionBox.y2 - selectionBox.y1);
+		ctx.fillStyle = "rgba(0, 155, 255, 0.1)";
+		ctx.strokeStyle = "rgba(0, 155, 255, 0.8)";
+		ctx.lineWidth = 1 / viewport.scale;
+		ctx.fill();
+		ctx.stroke();
+		ctx.restore();
 	}
 
 	ctx.restore(); // world viewport
@@ -1315,7 +1329,7 @@ const animate = () => {
 
 const main = async () => {
 	try {
-		deserialize(localStorage["JWorld"]);
+		deserialize(localStorage.JWorld);
 		dragging = entities.filter((entity) => entity.grabbed);
 	} catch (error) {
 		initTestLevel();
