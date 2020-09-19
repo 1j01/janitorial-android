@@ -302,6 +302,8 @@ const serialize = () => {
 const deserialize = (json) => {
 	const state = JSON.parse(json);
 	entities = state.entities;
+	dragging.length = 0;
+	entities.forEach((entity) => { entity.grabbed = false; });
 };
 const save = () => {
 	localStorage["JWorld"] = serialize()
