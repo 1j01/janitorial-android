@@ -22,6 +22,14 @@ const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 	ay < by + bh
 );
 
+const remove = (array, value) => {
+	if (!array) console.warn(array, value);
+	const index = array.indexOf(value);
+	if (value !== -1) {
+		array.splice(index, 1);
+	}
+};
+
 const resourcePaths = {
 	actors: "images/actors-atlas.png",
 	actorsAtlas: "images/actors-atlas.json",
@@ -292,6 +300,28 @@ const drawJunkbot = (ctx, junkbot, hilight) => {
 };
 
 let entities = [];
+// acceleration structures
+const entitiesByTopY = {}; // y to array of entities with that y as their top
+const entitiesByBottomY = {}; // y to array of entities with that y as their bottom
+const lastKeys = new Map; // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
+
+const entityMoved = (entity) => {
+	const yKeys = lastKeys.get(entity) || {};
+	entitiesByTopY[entity.y] = entitiesByTopY[entity.y] || [];
+	entitiesByBottomY[entity.y + entity.height] = entitiesByBottomY[entity.y + entity.height] || [];
+	if (yKeys.topY) {
+		remove(entitiesByTopY[yKeys.topY], entity);
+	}
+	if (yKeys.bottomY) {
+		remove(entitiesByBottomY[yKeys.bottomY], entity);
+	}
+	yKeys.topY = entity.y;
+	yKeys.bottomY = entity.y + entity.height;
+	entitiesByTopY[yKeys.topY].push(entity);
+	entitiesByBottomY[yKeys.bottomY].push(entity);
+	lastKeys.set(entity, yKeys)
+};
+
 const undos = [];
 const redos = [];
 const clipboard = {};
@@ -606,9 +636,14 @@ const connects = (a, b, direction = 0) => {
 const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 	const connectedToFixed = [];
 	const addAnyAttached = (entity) => {
-		for (const otherEntity of entities) {
+		const entitiesToCheck = [].concat(
+			entitiesByTopY[entity.y + entity.height] || [],
+			entitiesByBottomY[entity.y] || [],
+		);
+		for (const otherEntity of entitiesToCheck) {
 			if (
-				connects(entity, otherEntity) &&
+				entity.x + entity.width > otherEntity.x &&
+				entity.x < otherEntity.x + otherEntity.width &&
 				ignoreEntities.indexOf(otherEntity) === -1 &&
 				connectedToFixed.indexOf(otherEntity) === -1
 			) {
@@ -634,13 +669,19 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {}) => {
 	const visited = [];
 	const search = (fromEntity) => {
-		for (const otherEntity of entities) {
+		const entitiesToCheck = [].concat(
+			(fromEntity !== startEntity || direction !== -1) && entitiesByTopY[fromEntity.y + fromEntity.height] || [],
+			(fromEntity !== startEntity || direction !== +1) && entitiesByBottomY[fromEntity.y] || [],
+		);
+		for (const otherEntity of entitiesToCheck) {
 			if (
 				!otherEntity.grabbed &&
 				// otherEntity.type === "brick" && // TODO? but don't break behavior of bricks falling on junkbot...
 				ignoreEntities.indexOf(otherEntity) === -1 &&
 				visited.indexOf(otherEntity) === -1 &&
-				connects(fromEntity, otherEntity, fromEntity === startEntity ? direction : 0)
+				// connects(fromEntity, otherEntity, fromEntity === startEntity ? direction : 0)
+				fromEntity.x + fromEntity.width > otherEntity.x &&
+				fromEntity.x < otherEntity.x + otherEntity.width
 			) {
 				visited.push(otherEntity);
 				if (otherEntity.fixed) {
@@ -658,7 +699,11 @@ const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {
 
 const possibleGrabs = () => {
 	const findAttached = (brick, direction, attached, topLevel) => {
-		for (const entity of entities) {
+		const entitiesToCheck1 = [].concat(
+			entitiesByTopY[brick.y + brick.height] || [],
+			entitiesByBottomY[brick.y] || [],
+		);
+		for (const entity of entitiesToCheck1) {
 			if (
 				entity !== brick &&
 				connects(brick, entity, entity.type === "brick" ? direction : -1)
@@ -676,7 +721,11 @@ const possibleGrabs = () => {
 		}
 		if (topLevel) {
 			for (const brick of attached) {
-				for (const entity of entities) {
+				const entitiesToCheck2 = [].concat(
+					entitiesByTopY[brick.y + brick.height] || [],
+					entitiesByBottomY[brick.y] || [],
+				);
+				for (const entity of entitiesToCheck2) {
 					if (
 						!entity.fixed &&
 						entity.type === "brick" &&
@@ -684,7 +733,11 @@ const possibleGrabs = () => {
 						connects(brick, entity) &&
 						!connectsToFixed(entity, { ignoreEntities: attached })
 					) {
-						for (const junk of entities) {
+						const entitiesToCheck3 = [].concat(
+							entitiesByTopY[entity.y + entity.height] || [],
+							entitiesByBottomY[entity.y] || [],
+						);
+						for (const junk of entitiesToCheck3) {
 							if (junk.type !== "brick") {
 								if (connects(entity, junk, -1)) {
 									return false;
@@ -949,6 +1002,7 @@ const simulateGravity = () => {
 			if (!settled) {
 				entity.y += 1;
 				// entity.y += 6;
+				entityMoved(entity);
 			}
 		}
 	}
@@ -1008,6 +1062,7 @@ const simulateJunkbot = (junkbot) => {
 	if (inside) {
 		debugJunkbot("STUCK IN WALL - GO UP");
 		junkbot.y = inside.y - junkbot.height;
+		entityMoved(junkbot);
 		return;
 	}
 	if (junkbot.animationFrame % 5 === 3) {
@@ -1021,6 +1076,7 @@ const simulateJunkbot = (junkbot) => {
 				debugJunkbot("STEP UP");
 				junkbot.x = posInFront.x;
 				junkbot.y = posInFront.y;
+				entityMoved(junkbot);
 			} else {
 				// reached wall; turn around
 				debugJunkbot("WALL - TURN AROUND");
@@ -1038,6 +1094,7 @@ const simulateJunkbot = (junkbot) => {
 					debugJunkbot("WALK");
 					junkbot.x = posInFront.x;
 					junkbot.y = posInFront.y;
+					entityMoved(junkbot);
 				} else {
 					debugJunkbot("NOPE");
 					junkbot.facing *= -1;
@@ -1054,6 +1111,7 @@ const simulateJunkbot = (junkbot) => {
 					debugJunkbot("STEP DOWN");
 					junkbot.x = posInFront.x;
 					junkbot.y = posInFront.y;
+					entityMoved(junkbot);
 				} else {
 					// reached cliff/ledge/edge/precipice or wall would bonk head; turn around
 					debugJunkbot("CLIFF/WALL - TURN AROUND");
@@ -1106,6 +1164,34 @@ const animate = () => {
 	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
 	updateMouseWorldPosition();
 
+	// add new entities to acceleration structures
+	for (const entity of entities) {
+		if (!lastKeys.has(entity)) {
+			entityMoved(entity);
+		}
+	}
+	// clean up acceleration structures
+	lastKeys.forEach((yKeys, entity) => {
+		if (entities.indexOf(entity) === -1) {
+			if (yKeys.topY) {
+				remove(entitiesByTopY[yKeys.topY], entity);
+			}
+			if (yKeys.bottomY) {
+				remove(entitiesByBottomY[yKeys.bottomY], entity);
+			}
+			lastKeys.delete(entity);
+		}
+	});
+	const cleanByYObj = (entitiesByY) => {
+		Object.keys(entitiesByY).forEach((y) => {
+			if (entitiesByY[y].length === 0) {
+				delete entitiesByY[y];
+			}
+		});
+	};
+	cleanByYObj(entitiesByTopY);
+	cleanByYObj(entitiesByBottomY);
+
 	// sort for gravity
 	entities.sort((a, b) => b.y - a.y);
 
@@ -1125,6 +1211,7 @@ const animate = () => {
 		for (const brick of dragging) {
 			brick.x = 15 * ~~((mouse.worldX) / 15) + brick.grabOffset.x;
 			brick.y = 18 * ~~((mouse.worldY) / 18) + brick.grabOffset.y;
+			entityMoved(brick);
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
 	} else if (hovered.length >= 2) {
