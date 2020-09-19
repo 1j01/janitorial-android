@@ -24,7 +24,10 @@ const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 
 const remove = (array, value) => {
 	if (!array) {
-		console.warn(array, value);
+		if (window.console) {
+			// eslint-disable-next-line
+			console.warn(array, value);
+		}
 	}
 	const index = array.indexOf(value);
 	if (value !== -1) {
@@ -328,6 +331,10 @@ const undos = [];
 const redos = [];
 const clipboard = {};
 
+const mouse = { x: undefined, y: undefined };
+let dragging = [];
+let selectionBox;
+
 const serialize = () => {
 	return JSON.stringify({ entities, version: 0.1 });
 };
@@ -351,6 +358,18 @@ const undoable = (fn) => {
 		save();
 	}
 };
+const undoOrRedo = (undos, redos) => {
+	if (undos.length === 0) {
+		return false;
+	}
+	redos.push(serialize());
+	deserialize(undos.pop());
+	// for (const entity of entities) {
+	// 	entity.grabbed = false;
+	// }
+	save();
+	return true;
+};
 const undo = () => {
 	// if (editing) {
 	const didSomething = undoOrRedo(undos, redos);
@@ -371,18 +390,6 @@ const redo = () => {
 	}
 	// }
 };
-const undoOrRedo = (undos, redos) => {
-	if (undos.length === 0) {
-		return false;
-	}
-	redos.push(serialize());
-	deserialize(undos.pop());
-	// for (const entity of entities) {
-	// 	entity.grabbed = false;
-	// }
-	save();
-	return true;
-};
 
 const selectAll = () => {
 	entities.forEach((entity) => {
@@ -395,16 +402,16 @@ const deleteSelected = () => {
 	});
 	playSound(resources.delete);
 };
-const cutSelected = () => {
-	copySelected();
-	deleteSelected();
-};
 const copySelected = () => {
 	clipboard.entitiesJSON = JSON.stringify(entities.filter((entity) => entity.selected));
 	if (navigator.clipboard && navigator.clipboard.writeText) {
 		navigator.clipboard.writeText(clipboard.entitiesJSON);
 	}
 	playSound(resources.copyPaste);
+};
+const cutSelected = () => {
+	copySelected();
+	deleteSelected();
 };
 const paste = async () => {
 	let { entitiesJSON } = clipboard;
@@ -607,11 +614,6 @@ canvas.addEventListener("mouseleave", () => {
 	mouse.worldX = undefined;
 	mouse.worldY = undefined;
 });
-
-const mouse = { x: undefined, y: undefined };
-let dragging = [];
-let selectionBox;
-// let selectionBox = { x1: undefined, y1: undefined, x2: undefined, y2: undefined };
 
 const updateMouseWorldPosition = () => {
 	mouse.worldX = (mouse.x - canvas.width / 2) / viewport.scale + viewport.centerX;
@@ -996,18 +998,6 @@ const sortEntitiesForRendering = (entities) => {
 	// end procedure
 };
 
-/**
-* Shuffles array in place.
-* @param {Array} a items An array containing the items.
-*/
-const shuffle = (a) => {
-	for (let i = a.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[a[i], a[j]] = [a[j], a[i]];
-	}
-	return a;
-};
-
 const simulateGravity = () => {
 	for (const entity of entities) {
 		if (!entity.fixed && !entity.grabbed) {
@@ -1272,7 +1262,9 @@ const animate = () => {
 	const placeable = canRelease();
 
 	for (const entity of entities) {
-		ctx.globalAlpha = entity.grabbed ? placeable ? 0.8 : 0.3 : 1;
+		if (entity.grabbed) {
+			ctx.globalAlpha = placeable ? 0.8 : 0.3;
+		}
 		if (entity.type === "junkbot") {
 			drawJunkbot(ctx, entity, shouldHilight(entity));
 		} else {
