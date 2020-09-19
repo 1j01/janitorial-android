@@ -729,17 +729,19 @@ const possibleGrabs = () => {
 					if (
 						!entity.fixed &&
 						entity.type === "brick" &&
+						brick.x + brick.width > entity.x &&
+						brick.x < entity.x + entity.width &&
 						attached.indexOf(entity) === -1 &&
-						connects(brick, entity) &&
 						!connectsToFixed(entity, { ignoreEntities: attached })
 					) {
-						const entitiesToCheck3 = [].concat(
-							entitiesByTopY[entity.y + entity.height] || [],
-							entitiesByBottomY[entity.y] || [],
-						);
+						const entitiesToCheck3 = entitiesByBottomY[entity.y] || [];
 						for (const junk of entitiesToCheck3) {
 							if (junk.type !== "brick") {
-								if (connects(entity, junk, -1)) {
+								if (
+									entity.x + entity.width > junk.x &&
+									entity.x < junk.x + junk.width
+									// connects(entity, junk, -1)
+								) {
 									return false;
 								}
 							}
