@@ -380,6 +380,7 @@ const undo = () => {
 	// 	toggleEditing();
 	// 	undo();
 	// }
+	// eslint-disable-next-line
 	// TODO: undo view too
 };
 const redo = () => {
@@ -751,6 +752,7 @@ const possibleGrabs = () => {
 						!connectsToFixed(entity, { ignoreEntities: attached })
 					) {
 						const entitiesToCheck3 = entitiesByBottomY[entity.y] || [];
+						/* eslint-disable max-depth */
 						for (const junk of entitiesToCheck3) {
 							if (junk.type !== "brick") {
 								if (
@@ -763,6 +765,7 @@ const possibleGrabs = () => {
 							}
 						}
 						attached.push(entity);
+						/* eslint-enable max-depth */
 					}
 				}
 			}
@@ -1301,22 +1304,29 @@ const animate = () => {
 
 	ctx.restore(); // world viewport
 
-	// ctx.drawImage(images.font, 0, 90);
-	// drawText(ctx, fontChars, 0, 100, "sand");
-// 	const debugInfo = `ENTITIES: ${entities.length}
-// VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
-// AT SCALE: ${viewport.scale}X
+	let showDebug = false;
+	try {
+		showDebug = localStorage.showDebug === "true";
+	} catch (error) {
+		showDebug = false;
+	}
+	if (showDebug) {
+		drawText(ctx, fontChars, 1, 1, "white");
+		const debugInfo = `ENTITIES: ${entities.length}
+	VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
+	AT SCALE: ${viewport.scale}X
 
-// ${debugInfoForJunkbot}
+	${debugInfoForJunkbot}
 
-// ${debugInfoForFrame}`;
-// 	drawText(ctx, debugInfo, 0, 50, "white");
-// 	if (dragging.length) {
-// 		drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
-// 	} else if (hovered.length) {
-// 		drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
-// 	}
-// 	debugInfoForFrame = "";
+	${debugInfoForFrame}`;
+		drawText(ctx, debugInfo, 1, 50, "white");
+		if (dragging.length) {
+			drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
+		} else if (hovered.length) {
+			drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
+		}
+		debugInfoForFrame = "";
+	}
 };
 
 const main = async () => {
