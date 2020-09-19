@@ -89,7 +89,10 @@ module.exports = {
         "implicit-arrow-linebreak": "error",
         "indent": [
             "error",
-            "tab"
+            "tab",
+            {
+                "SwitchCase": 1
+            },
         ],
         "indent-legacy": "off",
         "init-declarations": "off",
