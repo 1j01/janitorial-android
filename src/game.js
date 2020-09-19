@@ -904,7 +904,8 @@ const sortEntitiesForRendering = (entities) => {
 				a.y + a.height < b.y ||
 				b.x + b.width <= a.x
 			) {
-				[entities[i - 1], entities[i]] = [entities[i], entities[i - 1]];
+				entities[i - 1] = b;
+				entities[i] = a;
 				newN = i;
 			}
 		}
