@@ -606,14 +606,12 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 	const addAnyAttached = (entity) => {
 		for (const otherEntity of entities) {
 			if (
+				connects(entity, otherEntity) &&
 				ignoreEntities.indexOf(otherEntity) === -1 &&
 				connectedToFixed.indexOf(otherEntity) === -1
 			) {
-				// TODO: handle non-bricks? but allow them as end results?
-				if (connects(entity, otherEntity)) {
-					connectedToFixed.push(otherEntity);
-					addAnyAttached(otherEntity);
-				}
+				connectedToFixed.push(otherEntity);
+				addAnyAttached(otherEntity);
 			}
 		}
 	};
@@ -677,21 +675,21 @@ const possibleGrabs = () => {
 		if (topLevel) {
 			for (const brick of attached) {
 				for (const entity of entities) {
-					if (attached.indexOf(entity) === -1) {
-						if (connects(brick, entity)) {
-							if (!entity.fixed && entity.type === "brick") {
-								if (!connectsToFixed(entity, { ignoreEntities: attached })) {
-									for (const junk of entities) {
-										if (junk.type !== "brick") {
-											if (connects(entity, junk, -1)) {
-												return false;
-											}
-										}
-									}
-									attached.push(entity);
+					if (
+						!entity.fixed &&
+						entity.type === "brick" &&
+						attached.indexOf(entity) === -1 &&
+						connects(brick, entity) &&
+						!connectsToFixed(entity, { ignoreEntities: attached })
+					) {
+						for (const junk of entities) {
+							if (junk.type !== "brick") {
+								if (connects(entity, junk, -1)) {
+									return false;
 								}
 							}
 						}
+						attached.push(entity);
 					}
 				}
 			}
