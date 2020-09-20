@@ -61,6 +61,7 @@ const resourcePaths = {
 	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
 	redo: "audio/sound-effects/lego-creator/redo-I0513.wav",
 	insert: "audio/sound-effects/lego-creator/insert-I0506.wav",
+	world: "levels/junkbot-world.json",
 };
 
 const loadImage = (imagePath) => {
@@ -135,7 +136,8 @@ const loadResources = async (resourcePathsByID) => {
 		if (path.match(/atlas\.json$/)) {
 			return loadAtlasJSON(path).then((atlas) => [id, atlas]);
 		} else if (path.match(/\.json$/)) {
-			return loadJSON(path).then((json) => [id, json]);
+			// return loadJSON(path).then((data) => [id, data]);
+			return loadTextFile(path).then((json) => [id, json]);
 		} else if (path.match(/levels\/.*\.txt$/)) {
 			return loadLevelFromTextFile(path).then((level) => [id, level]);
 		} else if (path.match(/\.(ogg|mp3|wav)$/)) {
@@ -1550,12 +1552,6 @@ const initUI = () => {
 
 const main = async () => {
 	try {
-		deserialize(localStorage.JWorld);
-		dragging = entities.filter((entity) => entity.grabbed);
-	} catch (error) {
-		initTestLevel();
-	}
-	try {
 		showDebug = localStorage.showDebug === "true";
 		muted = localStorage.muteSoundEffects === "true";
 		editing = localStorage.editing === "true";
@@ -1563,6 +1559,13 @@ const main = async () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 	resources = await loadResources(resourcePaths);
+	try {
+		deserialize(localStorage.JWorld);
+		dragging = entities.filter((entity) => entity.grabbed);
+	} catch (error) {
+		// initTestLevel();
+		deserialize(resources.world);
+	}
 	initUI();
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
