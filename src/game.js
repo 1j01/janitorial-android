@@ -1402,44 +1402,44 @@ const animate = () => {
 	ctx.restore(); // world viewport
 
 	// active validity checking of the world
-	for (const entity of entities) {
-		if (!isFinite(entity.x) || !isFinite(entity.y)) {
-			debug(`Invalid position for entitiy ${JSON.stringify(entity, null, "\t")}\n`);
-		}
-		for (const otherEntity of entities) {
-			if (otherEntity !== entity && (JSON.stringify(otherEntity).localeCompare(JSON.stringify(entity)) < 0)) {
-				if (
-					rectanglesIntersect(
-						entity.x,
-						entity.y,
-						entity.width,
-						entity.height,
-						otherEntity.x,
-						otherEntity.y,
-						otherEntity.width,
-						otherEntity.height,
-					)
-				) {
-					// debug(`Collision between entitiy ${JSON.stringify(entity, null, "\t")} and entity ${JSON.stringify(otherEntity, null, "\t")}`);
-					let { x, y } = worldToCanvas((entity.x + otherEntity.x) / 2, (entity.y + otherEntity.y) / 2);
-					// let { x, y } = worldToCanvas(entity.x, entity.y);
-					if (x < 0) {
-						x = 0;
-					}
-					if (y < 0) {
-						y = 0;
-					}
-					if (x > canvas.width - 150) {
-						x = canvas.width - 150;
-					}
-					if (y > canvas.height - 10) {
-						y = canvas.height - 10;
-					}
-					drawText(ctx, `${entity.type} to ${otherEntity.type} collision`, x, y, "white");
-				}
-			}
-		}
-	}
+	// for (const entity of entities) {
+	// 	if (!isFinite(entity.x) || !isFinite(entity.y)) {
+	// 		debug(`Invalid position for entitiy ${JSON.stringify(entity, null, "\t")}\n`);
+	// 	}
+	// 	for (const otherEntity of entities) {
+	// 		if (otherEntity !== entity && (JSON.stringify(otherEntity).localeCompare(JSON.stringify(entity)) < 0)) {
+	// 			if (
+	// 				rectanglesIntersect(
+	// 					entity.x,
+	// 					entity.y,
+	// 					entity.width,
+	// 					entity.height,
+	// 					otherEntity.x,
+	// 					otherEntity.y,
+	// 					otherEntity.width,
+	// 					otherEntity.height,
+	// 				)
+	// 			) {
+	// 				// debug(`Collision between entitiy ${JSON.stringify(entity, null, "\t")} and entity ${JSON.stringify(otherEntity, null, "\t")}`);
+	// 				let { x, y } = worldToCanvas((entity.x + otherEntity.x) / 2, (entity.y + otherEntity.y) / 2);
+	// 				// let { x, y } = worldToCanvas(entity.x, entity.y);
+	// 				if (x < 0) {
+	// 					x = 0;
+	// 				}
+	// 				if (y < 0) {
+	// 					y = 0;
+	// 				}
+	// 				if (x > canvas.width - 150) {
+	// 					x = canvas.width - 150;
+	// 				}
+	// 				if (y > canvas.height - 10) {
+	// 					y = canvas.height - 10;
+	// 				}
+	// 				drawText(ctx, `${entity.type} to ${otherEntity.type} collision`, x, y, "white");
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	if (showDebug) {
 		const x = 1 + sidebar.offsetWidth;
