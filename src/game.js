@@ -421,42 +421,41 @@ const cutSelected = () => {
 	deleteSelected();
 };
 const pasteEntities = (newEntities) => {
-	undoable(() => {
-		for (const entity of entities) {
-			entity.selected = false;
-			entity.grabbed = false;
-		}
-		dragging = [];
+	undoable();
+	for (const entity of entities) {
+		entity.selected = false;
+		entity.grabbed = false;
+	}
+	dragging = [];
 
-		for (const entity of newEntities) {
-			entity.selected = true;
-			entity.grabbed = true;
-			entities.push(entity);
-			dragging.push(entity);
-		}
+	for (const entity of newEntities) {
+		entity.selected = true;
+		entity.grabbed = true;
+		entities.push(entity);
+		dragging.push(entity);
+	}
 
-		const centers = newEntities.map((entity) => ({
-			x: entity.x + entity.width / 2,
-			y: entity.y + entity.height / 2,
-		}));
-		const collectiveCenter = { x: 0, y: 0 };
-		for (const entityCenter of centers) {
-			collectiveCenter.x += entityCenter.x;
-			collectiveCenter.y += entityCenter.y;
-		}
-		collectiveCenter.x /= centers.length;
-		collectiveCenter.y /= centers.length;
+	const centers = newEntities.map((entity) => ({
+		x: entity.x + entity.width / 2,
+		y: entity.y + entity.height / 2,
+	}));
+	const collectiveCenter = { x: 0, y: 0 };
+	for (const entityCenter of centers) {
+		collectiveCenter.x += entityCenter.x;
+		collectiveCenter.y += entityCenter.y;
+	}
+	collectiveCenter.x /= centers.length;
+	collectiveCenter.y /= centers.length;
 
-		const offsetX = -15 * Math.floor(collectiveCenter.x / 15);
-		const offsetY = -18 * Math.floor(collectiveCenter.y / 18);
+	const offsetX = -15 * Math.floor(collectiveCenter.x / 15);
+	const offsetY = -18 * Math.floor(collectiveCenter.y / 18);
 
-		for (const entity of newEntities) {
-			entity.grabOffset = {
-				x: entity.x + offsetX,
-				y: entity.y + offsetY,
-			};
-		}
-	});
+	for (const entity of newEntities) {
+		entity.grabOffset = {
+			x: entity.x + offsetX,
+			y: entity.y + offsetY,
+		};
+	}
 };
 const pasteFromClipboard = async () => {
 	let { entitiesJSON } = clipboard;
