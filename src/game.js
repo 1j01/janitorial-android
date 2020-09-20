@@ -1254,7 +1254,7 @@ const animate = () => {
 	if (mouse.y > canvas.height - panMarginSize) {
 		viewport.centerY += panFromMarginSpeed;
 	}
-	if (mouse.x < panMarginSize + (sidebar.hidden ? 0 : entitiesPalette.offsetWidth)) {
+	if (mouse.x < panMarginSize + (sidebar.hidden ? 0 : sidebar.offsetWidth)) {
 		viewport.centerX -= panFromMarginSpeed;
 	}
 	if (mouse.x > canvas.width - panMarginSize) {
@@ -1393,7 +1393,8 @@ const animate = () => {
 	ctx.restore(); // world viewport
 
 	if (showDebug) {
-		drawText(ctx, fontChars, 1, 1, "white");
+		const x = 1 + sidebar.offsetWidth;
+		drawText(ctx, fontChars, x, 1, "white");
 		const debugInfo = `ENTITIES: ${entities.length}
 	VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
 	AT SCALE: ${viewport.scale}X
@@ -1401,7 +1402,7 @@ const animate = () => {
 	${debugInfoForJunkbot}
 
 	${debugInfoForFrame}`;
-		drawText(ctx, debugInfo, 1, 50, "white");
+		drawText(ctx, debugInfo, x, 50, "white");
 		if (dragging.length) {
 			drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
 		} else if (hovered.length) {
