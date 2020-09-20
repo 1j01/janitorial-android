@@ -871,6 +871,9 @@ const startGrab = (grab) => {
 			x: (15 * Math.floor(brick.x / 15)) - (15 * Math.floor(mouse.worldX / 15)),
 			y: (18 * Math.floor(brick.y / 18)) - (18 * Math.floor(mouse.worldY / 18)),
 		};
+		if (editing) {
+			brick.selected = true;
+		}
 	}
 	playSound(resources.blockPickUp);
 };
@@ -906,6 +909,11 @@ canvas.addEventListener("mousedown", (event) => {
 	};
 	if (dragging.length === 0) {
 		const grabs = possibleGrabs();
+		if (!grabs.selection) {
+			for (const entity of entities) {
+				entity.selected = false;
+			}
+		}
 		if (grabs.length === 1) {
 			startGrab(grabs[0]);
 			playSound(resources.blockClick);
@@ -915,11 +923,6 @@ canvas.addEventListener("mousedown", (event) => {
 		} else if (editing) {
 			selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
 			playSound(resources.selectStart);
-		}
-		if (!grabs.selection) {
-			for (const entity of entities) {
-				entity.selected = false;
-			}
 		}
 	}
 });
