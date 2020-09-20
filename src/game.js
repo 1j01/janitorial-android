@@ -54,13 +54,13 @@ const resourcePaths = {
 	// selectEnd: "audio/sound-effects/custom/heavy-click-2.wav",
 	// selectStart: "audio/sound-effects/custom/select2.wav",
 	// selectEnd: "audio/sound-effects/custom/select-end.wav",
-	// selectEnd: "audio/sound-effects/lego-creator/insert-I0506.wav",
 	selectEnd: "audio/sound-effects/custom/select2.wav",
 	// selectStart: "audio/sound-effects/custom/heavy-click-2.wav",
 	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
 	copyPaste: "audio/sound-effects/lego-creator/copy-I0510.wav",
 	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
 	redo: "audio/sound-effects/lego-creator/redo-I0513.wav",
+	insert: "audio/sound-effects/lego-creator/insert-I0506.wav",
 };
 
 const loadImage = (imagePath) => {
@@ -239,47 +239,6 @@ for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
 	x += w;
 }
 
-const paintsTray = document.createElement("div");
-paintsTray.style.position = "fixed";
-paintsTray.style.left = "0px";
-paintsTray.style.top = "0px";
-paintsTray.style.bottom = "0px";
-paintsTray.style.width = "200px";
-paintsTray.style.backgroundColor = "black";
-
-document.body.append(paintsTray);
-
-let paintSelected;
-const exitPaintMode = () => {
-	paintSelected = null;
-	paintOptions.forEach((el) => {
-		el.style.boxShadow = "";
-		el.style.borderStyle = "";
-		el.style.borderColor = "";
-	});
-};
-const paintOptions = Object.keys(brickColorToYIndex).map((color) => {
-	const paintOption = document.createElement("button");
-	paintOption.style.width = "180px";
-	paintOption.style.height = "60px";
-	paintOption.style.margin = "10px";
-	paintOption.style.borderWidth = "3px";
-	paintOption.style.backgroundColor = color;
-	paintOption.onclick = () => {
-		if (paintSelected === color) {
-			exitPaintMode();
-		} else {
-			exitPaintMode();
-			paintSelected = color;
-			paintOption.style.boxShadow = "0 0 0 5px white";
-			paintOption.style.borderStyle = "dotted";
-			paintOption.style.borderColor = "black";
-		}
-	};
-	paintsTray.append(paintOption);
-	return paintOption;
-});
-
 const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 	return {
 		type: "brick",
@@ -455,14 +414,7 @@ const cutSelected = () => {
 	copySelected();
 	deleteSelected();
 };
-const paste = async () => {
-	let { entitiesJSON } = clipboard;
-	if (navigator.clipboard && navigator.clipboard.readText) {
-		const text = await navigator.clipboard.readText();
-		if (text && text.trim()[0] === "{") {
-			entitiesJSON = text;
-		}
-	}
+const pasteEntities = (newEntities) => {
 	undoable(() => {
 		for (const entity of entities) {
 			entity.selected = false;
@@ -470,7 +422,6 @@ const paste = async () => {
 		}
 		dragging = [];
 
-		const newEntities = JSON.parse(entitiesJSON);
 		for (const entity of newEntities) {
 			entity.selected = true;
 			entity.grabbed = true;
@@ -499,8 +450,19 @@ const paste = async () => {
 				y: entity.y + offsetY,
 			};
 		}
-		playSound(resources.copyPaste);
 	});
+};
+const pasteFromClipboard = async () => {
+	let { entitiesJSON } = clipboard;
+	if (navigator.clipboard && navigator.clipboard.readText) {
+		const text = await navigator.clipboard.readText();
+		if (text && text.trim()[0] === "{") {
+			entitiesJSON = text;
+		}
+	}
+	const newEntities = JSON.parse(entitiesJSON);
+	pasteEntities(newEntities);
+	playSound(resources.copyPaste);
 };
 
 const initTestLevel = () => {
@@ -619,17 +581,13 @@ addEventListener("keydown", (event) => {
 			break;
 		case "V":
 			if (event.ctrlKey) {
-				paste();
+				pasteFromClipboard();
 			}
 			break;
 		case "A":
 			if (event.ctrlKey) {
 				selectAll();
 			}
-			break;
-		case "ESCAPE":
-		case "ESC":
-			exitPaintMode();
 			break;
 		default:
 			// Prevent preventing default action if event not handled
@@ -898,24 +856,15 @@ canvas.addEventListener("mousedown", (event) => {
 	};
 	if (dragging.length === 0) {
 		const grabs = possibleGrabs();
-		if (paintSelected) {
-			const brick = brickUnderMouse(true);
-			if (brick) {
-				undoable(() => {
-					brick.colorName = paintSelected;
-				});
-			}
-		} else {
-			if (grabs.length === 1) {
-				startGrab(grabs[0]);
-				playSound(resources.blockClick);
-			} else if (grabs.length) {
-				pendingGrabs = grabs;
-				playSound(resources.blockClick);
-			} else if (event.ctrlKey) {
-				selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
-				playSound(resources.selectStart);
-			}
+		if (grabs.length === 1) {
+			startGrab(grabs[0]);
+			playSound(resources.blockClick);
+		} else if (grabs.length) {
+			pendingGrabs = grabs;
+			playSound(resources.blockClick);
+		} else if (event.ctrlKey) {
+			selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
+			playSound(resources.selectStart);
 		}
 		if (!grabs.selection) {
 			for (const entity of entities) {
@@ -1277,8 +1226,6 @@ const animate = () => {
 			entityMoved(brick);
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
-	} else if (paintSelected) {
-		canvas.style.cursor = `url("images/cursors/cursor-paint.png") 8 8, crosshair`;
 	} else if (hovered.length >= 2) {
 		canvas.style.cursor = `url("images/cursors/cursor-grab-either.png") 8 8, grab`;
 	} else if (hovered.upward) {
@@ -1385,6 +1332,69 @@ const animate = () => {
 	}
 };
 
+const initUI = () => {
+
+	const entitiesTray = document.createElement("div");
+	entitiesTray.style.position = "fixed";
+	entitiesTray.style.left = "0px";
+	entitiesTray.style.top = "0px";
+	entitiesTray.style.bottom = "0px";
+	// TODO: use wrapper for scrolling, to size things reasonably
+	entitiesTray.style.width = "220px";
+	entitiesTray.style.overflowY = "auto";
+	entitiesTray.style.backgroundColor = "black";
+
+	document.body.append(entitiesTray);
+
+	const makeInsertEntityButton = (protoEntity) => {
+		const getEntityCopy = () => JSON.parse(JSON.stringify(protoEntity));
+		const button = document.createElement("button");
+		const buttonCanvas = document.createElement("canvas");
+		const buttonCtx = buttonCanvas.getContext("2d");
+		button.style.margin = "10px";
+		button.style.borderWidth = "5px";
+		button.style.backgroundColor = "black";
+		// button.style.backgroundColor = color;
+		button.addEventListener("click", () => {
+			for (const entity of entities) {
+				entity.selected = false;
+				entity.grabbed = false;
+			}
+			const entity = getEntityCopy();
+			// entity.grabOffset = { x: 0, y: 0 };
+			// dragging = [entity];
+			pasteEntities([entity]);
+			entity.grabOffset.y -= 18; // TODO: why is this needed, and not for pasteFromClipboard?
+			// TODO: get cursor from lego creator
+			button.style.cursor = "url(images/green-1x1-brick-26x26.png)";
+			playSound(resources.insert);
+		});
+		button.addEventListener("mouseleave", () => {
+			button.style.cursor = "";
+		});
+		const previewEntity = getEntityCopy();
+		buttonCanvas.width = 155;
+		buttonCanvas.height = previewEntity.height + 18 * 3;
+		drawBrick(buttonCtx, previewEntity);
+		button.append(buttonCanvas);
+		entitiesTray.append(button);
+		return button;
+	};
+
+	Object.keys(brickColorToYIndex).forEach((colorName) => {
+		brickWidthsInStuds.forEach((widthInStuds) => {
+			makeInsertEntityButton(makeBrick({
+				colorName,
+				widthInStuds,
+				fixed: colorName === "gray",
+				x: 0,
+				y: 18 * 2,
+			}));
+		});
+	});
+
+};
+
 const main = async () => {
 	try {
 		deserialize(localStorage.JWorld);
@@ -1393,6 +1403,7 @@ const main = async () => {
 		initTestLevel();
 	}
 	resources = await loadResources(resourcePaths);
+	initUI();
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
