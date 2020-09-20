@@ -351,6 +351,7 @@ const entitiesByBottomY = {}; // y to array of entities with that y as their bot
 const lastKeys = new Map(); // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
 
 const entityMoved = (entity) => {
+	delete entity.connectedToFixedOptimization;
 	const yKeys = lastKeys.get(entity) || {};
 	entitiesByTopY[entity.y] = entitiesByTopY[entity.y] || [];
 	entitiesByBottomY[entity.y + entity.height] = entitiesByBottomY[entity.y + entity.height] || [];
@@ -779,6 +780,9 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 };
 
 const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {}) => {
+	if ("connectedToFixedOptimization" in startEntity) {
+		return startEntity.connectedToFixedOptimization;
+	}
 	const visited = [];
 	const search = (fromEntity) => {
 		const entitiesToCheck = [].concat(
@@ -806,7 +810,9 @@ const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {
 		}
 		return false;
 	};
-	return search(startEntity);
+	const connects = search(startEntity);
+	startEntity.connectedToFixedOptimization = connects;
+	return connects;
 };
 
 const possibleGrabs = () => {
