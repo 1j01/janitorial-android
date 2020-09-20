@@ -146,19 +146,33 @@ const loadResources = async (resourcePathsByID) => {
 	})));
 };
 
+let showDebug = false;
 let muted = false;
 let paused = false;
 let editing = false;
 let entitiesTray;
 const toggleMute = () => {
 	muted = !muted;
+	try {
+		localStorage.muteSoundEffects = muted;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
 };
 const togglePause = () => {
 	paused = !paused;
+	try {
+		localStorage.paused = paused;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
 };
 const toggleEditing = () => {
 	editing = !editing;
 	entitiesTray.hidden = !editing;
+	try {
+		// muted = localStorage.muteSoundEffects === "true";
+		localStorage.editing = editing;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
 };
 
 const playSound = (audioBuffer) => {
@@ -1342,12 +1356,6 @@ const animate = () => {
 
 	ctx.restore(); // world viewport
 
-	let showDebug = false;
-	try {
-		showDebug = localStorage.showDebug === "true";
-	} catch (error) {
-		showDebug = false;
-	}
 	if (showDebug) {
 		drawText(ctx, fontChars, 1, 1, "white");
 		const debugInfo = `ENTITIES: ${entities.length}
@@ -1440,6 +1448,13 @@ const main = async () => {
 	} catch (error) {
 		initTestLevel();
 	}
+	try {
+		showDebug = localStorage.showDebug === "true";
+		muted = localStorage.muteSoundEffects === "true";
+		editing = localStorage.editing === "true";
+		paused = localStorage.paused === "true";
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
 	resources = await loadResources(resourcePaths);
 	initUI();
 	for (const [colorName, color] of Object.entries(fontColors)) {
