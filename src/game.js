@@ -408,33 +408,40 @@ const undoOrRedo = (undos, redos) => {
 	return true;
 };
 const undo = () => {
-	if (editing) {
-		const didSomething = undoOrRedo(undos, redos);
-		if (didSomething) {
-			playSound(resources.undo);
-		}
-	} else {
+	if (!editing) {
 		toggleEditing();
-		undo();
+		return;
+	}
+	const didSomething = undoOrRedo(undos, redos);
+	if (didSomething) {
+		playSound(resources.undo);
 	}
 	// eslint-disable-next-line
 	// TODO: undo view too
 };
 const redo = () => {
-	// if (editing) {
+	if (!editing) {
+		toggleEditing();
+		return;
+	}
 	const didSomething = undoOrRedo(redos, undos);
 	if (didSomething) {
 		playSound(resources.redo);
 	}
-	// }
 };
 
 const selectAll = () => {
+	if (!editing) {
+		toggleEditing();
+	}
 	entities.forEach((entity) => {
 		entity.selected = true;
 	});
 };
 const deleteSelected = () => {
+	if (!editing) {
+		return;
+	}
 	if (entities.some((entity) => entity.selected)) {
 		undoable(() => {
 			entities = entities.filter((entity) => !entity.selected);
@@ -443,6 +450,9 @@ const deleteSelected = () => {
 	}
 };
 const copySelected = () => {
+	if (!editing) {
+		return;
+	}
 	if (entities.some((entity) => entity.selected)) {
 		clipboard.entitiesJSON = JSON.stringify(entities.filter((entity) => entity.selected));
 		if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -493,6 +503,9 @@ const pasteEntities = (newEntities) => {
 	}
 };
 const pasteFromClipboard = async () => {
+	if (!editing) {
+		return;
+	}
 	let { entitiesJSON } = clipboard;
 	if (navigator.clipboard && navigator.clipboard.readText) {
 		const text = await navigator.clipboard.readText();
