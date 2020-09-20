@@ -1375,7 +1375,7 @@ const initUI = () => {
 	entitiesTray.style.top = "0px";
 	entitiesTray.style.bottom = "0px";
 	// TODO: use wrapper for scrolling, to size things reasonably
-	entitiesTray.style.width = "220px";
+	entitiesTray.style.width = "320px";
 	entitiesTray.style.overflowY = "auto";
 	entitiesTray.style.backgroundColor = "black";
 	entitiesTray.hidden = !editing;
@@ -1387,8 +1387,8 @@ const initUI = () => {
 		const button = document.createElement("button");
 		const buttonCanvas = document.createElement("canvas");
 		const buttonCtx = buttonCanvas.getContext("2d");
-		button.style.margin = "10px";
-		button.style.borderWidth = "5px";
+		button.style.margin = "5px";
+		button.style.borderWidth = "0";
 		button.style.backgroundColor = "black";
 		button.addEventListener("click", () => {
 			for (const entity of entities) {
@@ -1405,8 +1405,8 @@ const initUI = () => {
 		// 	button.style.cursor = "";
 		// });
 		const previewEntity = getEntityCopy();
-		buttonCanvas.width = 155;
-		buttonCanvas.height = previewEntity.height + 18 * 3;
+		buttonCanvas.width = previewEntity.width + 15 * 1;
+		buttonCanvas.height = previewEntity.height + 18 * 2;
 		drawEntity(buttonCtx, previewEntity);
 		button.append(buttonCanvas);
 		entitiesTray.append(button);
