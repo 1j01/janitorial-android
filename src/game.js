@@ -283,7 +283,7 @@ const drawBrick = (ctx, brick, hilight) => {
 };
 
 const drawJunkbot = (ctx, junkbot, hilight) => {
-	const frameIndex = ~~(junkbot.animationFrame % 10);
+	const frameIndex = Math.floor(junkbot.animationFrame % 10);
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
@@ -441,8 +441,8 @@ const pasteEntities = (newEntities) => {
 		collectiveCenter.x /= centers.length;
 		collectiveCenter.y /= centers.length;
 
-		const offsetX = -15 * ~~(collectiveCenter.x / 15);
-		const offsetY = -18 * ~~(collectiveCenter.y / 18);
+		const offsetX = -15 * Math.floor(collectiveCenter.x / 15);
+		const offsetY = -18 * Math.floor(collectiveCenter.y / 18);
 
 		for (const entity of newEntities) {
 			entity.grabOffset = {
@@ -469,7 +469,7 @@ const initTestLevel = () => {
 	for (let row = 5; row >= 0; row--) {
 		for (let column = 0; column < 150;) { // MUST increment below
 			if (Math.sin(column * 13234) < row * 0.2 + 0.1) {
-				const widthInStuds = brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))];
+				const widthInStuds = brickWidthsInStuds[1 + Math.floor(Math.random() * (brickWidthsInStuds.length - 1))];
 				entities.push(makeBrick({
 					x: column * 15,
 					y: (row - 6) * 18,
@@ -479,7 +479,7 @@ const initTestLevel = () => {
 				}));
 				column += widthInStuds;
 			} else {
-				column += ~~(Math.random() * 5 + 1);
+				column += Math.floor(Math.random() * 5 + 1);
 			}
 		}
 	}
@@ -511,10 +511,10 @@ const initTestLevel = () => {
 	const iid = setInterval(() => {
 		dropFromRow += 1;
 		const brick = makeBrick({
-			x: 15 * ~~(Math.sin(Date.now() / 400) * 9),
+			x: 15 * Math.floor(Math.sin(Date.now() / 400) * 9),
 			y: 18 * -dropFromRow,
-			widthInStuds: brickWidthsInStuds[1 + ~~(Math.random() * (brickWidthsInStuds.length - 1))],
-			colorName: brickColorNames[~~((brickColorNames.length - 1) * Math.random())],
+			widthInStuds: brickWidthsInStuds[1 + Math.floor(Math.random() * (brickWidthsInStuds.length - 1))],
+			colorName: brickColorNames[Math.floor((brickColorNames.length - 1) * Math.random())],
 		});
 		entities.push(brick);
 		if (dropFromRow > 100) {
@@ -815,11 +815,11 @@ const startGrab = (grab) => {
 	for (const brick of dragging) {
 		brick.grabbed = true;
 		brick.grabOffset = {
-			// x: brick.x - (15 * ~~(mouse.worldX/15)),
-			// y: brick.y - (18 * ~~(mouse.worldY/18)),
+			// x: brick.x - (15 * Math.floor(mouse.worldX/15)),
+			// y: brick.y - (18 * Math.floor(mouse.worldY/18)),
 			// so you can place blocks that were grabbed when they weren't on the grid:
-			x: (15 * ~~(brick.x / 15)) - (15 * ~~(mouse.worldX / 15)),
-			y: (18 * ~~(brick.y / 18)) - (18 * ~~(mouse.worldY / 18)),
+			x: (15 * Math.floor(brick.x / 15)) - (15 * Math.floor(mouse.worldX / 15)),
+			y: (18 * Math.floor(brick.y / 18)) - (18 * Math.floor(mouse.worldY / 18)),
 		};
 	}
 	playSound(resources.blockPickUp);
@@ -1221,8 +1221,8 @@ const animate = () => {
 
 	if (dragging.length) {
 		for (const brick of dragging) {
-			brick.x = 15 * ~~((mouse.worldX) / 15) + brick.grabOffset.x;
-			brick.y = 18 * ~~((mouse.worldY) / 18) + brick.grabOffset.y;
+			brick.x = 15 * Math.floor((mouse.worldX) / 15) + brick.grabOffset.x;
+			brick.y = 18 * Math.floor((mouse.worldY) / 18) + brick.grabOffset.y;
 			entityMoved(brick);
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
@@ -1262,7 +1262,7 @@ const animate = () => {
 		// if (dragging.length) {
 		// 	return dragging.indexOf(entity) > -1;
 		// }
-		// return hovered.length && hovered[~~(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
+		// return hovered.length && hovered[Math.floor(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
 	};
 
 	const placeable = canRelease();
@@ -1364,7 +1364,6 @@ const initUI = () => {
 			// entity.grabOffset = { x: 0, y: 0 };
 			// dragging = [entity];
 			pasteEntities([entity]);
-			entity.grabOffset.y -= 18; // TODO: why is this needed, and not for pasteFromClipboard?
 			// TODO: get cursor from lego creator
 			button.style.cursor = "url(images/green-1x1-brick-26x26.png)";
 			playSound(resources.insert);
