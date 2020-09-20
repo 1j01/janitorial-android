@@ -1226,7 +1226,9 @@ const animate = () => {
 	if (mouse.x > canvas.width - panMarginSize) {
 		viewport.centerX += panFromMarginSpeed;
 	}
-	viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
+	if (!editing) {
+		viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
+	}
 	updateMouseWorldPosition();
 
 	// add new entities to acceleration structures
