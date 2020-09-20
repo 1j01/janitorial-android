@@ -598,7 +598,10 @@ addEventListener("keydown", (event) => {
 	if (event.defaultPrevented) {
 		return; // Do nothing if the event was already processed
 	}
-	if (event.target.tagName.match(/input|textarea|select|button/i)) {
+	if (event.target.tagName.match(/input|textarea|select/i)) {
+		return;
+	}
+	if (event.target.tagName.match(/button/i) && (event.key === " " || event.key === "Enter")) {
 		return;
 	}
 	keys[event.code] = true;
