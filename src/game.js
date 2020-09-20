@@ -150,7 +150,8 @@ let showDebug = false;
 let muted = false;
 let paused = false;
 let editing = false;
-let entitiesTray;
+let entitiesPalette;
+let sidebar;
 const toggleMute = () => {
 	muted = !muted;
 	try {
@@ -167,7 +168,7 @@ const togglePause = () => {
 };
 const toggleEditing = () => {
 	editing = !editing;
-	entitiesTray.hidden = !editing;
+	sidebar.hidden = !editing;
 	try {
 		// muted = localStorage.muteSoundEffects === "true";
 		localStorage.editing = editing;
@@ -385,6 +386,20 @@ const deserialize = (json) => {
 };
 const save = () => {
 	localStorage.JWorld = serialize();
+};
+
+const saveToFile = () => {
+	const file = new Blob([localStorage.JWorld], { type: "application/json" });
+	const a = document.createElement("a");
+	const url = URL.createObjectURL(file);
+	a.href = url;
+	a.download = "junkbot-world.json";
+	document.body.appendChild(a);
+	a.click();
+	setTimeout(() => {
+		document.body.removeChild(a);
+		window.URL.revokeObjectURL(url);
+	}, 0);
 };
 
 const undoable = (fn) => {
@@ -1236,7 +1251,7 @@ const animate = () => {
 	if (mouse.y > canvas.height - panMarginSize) {
 		viewport.centerY += panFromMarginSpeed;
 	}
-	if (mouse.x < panMarginSize + (entitiesTray.hidden ? 0 : entitiesTray.offsetWidth)) {
+	if (mouse.x < panMarginSize + (sidebar.hidden ? 0 : entitiesPalette.offsetWidth)) {
 		viewport.centerX -= panFromMarginSpeed;
 	}
 	if (mouse.x > canvas.width - panMarginSize) {
@@ -1395,18 +1410,22 @@ const animate = () => {
 
 const initUI = () => {
 
-	entitiesTray = document.createElement("div");
-	entitiesTray.style.position = "fixed";
-	entitiesTray.style.left = "0px";
-	entitiesTray.style.top = "0px";
-	entitiesTray.style.bottom = "0px";
-	// TODO: use wrapper for scrolling, to size things reasonably
-	entitiesTray.style.width = "330px";
-	entitiesTray.style.overflowY = "auto";
-	entitiesTray.style.backgroundColor = "black";
-	entitiesTray.hidden = !editing;
+	sidebar = document.createElement("div");
+	sidebar.style.position = "fixed";
+	sidebar.style.left = "0px";
+	sidebar.style.top = "0px";
+	sidebar.style.bottom = "0px";
+	sidebar.style.backgroundColor = "#224";
 
-	document.body.append(entitiesTray);
+	entitiesPalette = document.createElement("div");
+	// TODO: use wrapper for scrolling, to size things reasonably
+	entitiesPalette.style.width = "330px";
+	entitiesPalette.style.height = "90%";
+	entitiesPalette.style.overflowY = "auto";
+	entitiesPalette.style.backgroundColor = "black";
+	sidebar.hidden = !editing;
+
+	sidebar.append(entitiesPalette);
 
 	let hilitButton;
 	const makeInsertEntityButton = (protoEntity) => {
@@ -1427,7 +1446,7 @@ const initUI = () => {
 			}
 			const entity = getEntityCopy();
 			pasteEntities([entity]);
-			entitiesTray.style.cursor = "url(\"images/cursors/cursor-insert.png\") 0 0, default";
+			entitiesPalette.style.cursor = "url(\"images/cursors/cursor-insert.png\") 0 0, default";
 			if (hilitButton) {
 				hilitButton.style.borderColor = "transparent";
 			}
@@ -1435,8 +1454,8 @@ const initUI = () => {
 			hilitButton = button;
 			playSound(resources.insert);
 		});
-		entitiesTray.addEventListener("mouseleave", () => {
-			entitiesTray.style.cursor = "";
+		entitiesPalette.addEventListener("mouseleave", () => {
+			entitiesPalette.style.cursor = "";
 			// button.style.borderColor = "transparent";
 		});
 		const previewEntity = getEntityCopy();
@@ -1445,7 +1464,7 @@ const initUI = () => {
 		buttonCtx.translate(0, 28);
 		drawEntity(buttonCtx, previewEntity);
 		button.append(buttonCanvas);
-		entitiesTray.append(button);
+		entitiesPalette.append(button);
 		return button;
 	};
 
@@ -1467,6 +1486,13 @@ const initUI = () => {
 		facing: 1,
 	}));
 
+	const saveButton = document.createElement("button");
+	saveButton.textContent = "Save World";
+	saveButton.onclick = saveToFile;
+	saveButton.style.margin = "10px";
+	sidebar.append(saveButton);
+
+	document.body.append(sidebar);
 };
 
 const main = async () => {
