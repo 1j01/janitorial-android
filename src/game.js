@@ -941,7 +941,7 @@ const canRelease = () => {
 				}
 			}
 		});
-		if (connectsToCeiling ^ connectsToFloor) {
+		if (connectsToCeiling !== connectsToFloor) {
 			return true;
 		}
 	}
