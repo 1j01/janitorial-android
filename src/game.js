@@ -25,7 +25,7 @@ const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 const remove = (array, value) => {
 	if (!array) {
 		if (window.console) {
-			// eslint-disable-next-line
+			// eslint-disable-next-line no-console
 			console.warn(array, value);
 		}
 	}
@@ -307,6 +307,23 @@ const drawJunkbot = (ctx, junkbot, hilight) => {
 			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[2], (brickColorToYIndex.gray + 1) * h + 9, w, h, junkbot.x, junkbot.y - 15 + iy, w, h);
 		}
 		ctx.restore();
+	}
+};
+
+const drawEntity = (ctx, entity, hilight) => {
+	switch (entity.type) {
+		case "brick":
+			drawBrick(ctx, entity, hilight);
+			break;
+		case "junkbot":
+			drawJunkbot(ctx, entity, hilight);
+			break;
+		default:
+			if (window.console) {
+				// eslint-disable-next-line no-console
+				console.warn(`Unknown entity type '${entity.type}'`);
+			}
+			break;
 	}
 };
 
@@ -1293,11 +1310,7 @@ const animate = () => {
 		if (entity.grabbed) {
 			ctx.globalAlpha = placeable ? 0.8 : 0.3;
 		}
-		if (entity.type === "junkbot") {
-			drawJunkbot(ctx, entity, shouldHilight(entity));
-		} else {
-			drawBrick(ctx, entity, shouldHilight(entity));
-		}
+		drawEntity(ctx, entity, shouldHilight(entity));
 		ctx.globalAlpha = 1;
 	}
 
@@ -1377,27 +1390,24 @@ const initUI = () => {
 		button.style.margin = "10px";
 		button.style.borderWidth = "5px";
 		button.style.backgroundColor = "black";
-		// button.style.backgroundColor = color;
 		button.addEventListener("click", () => {
 			for (const entity of entities) {
 				entity.selected = false;
 				entity.grabbed = false;
 			}
 			const entity = getEntityCopy();
-			// entity.grabOffset = { x: 0, y: 0 };
-			// dragging = [entity];
 			pasteEntities([entity]);
 			// TODO: get cursor from lego creator
-			button.style.cursor = "url(images/green-1x1-brick-26x26.png)";
+			// button.style.cursor = "url(\"images/cursors/insert.png\") 0 0";
 			playSound(resources.insert);
 		});
-		button.addEventListener("mouseleave", () => {
-			button.style.cursor = "";
-		});
+		// button.addEventListener("mouseleave", () => {
+		// 	button.style.cursor = "";
+		// });
 		const previewEntity = getEntityCopy();
 		buttonCanvas.width = 155;
 		buttonCanvas.height = previewEntity.height + 18 * 3;
-		drawBrick(buttonCtx, previewEntity);
+		drawEntity(buttonCtx, previewEntity);
 		button.append(buttonCanvas);
 		entitiesTray.append(button);
 		return button;
@@ -1414,6 +1424,12 @@ const initUI = () => {
 			}));
 		});
 	});
+
+	makeInsertEntityButton(makeJunkbot({
+		x: 0,
+		y: 18 * 2,
+		facing: 1,
+	}));
 
 };
 
