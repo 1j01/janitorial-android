@@ -404,17 +404,21 @@ const selectAll = () => {
 	});
 };
 const deleteSelected = () => {
-	undoable(() => {
-		entities = entities.filter((entity) => !entity.selected);
-	});
-	playSound(resources.delete);
+	if (entities.some((entity) => entity.selected)) {
+		undoable(() => {
+			entities = entities.filter((entity) => !entity.selected);
+		});
+		playSound(resources.delete);
+	}
 };
 const copySelected = () => {
-	clipboard.entitiesJSON = JSON.stringify(entities.filter((entity) => entity.selected));
-	if (navigator.clipboard && navigator.clipboard.writeText) {
-		navigator.clipboard.writeText(clipboard.entitiesJSON);
+	if (entities.some((entity) => entity.selected)) {
+		clipboard.entitiesJSON = JSON.stringify(entities.filter((entity) => entity.selected));
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(clipboard.entitiesJSON);
+		}
+		playSound(resources.copyPaste);
 	}
-	playSound(resources.copyPaste);
 };
 const cutSelected = () => {
 	copySelected();
@@ -551,16 +555,24 @@ addEventListener("keydown", (event) => {
 	switch (event.key.toUpperCase()) {
 		case " ": // Spacebar
 		case "P":
-			togglePause();
+			if (!event.repeat) {
+				togglePause();
+			}
 			break;
 		case "E":
-			toggleEditing();
+			if (!event.repeat) {
+				toggleEditing();
+			}
 			break;
 		case "M":
-			toggleMute();
+			if (!event.repeat) {
+				toggleMute();
+			}
 			break;
 		case "DELETE":
-			deleteSelected();
+			if (!event.repeat) {
+				deleteSelected();
+			}
 			break;
 		case "Z":
 			if (event.ctrlKey) {
@@ -582,7 +594,7 @@ addEventListener("keydown", (event) => {
 			}
 			break;
 		case "C":
-			if (event.ctrlKey) {
+			if (event.ctrlKey && !event.repeat) {
 				copySelected();
 			}
 			break;
