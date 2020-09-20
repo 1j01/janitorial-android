@@ -1398,6 +1398,7 @@ const initUI = () => {
 		button.style.margin = "5px";
 		button.style.borderWidth = "0";
 		button.style.backgroundColor = "black";
+		button.style.cursor = "inherit";
 		button.addEventListener("click", () => {
 			for (const entity of entities) {
 				entity.selected = false;
@@ -1405,13 +1406,12 @@ const initUI = () => {
 			}
 			const entity = getEntityCopy();
 			pasteEntities([entity]);
-			// TODO: get cursor from lego creator
-			// button.style.cursor = "url(\"images/cursors/insert.png\") 0 0";
+			entitiesTray.style.cursor = "url(\"images/cursors/cursor-insert.png\") 0 0, default";
 			playSound(resources.insert);
 		});
-		// button.addEventListener("mouseleave", () => {
-		// 	button.style.cursor = "";
-		// });
+		entitiesTray.addEventListener("mouseleave", () => {
+			entitiesTray.style.cursor = "";
+		});
 		const previewEntity = getEntityCopy();
 		buttonCanvas.width = previewEntity.width + 15 * 1;
 		buttonCanvas.height = previewEntity.height + 18 * 2;
