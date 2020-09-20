@@ -829,9 +829,14 @@ const possibleGrabs = () => {
 		for (const entity of entitiesToCheck1) {
 			if (
 				entity !== brick &&
-				connects(brick, entity, entity.type === "brick" ? direction : -1)
+				// for things that aren't bricks, check above, in case someone's standing on these blocks
+				connects(brick, entity, entity.type === "brick" ? direction : -1) &&
+				// prevent heavy recursion when e.g. there's a pyramid of blocks
+				attached.indexOf(entity) === -1
 			) {
 				if (entity.fixed || entity.type !== "brick") {
+					// can't drag in this direction (e.g. the block might be sandwhiched) or
+					// junkbot or an enemy might be standing on these blocks
 					return false;
 				} else {
 					attached.push(entity);
