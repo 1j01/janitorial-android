@@ -19,7 +19,7 @@
   "author": "Isaiah Odhner <isaiahodhner@gmail.com>",
   "scripts": {
     "start": "live-server",
-    "lint": "eslint src/"
+    "lint": "eslint src/ .eslintrc.js"
   },
   "repository": {
     "type": "git",
