@@ -377,7 +377,12 @@ let dragging = [];
 let selectionBox;
 
 const serialize = () => {
-	return JSON.stringify({ entities, version: 0.1 });
+	return JSON.stringify({ version: 0.1, format: "janitorial-android", entities }, (name, value) => {
+		if (name === "connectedToFixedOptimization" || name === "grabbed" || name === "grabOffset") {
+			return undefined;
+		}
+		return value;
+	}, "\t");
 };
 const deserialize = (json) => {
 	const state = JSON.parse(json);
