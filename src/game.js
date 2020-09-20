@@ -8,9 +8,9 @@ const context = new AudioContext();
 
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
-// const debug = (text) => {
-// 	debugInfoForFrame += `${text}\n`;
-// };
+const debug = (text) => {
+	debugInfoForFrame += `${text}\n`;
+};
 const debugJunkbot = (text) => {
 	debugInfoForJunkbot += `${text}\n`;
 };
@@ -1391,6 +1391,29 @@ const animate = () => {
 	}
 
 	ctx.restore(); // world viewport
+
+	// active validity checking
+	for (const entity of entities) {
+		if (!isFinite(entity.x) || !isFinite(entity.y)) {
+			debug(`Invalid position for entitiy ${JSON.stringify(entity, null, "\t")}`);
+		}
+		for (const otherEntity of entities) {
+			if (
+				rectanglesIntersect(
+					entity.x,
+					entity.y,
+					entity.width,
+					entity.height,
+					otherEntity.x,
+					otherEntity.y,
+					otherEntity.width,
+					otherEntity.height,
+				)
+			) {
+				debug(`Collision between entitiy ${JSON.stringify(entity, null, "\t")} and entity ${JSON.stringify(otherEntity, null, "\t")}`);
+			}
+		}
+	}
 
 	if (showDebug) {
 		const x = 1 + sidebar.offsetWidth;
