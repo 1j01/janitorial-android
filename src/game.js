@@ -923,6 +923,9 @@ const canRelease = () => {
 		}
 		return true;
 	})) {
+		if (dragging.every((entity) => entity.fixed)) {
+			return true;
+		}
 		let connectsToCeiling = false;
 		let connectsToFloor = false;
 		dragging.forEach((entity) => {
