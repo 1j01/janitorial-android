@@ -831,12 +831,12 @@ const possibleGrabs = () => {
 		return [];
 	}
 	const grabs = [];
-	if (editing && brick.selected) {
-		grabs.push(grabs.selection = entities.filter((entity) => entity.selected));
+	if (editing && (keys.ControlLeft || keys.ControlRight)) {
+		grabs.push([brick]);
 		return grabs;
 	}
-	if (editing) {
-		grabs.push([brick]);
+	if (editing && brick.selected) {
+		grabs.push(grabs.selection = entities.filter((entity) => entity.selected));
 		return grabs;
 	}
 	if (brick.type !== "brick" || brick.fixed) {
