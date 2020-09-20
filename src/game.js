@@ -1383,20 +1383,23 @@ const initUI = () => {
 	entitiesTray.style.top = "0px";
 	entitiesTray.style.bottom = "0px";
 	// TODO: use wrapper for scrolling, to size things reasonably
-	entitiesTray.style.width = "320px";
+	entitiesTray.style.width = "330px";
 	entitiesTray.style.overflowY = "auto";
 	entitiesTray.style.backgroundColor = "black";
 	entitiesTray.hidden = !editing;
 
 	document.body.append(entitiesTray);
 
+	let hilitButton;
 	const makeInsertEntityButton = (protoEntity) => {
 		const getEntityCopy = () => JSON.parse(JSON.stringify(protoEntity));
 		const button = document.createElement("button");
 		const buttonCanvas = document.createElement("canvas");
 		const buttonCtx = buttonCanvas.getContext("2d");
-		button.style.margin = "5px";
-		button.style.borderWidth = "0";
+		button.style.margin = "0";
+		button.style.borderWidth = "3px";
+		button.style.borderStyle = "solid";
+		button.style.borderColor = "transparent";
 		button.style.backgroundColor = "black";
 		button.style.cursor = "inherit";
 		button.addEventListener("click", () => {
@@ -1407,14 +1410,21 @@ const initUI = () => {
 			const entity = getEntityCopy();
 			pasteEntities([entity]);
 			entitiesTray.style.cursor = "url(\"images/cursors/cursor-insert.png\") 0 0, default";
+			if (hilitButton) {
+				hilitButton.style.borderColor = "transparent";
+			}
+			button.style.borderColor = "yellow";
+			hilitButton = button;
 			playSound(resources.insert);
 		});
 		entitiesTray.addEventListener("mouseleave", () => {
 			entitiesTray.style.cursor = "";
+			// button.style.borderColor = "transparent";
 		});
 		const previewEntity = getEntityCopy();
 		buttonCanvas.width = previewEntity.width + 15 * 1;
 		buttonCanvas.height = previewEntity.height + 18 * 2;
+		buttonCtx.translate(0, 28);
 		drawEntity(buttonCtx, previewEntity);
 		button.append(buttonCanvas);
 		entitiesTray.append(button);
@@ -1428,14 +1438,14 @@ const initUI = () => {
 				widthInStuds,
 				fixed: colorName === "gray",
 				x: 0,
-				y: 18 * 2,
+				y: 0,
 			}));
 		});
 	});
 
 	makeInsertEntityButton(makeJunkbot({
 		x: 0,
-		y: 18 * 2,
+		y: 0,
 		facing: 1,
 	}));
 
