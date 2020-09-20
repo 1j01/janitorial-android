@@ -592,6 +592,14 @@ const initTestLevel = () => {
 };
 
 const viewport = { centerX: 0, centerY: 0, scale: 2 };
+const worldToCanvas = (worldX, worldY) => ({
+	x: (worldX - viewport.centerX) * viewport.scale + canvas.width / 2,
+	y: (worldY - viewport.centerY) * viewport.scale + canvas.height / 2,
+});
+const canvasToWorld = (canvasX, canvasY) => ({
+	x: (canvasX - canvas.width / 2) / viewport.scale + viewport.centerX,
+	y: (canvasY - canvas.height / 2) / viewport.scale + viewport.centerY,
+});
 
 let keys = {};
 addEventListener("keydown", (event) => {
@@ -701,8 +709,9 @@ canvas.addEventListener("mouseleave", () => {
 });
 
 const updateMouseWorldPosition = () => {
-	mouse.worldX = (mouse.x - canvas.width / 2) / viewport.scale + viewport.centerX;
-	mouse.worldY = (mouse.y - canvas.height / 2) / viewport.scale + viewport.centerY;
+	const worldPos = canvasToWorld(mouse.x, mouse.y);
+	mouse.worldX = worldPos.x;
+	mouse.worldY = worldPos.y;
 };
 const updateMouse = (event) => {
 	mouse.x = event.offsetX;
@@ -1392,25 +1401,42 @@ const animate = () => {
 
 	ctx.restore(); // world viewport
 
-	// active validity checking
+	// active validity checking of the world
 	for (const entity of entities) {
 		if (!isFinite(entity.x) || !isFinite(entity.y)) {
-			debug(`Invalid position for entitiy ${JSON.stringify(entity, null, "\t")}`);
+			debug(`Invalid position for entitiy ${JSON.stringify(entity, null, "\t")}\n`);
 		}
 		for (const otherEntity of entities) {
-			if (
-				rectanglesIntersect(
-					entity.x,
-					entity.y,
-					entity.width,
-					entity.height,
-					otherEntity.x,
-					otherEntity.y,
-					otherEntity.width,
-					otherEntity.height,
-				)
-			) {
-				debug(`Collision between entitiy ${JSON.stringify(entity, null, "\t")} and entity ${JSON.stringify(otherEntity, null, "\t")}`);
+			if (otherEntity !== entity && (JSON.stringify(otherEntity).localeCompare(JSON.stringify(entity)) < 0)) {
+				if (
+					rectanglesIntersect(
+						entity.x,
+						entity.y,
+						entity.width,
+						entity.height,
+						otherEntity.x,
+						otherEntity.y,
+						otherEntity.width,
+						otherEntity.height,
+					)
+				) {
+					// debug(`Collision between entitiy ${JSON.stringify(entity, null, "\t")} and entity ${JSON.stringify(otherEntity, null, "\t")}`);
+					let { x, y } = worldToCanvas((entity.x + otherEntity.x) / 2, (entity.y + otherEntity.y) / 2);
+					// let { x, y } = worldToCanvas(entity.x, entity.y);
+					if (x < 0) {
+						x = 0;
+					}
+					if (y < 0) {
+						y = 0;
+					}
+					if (x > canvas.width - 150) {
+						x = canvas.width - 150;
+					}
+					if (y > canvas.height - 10) {
+						y = canvas.height - 10;
+					}
+					drawText(ctx, `${entity.type} to ${otherEntity.type} collision`, x, y, "white");
+				}
 			}
 		}
 	}
@@ -1419,12 +1445,12 @@ const animate = () => {
 		const x = 1 + sidebar.offsetWidth;
 		drawText(ctx, fontChars, x, 1, "white");
 		const debugInfo = `ENTITIES: ${entities.length}
-	VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
-	AT SCALE: ${viewport.scale}X
+VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
+AT SCALE: ${viewport.scale}X
 
-	${debugInfoForJunkbot}
+${debugInfoForJunkbot}
 
-	${debugInfoForFrame}`;
+${debugInfoForFrame}`;
 		drawText(ctx, debugInfo, x, 50, "white");
 		if (dragging.length) {
 			drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
