@@ -148,11 +148,17 @@ const loadResources = async (resourcePathsByID) => {
 
 let muted = false;
 let paused = false;
+let editing = false;
+let entitiesTray;
 const toggleMute = () => {
 	muted = !muted;
 };
 const togglePause = () => {
 	paused = !paused;
+};
+const toggleEditing = () => {
+	editing = !editing;
+	entitiesTray.hidden = !editing;
 };
 
 const playSound = (audioBuffer) => {
@@ -371,15 +377,15 @@ const undoOrRedo = (undos, redos) => {
 	return true;
 };
 const undo = () => {
-	// if (editing) {
-	const didSomething = undoOrRedo(undos, redos);
-	if (didSomething) {
-		playSound(resources.undo);
+	if (editing) {
+		const didSomething = undoOrRedo(undos, redos);
+		if (didSomething) {
+			playSound(resources.undo);
+		}
+	} else {
+		toggleEditing();
+		undo();
 	}
-	// } else {
-	// 	toggleEditing();
-	// 	undo();
-	// }
 	// eslint-disable-next-line
 	// TODO: undo view too
 };
@@ -546,8 +552,10 @@ addEventListener("keydown", (event) => {
 	switch (event.key.toUpperCase()) {
 		case " ": // Spacebar
 		case "P":
-			// toggleEditing();
 			togglePause();
+			break;
+		case "E":
+			toggleEditing();
 			break;
 		case "M":
 			toggleMute();
@@ -781,12 +789,12 @@ const possibleGrabs = () => {
 		return [];
 	}
 	const grabs = [];
-	if (brick.selected) {
+	if (editing && brick.selected) {
 		grabs.push(grabs.selection = entities.filter((entity) => entity.selected));
 		return grabs;
 	}
-	if (keys.ControlLeft || keys.ControlRight) {
-		grabs.push(grabs.upward = [brick]);
+	if (editing) {
+		grabs.push([brick]);
 		return grabs;
 	}
 	if (brick.type !== "brick" || brick.fixed) {
@@ -862,7 +870,7 @@ canvas.addEventListener("mousedown", (event) => {
 		} else if (grabs.length) {
 			pendingGrabs = grabs;
 			playSound(resources.blockClick);
-		} else if (event.ctrlKey) {
+		} else if (editing) {
 			selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
 			playSound(resources.selectStart);
 		}
@@ -897,7 +905,7 @@ const canRelease = () => {
 	if (dragging.length === 0) {
 		return false; // optimization mainly - don't do allConnectedToFixed()
 	}
-	if (keys.ControlLeft || keys.ControlRight) {
+	if (editing) {
 		return true;
 	}
 
@@ -1170,7 +1178,7 @@ const animate = () => {
 	if (mouse.y > canvas.height - panMarginSize) {
 		viewport.centerY += panFromMarginSpeed;
 	}
-	if (mouse.x < panMarginSize) {
+	if (mouse.x < panMarginSize + (entitiesTray.hidden ? 0 : entitiesTray.offsetWidth)) {
 		viewport.centerX -= panFromMarginSpeed;
 	}
 	if (mouse.x > canvas.width - panMarginSize) {
@@ -1261,7 +1269,7 @@ const animate = () => {
 	sortEntitiesForRendering(entities);
 
 	const shouldHilight = (entity) => {
-		return entity.selected;
+		return editing && entity.selected;
 		// if (dragging.length) {
 		// 	return dragging.indexOf(entity) > -1;
 		// }
@@ -1337,7 +1345,7 @@ const animate = () => {
 
 const initUI = () => {
 
-	const entitiesTray = document.createElement("div");
+	entitiesTray = document.createElement("div");
 	entitiesTray.style.position = "fixed";
 	entitiesTray.style.left = "0px";
 	entitiesTray.style.top = "0px";
@@ -1346,6 +1354,7 @@ const initUI = () => {
 	entitiesTray.style.width = "220px";
 	entitiesTray.style.overflowY = "auto";
 	entitiesTray.style.backgroundColor = "black";
+	entitiesTray.hidden = !editing;
 
 	document.body.append(entitiesTray);
 
