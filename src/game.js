@@ -1626,8 +1626,8 @@ const gridWater = {
 		});
 
 		// for each block
-		/* eslint-disable max-depth, guard-for-in */
-		for (const i in connectBlockIndex) {
+		/* eslint-disable max-depth, no-continue, brace-style */
+		for (let i = 0; i < connectBlockIndex.length; i++) {
 			const blockIndex = connectBlockIndex[i];
 
 			// console.log("calculating block index:", blockIndex);
@@ -1779,8 +1779,8 @@ const gridWater = {
 		};
 
 		// for each grid...
-		for (const i in this.grid) {
-			for (const j in this.grid[i]) {
+		for (let i = 0; i < this.grid.length; i++) {
+			for (let j = 0; j < this.grid[i].length; j++) {
 				// if not water grid, continue
 				if (this.grid[i][j] < 2) {
 					continue;
@@ -1836,6 +1836,7 @@ const gridWater = {
 	}
 
 };
+/* eslint-enable max-depth, no-continue, brace-style */
 
 const initUI = () => {
 
