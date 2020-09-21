@@ -1559,7 +1559,7 @@ const gridWater = {
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 		];
-		gridWater.findConnectedBlock();
+		gridWater.findConnectedBlocks();
 		gridWater.render();
 	},
 
@@ -1754,7 +1754,7 @@ const gridWater = {
 			});
 		}
 
-		this.findConnectedBlock();
+		this.findConnectedBlocks();
 		this.render();
 		if (!moved && this.timer) {
 			clearInterval(this.timer);
@@ -1763,7 +1763,7 @@ const gridWater = {
 	},
 
 	// find connected blocks
-	findConnectedBlock () {
+	findConnectedBlocks() {
 		const m = this.grid.length;
 		const n = this.grid[0].length;
 		this.connectivity = this.buildArray(m, n, -1);
@@ -1781,11 +1781,10 @@ const gridWater = {
 		// for each grid...
 		for (let i = 0; i < this.grid.length; i++) {
 			for (let j = 0; j < this.grid[i].length; j++) {
-				// if not water grid, continue
+				// if not water in this grid cell, skip
 				if (this.grid[i][j] < 2) {
 					continue;
 				}
-				// if so
 				// test if top grid is water grid.
 				if (i > 0 && this.grid[i - 1][j] === 2) {
 					// if so, mark this grid same as top
