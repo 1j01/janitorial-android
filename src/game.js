@@ -152,7 +152,6 @@ let showDebug = false;
 let muted = false;
 let paused = false;
 let editing = false;
-let entitiesPalette;
 let sidebar;
 const toggleShowDebug = () => {
 	showDebug = !showDebug;
@@ -1538,21 +1537,24 @@ ${debugInfoForFrame}`;
 const initUI = () => {
 
 	sidebar = document.createElement("div");
+	sidebar.hidden = !editing;
 	sidebar.style.position = "fixed";
 	sidebar.style.left = "0px";
 	sidebar.style.top = "0px";
 	sidebar.style.bottom = "0px";
 	sidebar.style.backgroundColor = "#224";
 
-	entitiesPalette = document.createElement("div");
-	// TODO: use wrapper for scrolling, to size things reasonably
-	entitiesPalette.style.width = "330px";
-	entitiesPalette.style.height = "90%";
-	entitiesPalette.style.overflowY = "auto";
-	entitiesPalette.style.backgroundColor = "black";
-	sidebar.hidden = !editing;
+	const entitiesPalette = document.createElement("div");
+	entitiesPalette.style.width = "300px";
+	// wrapper to make layout consistent regardless of scrollbar
+	const entitiesScrollContainer = document.createElement("div");
+	entitiesScrollContainer.style.width = "320px"; // assuming scrollbar < 20px
+	entitiesScrollContainer.style.height = "calc(100% - 50px)";
+	entitiesScrollContainer.style.overflowY = "auto";
+	entitiesScrollContainer.style.backgroundColor = "black";
 
-	sidebar.append(entitiesPalette);
+	entitiesScrollContainer.append(entitiesPalette);
+	sidebar.append(entitiesScrollContainer);
 
 	let hilitButton;
 	const makeInsertEntityButton = (protoEntity) => {
@@ -1573,7 +1575,7 @@ const initUI = () => {
 			}
 			const entity = getEntityCopy();
 			pasteEntities([entity]);
-			entitiesPalette.style.cursor = "url(\"images/cursors/cursor-insert.png\") 0 0, default";
+			sidebar.style.cursor = "url(\"images/cursors/cursor-insert.png\") 0 0, default";
 			if (hilitButton) {
 				hilitButton.style.borderColor = "transparent";
 			}
@@ -1581,8 +1583,8 @@ const initUI = () => {
 			hilitButton = button;
 			playSound(resources.insert);
 		});
-		entitiesPalette.addEventListener("mouseleave", () => {
-			entitiesPalette.style.cursor = "";
+		sidebar.addEventListener("mouseleave", () => {
+			sidebar.style.cursor = "";
 			// button.style.borderColor = "transparent";
 		});
 		const previewEntity = getEntityCopy();
