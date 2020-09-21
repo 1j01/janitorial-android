@@ -1417,10 +1417,27 @@ const animate = () => {
 	if (showDebug) {
 		const maxEntityHeight = 100;
 		const reportedCollisions = new Map();
+		const isNum = (value) => typeof value === "number" && isFinite(value);
 		for (const entity of entities) {
-			if (!isFinite(entity.x) || !isFinite(entity.y)) {
-				debug(`Invalid position for entitiy ${JSON.stringify(entity, null, "\t")}\n`);
+			/* eslint-disable no-continue */
+			if (!isNum(entity.x) || !isNum(entity.y)) {
+				debug(`Invalid position (x/y) for entity ${JSON.stringify(entity, null, "\t")}\n`);
+				continue;
 			}
+			if (!isNum(entity.width) || !isNum(entity.height)) {
+				debug(`Invalid size (width/height) for entity ${JSON.stringify(entity, null, "\t")}\n`);
+				continue;
+			}
+			if (entity.type === "brick" && !isNum(entity.widthInStuds)) {
+				debug(`Invalid widthInStuds for entity ${JSON.stringify(entity, null, "\t")}\n`);
+				continue;
+			}
+			if (entity.type === "brick" && entity.width !== 15 * entity.widthInStuds) {
+				debug(`width doesn't match widthInStuds * 15 for entity ${JSON.stringify(entity, null, "\t")}\n`);
+				continue;
+			}
+			// eslint-disable-next-line indent
+		/* eslint-enable no-continue */
 			for (const topY of Object.keys(entitiesByTopY).map(Number)) {
 				if (
 					topY < entity.y + entity.height &&
@@ -1444,7 +1461,6 @@ const animate = () => {
 									otherEntity.height,
 								)
 							) {
-								// debug(`Collision between entitiy ${JSON.stringify(entity, null, "\t")} and entity ${JSON.stringify(otherEntity, null, "\t")}`);
 								let { x, y } = worldToCanvas(
 									(entity.x + otherEntity.x + (entity.width + otherEntity.width) / 2) / 2,
 									(entity.y + otherEntity.y + (entity.height + otherEntity.height) / 2) / 2,
