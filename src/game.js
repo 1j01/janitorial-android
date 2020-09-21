@@ -892,6 +892,10 @@ const possibleGrabs = () => {
 		return grabs;
 	}
 	if (brick.type !== "brick" || brick.fixed) {
+		if (editing) {
+			grabs.push([brick]);
+			return grabs;
+		}
 		return [];
 	}
 
