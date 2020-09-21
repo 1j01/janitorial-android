@@ -1630,7 +1630,7 @@ const gridWater = {
 		for (const i in connectBlockIndex) {
 			const blockIndex = connectBlockIndex[i];
 
-			console.log("calculating block index:", blockIndex);
+			// console.log("calculating block index:", blockIndex);
 			let topWaterGridsHeight = -1;
 			const gridsToMoveTo = { "grid": [], "pressure": 0 };
 			for (let m = 0; m < h; m++) {
@@ -1706,7 +1706,7 @@ const gridWater = {
 					}
 				}
 			}
-			console.log("grids to move to", gridsToMoveTo);
+			// console.log("grids to move to", gridsToMoveTo);
 
 			// find the top water grid, and remove it
 			const findWaterGridToRemove = (cm, cn) => {
@@ -1740,7 +1740,7 @@ const gridWater = {
 			let gridToRemove;
 			// eslint-disable-next-line no-loop-func
 			gridsToMoveTo.grid.forEach((grid) => {
-				console.log(`add water to ${grid[0]},${grid[1]}`);
+				// console.log(`add water to ${grid[0]},${grid[1]}`);
 				gridToRemove = findWaterGridToRemove(grid[0], grid[1]);
 				// if grid to remove and grid to add are of same height, do not move
 				if (gridToRemove[0] == grid[0]) {
@@ -1749,7 +1749,7 @@ const gridWater = {
 				g[grid[0]][grid[1]] = 2;
 				g[gridToRemove[0]][gridToRemove[1]] = 0;
 				c[gridToRemove[0]][gridToRemove[1]] = -1;
-				console.log("remove water ", gridToRemove);
+				// console.log("remove water ", gridToRemove);
 				moved = true;
 			});
 		}
