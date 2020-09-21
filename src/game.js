@@ -1619,7 +1619,7 @@ const gridWater = {
 		const connectBlockIndex = [];
 		c.forEach((row) => {
 			row.forEach((col) => {
-				if (col != -1 && connectBlockIndex.indexOf(col) < 0) {
+				if (col !== -1 && connectBlockIndex.indexOf(col) < 0) {
 					connectBlockIndex.push(col);
 				}
 			});
@@ -1635,17 +1635,17 @@ const gridWater = {
 			const gridsToMoveTo = { "grid": [], "pressure": 0 };
 			for (let m = 0; m < h; m++) {
 				for (let n = 0; n < w; n++) {
-					if (c[m][n] == blockIndex) {
+					if (c[m][n] === blockIndex) {
 						// top water grids height
-						if (topWaterGridsHeight == -1) {
+						if (topWaterGridsHeight === -1) {
 							topWaterGridsHeight = m;
 						}
 						// if can drop down
-						if (m + 1 < h && g[m + 1][n] == 0) {
-							if (gridsToMoveTo.pressure == Number.MAX_VALUE) {
+						if (m + 1 < h && g[m + 1][n] === 0) {
+							if (gridsToMoveTo.pressure === Number.MAX_VALUE) {
 								// avoid duplicate
 								if (!gridsToMoveTo.grid.filter((e) => {
-									return e[0] == m + 1 && e[1] == n;
+									return e[0] === m + 1 && e[1] === n;
 								})) {
 									gridsToMoveTo.grid.push([m + 1, n]);
 								}
@@ -1655,13 +1655,13 @@ const gridWater = {
 							}
 						}
 						// if can drop left
-						else if (n - 1 > 0 && g[m][n - 1] == 0 && m - topWaterGridsHeight > 0) {
+						else if (n - 1 > 0 && g[m][n - 1] === 0 && m - topWaterGridsHeight > 0) {
 							if (gridsToMoveTo.pressure > m - topWaterGridsHeight) {
 								continue;
-							} else if (gridsToMoveTo.pressure == m - topWaterGridsHeight) {
+							} else if (gridsToMoveTo.pressure === m - topWaterGridsHeight) {
 								// avoid duplicate
 								if (!gridsToMoveTo.grid.filter((e) => {
-									return e[0] == m && e[1] == n - 1;
+									return e[0] === m && e[1] === n - 1;
 								})) {
 									gridsToMoveTo.grid.push([m, n - 1]);
 								}
@@ -1671,13 +1671,13 @@ const gridWater = {
 							}
 						}
 						// if can drop right
-						else if (n + 1 < w && g[m][n + 1] == 0 && m - topWaterGridsHeight > 0) {
+						else if (n + 1 < w && g[m][n + 1] === 0 && m - topWaterGridsHeight > 0) {
 							if (gridsToMoveTo.pressure > m - topWaterGridsHeight) {
 								continue;
-							} else if (gridsToMoveTo.pressure == m - topWaterGridsHeight) {
+							} else if (gridsToMoveTo.pressure === m - topWaterGridsHeight) {
 								// avoid duplicate
 								if (!gridsToMoveTo.grid.filter((e) => {
-									return e[0] == m && e[1] == n + 1;
+									return e[0] === m && e[1] === n + 1;
 								})) {
 									gridsToMoveTo.grid.push([m, n + 1]);
 								}
@@ -1687,13 +1687,13 @@ const gridWater = {
 							}
 						}
 						// if can press up, notice move up will lose 1 pressure
-						else if (m - 1 > 0 && g[m - 1][n] == 0 && m - topWaterGridsHeight - 1 > 0) {
+						else if (m - 1 > 0 && g[m - 1][n] === 0 && m - topWaterGridsHeight - 1 > 0) {
 							if (gridsToMoveTo.pressure > m - topWaterGridsHeight - 1) {
 								continue;
-							} else if (gridsToMoveTo.pressure == m - topWaterGridsHeight - 1) {
+							} else if (gridsToMoveTo.pressure === m - topWaterGridsHeight - 1) {
 								// avoid duplicate
 								if (!gridsToMoveTo.grid.filter((e) => {
-									return e[0] == m - 1 && e[1] == n;
+									return e[0] === m - 1 && e[1] === n;
 								})) {
 									gridsToMoveTo.grid.push([m - 1, n]);
 								}
@@ -1721,8 +1721,8 @@ const gridWater = {
 					let leftFirst = -1;
 					let rightFirst = -1;
 					for (let n = 0; n < w; n++) {
-						if (c[m][n] == blockIndex) {
-							if (leftFirst == -1) {
+						if (c[m][n] === blockIndex) {
+							if (leftFirst === -1) {
 								leftFirst = n;
 							}
 							if (rightFirst < n) {
@@ -1730,7 +1730,7 @@ const gridWater = {
 							}
 						}
 					}
-					if (leftFirst != -1) {
+					if (leftFirst !== -1) {
 						const nToRemove = cn < (rightFirst + leftFirst) / 2 ? rightFirst : leftFirst;
 						return [m, nToRemove];
 					}
@@ -1743,7 +1743,7 @@ const gridWater = {
 				// console.log(`add water to ${grid[0]},${grid[1]}`);
 				gridToRemove = findWaterGridToRemove(grid[0], grid[1]);
 				// if grid to remove and grid to add are of same height, do not move
-				if (gridToRemove[0] == grid[0]) {
+				if (gridToRemove[0] === grid[0]) {
 					return;
 				}
 				g[grid[0]][grid[1]] = 2;
@@ -1773,7 +1773,7 @@ const gridWater = {
 		const update = (connectivity, oldNum, newNum) => {
 			return connectivity.map((row) => {
 				return row.map((col) => {
-					return col == oldNum ? newNum : col;
+					return col === oldNum ? newNum : col;
 				});
 			});
 		};
@@ -1787,25 +1787,25 @@ const gridWater = {
 				}
 				// if so
 				// test if top grid is water grid.
-				if (i > 0 && this.grid[i - 1][j] == 2) {
+				if (i > 0 && this.grid[i - 1][j] === 2) {
 					// if so, mark this grid same as top
 					this.connectivity[i][j] = this.connectivity[i - 1][j];
 				}
 				// test if left grid is water grid.
-				if (j > 0 && this.grid[i][j - 1] == 2) {
+				if (j > 0 && this.grid[i][j - 1] === 2) {
 					// if so
 					// if this grid is not marked
-					if (this.connectivity[i][j] == -1) {
+					if (this.connectivity[i][j] === -1) {
 						this.connectivity[i][j] = this.connectivity[i][j - 1];
 					}
 					// if this grid is already markd, and not same as left grid
-					else if (this.connectivity[i][j] != this.connectivity[i][j - 1]) {
+					else if (this.connectivity[i][j] !== this.connectivity[i][j - 1]) {
 						// update all the mark to connect to two part
 						this.connectivity = update(this.connectivity, this.connectivity[i][j], this.connectivity[i][j - 1]);
 					}
 				}
 				// if not connected to others, mark as a new block
-				if (this.connectivity[i][j] == -1) {
+				if (this.connectivity[i][j] === -1) {
 					this.connectivity[i][j] = blockIndex;
 					blockIndex += 1;
 				}
