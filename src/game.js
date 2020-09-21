@@ -1571,39 +1571,40 @@ const gridWater = {
 		this.render();
 	},
 
-	// render grid to divs
 	render() {
-		// const gridDiv = $("#grid");
-		// gridDiv.html("");
-		// const gridClass = ["air", "wall", "water"];
-		// const connectivity = this.connectivity;
-		// $(this.grid).each((index, line) => {
-		// 	let lineDom = "";
-		// 	for (const i in line) {
-		// 		let innerText = "";
-		// 		if (typeof connectivity[index] !== "undefined" &&
-		// 			connectivity[index][i] > -1 && this.showConnectivity) {
-		// 			innerText = connectivity[index][i];
-		// 		}
-		// 		lineDom += `<div class="g ${gridClass[line[i]]}" m="${index}" n="${i}">${innerText}</div>`;
-		// 	}
-		// 	gridDiv.append(`<div class="line">${lineDom}</div>`);
-		// });
-
-		// // click to change the type of grid
-		// $(".g").on("click", function () {
-		// 	const m = $(this).attr("m");
-		// 	const n = $(this).attr("n");
-		// 	$(this).removeClass(gridClass[_self.grid[m][n]]);
-		// 	_self.grid[m][n]++;
-		// 	if (_self.grid[m][n] > 2) {
-		// 		_self.grid[m][n] = 0;
-		// 	}
-		// 	$(this).addClass(gridClass[_self.grid[m][n]]);
-		// 	_self.findConnectedBlock();
-		// 	_self.render();
-		// });
-		// return true;
+		if (this.bricks) {
+			this.bricks.forEach((brick) => {
+				remove(entities, brick);
+			});
+		}
+		this.bricks = [];
+		this.grid.forEach((row, rowIndex) => {
+			row.forEach((cell, columnIndex) => {
+				// let innerText = "";
+				// if (typeof this.connectivity[rowIndex] !== "undefined" &&
+				// 	this.connectivity[rowIndex][columnIndex] > -1 && this.showConnectivity) {
+				// 	innerText = this.connectivity[rowIndex][columnIndex];
+				// }
+				if (cell === 1) {
+					this.bricks.push(makeBrick({
+						x: columnIndex * 15,
+						y: rowIndex * 18,
+						widthInStuds: 1,
+						colorName: "gray",
+						fixed: true,
+					}));
+				} else if (cell === 2) {
+					this.bricks.push(makeBrick({
+						x: columnIndex * 15,
+						y: rowIndex * 18,
+						widthInStuds: 1,
+						colorName: "blue",
+						fixed: true,
+					}));
+				}
+			});
+		});
+		entities = entities.concat(this.bricks);
 	},
 
 	// next step
@@ -1836,8 +1837,6 @@ const gridWater = {
 
 };
 
-gridWater.reset();
-
 const initUI = () => {
 
 	sidebar = document.createElement("div");
@@ -1944,6 +1943,10 @@ const main = async () => {
 		// initTestLevel();
 		deserialize(resources.world);
 	}
+
+	gridWater.reset();
+	gridWater.play();
+
 	initUI();
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
