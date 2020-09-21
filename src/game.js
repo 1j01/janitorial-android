@@ -1414,44 +1414,74 @@ const animate = () => {
 	ctx.restore(); // world viewport
 
 	// active validity checking of the world
-	// for (const entity of entities) {
-	// 	if (!isFinite(entity.x) || !isFinite(entity.y)) {
-	// 		debug(`Invalid position for entitiy ${JSON.stringify(entity, null, "\t")}\n`);
-	// 	}
-	// 	for (const otherEntity of entities) {
-	// 		if (otherEntity !== entity && (JSON.stringify(otherEntity).localeCompare(JSON.stringify(entity)) < 0)) {
-	// 			if (
-	// 				rectanglesIntersect(
-	// 					entity.x,
-	// 					entity.y,
-	// 					entity.width,
-	// 					entity.height,
-	// 					otherEntity.x,
-	// 					otherEntity.y,
-	// 					otherEntity.width,
-	// 					otherEntity.height,
-	// 				)
-	// 			) {
-	// 				// debug(`Collision between entitiy ${JSON.stringify(entity, null, "\t")} and entity ${JSON.stringify(otherEntity, null, "\t")}`);
-	// 				let { x, y } = worldToCanvas((entity.x + otherEntity.x) / 2, (entity.y + otherEntity.y) / 2);
-	// 				// let { x, y } = worldToCanvas(entity.x, entity.y);
-	// 				if (x < 0) {
-	// 					x = 0;
-	// 				}
-	// 				if (y < 0) {
-	// 					y = 0;
-	// 				}
-	// 				if (x > canvas.width - 150) {
-	// 					x = canvas.width - 150;
-	// 				}
-	// 				if (y > canvas.height - 10) {
-	// 					y = canvas.height - 10;
-	// 				}
-	// 				drawText(ctx, `${entity.type} to ${otherEntity.type} collision`, x, y, "white");
-	// 			}
-	// 		}
-	// 	}
-	// }
+	if (showDebug) {
+		const maxEntityHeight = 100;
+		const reportedCollisions = new Map();
+		for (const entity of entities) {
+			if (!isFinite(entity.x) || !isFinite(entity.y)) {
+				debug(`Invalid position for entitiy ${JSON.stringify(entity, null, "\t")}\n`);
+			}
+			for (const topY of Object.keys(entitiesByTopY).map(Number)) {
+				if (
+					topY < entity.y + entity.height &&
+					topY + maxEntityHeight > entity.y
+				) {
+					for (const otherEntity of entitiesByTopY[topY]) {
+						if (
+							otherEntity !== entity &&
+							(reportedCollisions.get(entity) || []).indexOf(otherEntity) === -1 &&
+							(reportedCollisions.get(otherEntity) || []).indexOf(entity) === -1
+						) {
+							if (
+								rectanglesIntersect(
+									entity.x,
+									entity.y,
+									entity.width,
+									entity.height,
+									otherEntity.x,
+									otherEntity.y,
+									otherEntity.width,
+									otherEntity.height,
+								)
+							) {
+								// debug(`Collision between entitiy ${JSON.stringify(entity, null, "\t")} and entity ${JSON.stringify(otherEntity, null, "\t")}`);
+								let { x, y } = worldToCanvas(
+									(entity.x + otherEntity.x + (entity.width + otherEntity.width) / 2) / 2,
+									(entity.y + otherEntity.y + (entity.height + otherEntity.height) / 2) / 2,
+								);
+								x = Math.floor(x);
+								y = Math.floor(y);
+								y -= 5;
+								if (x < 0) {
+									x = 0;
+								}
+								if (y < 0) {
+									y = 0;
+								}
+								if (x > canvas.width - 150) {
+									x = canvas.width - 150;
+								}
+								if (y > canvas.height - 10) {
+									y = canvas.height - 10;
+								}
+								drawText(ctx, `${entity.type} to ${otherEntity.type} collision`, x, y, "white");
+								if (reportedCollisions.has(entity)) {
+									reportedCollisions.get(entity).push(otherEntity);
+								} else {
+									reportedCollisions.set(entity, [otherEntity]);
+								}
+								if (reportedCollisions.has(otherEntity)) {
+									reportedCollisions.get(otherEntity).push(entity);
+								} else {
+									reportedCollisions.set(otherEntity, [entity]);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	if (showDebug) {
 		const x = 1 + sidebar.offsetWidth;
