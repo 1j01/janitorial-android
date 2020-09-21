@@ -1572,39 +1572,38 @@ const gridWater = {
 	},
 
 	// render grid to divs
-	render () {
-		_self = this;
-		const gridDiv = $("#grid");
-		gridDiv.html("");
-		const gridClass = ["air", "wall", "water"];
-		const connectivity = this.connectivity;
-		$(this.grid).each((index, line) => {
-			let lineDom = "";
-			for (const i in line) {
-				let innerText = "";
-				if (typeof connectivity[index] !== "undefined" &&
-					connectivity[index][i] > -1 && _self.showConnectivity) {
-					innerText = connectivity[index][i];
-				}
-				lineDom += `<div class="g ${gridClass[line[i]]}" m="${index}" n="${i}">${innerText}</div>`;
-			}
-			gridDiv.append(`<div class="line">${lineDom}</div>`);
-		});
+	render() {
+		// const gridDiv = $("#grid");
+		// gridDiv.html("");
+		// const gridClass = ["air", "wall", "water"];
+		// const connectivity = this.connectivity;
+		// $(this.grid).each((index, line) => {
+		// 	let lineDom = "";
+		// 	for (const i in line) {
+		// 		let innerText = "";
+		// 		if (typeof connectivity[index] !== "undefined" &&
+		// 			connectivity[index][i] > -1 && this.showConnectivity) {
+		// 			innerText = connectivity[index][i];
+		// 		}
+		// 		lineDom += `<div class="g ${gridClass[line[i]]}" m="${index}" n="${i}">${innerText}</div>`;
+		// 	}
+		// 	gridDiv.append(`<div class="line">${lineDom}</div>`);
+		// });
 
-		// click to change the type of grid
-		$(".g").on("click", function () {
-			const m = $(this).attr("m");
-			const n = $(this).attr("n");
-			$(this).removeClass(gridClass[_self.grid[m][n]]);
-			_self.grid[m][n]++;
-			if (_self.grid[m][n] > 2) {
-				_self.grid[m][n] = 0;
-			}
-			$(this).addClass(gridClass[_self.grid[m][n]]);
-			_self.findConnectedBlock();
-			_self.render();
-		});
-		return true;
+		// // click to change the type of grid
+		// $(".g").on("click", function () {
+		// 	const m = $(this).attr("m");
+		// 	const n = $(this).attr("n");
+		// 	$(this).removeClass(gridClass[_self.grid[m][n]]);
+		// 	_self.grid[m][n]++;
+		// 	if (_self.grid[m][n] > 2) {
+		// 		_self.grid[m][n] = 0;
+		// 	}
+		// 	$(this).addClass(gridClass[_self.grid[m][n]]);
+		// 	_self.findConnectedBlock();
+		// 	_self.render();
+		// });
+		// return true;
 	},
 
 	// next step
@@ -1617,23 +1616,24 @@ const gridWater = {
 
 		// find all blocks
 		const connectBlockIndex = [];
-		c.map((row) => {
-			row.map((col) => {
-				if (col != -1 && $.inArray(col, connectBlockIndex) < 0) {
+		c.forEach((row) => {
+			row.forEach((col) => {
+				if (col != -1 && connectBlockIndex.indexOf(col) < 0) {
 					connectBlockIndex.push(col);
 				}
 			});
 		});
 
 		// for each block
+		/* eslint-disable max-depth, guard-for-in */
 		for (const i in connectBlockIndex) {
-			var blockIndex = connectBlockIndex[i];
+			const blockIndex = connectBlockIndex[i];
 
 			console.log("calculating block index:", blockIndex);
 			let topWaterGridsHeight = -1;
 			const gridsToMoveTo = { "grid": [], "pressure": 0 };
-			for (var m = 0; m < h; m++) {
-				for (var n = 0; n < w; n++) {
+			for (let m = 0; m < h; m++) {
+				for (let n = 0; n < w; n++) {
 					if (c[m][n] == blockIndex) {
 						// top water grids height
 						if (topWaterGridsHeight == -1) {
@@ -1708,7 +1708,7 @@ const gridWater = {
 			console.log("grids to move to", gridsToMoveTo);
 
 			// find the top water grid, and remove it
-			var findWaterGridToRemove = function (cm, cn) {
+			const findWaterGridToRemove = (cm, cn) => {
 				for (let m = 0; m < h; m++) {
 					// always remove farthest water grid
 					// 212<-remove this
@@ -1736,8 +1736,9 @@ const gridWater = {
 				}
 			};
 
-			var gridToRemove;
-			gridsToMoveTo.grid.map((grid) => {
+			let gridToRemove;
+			// eslint-disable-next-line no-loop-func
+			gridsToMoveTo.grid.forEach((grid) => {
 				console.log(`add water to ${grid[0]},${grid[1]}`);
 				gridToRemove = findWaterGridToRemove(grid[0], grid[1]);
 				// if grid to remove and grid to add are of same height, do not move
@@ -1768,7 +1769,7 @@ const gridWater = {
 		let blockIndex = 0;
 
 		// update block number, internal use, see usage below
-		const update = function (connectivity, oldNum, newNum) {
+		const update = (connectivity, oldNum, newNum) => {
 			return connectivity.map((row) => {
 				return row.map((col) => {
 					return col == oldNum ? newNum : col;
@@ -1804,23 +1805,22 @@ const gridWater = {
 				}
 				// if not connected to others, mark as a new block
 				if (this.connectivity[i][j] == -1) {
-					this.connectivity[i][j] = blockIndex++;
+					this.connectivity[i][j] = blockIndex;
+					blockIndex += 1;
 				}
 			}
 		}
 	},
 
-
 	// build array
 	buildArray (m, n, v) {
-		let array = [],
-			array_row = [],
-			i = 0;
-		for (i = 0; i < n; i++) {
-			array_row.push(v);
+		const array = [];
+		const arrayRow = [];
+		for (let i = 0; i < n; i++) {
+			arrayRow.push(v);
 		}
-		for (i = 0; i < m; i++) {
-			array.push(array_row.slice(0));
+		for (let i = 0; i < m; i++) {
+			array.push(arrayRow.slice(0));
 		}
 		return array;
 	},
@@ -1828,7 +1828,9 @@ const gridWater = {
 	timer: "",
 	play () {
 		if (!this.timer) {
-			this.timer = setInterval("gridWater.next()", "80");
+			this.timer = setInterval(() => {
+				gridWater.next();
+			}, 80);
 		}
 	}
 
