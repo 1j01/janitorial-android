@@ -154,6 +154,13 @@ let paused = false;
 let editing = false;
 let entitiesPalette;
 let sidebar;
+const toggleShowDebug = () => {
+	showDebug = !showDebug;
+	try {
+		localStorage.showDebug = showDebug;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
+};
 const toggleMute = () => {
 	muted = !muted;
 	try {
@@ -644,6 +651,11 @@ addEventListener("keydown", (event) => {
 		case "M":
 			if (!event.repeat) {
 				toggleMute();
+			}
+			break;
+		case "`":
+			if (!event.repeat) {
+				toggleShowDebug();
 			}
 			break;
 		case "DELETE":
