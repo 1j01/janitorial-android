@@ -118,7 +118,6 @@ Tomas Clark
 
 Requirements:
 - [Git][]
-- [Git Large File Storage][git lfs install]
 - [Node.js][]
 - Lack of Lego litigation (hope they're not assholes)
 
@@ -130,7 +129,6 @@ Steps
 
 [Node.js]: https://nodejs.org/
 [Git]: https://git-scm.org/
-[git lfs install]: https://help.github.com/en/github/managing-large-files/installing-git-large-file-storage
 [git clone]: https://help.github.com/articles/cloning-a-repository/
 [demo]: https://1j01.github.io/janitorial-android/
 [3D demo]: https://1j01.github.io/janitorial-android/three
