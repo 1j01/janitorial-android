@@ -394,7 +394,8 @@ const deserialize = (json) => {
 	entities = state.entities;
 	dragging.length = 0;
 	entities.forEach((entity) => {
-		entity.grabbed = false;
+		delete entity.grabbed;
+		delete entity.grabOffset;
 	});
 };
 const save = () => {
@@ -429,9 +430,6 @@ const undoOrRedo = (undos, redos) => {
 	}
 	redos.push(serialize());
 	deserialize(undos.pop());
-	// for (const entity of entities) {
-	// 	entity.grabbed = false;
-	// }
 	save();
 	return true;
 };
@@ -496,8 +494,9 @@ const cutSelected = () => {
 const pasteEntities = (newEntities) => {
 	undoable();
 	for (const entity of entities) {
-		entity.selected = false;
-		entity.grabbed = false;
+		delete entity.selected;
+		delete entity.grabbed;
+		delete entity.grabOffset;
 	}
 	dragging = [];
 
@@ -978,7 +977,7 @@ canvas.addEventListener("mousedown", (event) => {
 		const grabs = possibleGrabs();
 		if (!grabs.selection) {
 			for (const entity of entities) {
-				entity.selected = false;
+				delete entity.selected;
 			}
 		}
 		if (grabs.length === 1) {
@@ -1074,8 +1073,8 @@ addEventListener("mouseup", () => {
 	if (dragging.length) {
 		if (canRelease()) {
 			dragging.forEach((entity) => {
-				entity.grabbed = false;
-				entity.grabOffset = null;
+				delete entity.grabbed;
+				delete entity.grabOffset;
 			});
 			dragging = [];
 			playSound(resources.blockDrop);
@@ -1570,8 +1569,9 @@ const initUI = () => {
 		button.style.cursor = "inherit";
 		button.addEventListener("click", () => {
 			for (const entity of entities) {
-				entity.selected = false;
-				entity.grabbed = false;
+				delete entity.selected;
+				delete entity.grabbed;
+				delete entity.grabOffset;
 			}
 			const entity = getEntityCopy();
 			pasteEntities([entity]);
