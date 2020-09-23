@@ -15,11 +15,128 @@
 			width: 100%;
 			height: 100%;
 		}
+		#toggle-info {
+			position: fixed;
+			right: 15px;
+			top: 15px;
+			z-index: 1;
+			font-size: 3em;
+		}
+		#info {
+			position: fixed;
+			right: 15px;
+			top: 15px;
+			max-width: 800px;
+			max-height: calc(100% - 30px);
+			box-sizing: border-box;
+			background: white;
+			color: black;
+			padding: 15px;
+			line-height: 1.5;
+			overflow: auto;
+			box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.5);
+			border-radius: 5px;
+		}
+		table {
+			border-spacing: 0;
+			border-collapse: collapse;
+			margin-top: 0;
+			margin-bottom: 16px;
+		}
+		kbd {
+			display: inline-block;
+			padding: 3px 5px;
+			font: 11px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+			line-height: 10px;
+			color: #444d56;
+			vertical-align: middle;
+			background-color: #fafbfc;
+			border: 1px solid #d1d5da;
+			border-radius: 6px;
+			box-shadow: inset 0 -1px 0 #d1d5da;
+		}
+		td button {
+			text-align: left;
+			margin-left: 10px;
+		}
 	</style>
 </head>
 
 <body>
 	<script src="src/game.js"></script>
+	<button id="toggle-info" aria-label="Toggle Info" aria-expanded="true">
+		<svg fill="currentColor" width="1em" height="1em" viewBox="0 0 40 40" style="vertical-align: middle;">
+			<path
+				d="m18.4 15v-3.4h3.2v3.4h-3.2z m1.6 18.4c7.3 0 13.4-6.1 13.4-13.4s-6.1-13.4-13.4-13.4-13.4 6.1-13.4 13.4 6.1 13.4 13.4 13.4z m0-30c9.2 0 16.6 7.4 16.6 16.6s-7.4 16.6-16.6 16.6-16.6-7.4-16.6-16.6 7.4-16.6 16.6-16.6z m-1.6 25v-10h3.2v10h-3.2z">
+			</path>
+		</svg>
+	</button>
+	<div id="info">
+		<h1>Janitorial Android (Junkbot)</h1>
+		<a href="https://github.com/1j01/janitorial-android">Source Code on GitHub</a>
+		<h2>Controls</h2>
+		<p>Drag bricks with the mouse. You don't control Junkbot directly. Junkbot moves on their own.</p>
+		<p>Use the arrow keys or <kbd>WASD</kbd> (on QWERTY keyboard, something else on AZERTY), or move the mouse to the
+			edges of screen to pan the view and look around.</p>
+		<table>
+			<tr>
+				<td><kbd>E</kbd></td>
+				<td>Toggle edit mode</td>
+			</tr>
+			<tr>
+				<td><kbd>P</kbd> or <kbd>Spacebar</kbd></td>
+				<td>Pause / unpause</td>
+			</tr>
+			<tr>
+				<td><kbd>M</kbd></td>
+				<td>Mute / unmute</td>
+			</tr>
+			<tr>
+				<td><kbd>`</kbd></td>
+				<td>Toggle debug information (including collision and NaN detection)
+				</td>
+			</tr>
+		</table>
+		<p>When in editor mode:</p>
+		<table>
+			<tr>
+				<td><kbd>Ctrl+C</kbd></td>
+				<td>Copy selected to clipboard</td>
+			</tr>
+			<tr>
+				<td><kbd>Ctrl+X</kbd></td>
+				<td>Cut selected to clipboard</td>
+			</tr>
+			<tr>
+				<td><kbd>Ctrl+V</kbd></td>
+				<td>Paste from clipboard</td>
+			</tr>
+			<tr>
+				<td><kbd>Delete</kbd></td>
+				<td>Delete selected</td>
+			</tr>
+			<tr>
+				<td><kbd>Ctrl+Z</kbd></td>
+				<td>Undo</td>
+			</tr>
+			<tr>
+				<td><kbd>Ctrl+Shift+Z</kbd> or <kbd>Ctrl+Y</kbd></td>
+				<td>Redo</td>
+			</tr>
+			<tr>
+				<td><kbd>Ctrl+A</kbd></td>
+				<td>Select all</td>
+			</tr>
+			<tr>
+				<td><kbd>Ctrl+S</kbd></td>
+				<td>Save world to a file</td>
+			</tr>
+			<tr>
+				<td><kbd>Ctrl+O</kbd></td>
+				<td>Open a saved world file</td>
+			</tr>
+		</table>
+	</div>
 </body>
 
 </html>

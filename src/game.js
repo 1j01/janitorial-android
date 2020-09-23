@@ -1565,6 +1565,12 @@ ${debugInfoForFrame}`;
 	}
 };
 
+const wrapContents = (target, wrapper) => {
+	;[...target.childNodes].forEach(child => wrapper.appendChild(child));
+	target.appendChild(wrapper);
+	return wrapper;
+};
+
 const initUI = () => {
 
 	sidebar = document.createElement("div");
@@ -1660,6 +1666,31 @@ const initUI = () => {
 	sidebar.append(openButton);
 
 	document.body.append(sidebar);
+
+	const infoBox = document.getElementById("info");
+	const controlsTableRows = document.querySelectorAll("#info table tr");
+	for (const tr of controlsTableRows) {
+		const [controlCell, actionCell] = tr.cells;
+		const kbd = controlCell.querySelector("kbd");
+		const match = kbd.textContent.match(/(Ctrl\+)?(.+)/);
+		if (!match) {
+			// console.log(tr, kbd.textContent);
+			continue;
+		}
+		const ctrlKey = match[1] !== "";
+		const key = match[2];
+		const button = document.createElement("button");
+		button.addEventListener("click", () => {
+			canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
+		});
+		wrapContents(actionCell, button);
+	}
+
+	const toggleInfoButton = document.getElementById("toggle-info");
+	toggleInfoButton.addEventListener("click", () => {
+		infoBox.hidden = !infoBox.hidden;
+		toggleInfoButton.setAttribute("aria-expanded", infoBox.hidden ? "false" : "true");
+	});
 };
 
 const main = async () => {

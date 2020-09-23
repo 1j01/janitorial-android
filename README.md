@@ -15,14 +15,9 @@ Done so far:
 
 ## Controls
 
+<p>Drag bricks with the mouse. You don't control Junkbot directly. Junkbot moves on their own.</p>
+<p>Use the arrow keys or <kbd>WASD</kbd> (on QWERTY keyboard, something else on AZERTY), or move the mouse to the edges of screen to pan the view and look around.</p>
 <table>
-	<tr>
-		<td colspan="2">Drag bricks with the mouse. You don't control Junkbot directly.</td>
-	</tr>
-	<tr>
-		<td>Arrow keys or <kbd>WASD</kbd> (on QWERTY keyboard) or move mouse to edges of screen</td>
-		<td>Pan view (look around)</td>
-	</tr>
 	<tr>
 		<td><kbd>E</kbd></td>
 		<td>Toggle edit mode</td>
@@ -37,11 +32,11 @@ Done so far:
 	</tr>
 	<tr>
 		<td><kbd>`</kbd></td>
-		<td>Toggle debug information, including checking for collisions and other problems in the world state</td>
+		<td>Toggle debug information, including checking for collisions and other problems in the world state
+		</td>
 	</tr>
 </table>
-
-When in editor mode:
+<p>When in editor mode:</p>
 <table>
 	<tr>
 		<td><kbd>Ctrl+C</kbd></td>
