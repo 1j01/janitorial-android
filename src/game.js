@@ -416,6 +416,28 @@ const saveToFile = () => {
 	}, 0);
 };
 
+const openFromFile = () => {
+	const input = document.createElement("input");
+	input.type = "file";
+	input.onchange = (event) => {
+		const file = event.target.files[0];
+		const reader = new FileReader();
+		reader.onload = (readerEvent) => {
+			const content = readerEvent.target.result;
+			try {
+				deserialize(content);
+			} catch (error) {
+				alert(`Failed to load from file:\n\n${error}`);
+			}
+		};
+		reader.onerror = (event) => {
+			alert(`Failed to read file:\n\n${reader.error}`);
+		};
+		reader.readAsText(file, "UTF-8");
+	};
+	input.click();
+};
+
 const undoable = (fn) => {
 	undos.push(serialize());
 	redos.length = 0;
@@ -693,6 +715,16 @@ addEventListener("keydown", (event) => {
 		case "A":
 			if (event.ctrlKey) {
 				selectAll();
+			}
+			break;
+		case "S":
+			if (event.ctrlKey) {
+				saveToFile();
+			}
+			break;
+		case "O":
+			if (event.ctrlKey) {
+				openFromFile();
 			}
 			break;
 		default:
@@ -1620,6 +1652,12 @@ const initUI = () => {
 	saveButton.onclick = saveToFile;
 	saveButton.style.margin = "10px";
 	sidebar.append(saveButton);
+
+	const openButton = document.createElement("button");
+	openButton.textContent = "Open World";
+	openButton.onclick = openFromFile;
+	openButton.style.margin = "10px";
+	sidebar.append(openButton);
 
 	document.body.append(sidebar);
 };

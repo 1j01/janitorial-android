@@ -10,7 +10,7 @@ Not sure what direction this project will take.
 Done so far:
 - Brick dragging mechanics, including grabs that are ambiguous until you drag up or down, and cursors for different drags (up, down, or either)
 - Junkbot's movement, generally (no momentum when in air yet; and there will probably be edge cases with different blocks)
-- Level editing functionality (not present in the original games): select with mouse, select all, copy, cut, paste, delete, undo, redo, and inserting entities via a palette, with sound effects taken from Lego Creator
+- Level editing functionality (not present in the original games): select with mouse, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette, with sound effects taken from Lego Creator
 - I've started making a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo]; I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
 
 ## Controls
@@ -70,6 +70,14 @@ When in editor mode:
 	<tr>
 		<td><kbd>Ctrl+A</kbd></td>
 		<td>Select all</td>
+	</tr>
+	<tr>
+		<td><kbd>Ctrl+S</kbd></td>
+		<td>Save world to a file</td>
+	</tr>
+	<tr>
+		<td><kbd>Ctrl+O</kbd></td>
+		<td>Open a saved world file</td>
 	</tr>
 </table>
 
