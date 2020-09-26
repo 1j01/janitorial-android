@@ -430,7 +430,7 @@ const openFromFile = () => {
 				alert(`Failed to load from file:\n\n${error}`);
 			}
 		};
-		reader.onerror = (event) => {
+		reader.onerror = () => {
 			alert(`Failed to read file:\n\n${reader.error}`);
 		};
 		reader.readAsText(file, "UTF-8");
@@ -1566,7 +1566,7 @@ ${debugInfoForFrame}`;
 };
 
 const wrapContents = (target, wrapper) => {
-	;[...target.childNodes].forEach(child => wrapper.appendChild(child));
+	[...target.childNodes].forEach((child) => wrapper.appendChild(child));
 	target.appendChild(wrapper);
 	return wrapper;
 };
@@ -1673,17 +1673,15 @@ const initUI = () => {
 		const [controlCell, actionCell] = tr.cells;
 		const kbd = controlCell.querySelector("kbd");
 		const match = kbd.textContent.match(/(Ctrl\+)?(.+)/);
-		if (!match) {
-			// console.log(tr, kbd.textContent);
-			continue;
+		if (match) {
+			const ctrlKey = match[1] !== "";
+			const key = match[2];
+			const button = document.createElement("button");
+			button.addEventListener("click", () => {
+				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
+			});
+			wrapContents(actionCell, button);
 		}
-		const ctrlKey = match[1] !== "";
-		const key = match[2];
-		const button = document.createElement("button");
-		button.addEventListener("click", () => {
-			canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
-		});
-		wrapContents(actionCell, button);
 	}
 
 	const toggleInfoButton = document.getElementById("toggle-info");
