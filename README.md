@@ -79,8 +79,13 @@ Done so far:
 ## Credits
 
 ### Ripping resources
-- Rory Fewell - [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
+- [Rory Fewell](https://github.com/rozniak) and [TommytheJerk](https://github.com/TommytheJerk) - [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
 - Sleepy Harry - [The Spriters Resource](https://www.spriters-resource.com/pc_computer/junkbot/)
+
+### Some sounds taken from
+- Lego Creator (editor sounds)
+- Lego Star Wars: Force Awakens (lego rustling sounds)
+- (in addition to Junkbot)
 
 ### Credits for Junkbot & Junkbot Undercover
 
@@ -128,7 +133,7 @@ Steps
 - [Clone the repo.][git clone]
 - Open up a command prompt / terminal in the project directory.
 - Install project dependencies with `npm install`
-- Run `npm start` to start a web server which will reload the page automatically when you make changes
+- Run `npm start` to start a web server which will reload the page automatically when you make changes.
 
 [Node.js]: https://nodejs.org/
 [Git]: https://git-scm.org/

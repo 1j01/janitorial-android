@@ -61,8 +61,15 @@ const resourcePaths = {
 	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
 	redo: "audio/sound-effects/lego-creator/redo-I0513.wav",
 	insert: "audio/sound-effects/lego-creator/insert-I0506.wav",
+	rustle0: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML1.WAV",
+	rustle1: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML2.WAV",
+	rustle2: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML3.WAV",
+	rustle3: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML4.WAV",
+	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
+	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
 	world: "levels/junkbot-world.json",
 };
+const numRustles = 6;
 
 const loadImage = (imagePath) => {
 	const image = new Image();
@@ -133,18 +140,19 @@ const loadSound = async (path) => {
 
 const loadResources = async (resourcePathsByID) => {
 	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path]) => {
-		if (path.match(/atlas\.json$/)) {
+		if (path.match(/atlas\.json$/i)) {
 			return loadAtlasJSON(path).then((atlas) => [id, atlas]);
-		} else if (path.match(/\.json$/)) {
+		} else if (path.match(/\.json$/i)) {
 			// return loadJSON(path).then((data) => [id, data]);
 			return loadTextFile(path).then((json) => [id, json]);
-		} else if (path.match(/levels\/.*\.txt$/)) {
+		} else if (path.match(/levels\/.*\.txt$/i)) {
 			return loadLevelFromTextFile(path).then((level) => [id, level]);
-		} else if (path.match(/\.(ogg|mp3|wav)$/)) {
+		} else if (path.match(/\.(ogg|mp3|wav)$/i)) {
 			return loadSound(path).then((audioBuffer) => [id, audioBuffer]);
-		} else {
+		} else if (path.match(/\.(png|jpe?g|gif)$/i)) {
 			return loadImage(path).then((image) => [id, image]);
 		}
+		throw new Error(`How should I load this? '${path}'`);
 	})));
 };
 
@@ -1652,6 +1660,14 @@ const initUI = () => {
 		y: 0,
 		facing: 1,
 	}));
+
+	let lastScrollSoundTime = 0;
+	entitiesScrollContainer.addEventListener("scroll", () => {
+		if (Date.now() > lastScrollSoundTime + 200) {
+			playSound(resources[`rustle${Math.floor(Math.random() * numRustles)}`]);
+			lastScrollSoundTime = Date.now();
+		}
+	});
 
 	const saveButton = document.createElement("button");
 	saveButton.textContent = "Save World";
