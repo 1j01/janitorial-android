@@ -124,6 +124,7 @@ const makeFire = ({ x, y, on }) => {
 		width: 4 * 15,
 		height: 1 * 18,
 		on,
+		animationFrame: 0,
 		fixed: true,
 	};
 };
@@ -239,17 +240,18 @@ const loadLevelFromText = (levelData) => {
 				const y = e[1] * 18;
 				const typeName = types[e[2] - 1].toLowerCase();
 				const colorName = colors[e[3] - 1].toLowerCase();
+				const animationName = e[4].toLowerCase();
 				const brickMatch = typeName.match(/brick_(\d+)/i);
 				if (brickMatch) {
 					entities.push(makeBrick({
 						x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
 					}));
 				} else if (typeName === "minifig") {
-					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: e[4].match(/_L/i) ? -1 : 1 }));
+					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "flag") {
-					entities.push(makeBin({ x, y: y - 18 * 2, facing: e[4].match(/_L/i) ? -1 : 1 }));
+					entities.push(makeBin({ x, y: y - 18 * 2, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_slickfire") {
-					entities.push(makeFire({ x, y }));
+					entities.push(makeFire({ x, y, on: animationName === "on" }));
 				} else if (typeName === "haz_slickfan") {
 					entities.push({ type: typeName, x, y, colorName: "blue", widthInStuds: 4, width: 4 * 15, height: 18, fixed: true });
 				} else if (typeName === "haz_slickjump") {
@@ -458,7 +460,9 @@ const drawBin = (ctx, bin, hilight) => {
 };
 
 const drawFire = (ctx, entity, hilight) => {
-	const frame = resources.actorsAtlas[`haz_slickFire_off_1`];
+	const frameIndex = entity.on ? Math.floor(entity.animationFrame % 8 < 4 ? entity.animationFrame % 4 : 4 - (entity.animationFrame % 4)) : 0;
+	// console.log(`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`);
+	const frame = resources.actorsAtlas[`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
 	if (hilight) {
@@ -1546,6 +1550,8 @@ const animate = () => {
 		for (const entity of entities) {
 			if (entity.type === "junkbot") {
 				simulateJunkbot(entity);
+			} else if ("animationFrame" in entity) {
+				entity.animationFrame += 0.25;
 			}
 		}
 	}
@@ -1838,6 +1844,11 @@ const initUI = () => {
 	makeInsertEntityButton(makeFire({
 		x: 0,
 		y: 0,
+	}));
+	makeInsertEntityButton(makeFire({
+		x: 0,
+		y: 0,
+		on: true,
 	}));
 
 	let lastScrollSoundTime = 0;
