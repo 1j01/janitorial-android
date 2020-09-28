@@ -430,55 +430,28 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 	}
 };
 
-const drawBrick = (ctx, brick, hilight) => {
+const drawBrick = (ctx, brick) => {
 	const { x, y, widthInStuds, colorName } = brick;
 	const w = widthInStuds * 15 + 15; // sprite width
 	const h = 35; // sprite row height
 	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * h + 9, w, h, x, y - 15, w, h);
-	if (hilight) {
-		ctx.save();
-		ctx.globalAlpha = 0.5;
-		ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, x, y - 15, w, h);
-		ctx.restore();
-	}
 };
 
-const drawBin = (ctx, bin, hilight) => {
+const drawBin = (ctx, bin) => {
 	const frame = resources.actorsAtlas.bin;
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.actors, left, top, width, height, bin.x + 4, bin.y + bin.height - height - 5, width, height);
-	if (hilight) {
-		ctx.save();
-		ctx.globalAlpha = 0.5;
-		const w = 2 * 15 + 15; // sprite width
-		const h = 35; // sprite row height
-		for (let iy = 0; iy < bin.height; iy += 18) {
-			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[2], (brickColorToYIndex.gray + 1) * h + 9, w, h, bin.x, bin.y - 15 + iy, w, h);
-		}
-		ctx.restore();
-	}
 };
 
-const drawFire = (ctx, entity, hilight) => {
+const drawFire = (ctx, entity) => {
 	const frameIndex = entity.on ? Math.floor(entity.animationFrame % 8 < 4 ? entity.animationFrame % 4 : 4 - (entity.animationFrame % 4)) : 0;
 	// console.log(`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`);
 	const frame = resources.actorsAtlas[`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
-	if (hilight) {
-		ctx.save();
-		ctx.globalAlpha = 0.5;
-		const widthInStuds = entity.width / 15;
-		const w = widthInStuds * 15 + 15; // sprite width
-		const h = 35; // sprite row height
-		for (let iy = 0; iy < entity.height; iy += 18) {
-			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, entity.x, entity.y - 15 + iy, w, h);
-		}
-		ctx.restore();
-	}
 };
 
-const drawJunkbot = (ctx, junkbot, hilight) => {
+const drawJunkbot = (ctx, junkbot) => {
 	const frameIndex = Math.floor(junkbot.animationFrame % 10);
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
@@ -488,36 +461,37 @@ const drawJunkbot = (ctx, junkbot, hilight) => {
 	} else {
 		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	}
-	if (hilight) {
-		ctx.save();
-		ctx.globalAlpha = 0.5;
-		const w = 2 * 15 + 15; // sprite width
-		const h = 35; // sprite row height
-		for (let iy = 0; iy < junkbot.height; iy += 18) {
-			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[2], (brickColorToYIndex.gray + 1) * h + 9, w, h, junkbot.x, junkbot.y - 15 + iy, w, h);
-		}
-		ctx.restore();
-	}
 };
 
 const drawEntity = (ctx, entity, hilight) => {
 	switch (entity.type) {
 		case "brick":
-			drawBrick(ctx, entity, hilight);
+			drawBrick(ctx, entity);
 			break;
 		case "junkbot":
-			drawJunkbot(ctx, entity, hilight);
+			drawJunkbot(ctx, entity);
 			break;
 		case "bin":
-			drawBin(ctx, entity, hilight);
+			drawBin(ctx, entity);
 			break;
 		case "fire":
-			drawFire(ctx, entity, hilight);
+			drawFire(ctx, entity);
 			break;
 		default:
-			drawBrick(ctx, entity, hilight);
+			drawBrick(ctx, entity);
 			drawText(ctx, entity.type, entity.x, entity.y, "white");
 			break;
+	}
+	if (hilight) {
+		ctx.save();
+		ctx.globalAlpha = 0.5;
+		const widthInStuds = Math.ceil(entity.width / 15);
+		const w = widthInStuds * 15 + 15; // sprite width
+		const h = 35; // sprite row height
+		for (let iy = 0; iy < entity.height; iy += 18) {
+			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, entity.x, entity.y - 15 + iy, w, h);
+		}
+		ctx.restore();
 	}
 };
 
