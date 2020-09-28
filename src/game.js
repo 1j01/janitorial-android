@@ -35,6 +35,54 @@ const remove = (array, value) => {
 	}
 };
 
+const brickColorToYIndex = {
+	white: 0,
+	red: 1,
+	green: 2,
+	blue: 3,
+	yellow: 4,
+	gray: 5,
+};
+// const brickColorNames = Object.keys(brickColorToYIndex);
+const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
+const brickWidthsInStudsToX = {};
+for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
+	brickWidthsInStudsToX[brickWidthsInStuds[i]] = x;
+	const w = brickWidthsInStuds[i] * 15 + 15;
+	x += w;
+}
+
+const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
+	return {
+		type: "brick",
+		x,
+		y,
+		widthInStuds,
+		width: widthInStuds * 15,
+		height: 18,
+		colorName,
+		fixed,
+		grabbed: false,
+	};
+};
+
+const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
+	return {
+		type: "junkbot",
+		x,
+		y,
+		width: 2 * 15,
+		height: 4 * 18,
+		facing,
+		armored,
+		timer: 0,
+		animationFrame: 0,
+		grabbed: false,
+		headLoaded: false,
+	};
+};
+
+let resources;
 const resourcePaths = {
 	actors: "images/actors-atlas.png",
 	actorsAtlas: "images/actors-atlas.json",
@@ -254,8 +302,6 @@ const playSound = (audioBuffer) => {
 	source.start(0);
 };
 
-let resources;
-
 const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}`;
 const fontCharW = "55555555355555555555555555355555555551221113331355353525531155332233".split("").map((digit) => Number(digit));
 const fontCharX = [];
@@ -311,53 +357,6 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 	}
 };
 
-const brickColorToYIndex = {
-	white: 0,
-	red: 1,
-	green: 2,
-	blue: 3,
-	yellow: 4,
-	gray: 5,
-};
-const brickColorNames = Object.keys(brickColorToYIndex);
-const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
-const brickWidthsInStudsToX = {};
-for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
-	brickWidthsInStudsToX[brickWidthsInStuds[i]] = x;
-	const w = brickWidthsInStuds[i] * 15 + 15;
-	x += w;
-}
-
-const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
-	return {
-		type: "brick",
-		x,
-		y,
-		widthInStuds,
-		width: widthInStuds * 15,
-		height: 18,
-		colorName,
-		fixed,
-		grabbed: false,
-	};
-};
-
-const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
-	return {
-		type: "junkbot",
-		x,
-		y,
-		width: 2 * 15,
-		height: 4 * 18,
-		facing,
-		armored,
-		timer: 0,
-		animationFrame: 0,
-		grabbed: false,
-		headLoaded: false,
-	};
-};
-
 const drawBrick = (ctx, brick, hilight) => {
 	const { x, y, widthInStuds, colorName } = brick;
 	const w = widthInStuds * 15 + 15; // sprite width
@@ -409,6 +408,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 	}
 };
+
+const viewport = { centerX: 0, centerY: 0, scale: 2 };
+let keys = {};
 
 let entities = [];
 // acceleration structures
@@ -636,65 +638,64 @@ const initLevel = (level) => {
 	viewport.centerY = 24 / 2 * 15;
 };
 
-const initTestLevel = () => {
-	for (let row = 5; row >= 0; row--) {
-		for (let column = 0; column < 150;) { // MUST increment below
-			if (Math.sin(column * 13234) < row * 0.2 + 0.1) {
-				const widthInStuds = brickWidthsInStuds[1 + Math.floor(Math.random() * (brickWidthsInStuds.length - 1))];
-				entities.push(makeBrick({
-					x: column * 15,
-					y: (row - 6) * 18,
-					widthInStuds,
-					colorName: "gray",
-					fixed: true,
-				}));
-				column += widthInStuds;
-			} else {
-				column += Math.floor(Math.random() * 5 + 1);
-			}
-		}
-	}
-	for (let staircase = 5; staircase >= 0; staircase--) {
-		for (let stair = 0; stair < 10; stair++) {
-			entities.push(makeBrick({
-				x: staircase * 15 * 7 + stair * 15 * (staircase > 3 ? 1 : -1),
-				y: (-stair - 8) * 18,
-				widthInStuds: 2,
-				colorName: "gray",
-				fixed: true,
-			}));
-		}
-	}
-	entities.push(
-		makeBrick({ x: 15 * 5, y: 18 * -12, colorName: "red", widthInStuds: 1 }),
-		makeBrick({ x: 15 * 4, y: 18 * -13, colorName: "yellow", widthInStuds: 4 }),
-		makeBrick({ x: 15 * 4, y: 18 * -14, colorName: "green", widthInStuds: 2 }),
-	);
-	entities.push(
-		makeBrick({ x: 15 * 20, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
-		makeBrick({ x: 15 * 26, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
-		makeBrick({ x: 15 * 24, y: 18 * -20, colorName: "gray", fixed: true, widthInStuds: 6 }),
-	);
-	entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -8, facing: 1 }));
-	entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -20, facing: 1 }));
+// const initTestLevel = () => {
+// 	for (let row = 5; row >= 0; row--) {
+// 		for (let column = 0; column < 150;) { // MUST increment below
+// 			if (Math.sin(column * 13234) < row * 0.2 + 0.1) {
+// 				const widthInStuds = brickWidthsInStuds[1 + Math.floor(Math.random() * (brickWidthsInStuds.length - 1))];
+// 				entities.push(makeBrick({
+// 					x: column * 15,
+// 					y: (row - 6) * 18,
+// 					widthInStuds,
+// 					colorName: "gray",
+// 					fixed: true,
+// 				}));
+// 				column += widthInStuds;
+// 			} else {
+// 				column += Math.floor(Math.random() * 5 + 1);
+// 			}
+// 		}
+// 	}
+// 	for (let staircase = 5; staircase >= 0; staircase--) {
+// 		for (let stair = 0; stair < 10; stair++) {
+// 			entities.push(makeBrick({
+// 				x: staircase * 15 * 7 + stair * 15 * (staircase > 3 ? 1 : -1),
+// 				y: (-stair - 8) * 18,
+// 				widthInStuds: 2,
+// 				colorName: "gray",
+// 				fixed: true,
+// 			}));
+// 		}
+// 	}
+// 	entities.push(
+// 		makeBrick({ x: 15 * 5, y: 18 * -12, colorName: "red", widthInStuds: 1 }),
+// 		makeBrick({ x: 15 * 4, y: 18 * -13, colorName: "yellow", widthInStuds: 4 }),
+// 		makeBrick({ x: 15 * 4, y: 18 * -14, colorName: "green", widthInStuds: 2 }),
+// 	);
+// 	entities.push(
+// 		makeBrick({ x: 15 * 20, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
+// 		makeBrick({ x: 15 * 26, y: 18 * -16, colorName: "gray", fixed: true, widthInStuds: 6 }),
+// 		makeBrick({ x: 15 * 24, y: 18 * -20, colorName: "gray", fixed: true, widthInStuds: 6 }),
+// 	);
+// 	entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -8, facing: 1 }));
+// 	entities.push(makeJunkbot({ x: 15 * 9, y: 18 * -20, facing: 1 }));
 
-	let dropFromRow = 25;
-	const iid = setInterval(() => {
-		dropFromRow += 1;
-		const brick = makeBrick({
-			x: 15 * Math.floor(Math.sin(Date.now() / 400) * 9),
-			y: 18 * -dropFromRow,
-			widthInStuds: brickWidthsInStuds[1 + Math.floor(Math.random() * (brickWidthsInStuds.length - 1))],
-			colorName: brickColorNames[Math.floor((brickColorNames.length - 1) * Math.random())],
-		});
-		entities.push(brick);
-		if (dropFromRow > 100) {
-			clearInterval(iid);
-		}
-	}, 200);
-};
+// 	let dropFromRow = 25;
+// 	const iid = setInterval(() => {
+// 		dropFromRow += 1;
+// 		const brick = makeBrick({
+// 			x: 15 * Math.floor(Math.sin(Date.now() / 400) * 9),
+// 			y: 18 * -dropFromRow,
+// 			widthInStuds: brickWidthsInStuds[1 + Math.floor(Math.random() * (brickWidthsInStuds.length - 1))],
+// 			colorName: brickColorNames[Math.floor((brickColorNames.length - 1) * Math.random())],
+// 		});
+// 		entities.push(brick);
+// 		if (dropFromRow > 100) {
+// 			clearInterval(iid);
+// 		}
+// 	}, 200);
+// };
 
-const viewport = { centerX: 0, centerY: 0, scale: 2 };
 const worldToCanvas = (worldX, worldY) => ({
 	x: (worldX - viewport.centerX) * viewport.scale + canvas.width / 2,
 	y: (worldY - viewport.centerY) * viewport.scale + canvas.height / 2,
@@ -704,7 +705,6 @@ const canvasToWorld = (canvasX, canvasY) => ({
 	y: (canvasY - canvas.height / 2) / viewport.scale + viewport.centerY,
 });
 
-let keys = {};
 addEventListener("keydown", (event) => {
 	if (event.defaultPrevented) {
 		return; // Do nothing if the event was already processed
