@@ -632,6 +632,8 @@ const initLevel = (level) => {
 	undos.length = 0;
 	redos.length = 0;
 	dragging = [];
+	viewport.centerX = 35 / 2 * 15;
+	viewport.centerY = 24 / 2 * 15;
 };
 
 const initTestLevel = () => {
