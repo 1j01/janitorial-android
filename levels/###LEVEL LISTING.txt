@@ -1,4 +1,3 @@
-LEVELS APPEAR IN THIS ORDER:
 New Employee Training
 Art in the Lobby
 Bridge Builder
@@ -59,5 +58,3 @@ The Quest
 Wind Tunnel
 All Kinds of Trouble
 Art Factory
-
-60 Levels in Total!

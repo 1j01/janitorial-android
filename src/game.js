@@ -68,6 +68,8 @@ const resourcePaths = {
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
 	world: "levels/junkbot-world.json",
+	levelNames: "levels/%23%23%23LEVEL LISTING.txt",
+	// levelNames: "levels/Undercover Exclusive/%23%23%23LEVEL LISTING.txt",
 };
 const numRustles = 6;
 
@@ -113,6 +115,64 @@ const loadLevelFromText = (levelData) => {
 			}
 		}
 	}
+	// console.log(sections);
+	let types = [];
+	let colors = [];
+	const entities = [];
+	sections.partslist.forEach(([key, value]) => {
+		if (key === "types") {
+			types = types.concat(value.toLowerCase().split(","));
+		} else if (key === "colors") {
+			colors = colors.concat(value.toLowerCase().split(","));
+		} else if (key === "parts") {
+			value.split(",").forEach((entityDef) => {
+				const e = entityDef.split(";");
+				// [0] - x coordinate
+				// [1] - y coordinate
+				// [2] - type index (in the types array)
+				// [3] - color index (in the colors array)
+				// [4] - starting animation name (0 for objects that don't animate)
+				// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
+				const x = e[0] * 15;
+				const y = e[1] * 18;
+				const colorName = colors[e[3] - 1].toLowerCase();
+				let entity;
+				switch (types[e[2] - 1]) {
+					case "minifig":
+						entity = makeJunkbot({ x, y, facing: e[4].match(/_L/i) ? -1 : 1 });
+						break;
+					case "brick_01":
+						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 1 });
+						break;
+					case "brick_02":
+						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 2 });
+						break;
+					case "brick_03":
+						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 3 });
+						break;
+					case "brick_04":
+						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 4 });
+						break;
+					case "brick_06":
+						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 6 });
+						break;
+					case "brick_08":
+						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 8 });
+						break;
+					// case "brick_10":
+					// 	entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 10 });
+					// 	break;
+					default:
+						// entity = makeUnknown({ x, y, colorName });
+						break;
+				}
+				if (entity) {
+					entities.push(entity);
+				}
+			});
+		}
+	});
+	sections.entities = entities;
 	return sections;
 };
 
@@ -145,6 +205,8 @@ const loadResources = async (resourcePathsByID) => {
 		} else if (path.match(/\.json$/i)) {
 			// return loadJSON(path).then((data) => [id, data]);
 			return loadTextFile(path).then((json) => [id, json]);
+		} else if (path.match(/levels\/.*(#|%23){3}.*\.txt$/i)) { // ###LEVEL LISTING.txt
+			return loadTextFile(path).then((text) => [id, text.trim().split(/\r?\n/g)]);
 		} else if (path.match(/levels\/.*\.txt$/i)) {
 			return loadLevelFromTextFile(path).then((level) => [id, level]);
 		} else if (path.match(/\.(ogg|mp3|wav)$/i)) {
@@ -587,6 +649,13 @@ const pasteFromClipboard = async () => {
 	const newEntities = JSON.parse(entitiesJSON);
 	pasteEntities(newEntities);
 	playSound(resources.copyPaste);
+};
+
+const initLevel = (level) => {
+	entities = level.entities;
+	undos.length = 0;
+	redos.length = 0;
+	dragging = [];
 };
 
 const initTestLevel = () => {
@@ -1608,7 +1677,7 @@ const initUI = () => {
 	// wrapper to make layout consistent regardless of scrollbar
 	const entitiesScrollContainer = document.createElement("div");
 	entitiesScrollContainer.style.width = "320px"; // assuming scrollbar < 20px
-	entitiesScrollContainer.style.height = "calc(100% - 50px)";
+	entitiesScrollContainer.style.height = "calc(100% - 140px)";
 	entitiesScrollContainer.style.overflowY = "auto";
 	entitiesScrollContainer.style.backgroundColor = "black";
 
@@ -1694,6 +1763,29 @@ const initUI = () => {
 	openButton.onclick = openFromFile;
 	openButton.style.margin = "10px";
 	sidebar.append(openButton);
+
+	sidebar.append(document.createElement("br"));
+
+	const levelSelect = document.createElement("select");
+	const option = document.createElement("option");
+	option.textContent = "Custom World";
+	option.defaultSelected = true;
+	levelSelect.append(option);
+	for (const levelName of resources.levelNames) {
+		const option = document.createElement("option");
+		option.textContent = levelName;
+		levelSelect.append(option);
+	}
+	levelSelect.onchange = () => {
+		if (levelSelect.value === "Custom World") {
+			// openFromFile(), maybe?
+		} else {
+			loadLevelFromTextFile(`levels/${levelSelect.value}.txt`).then(initLevel);
+			// loadLevelFromTextFile(`levels/Undercover Exclusive/${levelSelect.value}.txt`).then(initLevel);
+		}
+	};
+	levelSelect.style.margin = "10px";
+	sidebar.append(levelSelect);
 
 	document.body.append(sidebar);
 
