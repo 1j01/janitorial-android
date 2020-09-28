@@ -228,8 +228,18 @@ const loadLevelFromText = (levelData) => {
 					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: e[4].match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing: e[4].match(/_L/i) ? -1 : 1 }));
+				} else if (typeName === "haz_slickfire") {
+					entities.push({ type: typeName, x, y, colorName: "red", widthInStuds: 4, width: 4 * 15, height: 18, fixed: true });
+				} else if (typeName === "haz_slickfan") {
+					entities.push({ type: typeName, x, y, colorName: "blue", widthInStuds: 4, width: 4 * 15, height: 18, fixed: true });
+				} else if (typeName === "haz_slickjump") {
+					entities.push({ type: typeName, x, y, colorName: "gray", widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
+				} else if (typeName === "haz_slickpipe") {
+					entities.push({ type: typeName, x, y, colorName: "blue", widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
+				} else if (typeName === "brick_slickjump") {
+					entities.push({ type: typeName, x, y, colorName: "yellow", widthInStuds: 2, width: 2 * 15, height: 18 });
 				} else {
-					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18 });
+					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
 				}
 			});
 		}
