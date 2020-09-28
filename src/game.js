@@ -116,6 +116,18 @@ const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 	};
 };
 
+const makeFire = ({ x, y, on }) => {
+	return {
+		type: "fire",
+		x,
+		y,
+		width: 4 * 15,
+		height: 1 * 18,
+		on,
+		fixed: true,
+	};
+};
+
 let resources;
 const resourcePaths = {
 	actors: "images/spritesheet.png",
@@ -237,7 +249,7 @@ const loadLevelFromText = (levelData) => {
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing: e[4].match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_slickfire") {
-					entities.push({ type: typeName, x, y, colorName: "red", widthInStuds: 4, width: 4 * 15, height: 18, fixed: true });
+					entities.push(makeFire({ x, y }));
 				} else if (typeName === "haz_slickfan") {
 					entities.push({ type: typeName, x, y, colorName: "blue", widthInStuds: 4, width: 4 * 15, height: 18, fixed: true });
 				} else if (typeName === "haz_slickjump") {
@@ -445,6 +457,23 @@ const drawBin = (ctx, bin, hilight) => {
 	}
 };
 
+const drawFire = (ctx, entity, hilight) => {
+	const frame = resources.actorsAtlas[`haz_slickFire_off_1`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
+	if (hilight) {
+		ctx.save();
+		ctx.globalAlpha = 0.5;
+		const widthInStuds = entity.width / 15;
+		const w = widthInStuds * 15 + 15; // sprite width
+		const h = 35; // sprite row height
+		for (let iy = 0; iy < entity.height; iy += 18) {
+			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, entity.x, entity.y - 15 + iy, w, h);
+		}
+		ctx.restore();
+	}
+};
+
 const drawJunkbot = (ctx, junkbot, hilight) => {
 	const frameIndex = Math.floor(junkbot.animationFrame % 10);
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
@@ -477,6 +506,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "bin":
 			drawBin(ctx, entity, hilight);
+			break;
+		case "fire":
+			drawFire(ctx, entity, hilight);
 			break;
 		default:
 			drawBrick(ctx, entity, hilight);
@@ -1799,6 +1831,11 @@ const initUI = () => {
 	}));
 
 	makeInsertEntityButton(makeBin({
+		x: 0,
+		y: 0,
+	}));
+
+	makeInsertEntityButton(makeFire({
 		x: 0,
 		y: 0,
 	}));
