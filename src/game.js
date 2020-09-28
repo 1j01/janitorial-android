@@ -135,39 +135,15 @@ const loadLevelFromText = (levelData) => {
 				// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
 				const x = e[0] * 15;
 				const y = e[1] * 18;
+				const typeName = types[e[2] - 1].toLowerCase();
 				const colorName = colors[e[3] - 1].toLowerCase();
-				let entity;
-				switch (types[e[2] - 1]) {
-					case "minifig":
-						entity = makeJunkbot({ x, y: y - 18 * 3, facing: e[4].match(/_L/i) ? -1 : 1 });
-						break;
-					case "brick_01":
-						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 1 });
-						break;
-					case "brick_02":
-						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 2 });
-						break;
-					case "brick_03":
-						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 3 });
-						break;
-					case "brick_04":
-						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 4 });
-						break;
-					case "brick_06":
-						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 6 });
-						break;
-					case "brick_08":
-						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 8 });
-						break;
-					// case "brick_10":
-					// 	entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 10 });
-					// 	break;
-					default:
-						// entity = makeUnknown({ x, y, colorName });
-						break;
-				}
-				if (entity) {
-					entities.push(entity);
+				const brickMatch = typeName.match(/brick_(\d+)/i);
+				if (brickMatch) {
+					entities.push(makeBrick({
+						x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
+					}));
+				} else if (typeName === "minifig") {
+					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: e[4].match(/_L/i) ? -1 : 1 }));
 				}
 			});
 		}
