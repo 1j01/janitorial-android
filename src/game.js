@@ -118,8 +118,8 @@ const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 
 let resources;
 const resourcePaths = {
-	actors: "images/actors-atlas.png",
-	actorsAtlas: "images/actors-atlas.json",
+	actors: "images/spritesheet.png",
+	actorsAtlas: "images/spritesheet.json",
 	coloredBlocks: "images/colored-blocks.png",
 	font: "images/font.png",
 	turn: "audio/sound-effects/turn1.ogg",
@@ -177,10 +177,18 @@ const loadJSON = async (path) => {
 	}
 };
 
+// const loadRozniacAtlasJSON = async (path) => {
+// 	return Object.fromEntries((await loadJSON(path)).map(
+// 		({ Name, Bounds }) => [Name, { bounds: Bounds.split(", ").map((numberString) => Number(numberString)) }]
+// 	));
+// };
 const loadAtlasJSON = async (path) => {
-	return Object.fromEntries((await loadJSON(path)).map(
-		({ Name, Bounds }) => [Name, { bounds: Bounds.split(", ").map((numberString) => Number(numberString)) }]
-	));
+	const { frames, animations } = await loadJSON(path);
+	const result = {};
+	for (const [name, framesIndices] of Object.entries(animations)) {
+		result[name.replace(/\.png/i, "")] = { bounds: frames[framesIndices[0]] };
+	}
+	return result;
 };
 
 const loadLevelFromText = (levelData) => {
@@ -272,7 +280,10 @@ const loadSound = async (path) => {
 
 const loadResources = async (resourcePathsByID) => {
 	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path]) => {
-		if (path.match(/atlas\.json$/i)) {
+		// if (path.match(/atlas\.json$/i)) {
+		// 	return loadRozniacAtlasJSON(path).then((atlas) => [id, atlas]);
+		// } else
+		if (path.match(/spritesheet\.json$/i)) {
 			return loadAtlasJSON(path).then((atlas) => [id, atlas]);
 		} else if (path.match(/\.json$/i)) {
 			// return loadJSON(path).then((data) => [id, data]);
