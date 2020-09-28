@@ -1419,7 +1419,7 @@ const animate = () => {
 		viewport.centerX += panFromMarginSpeed;
 	}
 	if (!editing) {
-		viewport.centerY = Math.min(-canvas.height / 2 / viewport.scale, viewport.centerY);
+		viewport.centerY = Math.min(23 * 18 - canvas.height / 2 / viewport.scale, viewport.centerY);
 	}
 	updateMouseWorldPosition();
 
