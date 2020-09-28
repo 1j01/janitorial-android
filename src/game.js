@@ -160,7 +160,10 @@ let showDebug = false;
 let muted = false;
 let paused = false;
 let editing = false;
+let hideInfoBox = false;
 let sidebar;
+let infoBox;
+let toggleInfoButton;
 const toggleShowDebug = () => {
 	showDebug = !showDebug;
 	try {
@@ -186,8 +189,19 @@ const toggleEditing = () => {
 	editing = !editing;
 	sidebar.hidden = !editing;
 	try {
-		// muted = localStorage.muteSoundEffects === "true";
 		localStorage.editing = editing;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
+};
+const updateInfoBoxHidden = () => {
+	infoBox.hidden = hideInfoBox;
+	toggleInfoButton.setAttribute("aria-expanded", hideInfoBox ? "false" : "true");
+};
+const toggleInfoBox = () => {
+	hideInfoBox = !hideInfoBox;
+	updateInfoBoxHidden();
+	try {
+		localStorage.hideInfoBox = hideInfoBox;
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
@@ -1683,7 +1697,7 @@ const initUI = () => {
 
 	document.body.append(sidebar);
 
-	const infoBox = document.getElementById("info");
+	infoBox = document.getElementById("info");
 	const controlsTableRows = document.querySelectorAll("#info table tr");
 	for (const tr of controlsTableRows) {
 		const [controlCell, actionCell] = tr.cells;
@@ -1700,11 +1714,10 @@ const initUI = () => {
 		}
 	}
 
-	const toggleInfoButton = document.getElementById("toggle-info");
-	toggleInfoButton.addEventListener("click", () => {
-		infoBox.hidden = !infoBox.hidden;
-		toggleInfoButton.setAttribute("aria-expanded", infoBox.hidden ? "false" : "true");
-	});
+	toggleInfoButton = document.getElementById("toggle-info");
+	toggleInfoButton.addEventListener("click", toggleInfoBox);
+
+	updateInfoBoxHidden();
 };
 
 const main = async () => {
@@ -1713,6 +1726,7 @@ const main = async () => {
 		muted = localStorage.muteSoundEffects === "true";
 		editing = localStorage.editing === "true";
 		paused = localStorage.paused === "true";
+		hideInfoBox = localStorage.hideInfoBox === "true";
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 	resources = await loadResources(resourcePaths);
