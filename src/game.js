@@ -1778,14 +1778,18 @@ const initUI = () => {
 		option.textContent = levelName;
 		levelSelect.append(option);
 	}
-	levelSelect.onchange = () => {
+	levelSelect.onchange = async () => {
 		if (levelSelect.value === "Custom World") {
 			// openFromFile(), maybe?
 		} else {
 			const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.txt`;
 			const folder = "levels";
 			// const folder = "levels/Undercover Exclusive";
-			loadLevelFromTextFile(`${folder}/${fileName}`).then(initLevel);
+			try {
+				await loadLevelFromTextFile(`${folder}/${fileName}`).then(initLevel);
+			} catch (error) {
+				showMessageBox(`Failed to load level:\n\n${error}`);
+			}
 		}
 	};
 	levelSelect.style.margin = "10px";
