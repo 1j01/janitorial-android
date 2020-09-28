@@ -15,6 +15,30 @@ const debugJunkbot = (text) => {
 	debugInfoForJunkbot += `${text}\n`;
 };
 
+let messageBox;
+let messageBoxContainer;
+const showMessageBox = (message) => {
+	if (messageBox) {
+		messageBoxContainer.remove();
+	}
+	messageBoxContainer = document.createElement("div");
+	messageBoxContainer.className = "dialog-container";
+	messageBox = document.createElement("div");
+	messageBox.className = "dialog";
+	messageBox.textContent = message;
+	const closeButton = document.createElement("button");
+	closeButton.onclick = () => {
+		messageBoxContainer.remove();
+	};
+	closeButton.textContent = "Close";
+	closeButton.style.marginTop = "20px";
+	messageBox.append(document.createElement("br"));
+	messageBox.append(closeButton);
+	messageBoxContainer.append(messageBox);
+	document.body.append(messageBoxContainer);
+	closeButton.focus();
+};
+
 const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 	ax + aw > bx &&
 	ax < bx + bw &&
@@ -489,11 +513,11 @@ const openFromFile = () => {
 			try {
 				deserialize(content);
 			} catch (error) {
-				alert(`Failed to load from file:\n\n${error}`);
+				showMessageBox(`Failed to load from file:\n\n${error}`);
 			}
 		};
 		reader.onerror = () => {
-			alert(`Failed to read file:\n\n${reader.error}`);
+			showMessageBox(`Failed to read file:\n\n${reader.error}`);
 		};
 		reader.readAsText(file, "UTF-8");
 	};

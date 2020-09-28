@@ -59,6 +59,28 @@
 			text-align: left;
 			margin-left: 10px;
 		}
+
+		.dialog-container {
+			position: fixed;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			pointer-events: none;
+		}
+		.dialog {
+			min-width: 300px;
+			max-width: 90vw;
+			z-index: 100;
+			padding: 20px;
+			background: white;
+			color: black;
+			white-space: pre;
+			pointer-events: all;
+		}
 	</style>
 </head>
 
