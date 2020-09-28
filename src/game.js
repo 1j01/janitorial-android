@@ -1237,15 +1237,27 @@ const canRelease = () => {
 		dragging.forEach((entity) => {
 			for (const otherEntity of entities) {
 				if (
-					!otherEntity.grabbed &&
-					otherEntity.type === "brick" &&
-					connectedToFixed.indexOf(otherEntity) !== -1
+					!otherEntity.grabbed
 				) {
-					if (connects(entity, otherEntity, -1)) {
-						connectsToCeiling = true;
+					if (
+						(
+							otherEntity.type === "fire" ||
+							otherEntity.type === "fan"
+						) &&
+						connects(entity, otherEntity)
+					) {
+						return false;
 					}
-					if (connects(entity, otherEntity, +1)) {
-						connectsToFloor = true;
+					if (
+						otherEntity.type === "brick" &&
+						connectedToFixed.indexOf(otherEntity) !== -1
+					) {
+						if (connects(entity, otherEntity, -1)) {
+							connectsToCeiling = true;
+						}
+						if (connects(entity, otherEntity, +1)) {
+							connectsToFloor = true;
+						}
 					}
 				}
 			}
