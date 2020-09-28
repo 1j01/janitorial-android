@@ -1756,7 +1756,7 @@ const initUI = () => {
 		if (levelSelect.value === "Custom World") {
 			// openFromFile(), maybe?
 		} else {
-			const fileName = `${levelSelect.value.replace(/:/g, "")}.txt`;
+			const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.txt`;
 			const folder = "levels";
 			// const folder = "levels/Undercover Exclusive";
 			loadLevelFromTextFile(`${folder}/${fileName}`).then(initLevel);
