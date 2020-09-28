@@ -86,7 +86,6 @@ const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 		height: 18,
 		colorName,
 		fixed,
-		grabbed: false,
 	};
 };
 
@@ -101,8 +100,19 @@ const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 		armored,
 		timer: 0,
 		animationFrame: 0,
-		grabbed: false,
 		headLoaded: false,
+	};
+};
+
+const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
+	return {
+		type: "bin",
+		x,
+		y,
+		width: 2 * 15,
+		height: 3 * 18,
+		facing,
+		scaredy,
 	};
 };
 
@@ -216,6 +226,8 @@ const loadLevelFromText = (levelData) => {
 					}));
 				} else if (typeName === "minifig") {
 					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: e[4].match(/_L/i) ? -1 : 1 }));
+				} else if (typeName === "flag") {
+					entities.push(makeBin({ x, y: y - 18 * 2, facing: e[4].match(/_L/i) ? -1 : 1 }));
 				} else {
 					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18 });
 				}
@@ -396,6 +408,22 @@ const drawBrick = (ctx, brick, hilight) => {
 	}
 };
 
+const drawBin = (ctx, bin, hilight) => {
+	const frame = resources.actorsAtlas.bin;
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, bin.x + 4, bin.y + bin.height - height - 5, width, height);
+	if (hilight) {
+		ctx.save();
+		ctx.globalAlpha = 0.5;
+		const w = 2 * 15 + 15; // sprite width
+		const h = 35; // sprite row height
+		for (let iy = 0; iy < bin.height; iy += 18) {
+			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[2], (brickColorToYIndex.gray + 1) * h + 9, w, h, bin.x, bin.y - 15 + iy, w, h);
+		}
+		ctx.restore();
+	}
+};
+
 const drawJunkbot = (ctx, junkbot, hilight) => {
 	const frameIndex = Math.floor(junkbot.animationFrame % 10);
 	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
@@ -425,6 +453,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "junkbot":
 			drawJunkbot(ctx, entity, hilight);
+			break;
+		case "bin":
+			drawBin(ctx, entity, hilight);
 			break;
 		default:
 			drawBrick(ctx, entity, hilight);
@@ -1744,6 +1775,11 @@ const initUI = () => {
 		x: 0,
 		y: 0,
 		facing: 1,
+	}));
+
+	makeInsertEntityButton(makeBin({
+		x: 0,
+		y: 0,
 	}));
 
 	let lastScrollSoundTime = 0;
