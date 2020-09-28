@@ -1780,8 +1780,10 @@ const initUI = () => {
 		if (levelSelect.value === "Custom World") {
 			// openFromFile(), maybe?
 		} else {
-			loadLevelFromTextFile(`levels/${levelSelect.value}.txt`).then(initLevel);
-			// loadLevelFromTextFile(`levels/Undercover Exclusive/${levelSelect.value}.txt`).then(initLevel);
+			const fileName = `${levelSelect.value.replace(/:/g, "")}.txt`;
+			const folder = "levels";
+			// const folder = "levels/Undercover Exclusive";
+			loadLevelFromTextFile(`${folder}/${fileName}`).then(initLevel);
 		}
 	};
 	levelSelect.style.margin = "10px";
