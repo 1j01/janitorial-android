@@ -1317,7 +1317,7 @@ const simulateGravity = () => {
 	for (const entity of entities) {
 		if (!entity.fixed && !entity.grabbed) {
 			let settled = false;
-			if (connectsToFixed(entity, { direction: entity.type === "brick" ? 0 : 1 })) {
+			if (connectsToFixed(entity, { direction: entity.type === "junkbot" ? 1 : 0 })) {
 				settled = true;
 			}
 			if (!settled) {
