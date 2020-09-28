@@ -139,7 +139,7 @@ const loadLevelFromText = (levelData) => {
 				let entity;
 				switch (types[e[2] - 1]) {
 					case "minifig":
-						entity = makeJunkbot({ x, y, facing: e[4].match(/_L/i) ? -1 : 1 });
+						entity = makeJunkbot({ x, y: y - 18 * 3, facing: e[4].match(/_L/i) ? -1 : 1 });
 						break;
 					case "brick_01":
 						entity = makeBrick({ x, y, colorName, fixed: colorName === "gray", widthInStuds: 1 });
