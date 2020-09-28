@@ -216,6 +216,8 @@ const loadLevelFromText = (levelData) => {
 					}));
 				} else if (typeName === "minifig") {
 					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: e[4].match(/_L/i) ? -1 : 1 }));
+				} else {
+					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18 });
 				}
 			});
 		}
@@ -425,10 +427,8 @@ const drawEntity = (ctx, entity, hilight) => {
 			drawJunkbot(ctx, entity, hilight);
 			break;
 		default:
-			if (window.console) {
-				// eslint-disable-next-line no-console
-				console.warn(`Unknown entity type '${entity.type}'`);
-			}
+			drawBrick(ctx, entity, hilight);
+			drawText(ctx, entity.type, entity.x, entity.y, "white");
 			break;
 	}
 };
