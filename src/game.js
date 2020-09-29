@@ -115,7 +115,7 @@ const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 		scaredy,
 	};
 };
-const makeFire = ({ x, y, on }) => {
+const makeFire = ({ x, y, on, switchID }) => {
 	return {
 		type: "fire",
 		x,
@@ -123,11 +123,12 @@ const makeFire = ({ x, y, on }) => {
 		width: 4 * 15,
 		height: 1 * 18,
 		on,
+		switchID,
 		animationFrame: 0,
 		fixed: true,
 	};
 };
-const makeFan = ({ x, y, on }) => {
+const makeFan = ({ x, y, on, switchID }) => {
 	return {
 		type: "fan",
 		x,
@@ -135,6 +136,7 @@ const makeFan = ({ x, y, on }) => {
 		width: 4 * 15,
 		height: 1 * 18,
 		on,
+		switchID,
 		animationFrame: 0,
 		fixed: true,
 	};
@@ -321,9 +323,9 @@ const loadLevelFromText = (levelData) => {
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_slickfire") {
-					entities.push(makeFire({ x, y, on: animationName === "on" || animationName === "none" }));
+					entities.push(makeFire({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slickfan") {
-					entities.push(makeFan({ x, y, on: animationName === "on" || animationName === "none" }));
+					entities.push(makeFan({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slickswitch") {
 					entities.push(makeSwitch({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slickjump") {
@@ -1669,8 +1671,9 @@ const simulateJunkbot = (junkbot) => {
 					groundLevelEntity.on = !groundLevelEntity.on;
 					for (const entity of entities) {
 						if (entity.type === "fire" || entity.type === "fan") {
-							// if (entity.switchID === groundLevelEntity.switchID) {
-							entity.on = !entity.on;
+							if (entity.switchID === groundLevelEntity.switchID) {
+								entity.on = !entity.on;
+							}
 						}
 					}
 					playSound("switchClick");
@@ -2128,22 +2131,26 @@ const initUI = () => {
 		x: 0,
 		y: 0,
 		on: false,
+		switchID: "switch1",
 	}));
 	makeInsertEntityButton(makeFire({
 		x: 0,
 		y: 0,
 		on: true,
+		switchID: "switch1",
 	}));
 
 	makeInsertEntityButton(makeFan({
 		x: 0,
 		y: 0,
 		on: false,
+		switchID: "switch1",
 	}));
 	makeInsertEntityButton(makeFan({
 		x: 0,
 		y: 0,
 		on: true,
+		switchID: "switch1",
 	}));
 
 	makeInsertEntityButton(makeJump({
