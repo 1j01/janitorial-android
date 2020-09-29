@@ -210,6 +210,9 @@ const resourcePaths = {
 	headBonk: "audio/sound-effects/headbonk1.ogg",
 	collectBin: "audio/sound-effects/eat1.ogg",
 	collectBin2: "audio/sound-effects/garbage1.ogg",
+	switchClick: "audio/sound-effects/switch_click.ogg",
+	switchOn: "audio/sound-effects/switch_on.ogg",
+	switchOff: "audio/sound-effects/switch_off.ogg",
 	fire: "audio/sound-effects/fire.ogg",
 	waterDeath: "audio/sound-effects/electricity1.ogg",
 	drip0: "audio/sound-effects/drip1.ogg",
@@ -1670,7 +1673,8 @@ const simulateJunkbot = (junkbot) => {
 							entity.on = !entity.on;
 						}
 					}
-					playSound("switch");
+					playSound("switchClick");
+					playSound(groundLevelEntity.on ? "switchOn" : "switchOff");
 				} else if (groundLevelEntity.type === "fire" && groundLevelEntity.on) {
 					junkbot.animationFrame = 0;
 					junkbot.dying = true;
