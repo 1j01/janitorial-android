@@ -546,7 +546,10 @@ const drawFan = (ctx, entity) => {
 };
 
 const drawWind = (ctx, fan) => {
-	for (let x = fan.x + 15; x < fan.x + fan.width - 15 && fan.on; x += 15) {
+	if (!fan.on) {
+		return;
+	}
+	for (let x = fan.x + 15; x < fan.x + fan.width - 15; x += 15) {
 		for (let y = fan.y - 18; y > -200; y -= 18) {
 			if ((entitiesByTopY[y] || []).some((entity) => (
 				entity.type !== "junkbot" &&
