@@ -486,7 +486,7 @@ const drawFan = (ctx, entity) => {
 const drawJump = (ctx, entity) => {
 	const frame = resources.actorsAtlas[`${entity.fixed ? "haz" : "brick"}_slickJump_dormant_1`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
 const drawJunkbot = (ctx, junkbot) => {
