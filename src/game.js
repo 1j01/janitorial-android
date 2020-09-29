@@ -1644,6 +1644,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 	const inside = junkbotCollisionTest(junkbot.x, junkbot.y, junkbot);
 	if (inside) {
+		debugInfoForJunkbot = "";
 		debugJunkbot("STUCK IN WALL - GO UP");
 		junkbot.y = inside.y - junkbot.height;
 		entityMoved(junkbot);
@@ -1652,6 +1653,7 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.floating) {
 		const abovePos = { x: junkbot.x, y: junkbot.y - 18 };
 		const aboveHead = junkbotCollisionTest(abovePos.x, abovePos.y, junkbot);
+		debugInfoForJunkbot = "";
 		if (aboveHead) {
 			debugJunkbot("FLOATING - CAN'T GO UP");
 		} else {
@@ -1709,11 +1711,13 @@ const simulateJunkbot = (junkbot) => {
 					junkbot.x = posInFront.x;
 					junkbot.y = posInFront.y;
 					entityMoved(junkbot);
-				} else {
+				} else if (junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot)) {
 					// reached cliff/ledge/edge/precipice or wall would bonk head; turn around
 					debugJunkbot("CLIFF/WALL - TURN AROUND");
 					junkbot.facing *= -1;
 					playSound("turn");
+				} else {
+					debugJunkbot("FALLING");
 				}
 			}
 		}
