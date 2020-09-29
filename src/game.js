@@ -359,13 +359,14 @@ const toggleInfoBox = () => {
 	} catch (error) { }
 };
 
-const playSound = (audioBuffer) => {
+const playSound = (audioBuffer, playbackRate = 1) => {
 	if (muted) {
 		return;
 	}
 	const source = context.createBufferSource();
 	source.buffer = audioBuffer;
 	source.connect(context.destination);
+	source.playbackRate.value = playbackRate;
 	source.start(0);
 };
 
@@ -598,6 +599,8 @@ const undoOrRedo = (undos, redos) => {
 	save();
 	return true;
 };
+let recentUndoSound = 0;
+let recentRedoSound = 0;
 const undo = () => {
 	if (!editing) {
 		toggleEditing();
@@ -605,7 +608,11 @@ const undo = () => {
 	}
 	const didSomething = undoOrRedo(undos, redos);
 	if (didSomething) {
-		playSound(resources.undo);
+		playSound(resources.undo, 1 / (1 + recentUndoSound / 2));
+		recentUndoSound += 1;
+		setTimeout(() => {
+			recentUndoSound -= 1;
+		}, 400);
 	}
 	// eslint-disable-next-line
 	// TODO: undo view too
@@ -617,7 +624,11 @@ const redo = () => {
 	}
 	const didSomething = undoOrRedo(redos, undos);
 	if (didSomething) {
-		playSound(resources.redo);
+		playSound(resources.redo, (1 + recentRedoSound / 10));
+		recentRedoSound += 1;
+		setTimeout(() => {
+			recentRedoSound -= 1;
+		}, 400);
 	}
 };
 
