@@ -104,6 +104,17 @@ const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 		headLoaded: false,
 	};
 };
+const makeGearbot = ({ x, y, facing = 1 }) => {
+	return {
+		type: "gearbot",
+		x,
+		y,
+		width: 2 * 15,
+		height: 2 * 18,
+		facing,
+		animationFrame: 0,
+	};
+};
 const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 	return {
 		type: "bin",
@@ -215,8 +226,9 @@ const resourcePaths = {
 	switchClick: "audio/sound-effects/switch_click.ogg",
 	switchOn: "audio/sound-effects/switch_on.ogg",
 	switchOff: "audio/sound-effects/switch_off.ogg",
-	fire: "audio/sound-effects/fire.ogg",
-	waterDeath: "audio/sound-effects/electricity1.ogg",
+	deathByFire: "audio/sound-effects/fire.ogg",
+	deathByWater: "audio/sound-effects/electricity1.ogg",
+	deathByBot: "audio/sound-effects/robottouch4.ogg",
 	getShield: "audio/sound-effects/shieldon2.ogg",
 	fan: "audio/sound-effects/fan.ogg",
 	drip0: "audio/sound-effects/drip1.ogg",
@@ -322,6 +334,8 @@ const loadLevelFromText = (levelData) => {
 					}));
 				} else if (typeName === "minifig") {
 					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: animationName.match(/_L/i) ? -1 : 1 }));
+				} else if (typeName === "haz_walker") {
+					entities.push(makeGearbot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_slickfire") {
@@ -601,6 +615,13 @@ const drawDrop = (ctx, entity) => {
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 15, entity.y, width, height);
 };
 
+const drawGearbot = (ctx, entity) => {
+	const frameIndex = Math.floor(entity.animationFrame % 2);
+	const frame = resources.actorsAtlas[`gearbot_walk_${entity.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+};
+
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
 	if (junkbot.dead) {
@@ -642,6 +663,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "junkbot":
 			drawJunkbot(ctx, entity);
+			break;
+		case "gearbot":
+			drawGearbot(ctx, entity);
 			break;
 		case "bin":
 			drawBin(ctx, entity);
@@ -1581,18 +1605,18 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 	}
 	return null;
 };
-const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => {
-	// Note: make sure not to use junkbot.x/y!
+const simpleCollisionTest = (entityX, entityY, entity, filter) => {
+	// Note: make sure not to use entity.x/y!
 	for (const otherEntity of entities) {
 		if (
 			!otherEntity.grabbed &&
-			otherEntity.type === "bin" &&
-			otherEntity !== junkbot && (
+			otherEntity !== entity &&
+			filter(otherEntity) && (
 				rectanglesIntersect(
-					junkbotX,
-					junkbotY,
-					junkbot.width,
-					junkbot.height,
+					entityX,
+					entityY,
+					entity.width,
+					entity.height,
 					otherEntity.x,
 					otherEntity.y,
 					otherEntity.width,
@@ -1605,6 +1629,10 @@ const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => {
 	}
 	return null;
 };
+const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) =>
+	simpleCollisionTest(junkbotX, junkbotY, junkbot, (otherEntity) =>
+		otherEntity.type === "bin"
+	);
 
 const simulateJunkbot = (junkbot) => {
 	junkbot.timer += 1;
@@ -1742,7 +1770,7 @@ const simulateJunkbot = (junkbot) => {
 						junkbot.animationFrame = 0;
 						junkbot.dying = true;
 						junkbot.collectingBin = false;
-						playSound("fire");
+						playSound("deathByFire");
 					}
 				} else if (groundLevelEntity.type === "shield" && !groundLevelEntity.used && !junkbot.armored) {
 					junkbot.animationFrame = 0;
@@ -1764,6 +1792,32 @@ const simulateJunkbot = (junkbot) => {
 	}
 };
 
+const simulateGearbot = (gearbot) => {
+	gearbot.animationFrame += 0.25;
+	if (gearbot.animationFrame > 2) {
+		gearbot.animationFrame = 0;
+		const aheadPos = { x: gearbot.x + gearbot.facing * 15, y: gearbot.y };
+		const ahead = simpleCollisionTest(aheadPos.x, aheadPos.y, gearbot, (otherEntity) => otherEntity.type !== "drop");
+		const groundAhead = simpleCollisionTest(gearbot.x + gearbot.facing * 15 * 2, gearbot.y + 1, gearbot, (otherEntity) => otherEntity.type !== "drop");
+		if (ahead) {
+			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
+				ahead.dying = true;
+				ahead.collectingBin = false;
+				ahead.animationFrame = 0;
+				playSound("deathByBot");
+			} else if (ahead.type !== "junkbot") {
+				gearbot.facing *= -1;
+			}
+		} else if (groundAhead) {
+			gearbot.x = aheadPos.x;
+			gearbot.y = aheadPos.y;
+			entityMoved(gearbot);
+		} else {
+			gearbot.facing *= -1;
+		}
+	}
+};
+
 const simulateDrop = (drop) => {
 	if (drop.splashing) {
 		drop.animationFrame += 0.25;
@@ -1774,6 +1828,7 @@ const simulateDrop = (drop) => {
 		for (let i = 0; i < 6; i++) {
 			const underneath = entitiesByTopY[drop.y + drop.height] || [];
 			drop.y += 1;
+			entityMoved(drop);
 			for (const ground of underneath) {
 				if (
 					drop.x + drop.width > ground.x &&
@@ -1789,7 +1844,7 @@ const simulateDrop = (drop) => {
 							ground.dyingFromWater = true;
 							ground.collectingBin = false;
 							ground.animationFrame = 0;
-							playSound("waterDeath");
+							playSound("deathByWater");
 						}
 					}
 					// ground.colorName = "blue";
@@ -1822,6 +1877,8 @@ const simulate = (entities) => {
 		if (!entity.grabbed) {
 			if (entity.type === "junkbot") {
 				simulateJunkbot(entity);
+			} else if (entity.type === "gearbot") {
+				simulateGearbot(entity);
 			} else if (entity.type === "pipe") {
 				simulatePipe(entity);
 			} else if (entity.type === "drop") {
@@ -2340,6 +2397,12 @@ const initUI = () => {
 	makeInsertEntityButton(makeDrop({
 		x: 0,
 		y: 0,
+	}));
+
+	makeInsertEntityButton(makeGearbot({
+		x: 0,
+		y: 0,
+		facing: 1,
 	}));
 
 	let lastScrollSoundTime = Date.now(); // not 0 because a random scroll event happens on page load; don't want page load to make a sound
