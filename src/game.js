@@ -170,6 +170,16 @@ const makePipe = ({ x, y }) => {
 		fixed: true,
 	};
 };
+const makeDrop = ({ x, y }) => {
+	return {
+		type: "drop",
+		x,
+		y,
+		width: 2 * 15,
+		height: 1 * 18,
+		splashing: false,
+	};
+};
 
 let resources;
 const resourcePaths = {
@@ -522,7 +532,16 @@ const drawPipe = (ctx, entity) => {
 	const frame = resources.actorsAtlas[`haz_slickPipe_${wet ? "wet" : "dry"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 11, entity.y - 12, width, height);
-	drawText(ctx, String(entity.timer), entity.x, entity.y + entity.height + 5, "white");
+	if (showDebug) {
+		drawText(ctx, String(entity.timer), entity.x, entity.y + entity.height + 5, "white");
+	}
+};
+
+const drawDrop = (ctx, entity) => {
+	const frameIndex = Math.floor(entity.splashing ? entity.animationFrame : 0);
+	const frame = resources.actorsAtlas[`drip_${entity.splashing ? "splashing" : "falling"}_${1 + frameIndex}`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 11, entity.y - 12, width, height);
 };
 
 const drawJunkbot = (ctx, junkbot) => {
@@ -569,6 +588,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "pipe":
 			drawPipe(ctx, entity);
+			break;
+		case "drop":
+			drawDrop(ctx, entity);
 			break;
 		case "shield":
 			drawShield(ctx, entity);
@@ -1437,7 +1459,7 @@ const sortEntitiesForRendering = (entities) => {
 
 const simulateGravity = () => {
 	for (const entity of entities) {
-		if (!entity.fixed && !entity.grabbed) {
+		if (!entity.fixed && !entity.grabbed && entity.type !== "drop") {
 			let settled = false;
 			if (connectsToFixed(entity, { direction: entity.type === "junkbot" ? 1 : 0 })) {
 				settled = true;
@@ -1458,6 +1480,7 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 			!otherEntity.grabbed &&
 			otherEntity.type !== "bin" &&
 			otherEntity.type !== "gearbot" &&
+			otherEntity.type !== "drop" &&
 			otherEntity !== junkbot && (
 				rectanglesIntersect(
 					junkbotX + (junkbot.facing === 1 ? 0 : 15),
@@ -1512,9 +1535,6 @@ const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => {
 };
 
 const simulateJunkbot = (junkbot) => {
-	if (junkbot.grabbed) {
-		return;
-	}
 	junkbot.timer += 1;
 	const aboveHead = junkbotCollisionTest(junkbot.x, junkbot.y - 1, junkbot);
 	const headLoaded = aboveHead && !aboveHead.fixed && !connectsToFixed(aboveHead, { ignoreEntities: [junkbot] });
@@ -1700,12 +1720,48 @@ const animate = () => {
 		simulateGravity();
 
 		for (const entity of entities) {
+			if (entity.grabbed) {
+				continue;
+			}
 			if (entity.type === "junkbot") {
 				simulateJunkbot(entity);
 			} else if (entity.type === "pipe") {
 				entity.timer += 0.25;
 				if (entity.timer > 60) {
 					entity.timer = 0;
+					entities.push(makeDrop({
+						x: entity.x,
+						y: entity.y,
+					}));
+				}
+			} else if (entity.type === "drop") {
+				if (entity.splashing) {
+					entity.animationFrame += 0.25;
+					if (entity.animationFrame > 4) {
+						remove(entities, entity);
+					}
+				} else {
+					for (let i = 0; i < 6; i++) {
+						const underneath = entitiesByTopY[entity.y + 5] || [];
+						entity.y += 1;
+						for (const ground of underneath) {
+							if (
+								entity.x + entity.width > ground.x &&
+								entity.x < ground.x + ground.width &&
+								ground.type !== "pipe" &&
+								ground.type !== "drop"
+							) {
+								if (ground.type === "junkbot") {
+									ground.dying = true;
+									ground.animationFrame = 0;
+								}
+								// ground.colorName = "blue";
+								entity.splashing = true;
+								entity.animationFrame = 0;
+								break;
+							}
+						}
+					}
 				}
 			} else if ("animationFrame" in entity) {
 				entity.animationFrame += 0.25;
@@ -2038,6 +2094,10 @@ const initUI = () => {
 	}));
 
 	makeInsertEntityButton(makePipe({
+		x: 0,
+		y: 0,
+	}));
+	makeInsertEntityButton(makeDrop({
 		x: 0,
 		y: 0,
 	}));
