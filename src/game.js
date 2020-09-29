@@ -88,7 +88,6 @@ const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 		fixed,
 	};
 };
-
 const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 	return {
 		type: "junkbot",
@@ -103,7 +102,6 @@ const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 		headLoaded: false,
 	};
 };
-
 const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 	return {
 		type: "bin",
@@ -115,7 +113,6 @@ const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 		scaredy,
 	};
 };
-
 const makeFire = ({ x, y, on }) => {
 	return {
 		type: "fire",
@@ -149,6 +146,17 @@ const makeJump = ({ x, y, fixed }) => {
 		height: 1 * 18,
 		animationFrame: 0,
 		fixed,
+	};
+};
+const makePipe = ({ x, y }) => {
+	return {
+		type: "pipe",
+		x,
+		y,
+		width: 2 * 15,
+		height: 1 * 18,
+		animationFrame: 0,
+		fixed: true,
 	};
 };
 
@@ -278,7 +286,7 @@ const loadLevelFromText = (levelData) => {
 				} else if (typeName === "brick_slickjump") {
 					entities.push(makeJump({ x, y, fixed: false }));
 				} else if (typeName === "haz_slickpipe") {
-					entities.push({ type: typeName, x, y, colorName: "blue", widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
+					entities.push(makePipe({ x, y }));
 				} else {
 					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
 				}
@@ -489,6 +497,12 @@ const drawJump = (ctx, entity) => {
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
+const drawPipe = (ctx, entity) => {
+	const frame = resources.actorsAtlas[`haz_slickPipe_dry_1`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 11, entity.y + entity.height - height - 6, width, height);
+};
+
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
 	if (junkbot.dead) {
@@ -530,6 +544,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "jump":
 			drawJump(ctx, entity);
+			break;
+		case "pipe":
+			drawPipe(ctx, entity);
 			break;
 		default:
 			drawBrick(ctx, entity);
@@ -1976,6 +1993,11 @@ const initUI = () => {
 		x: 0,
 		y: 0,
 		fixed: true,
+	}));
+
+	makeInsertEntityButton(makePipe({
+		x: 0,
+		y: 0,
 	}));
 
 	let lastScrollSoundTime = Date.now(); // not 0 because a random scroll event happens on page load; don't want page load to make a sound
