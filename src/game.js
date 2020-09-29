@@ -143,6 +143,7 @@ const resourcePaths = {
 	fall: "audio/sound-effects/fall.ogg",
 	headBonk: "audio/sound-effects/headbonk1.ogg",
 	collectBin: "audio/sound-effects/eat1.ogg",
+	collectBin2: "audio/sound-effects/garbage1.ogg",
 	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
 	selectEnd: "audio/sound-effects/custom/select2.wav",
 	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
@@ -453,8 +454,8 @@ const drawFire = (ctx, entity) => {
 
 const drawJunkbot = (ctx, junkbot) => {
 	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.collectingBin ? 17 : 10));
-	const frame = resources.actorsAtlas[`minifig_${junkbot.collectingBin ? "eat_start" : `walk_${junkbot.facing === 1 ? "r" : "l"}`
-		}_${1 + frameIndex}`];
+	const animName = junkbot.collectingBin ? "eat_start" : `walk_${junkbot.facing === 1 ? "r" : "l"}`;
+	const frame = resources.actorsAtlas[`minifig_${animName}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
 	if (junkbot.facing === 1) {
@@ -1504,6 +1505,7 @@ const simulateJunkbot = (junkbot) => {
 		junkbot.collectingBin = true;
 		remove(entities, bin);
 		playSound(resources.collectBin);
+		playSound(resources.collectBin2);
 	}
 };
 
