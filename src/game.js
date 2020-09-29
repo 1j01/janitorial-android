@@ -1882,10 +1882,13 @@ ${debugInfoForJunkbot}
 
 ${debugInfoForFrame}`;
 		drawText(ctx, debugInfo, x, 50, "white");
+		const hoveredBrick = brickUnderMouse() || brickUnderMouse(true);
 		if (dragging.length) {
 			drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
-		} else if (hovered.length) {
-			drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
+			// } else if (hovered.length) {
+			// 	drawText(ctx, `HOVERED: ${JSON.stringify(hovered, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
+		} else if (hoveredBrick) {
+			drawText(ctx, `HOVERED: ${JSON.stringify(hoveredBrick, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
 		}
 		debugInfoForFrame = "";
 	}
