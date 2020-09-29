@@ -644,7 +644,7 @@ const drawJunkbot = (ctx, junkbot) => {
 			animName = `shield_${animName}`;
 		}
 	}
-	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.collectingBin ? 17 : 10));
+	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.gettingShield ? 11 : junkbot.collectingBin ? 17 : 10));
 	const frame = resources.actorsAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
@@ -1672,7 +1672,7 @@ const simulateJunkbot = (junkbot) => {
 		return;
 	}
 	if (junkbot.gettingShield) {
-		if (junkbot.animationFrame > 12) {
+		if (junkbot.animationFrame >= 11) {
 			junkbot.gettingShield = false;
 			junkbot.armored = true;
 		} else {
