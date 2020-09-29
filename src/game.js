@@ -1650,6 +1650,75 @@ const simulateJunkbot = (junkbot) => {
 	}
 };
 
+const simulateDrop = (drop) => {
+	if (drop.splashing) {
+		drop.animationFrame += 0.25;
+		if (drop.animationFrame > 4) {
+			remove(entities, drop);
+		}
+	} else {
+		for (let i = 0; i < 6; i++) {
+			const underneath = entitiesByTopY[drop.y + 5] || [];
+			drop.y += 1;
+			for (const ground of underneath) {
+				if (
+					drop.x + drop.width > ground.x &&
+					drop.x < ground.x + ground.width &&
+					ground.type !== "pipe" &&
+					ground.type !== "drop"
+				) {
+					if (ground.type === "junkbot" && !ground.dying && !ground.dead) {
+						ground.dying = true;
+						ground.dyingFromWater = true;
+						ground.animationFrame = 0;
+						playSound(resources.waterDeath);
+					}
+					// ground.colorName = "blue";
+					drop.splashing = true;
+					drop.animationFrame = 0;
+					if (Math.random() < 0.33) {
+						playSound(resources.drip1);
+					} else if (Math.random() < 0.5) {
+						playSound(resources.drip2);
+					} else {
+						playSound(resources.drip3);
+					}
+					break;
+				}
+			}
+		}
+	}
+};
+
+const simulatePipe = (pipe) => {
+	pipe.timer += 0.25;
+	if (pipe.timer > 60) {
+		pipe.timer = 0;
+		entities.push(makeDrop({
+			x: pipe.x,
+			y: pipe.y,
+		}));
+	}
+};
+
+const simulate = () => {
+	simulateGravity();
+
+	for (const entity of entities) {
+		if (!entity.grabbed) {
+			if (entity.type === "junkbot") {
+				simulateJunkbot(entity);
+			} else if (entity.type === "pipe") {
+				simulatePipe(entity);
+			} else if (entity.type === "drop") {
+				simulateDrop(entity);
+			} else if ("animationFrame" in entity) {
+				entity.animationFrame += 0.25;
+			}
+		}
+	}
+};
+
 let rafid;
 window.addEventListener("error", () => {
 	// so my computer doesn't freeze up from the console logging messages about repeated errors
@@ -1724,65 +1793,7 @@ const animate = () => {
 	entities.sort((a, b) => b.y - a.y);
 
 	if (!paused) {
-		simulateGravity();
-
-		for (const entity of entities) {
-			if (entity.grabbed) {
-				continue;
-			}
-			if (entity.type === "junkbot") {
-				simulateJunkbot(entity);
-			} else if (entity.type === "pipe") {
-				entity.timer += 0.25;
-				if (entity.timer > 60) {
-					entity.timer = 0;
-					entities.push(makeDrop({
-						x: entity.x,
-						y: entity.y,
-					}));
-				}
-			} else if (entity.type === "drop") {
-				if (entity.splashing) {
-					entity.animationFrame += 0.25;
-					if (entity.animationFrame > 4) {
-						remove(entities, entity);
-					}
-				} else {
-					for (let i = 0; i < 6; i++) {
-						const underneath = entitiesByTopY[entity.y + 5] || [];
-						entity.y += 1;
-						for (const ground of underneath) {
-							if (
-								entity.x + entity.width > ground.x &&
-								entity.x < ground.x + ground.width &&
-								ground.type !== "pipe" &&
-								ground.type !== "drop"
-							) {
-								if (ground.type === "junkbot" && !ground.dying && !ground.dead) {
-									ground.dying = true;
-									ground.dyingFromWater = true;
-									ground.animationFrame = 0;
-									playSound(resources.waterDeath);
-								}
-								// ground.colorName = "blue";
-								entity.splashing = true;
-								entity.animationFrame = 0;
-								if (Math.random() < 0.33) {
-									playSound(resources.drip1);
-								} else if (Math.random() < 0.5) {
-									playSound(resources.drip2);
-								} else {
-									playSound(resources.drip3);
-								}
-								break;
-							}
-						}
-					}
-				}
-			} else if ("animationFrame" in entity) {
-				entity.animationFrame += 0.25;
-			}
-		}
+		simulate();
 	}
 
 	sortEntitiesForRendering(entities);
