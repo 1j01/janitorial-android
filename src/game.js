@@ -139,6 +139,18 @@ const makeFan = ({ x, y, on }) => {
 		fixed: true,
 	};
 };
+const makeSwitch = ({ x, y, on, switchID }) => {
+	return {
+		type: "switch",
+		x,
+		y,
+		width: 2 * 15,
+		height: 1 * 18,
+		on,
+		switchID,
+		fixed: true,
+	};
+};
 const makeJump = ({ x, y, fixed }) => {
 	return {
 		type: "jump",
@@ -308,6 +320,8 @@ const loadLevelFromText = (levelData) => {
 					entities.push(makeFire({ x, y, on: animationName === "on" || animationName === "none" }));
 				} else if (typeName === "haz_slickfan") {
 					entities.push(makeFan({ x, y, on: animationName === "on" || animationName === "none" }));
+				} else if (typeName === "haz_slickswitch") {
+					entities.push(makeSwitch({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slickjump") {
 					entities.push(makeJump({ x, y, fixed: true }));
 				} else if (typeName === "brick_slickjump") {
@@ -532,6 +546,12 @@ const drawShield = (ctx, entity) => {
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
+const drawSwitch = (ctx, entity) => {
+	const frame = resources.actorsAtlas[`haz_slickSwitch_${entity.on ? "on" : "off"}_1`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+};
+
 const drawPipe = (ctx, entity) => {
 	const wet = entity.timer > 54;
 	const frameIndex = Math.floor(wet ? entity.timer - 54 : 0);
@@ -602,6 +622,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "shield":
 			drawShield(ctx, entity);
+			break;
+		case "switch":
+			drawSwitch(ctx, entity);
 			break;
 		default:
 			drawBrick(ctx, entity);
@@ -1643,6 +1666,16 @@ const simulateJunkbot = (junkbot) => {
 	}
 
 	const ground = junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot);
+	if (ground && ground.type === "switch") {
+		ground.on = !ground.on;
+		for (const entity of entities) {
+			if (entity.type === "fire" || entity.type === "fan") {
+				// if (entity.switchID === ground.switchID) {
+				entity.on = !entity.on;
+			}
+		}
+		playSound(resources.switch);
+	}
 	if (ground && ground.type === "fire" && ground.on) {
 		junkbot.animationFrame = 0;
 		junkbot.dying = true;
@@ -2116,6 +2149,19 @@ const initUI = () => {
 		x: 0,
 		y: 0,
 		fixed: true,
+	}));
+
+	makeInsertEntityButton(makeSwitch({
+		x: 0,
+		y: 0,
+		on: false,
+		switchID: "switch1",
+	}));
+	makeInsertEntityButton(makeSwitch({
+		x: 0,
+		y: 0,
+		on: true,
+		switchID: "switch1",
 	}));
 
 	makeInsertEntityButton(makeShield({
