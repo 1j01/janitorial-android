@@ -936,16 +936,14 @@ const brickUnderMouse = (includeFixed) => {
 	}
 };
 
-const connects = (a, b, direction = 0) => {
-	if (direction === 0) {
-		return connects(a, b, +1) || connects(a, b, -1);
-	}
-	return (
-		(direction === 1 ? b.y === a.y + a.height : b.y + b.height === a.y) &&
-		a.x + a.width > b.x &&
-		a.x < b.x + b.width
-	);
-};
+const connects = (a, b, direction = 0) => (
+	(
+		(direction >= 0 && b.y === a.y + a.height) ||
+		(direction <= 0 && b.y + b.height === a.y)
+	) &&
+	a.x + a.width > b.x &&
+	a.x < b.x + b.width
+);
 
 const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 	const connectedToFixed = [];
