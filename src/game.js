@@ -1463,9 +1463,9 @@ const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => {
 			otherEntity.type === "bin" &&
 			otherEntity !== junkbot && (
 				rectanglesIntersect(
-					junkbotX - 15,
+					junkbotX,
 					junkbotY,
-					junkbot.width + 15 * 2,
+					junkbot.width,
 					junkbot.height,
 					otherEntity.x,
 					otherEntity.y,
@@ -1575,7 +1575,7 @@ const simulateJunkbot = (junkbot) => {
 		}
 	}
 
-	const bin = junkbotBinCollisionTest(junkbot.x, junkbot.y, junkbot);
+	const bin = junkbotBinCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot);
 	if (bin) {
 		junkbot.animationFrame = 0;
 		junkbot.collectingBin = true;
