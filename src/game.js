@@ -1747,8 +1747,8 @@ const animate = () => {
 	if (showDebug) {
 		for (const [name, frame] of Object.entries(resources.actorsAtlas)) {
 			const [left, top, width, height] = frame.bounds;
-			const x = left * 3;
-			const y = top * 2;
+			const x = left;
+			const y = (top * 2 + left * 5) % 500;
 			ctx.drawImage(
 				resources.actors,
 				left, top, width, height,
@@ -1756,7 +1756,7 @@ const animate = () => {
 				Math.floor(y + Math.cos(Date.now() / 1000 + x) * 5),
 				width, height
 			);
-			drawText(ctx, name, x, y + height, "white");
+			drawText(ctx, name, x, y + height + 5, "white");
 		}
 	}
 
