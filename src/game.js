@@ -1810,10 +1810,14 @@ const simulateGearbot = (gearbot) => {
 		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, (otherEntity) => otherEntity.type !== "drop");
 		if (ahead) {
 			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
-				ahead.dying = true;
-				ahead.collectingBin = false;
-				ahead.animationFrame = 0;
-				playSound("deathByBot");
+				if (ahead.armored) {
+					ahead.losingShield = true;
+				} else {
+					ahead.dying = true;
+					ahead.collectingBin = false;
+					ahead.animationFrame = 0;
+					playSound("deathByBot");
+				}
 			} else if (ahead.type !== "junkbot") {
 				gearbot.facing *= -1;
 			}
