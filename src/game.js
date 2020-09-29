@@ -543,6 +543,23 @@ const drawFan = (ctx, entity) => {
 	const frame = resources.actorsAtlas[`haz_slickFan_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
+	for (let x = entity.x + 15; x < entity.x + entity.width - 15 && entity.on; x += 15) {
+		for (let y = entity.y - 18; y > -200; y -= 18) {
+			if ((entitiesByTopY[y] || []).some((entity) => (
+				entity.type !== "junkbot" &&
+				entity.type !== "gearbot" &&
+				entity.type !== "drop" &&
+				entity.x <= x &&
+				entity.x + entity.width > x
+			))) {
+				break;
+			}
+			const frameIndex = Math.floor(entity.animationFrame % 7);
+			const frame = resources.actorsAtlas[`fanAir_1_${1 + frameIndex}`];
+			const [left, top, width, height] = frame.bounds;
+			ctx.drawImage(resources.actors, left, top, width, height, x + 4, y - frameIndex * 2 + 8, width, height);
+		}
+	}
 };
 
 const drawJump = (ctx, entity) => {

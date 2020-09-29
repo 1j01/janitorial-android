@@ -15,10 +15,12 @@ Done so far:
 - Dripping pipes (except for random interval)
 - Goal bins
 - Switches
-- Visible but not functional: fans, shields, and jump blocks
 - Level editing functionality (not present in the original games)
 	- Rectangular selection, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette
 	- With sound effects taken from Lego Creator
+
+Partially done:
+- Shields, fans, and jump blocks
 - I've started making a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo]; I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
 
 ## Controls
