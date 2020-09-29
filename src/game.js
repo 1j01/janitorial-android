@@ -1236,7 +1236,7 @@ const canRelease = () => {
 	}
 	let connectsToCeiling = false;
 	let connectsToFloor = false;
-	dragging.forEach((entity) => {
+	for (const entity of dragging) {
 		for (const otherEntity of entities) {
 			if (
 				!otherEntity.grabbed
@@ -1263,7 +1263,7 @@ const canRelease = () => {
 				}
 			}
 		}
-	});
+	}
 	return connectsToCeiling !== connectsToFloor;
 };
 addEventListener("mouseup", () => {
