@@ -1605,18 +1605,16 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 	}
 	return null;
 };
-const simpleCollisionTest = (entityX, entityY, entity, filter) => {
-	// Note: make sure not to use entity.x/y!
+const rectangleCollisionTest = (x, y, width, height, filter) => {
 	for (const otherEntity of entities) {
 		if (
 			!otherEntity.grabbed &&
-			otherEntity !== entity &&
 			filter(otherEntity) && (
 				rectanglesIntersect(
-					entityX,
-					entityY,
-					entity.width,
-					entity.height,
+					x,
+					y,
+					width,
+					height,
 					otherEntity.x,
 					otherEntity.y,
 					otherEntity.width,
@@ -1629,10 +1627,21 @@ const simpleCollisionTest = (entityX, entityY, entity, filter) => {
 	}
 	return null;
 };
-const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) =>
-	simpleCollisionTest(junkbotX, junkbotY, junkbot, (otherEntity) =>
+const entityCollisionTest = (entityX, entityY, entity, filter) => (
+	// Note: make sure not to use entity.x/y!
+	rectangleCollisionTest(
+		entityX,
+		entityY,
+		entity.width,
+		entity.height,
+		(otherEntity) => otherEntity !== entity && filter(otherEntity)
+	)
+);
+const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => (
+	entityCollisionTest(junkbotX, junkbotY, junkbot, (otherEntity) => (
 		otherEntity.type === "bin"
-	);
+	))
+);
 
 const simulateJunkbot = (junkbot) => {
 	junkbot.timer += 1;
@@ -1797,8 +1806,8 @@ const simulateGearbot = (gearbot) => {
 	if (gearbot.animationFrame > 2) {
 		gearbot.animationFrame = 0;
 		const aheadPos = { x: gearbot.x + gearbot.facing * 15, y: gearbot.y };
-		const ahead = simpleCollisionTest(aheadPos.x, aheadPos.y, gearbot, (otherEntity) => otherEntity.type !== "drop");
-		const groundAhead = simpleCollisionTest(gearbot.x + gearbot.facing * 15 * 2, gearbot.y + 1, gearbot, (otherEntity) => otherEntity.type !== "drop");
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, gearbot, (otherEntity) => otherEntity.type !== "drop");
+		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, (otherEntity) => otherEntity.type !== "drop");
 		if (ahead) {
 			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
 				ahead.dying = true;
