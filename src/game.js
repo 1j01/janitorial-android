@@ -142,15 +142,9 @@ const resourcePaths = {
 	blockClick: "audio/sound-effects/blockclick.ogg",
 	fall: "audio/sound-effects/fall.ogg",
 	headBonk: "audio/sound-effects/headbonk1.ogg",
+	collectBin: "audio/sound-effects/eat1.ogg",
 	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
-	// selectEnd: "audio/sound-effects/custom/select-end.wav",
-	// selectStart: "audio/sound-effects/custom/select2.wav",
-	// selectEnd: "audio/sound-effects/custom/heavy-click.wav",
-	// selectEnd: "audio/sound-effects/custom/heavy-click-2.wav",
-	// selectStart: "audio/sound-effects/custom/select2.wav",
-	// selectEnd: "audio/sound-effects/custom/select-end.wav",
 	selectEnd: "audio/sound-effects/custom/select2.wav",
-	// selectStart: "audio/sound-effects/custom/heavy-click-2.wav",
 	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
 	copyPaste: "audio/sound-effects/lego-creator/copy-I0510.wav",
 	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
@@ -452,8 +446,9 @@ const drawFire = (ctx, entity) => {
 };
 
 const drawJunkbot = (ctx, junkbot) => {
-	const frameIndex = Math.floor(junkbot.animationFrame % 10);
-	const frame = resources.actorsAtlas[`minifig_walk_${junkbot.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
+	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.collectingBin ? 17 : 10));
+	const frame = resources.actorsAtlas[`minifig_${junkbot.collectingBin ? "eat_start" : `walk_${junkbot.facing === 1 ? "r" : "l"}`
+		}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
 	if (junkbot.facing === 1) {
@@ -1344,6 +1339,8 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 	for (const otherEntity of entities) {
 		if (
 			!otherEntity.grabbed &&
+			otherEntity.type !== "bin" &&
+			otherEntity.type !== "gearbot" &&
 			otherEntity !== junkbot && (
 				rectanglesIntersect(
 					junkbotX + (junkbot.facing === 1 ? 0 : 15),
@@ -1372,6 +1369,30 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 	}
 	return null;
 };
+const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => {
+	// Note: make sure not to use junkbot.x/y!
+	for (const otherEntity of entities) {
+		if (
+			!otherEntity.grabbed &&
+			otherEntity.type === "bin" &&
+			otherEntity !== junkbot && (
+				rectanglesIntersect(
+					junkbotX - 15,
+					junkbotY,
+					junkbot.width + 15 * 2,
+					junkbot.height,
+					otherEntity.x,
+					otherEntity.y,
+					otherEntity.width,
+					otherEntity.height,
+				)
+			)
+		) {
+			return otherEntity;
+		}
+	}
+	return null;
+};
 
 const simulateJunkbot = (junkbot) => {
 	if (junkbot.grabbed) {
@@ -1388,6 +1409,14 @@ const simulateJunkbot = (junkbot) => {
 	}
 	if (junkbot.timer % 3 > 0) {
 		return;
+	}
+	junkbot.animationFrame += 1;
+	if (junkbot.collectingBin) {
+		if (junkbot.animationFrame > 17) {
+			junkbot.collectingBin = false;
+		} else {
+			return;
+		}
 	}
 	const inside = junkbotCollisionTest(junkbot.x, junkbot.y, junkbot);
 	if (inside) {
@@ -1452,7 +1481,14 @@ const simulateJunkbot = (junkbot) => {
 			}
 		}
 	}
-	junkbot.animationFrame += 1;
+
+	const bin = junkbotBinCollisionTest(junkbot.x, junkbot.y, junkbot);
+	if (bin) {
+		junkbot.animationFrame = 0;
+		junkbot.collectingBin = true;
+		remove(entities, bin);
+		playSound(resources.collectBin);
+	}
 };
 
 let rafid;
