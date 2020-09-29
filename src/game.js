@@ -543,8 +543,11 @@ const drawFan = (ctx, entity) => {
 	const frame = resources.actorsAtlas[`haz_slickFan_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
-	for (let x = entity.x + 15; x < entity.x + entity.width - 15 && entity.on; x += 15) {
-		for (let y = entity.y - 18; y > -200; y -= 18) {
+};
+
+const drawWind = (ctx, fan) => {
+	for (let x = fan.x + 15; x < fan.x + fan.width - 15 && fan.on; x += 15) {
+		for (let y = fan.y - 18; y > -200; y -= 18) {
 			if ((entitiesByTopY[y] || []).some((entity) => (
 				entity.type !== "junkbot" &&
 				entity.type !== "gearbot" &&
@@ -554,7 +557,7 @@ const drawFan = (ctx, entity) => {
 			))) {
 				break;
 			}
-			const frameIndex = Math.floor(entity.animationFrame % 7);
+			const frameIndex = Math.floor(fan.animationFrame % 7);
 			const frame = resources.actorsAtlas[`fanAir_1_${1 + frameIndex}`];
 			const [left, top, width, height] = frame.bounds;
 			ctx.drawImage(resources.actors, left, top, width, height, x + 4, y - frameIndex * 2 + 8, width, height);
@@ -1944,6 +1947,11 @@ const animate = () => {
 		drawEntity(ctx, entity, shouldHilight(entity));
 		ctx.globalAlpha = 1;
 	}
+	for (const entity of entities) {
+		if (entity.type === "fan") {
+			drawWind(ctx, entity);
+		}
+	}
 
 	// const connectedToFixed = allConnectedToFixed({ ignoreEntities: [brickUnderMouse() || {}] });
 	// sortEntitiesForRendering(connectedToFixed);
@@ -2148,6 +2156,9 @@ const initUI = () => {
 		buttonCanvas.height = previewEntity.height + 18 * 2;
 		buttonCtx.translate(0, 28);
 		drawEntity(buttonCtx, previewEntity);
+		if (previewEntity.type === "fan") {
+			drawWind(buttonCtx, previewEntity);
+		}
 		button.append(buttonCanvas);
 		entitiesPalette.append(button);
 		return button;
