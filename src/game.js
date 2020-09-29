@@ -2036,10 +2036,10 @@ const main = async () => {
 		// initTestLevel();
 		deserialize(resources.world);
 	}
-	initUI();
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
+	initUI();
 	animate();
 };
 
