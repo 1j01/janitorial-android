@@ -8,9 +8,12 @@ Not sure what direction this project will take.
 [Try it out here!][demo]
 
 Done so far:
-- Brick dragging mechanics, including grabs that are ambiguous until you drag up or down, and cursors for different drags (up, down, or either)
+- Brick dragging mechanics, including when grabs are ambiguous until you drag up or down, with cursors for different drags (up, down, or either)
 - Junkbot's movement, generally (no momentum when in air yet; and there will probably be edge cases with different blocks)
-- Level editing functionality (not present in the original games): select with mouse, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette, with sound effects taken from Lego Creator
+- Level loading, with fire bricks (including death animation), goal bins (animation needs positional tweaks), fans and jump blocks (visual only)
+- Level editing functionality (not present in the original games)
+	- Rectangular selection, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette
+	- With sound effects taken from Lego Creator
 - I've started making a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo]; I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
 
 ## Controls
@@ -80,11 +83,15 @@ Done so far:
 
 ### Ripping resources
 - [Rory Fewell](https://github.com/rozniak) and [TommytheJerk](https://github.com/TommytheJerk) - [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
-- Sleepy Harry - [The Spriters Resource](https://www.spriters-resource.com/pc_computer/junkbot/)
+- Sleepy Harry - [The Spriters Resource](https://www.spriters-resource.com/pc_computer/junkbot/) (will ditch these ones eventually)
 
 ### Some sounds taken from
 - Lego Creator (editor sounds)
 - Lego Star Wars: Force Awakens (lego rustling sounds)
+	- These sounds are a little too abrupt
+		- These might be better:
+			- https://freesound.org/people/SomeoneCool15/sounds/423782/
+			- https://freesound.org/people/sampson021/sounds/262584/
 - (in addition to Junkbot)
 
 ### Credits for Junkbot & Junkbot Undercover
