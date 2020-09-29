@@ -1202,6 +1202,10 @@ const possibleGrabs = () => {
 	const grabUpward = [brick];
 	const canGrabDownward = findAttached(brick, +1, grabDownward, true);
 	const canGrabUpward = findAttached(brick, -1, grabUpward, true);
+	if (editing && canGrabDownward === canGrabUpward) {
+		grabs.push([brick]);
+		return grabs;
+	}
 	if (canGrabDownward) {
 		grabs.push(grabDownward);
 		grabs.downward = grabDownward;
