@@ -1189,7 +1189,6 @@ const possibleGrabs = () => {
 						!connectsToFixed(entity, { ignoreEntities: attached })
 					) {
 						const entitiesToCheck3 = entitiesByBottomY[entity.y] || [];
-						/* eslint-disable max-depth */
 						for (const junk of entitiesToCheck3) {
 							if (junk.type !== "brick") {
 								if (
@@ -1202,7 +1201,6 @@ const possibleGrabs = () => {
 							}
 						}
 						attached.push(entity);
-						/* eslint-enable max-depth */
 					}
 				}
 			}
