@@ -547,7 +547,7 @@ const drawDrop = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.splashing ? entity.animationFrame : 0);
 	const frame = resources.actorsAtlas[`drip_${entity.splashing ? "splashing" : "falling"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 11, entity.y - 12, width, height);
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 15, entity.y, width, height);
 };
 
 const drawJunkbot = (ctx, junkbot) => {
@@ -1658,7 +1658,7 @@ const simulateDrop = (drop) => {
 		}
 	} else {
 		for (let i = 0; i < 6; i++) {
-			const underneath = entitiesByTopY[drop.y + 5] || [];
+			const underneath = entitiesByTopY[drop.y + drop.height] || [];
 			drop.y += 1;
 			for (const ground of underneath) {
 				if (
