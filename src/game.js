@@ -1841,7 +1841,7 @@ const simulate = () => {
 				for (let y = fan.y - 18; y > -200; y -= 18) {
 					let collision = false;
 					for (const otherEntity of entities) {
-						if (rectanglesIntersect(
+						if (!otherEntity.grabbed && rectanglesIntersect(
 							x,
 							y,
 							15,
