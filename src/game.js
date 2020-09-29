@@ -128,6 +128,18 @@ const makeFire = ({ x, y, on }) => {
 		fixed: true,
 	};
 };
+const makeFan = ({ x, y, on }) => {
+	return {
+		type: "fan",
+		x,
+		y,
+		width: 4 * 15,
+		height: 1 * 18,
+		on,
+		animationFrame: 0,
+		fixed: true,
+	};
+};
 
 let resources;
 const resourcePaths = {
@@ -249,7 +261,7 @@ const loadLevelFromText = (levelData) => {
 				} else if (typeName === "haz_slickfire") {
 					entities.push(makeFire({ x, y, on: animationName === "on" }));
 				} else if (typeName === "haz_slickfan") {
-					entities.push({ type: typeName, x, y, colorName: "blue", widthInStuds: 4, width: 4 * 15, height: 18, fixed: true });
+					entities.push(makeFan({ x, y, on: animationName === "on" }));
 				} else if (typeName === "haz_slickjump") {
 					entities.push({ type: typeName, x, y, colorName: "gray", widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
 				} else if (typeName === "haz_slickpipe") {
@@ -453,6 +465,13 @@ const drawFire = (ctx, entity) => {
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
 };
 
+const drawFan = (ctx, entity) => {
+	const frameIndex = entity.on ? Math.floor(entity.animationFrame % 4) : 0;
+	const frame = resources.actorsAtlas[`haz_slickFan_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
+};
+
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
 	if (junkbot.dead) {
@@ -488,6 +507,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "fire":
 			drawFire(ctx, entity);
+			break;
+		case "fan":
+			drawFan(ctx, entity);
 			break;
 		default:
 			drawBrick(ctx, entity);
@@ -1908,6 +1930,16 @@ const initUI = () => {
 		y: 0,
 	}));
 	makeInsertEntityButton(makeFire({
+		x: 0,
+		y: 0,
+		on: true,
+	}));
+
+	makeInsertEntityButton(makeFan({
+		x: 0,
+		y: 0,
+	}));
+	makeInsertEntityButton(makeFan({
 		x: 0,
 		y: 0,
 		on: true,
