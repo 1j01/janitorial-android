@@ -1,6 +1,8 @@
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
+canvas.tabIndex = 0;
+
 document.body.append(canvas);
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1290,6 +1292,7 @@ canvas.addEventListener("mousemove", (event) => {
 	}
 });
 canvas.addEventListener("mousedown", (event) => {
+	canvas.focus(); // for keyboard shortcuts like Space, after interacting with dropdown
 	updateMouse(event);
 	mouse.atDragStart = {
 		x: mouse.x,
@@ -2032,6 +2035,7 @@ const initUI = () => {
 			button.style.borderColor = "yellow";
 			hilitButton = button;
 			playSound(resources.insert);
+			canvas.focus(); // for keyboard shortcuts like Space
 		});
 		sidebar.addEventListener("mouseleave", () => {
 			sidebar.style.cursor = "";
