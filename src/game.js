@@ -545,21 +545,17 @@ const drawFan = (ctx, entity) => {
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
 };
 
-const drawWind = (ctx, fan) => {
+const drawWind = (ctx, fan, extents) => {
 	if (!fan.on) {
 		return;
 	}
-	for (let x = fan.x + 15; x < fan.x + fan.width - 15; x += 15) {
+	for (let i = 0, x = fan.x + 15; x < fan.x + fan.width - 15; i += 1, x += 15) {
+		let extent = 0;
 		for (let y = fan.y - 18; y > -200; y -= 18) {
-			if ((entitiesByTopY[y] || []).some((entity) => (
-				entity.type !== "junkbot" &&
-				entity.type !== "gearbot" &&
-				entity.type !== "drop" &&
-				entity.x <= x &&
-				entity.x + entity.width > x
-			))) {
+			if (extent >= extents[i]) {
 				break;
 			}
+			extent += 1;
 			const frameIndex = Math.floor(fan.animationFrame % 7);
 			const frame = resources.actorsAtlas[`fanAir_1_${1 + frameIndex}`];
 			const [left, top, width, height] = frame.bounds;
@@ -1952,7 +1948,25 @@ const animate = () => {
 	}
 	for (const entity of entities) {
 		if (entity.type === "fan") {
-			drawWind(ctx, entity);
+			const fan = entity;
+			const extents = [];
+			for (let x = fan.x + 15; x < fan.x + fan.width - 15; x += 15) {
+				let extent = 0;
+				for (let y = fan.y - 18; y > -200; y -= 18) {
+					if ((entitiesByTopY[y] || []).some((otherEntity) => (
+						otherEntity.type !== "junkbot" &&
+						otherEntity.type !== "gearbot" &&
+						otherEntity.type !== "drop" &&
+						otherEntity.x <= x &&
+						otherEntity.x + otherEntity.width > x
+					))) {
+						break;
+					}
+					extent += 1;
+				}
+				extents.push(extent);
+			}
+			drawWind(ctx, entity, extents);
 		}
 	}
 
@@ -2160,7 +2174,7 @@ const initUI = () => {
 		buttonCtx.translate(0, 28);
 		drawEntity(buttonCtx, previewEntity);
 		if (previewEntity.type === "fan") {
-			drawWind(buttonCtx, previewEntity);
+			drawWind(buttonCtx, previewEntity, [3, 3]);
 		}
 		button.append(buttonCanvas);
 		entitiesPalette.append(button);
