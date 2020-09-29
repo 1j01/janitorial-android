@@ -218,6 +218,7 @@ const resourcePaths = {
 	fire: "audio/sound-effects/fire.ogg",
 	waterDeath: "audio/sound-effects/electricity1.ogg",
 	getShield: "audio/sound-effects/shieldon2.ogg",
+	fan: "audio/sound-effects/fan.ogg",
 	drip0: "audio/sound-effects/drip1.ogg",
 	drip1: "audio/sound-effects/drip2.ogg",
 	drip2: "audio/sound-effects/drip3.ogg",
@@ -1529,7 +1530,7 @@ addEventListener("mouseup", () => {
 
 const simulateGravity = () => {
 	for (const entity of entities) {
-		if (!entity.fixed && !entity.grabbed && entity.type !== "drop") {
+		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop") {
 			let settled = false;
 			if (connectsToFixed(entity, { direction: entity.type === "junkbot" ? 1 : 0 })) {
 				settled = true;
@@ -1607,7 +1608,7 @@ const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => {
 const simulateJunkbot = (junkbot) => {
 	junkbot.timer += 1;
 	const aboveHead = junkbotCollisionTest(junkbot.x, junkbot.y - 1, junkbot);
-	const headLoaded = aboveHead && !aboveHead.fixed && !connectsToFixed(aboveHead, { ignoreEntities: [junkbot] });
+	const headLoaded = aboveHead && (junkbot.floating || (!aboveHead.fixed && !connectsToFixed(aboveHead, { ignoreEntities: [junkbot] })));
 	if (junkbot.headLoaded && !headLoaded) {
 		junkbot.headLoaded = false;
 	} else if (headLoaded && !junkbot.headLoaded && !junkbot.grabbed) {
@@ -1645,6 +1646,16 @@ const simulateJunkbot = (junkbot) => {
 		debugJunkbot("STUCK IN WALL - GO UP");
 		junkbot.y = inside.y - junkbot.height;
 		entityMoved(junkbot);
+		return;
+	}
+	if (junkbot.floating) {
+		if (aboveHead) {
+			debugJunkbot("FLOATING - CAN'T GO UP");
+		} else {
+			debugJunkbot("FLOATING - GO UP");
+			junkbot.y -= 6;
+			entityMoved(junkbot);
+		}
 		return;
 	}
 	if (junkbot.animationFrame % 5 === 3) {
@@ -1947,27 +1958,76 @@ const animate = () => {
 		ctx.globalAlpha = 1;
 	}
 	for (const entity of entities) {
+		if ("floating" in entity) {
+			entity._wasFloating = entity.floating;
+			delete entity.floating;
+		}
+	}
+	for (const entity of entities) {
 		if (entity.type === "fan") {
 			const fan = entity;
 			const extents = [];
 			for (let x = fan.x + 15; x < fan.x + fan.width - 15; x += 15) {
 				let extent = 0;
 				for (let y = fan.y - 18; y > -200; y -= 18) {
-					if ((entitiesByTopY[y] || []).some((otherEntity) => (
-						otherEntity.type !== "junkbot" &&
-						otherEntity.type !== "gearbot" &&
-						otherEntity.type !== "drop" &&
-						otherEntity.x <= x &&
-						otherEntity.x + otherEntity.width > x
-					))) {
+					let collision = false;
+					for (const otherEntity of entities) {
+						if (rectanglesIntersect(
+							x,
+							y,
+							15,
+							18,
+							otherEntity.x,
+							otherEntity.y,
+							otherEntity.width,
+							otherEntity.height,
+						)) {
+							if (otherEntity.type === "junkbot") {
+								if (!otherEntity._wasFloating && !otherEntity.grabbed) {
+									playSound("fan");
+								}
+								otherEntity.floating = true;
+							} else if (
+								otherEntity.type !== "gearbot" &&
+								otherEntity.type !== "drop"
+							) {
+								collision = true;
+								break;
+							}
+						}
+					}
+					if (collision) {
 						break;
 					}
+					// const junkbot = (entitiesByTopY[y] || []).find((otherEntity) => (
+					// 	otherEntity.type === "junkbot" &&
+					// 	otherEntity.x <= x &&
+					// 	otherEntity.x + otherEntity.width > x
+					// ));
+					// if (junkbot) {
+					// 	if (!junkbot._wasFloating) {
+					// 		playSound("fan");
+					// 	}
+					// 	junkbot.floating = true;
+					// }
+					// if ((entitiesByTopY[y] || []).some((otherEntity) => (
+					// 	otherEntity.type !== "junkbot" &&
+					// 	otherEntity.type !== "gearbot" &&
+					// 	otherEntity.type !== "drop" &&
+					// 	otherEntity.x <= x &&
+					// 	otherEntity.x + otherEntity.width > x
+					// ))) {
+					// 	break;
+					// }
 					extent += 1;
 				}
 				extents.push(extent);
 			}
 			drawWind(ctx, entity, extents);
 		}
+	}
+	for (const entity of entities) {
+		delete entity._wasFloating;
 	}
 
 	// const connectedToFixed = allConnectedToFixed({ ignoreEntities: [brickUnderMouse() || {}] });
