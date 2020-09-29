@@ -1585,7 +1585,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 
 	const ground = junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot);
-	if (ground && ground.type === "fire") {
+	if (ground && ground.type === "fire" && ground.on) {
 		junkbot.animationFrame = 0;
 		junkbot.dying = true;
 		playSound(resources.fire);
