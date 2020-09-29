@@ -144,6 +144,7 @@ const resourcePaths = {
 	headBonk: "audio/sound-effects/headbonk1.ogg",
 	collectBin: "audio/sound-effects/eat1.ogg",
 	collectBin2: "audio/sound-effects/garbage1.ogg",
+	fire: "audio/sound-effects/fire.ogg",
 	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
 	selectEnd: "audio/sound-effects/custom/select2.wav",
 	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
@@ -453,8 +454,8 @@ const drawFire = (ctx, entity) => {
 };
 
 const drawJunkbot = (ctx, junkbot) => {
-	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.collectingBin ? 17 : 10));
-	const animName = junkbot.collectingBin ? "eat_start" : `walk_${junkbot.facing === 1 ? "r" : "l"}`;
+	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.dead ? 11 : junkbot.collectingBin ? 17 : 10));
+	const animName = junkbot.dead ? "die" : junkbot.collectingBin ? "eat_start" : `walk_${junkbot.facing === 1 ? "r" : "l"}`;
 	const frame = resources.actorsAtlas[`minifig_${animName}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
@@ -1435,6 +1436,12 @@ const simulateJunkbot = (junkbot) => {
 			return;
 		}
 	}
+	if (junkbot.dead) {
+		if (junkbot.animationFrame > 11) {
+			junkbot.animationFrame = 11;
+		}
+		return;
+	}
 	const inside = junkbotCollisionTest(junkbot.x, junkbot.y, junkbot);
 	if (inside) {
 		debugJunkbot("STUCK IN WALL - GO UP");
@@ -1506,6 +1513,13 @@ const simulateJunkbot = (junkbot) => {
 		remove(entities, bin);
 		playSound(resources.collectBin);
 		playSound(resources.collectBin2);
+	}
+
+	const ground = junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot);
+	if (ground && ground.type === "fire") {
+		junkbot.animationFrame = 0;
+		junkbot.dead = true;
+		playSound(resources.fire);
 	}
 };
 
@@ -1973,6 +1987,7 @@ const main = async () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 	resources = await loadResources(resourcePaths);
+	resources.actorsAtlas.minifig_die_11 = resources.actorsAtlas.minifig_dead;
 	try {
 		deserialize(localStorage.JWorld);
 		dragging = entities.filter((entity) => entity.grabbed);
