@@ -212,9 +212,9 @@ const resourcePaths = {
 	collectBin2: "audio/sound-effects/garbage1.ogg",
 	fire: "audio/sound-effects/fire.ogg",
 	waterDeath: "audio/sound-effects/electricity1.ogg",
-	drip1: "audio/sound-effects/drip1.ogg",
-	drip2: "audio/sound-effects/drip2.ogg",
-	drip3: "audio/sound-effects/drip3.ogg",
+	drip0: "audio/sound-effects/drip1.ogg",
+	drip1: "audio/sound-effects/drip2.ogg",
+	drip2: "audio/sound-effects/drip3.ogg",
 	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
 	selectEnd: "audio/sound-effects/custom/select2.wav",
 	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
@@ -233,6 +233,7 @@ const resourcePaths = {
 	// levelNames: "levels/Undercover Exclusive/%23%23%23LEVEL LISTING.txt",
 };
 const numRustles = 6;
+const numDrips = 3;
 
 const loadImage = (imagePath) => {
 	const image = new Image();
@@ -435,7 +436,11 @@ const toggleInfoBox = () => {
 	} catch (error) { }
 };
 
-const playSound = (audioBuffer, playbackRate = 1, cutOffFromEndRatio = 0) => {
+const playSound = (soundName, playbackRate = 1, cutOffFromEndRatio = 0) => {
+	const audioBuffer = resources[soundName];
+	if (!audioBuffer) {
+		throw new Error(`No AudioBuffer loaded for sound '${soundName}'`);
+	}
 	if (muted) {
 		return;
 	}
@@ -761,7 +766,7 @@ const undo = () => {
 	}
 	const didSomething = undoOrRedo(undos, redos);
 	if (didSomething) {
-		playSound(resources.undo, 1 / (1 + recentUndoSound / 2), Math.min(0.2, recentUndoSound / 5));
+		playSound("undo", 1 / (1 + recentUndoSound / 2), Math.min(0.2, recentUndoSound / 5));
 		recentUndoSound += 1;
 		setTimeout(() => {
 			recentUndoSound -= 1;
@@ -777,7 +782,7 @@ const redo = () => {
 	}
 	const didSomething = undoOrRedo(redos, undos);
 	if (didSomething) {
-		playSound(resources.redo, (1 + recentRedoSound / 10));
+		playSound("redo", (1 + recentRedoSound / 10));
 		recentRedoSound += 1;
 		setTimeout(() => {
 			recentRedoSound -= 1;
@@ -801,7 +806,7 @@ const deleteSelected = () => {
 		undoable(() => {
 			entities = entities.filter((entity) => !entity.selected);
 		});
-		playSound(resources.delete);
+		playSound("delete");
 	}
 };
 const copySelected = () => {
@@ -813,7 +818,7 @@ const copySelected = () => {
 		if (navigator.clipboard && navigator.clipboard.writeText) {
 			navigator.clipboard.writeText(clipboard.entitiesJSON);
 		}
-		playSound(resources.copyPaste);
+		playSound("copyPaste");
 	}
 };
 const cutSelected = () => {
@@ -871,7 +876,7 @@ const pasteFromClipboard = async () => {
 	}
 	const newEntities = JSON.parse(entitiesJSON);
 	pasteEntities(newEntities);
-	playSound(resources.copyPaste);
+	playSound("copyPaste");
 };
 
 const sortEntitiesForRendering = (entities) => {
@@ -1322,7 +1327,7 @@ const startGrab = (grab) => {
 			brick.selected = true;
 		}
 	}
-	playSound(resources.blockPickUp);
+	playSound("blockPickUp");
 };
 
 canvas.addEventListener("mousemove", (event) => {
@@ -1365,13 +1370,13 @@ canvas.addEventListener("mousedown", (event) => {
 		}
 		if (grabs.length === 1) {
 			startGrab(grabs[0]);
-			playSound(resources.blockClick);
+			playSound("blockClick");
 		} else if (grabs.length) {
 			pendingGrabs = grabs;
-			playSound(resources.blockClick);
+			playSound("blockClick");
 		} else if (editing) {
 			selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
-			playSound(resources.selectStart);
+			playSound("selectStart");
 		}
 	}
 });
@@ -1472,7 +1477,7 @@ addEventListener("mouseup", () => {
 				delete entity.grabOffset;
 			});
 			dragging = [];
-			playSound(resources.blockDrop);
+			playSound("blockDrop");
 			save();
 		}
 	} else if (selectionBox) {
@@ -1482,7 +1487,7 @@ addEventListener("mouseup", () => {
 		});
 		selectionBox = null;
 		if (toSelect.length) {
-			playSound(resources.selectEnd);
+			playSound("selectEnd");
 		}
 	}
 });
@@ -1572,7 +1577,7 @@ const simulateJunkbot = (junkbot) => {
 		junkbot.headLoaded = false;
 	} else if (headLoaded && !junkbot.headLoaded && !junkbot.grabbed) {
 		junkbot.headLoaded = true;
-		playSound(resources.headBonk);
+		playSound("headBonk");
 	}
 	if (junkbot.timer % 3 > 0) {
 		return;
@@ -1615,7 +1620,7 @@ const simulateJunkbot = (junkbot) => {
 				// reached wall; turn around
 				debugJunkbot("WALL - TURN AROUND");
 				junkbot.facing *= -1;
-				playSound(resources.turn);
+				playSound("turn");
 			}
 		} else {
 			// is there solid ground ahead to walk on?
@@ -1632,7 +1637,7 @@ const simulateJunkbot = (junkbot) => {
 				} else {
 					debugJunkbot("NOPE");
 					junkbot.facing *= -1;
-					playSound(resources.turn);
+					playSound("turn");
 				}
 			} else {
 				// can we step down?
@@ -1650,7 +1655,7 @@ const simulateJunkbot = (junkbot) => {
 					// reached cliff/ledge/edge/precipice or wall would bonk head; turn around
 					debugJunkbot("CLIFF/WALL - TURN AROUND");
 					junkbot.facing *= -1;
-					playSound(resources.turn);
+					playSound("turn");
 				}
 			}
 		}
@@ -1665,12 +1670,12 @@ const simulateJunkbot = (junkbot) => {
 							entity.on = !entity.on;
 						}
 					}
-					playSound(resources.switch);
+					playSound("switch");
 				} else if (groundLevelEntity.type === "fire" && groundLevelEntity.on) {
 					junkbot.animationFrame = 0;
 					junkbot.dying = true;
 					junkbot.collectingBin = false;
-					playSound(resources.fire);
+					playSound("fire");
 				}
 			}
 		}
@@ -1681,8 +1686,8 @@ const simulateJunkbot = (junkbot) => {
 		junkbot.animationFrame = 0;
 		junkbot.collectingBin = true;
 		remove(entities, bin);
-		playSound(resources.collectBin);
-		playSound(resources.collectBin2);
+		playSound("collectBin");
+		playSound("collectBin2");
 	}
 };
 
@@ -1708,18 +1713,13 @@ const simulateDrop = (drop) => {
 						ground.dyingFromWater = true;
 						ground.collectingBin = false;
 						ground.animationFrame = 0;
-						playSound(resources.waterDeath);
+						playSound("waterDeath");
 					}
 					// ground.colorName = "blue";
 					drop.splashing = true;
 					drop.animationFrame = 0;
-					if (Math.random() < 0.33) {
-						playSound(resources.drip1);
-					} else if (Math.random() < 0.5) {
-						playSound(resources.drip2);
-					} else {
-						playSound(resources.drip3);
-					}
+
+					playSound(`drip${Math.floor(Math.random() * numDrips)}`);
 					break;
 				}
 			}
@@ -2080,7 +2080,7 @@ const initUI = () => {
 			}
 			button.style.borderColor = "yellow";
 			hilitButton = button;
-			playSound(resources.insert);
+			playSound("insert");
 			canvas.focus(); // for keyboard shortcuts like Space
 		});
 		sidebar.addEventListener("mouseleave", () => {
@@ -2183,7 +2183,7 @@ const initUI = () => {
 	let lastScrollSoundTime = Date.now(); // not 0 because a random scroll event happens on page load; don't want page load to make a sound
 	entitiesScrollContainer.addEventListener("scroll", () => {
 		if (Date.now() > lastScrollSoundTime + 200) {
-			playSound(resources[`rustle${Math.floor(Math.random() * numRustles)}`]);
+			playSound(`rustle${Math.floor(Math.random() * numRustles)}`);
 			lastScrollSoundTime = Date.now();
 		}
 	});
