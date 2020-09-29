@@ -40,6 +40,8 @@ Done so far:
 	</tr>
 </table>
 <p>When in editor mode:</p>
+<p>Click on the background and drag to select objects within a rectangle.</p>
+<p>Hold <kbd>Ctrl</kbd> and click to drag an individual object.</p>
 <table>
 	<tr>
 		<td><kbd>Ctrl+C</kbd></td>
