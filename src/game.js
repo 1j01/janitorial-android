@@ -1654,6 +1654,26 @@ const simulateJunkbot = (junkbot) => {
 				}
 			}
 		}
+		const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
+		for (const groundLevelEntity of groundLevelEntities) {
+			if (groundLevelEntity.x <= junkbot.x && groundLevelEntity.x + groundLevelEntity.width >= junkbot.x + junkbot.width) {
+				if (groundLevelEntity.type === "switch") {
+					groundLevelEntity.on = !groundLevelEntity.on;
+					for (const entity of entities) {
+						if (entity.type === "fire" || entity.type === "fan") {
+							// if (entity.switchID === groundLevelEntity.switchID) {
+							entity.on = !entity.on;
+						}
+					}
+					playSound(resources.switch);
+				} else if (groundLevelEntity.type === "fire" && groundLevelEntity.on) {
+					junkbot.animationFrame = 0;
+					junkbot.dying = true;
+					junkbot.collectingBin = false;
+					playSound(resources.fire);
+				}
+			}
+		}
 	}
 
 	const bin = junkbotBinCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot);
@@ -1663,24 +1683,6 @@ const simulateJunkbot = (junkbot) => {
 		remove(entities, bin);
 		playSound(resources.collectBin);
 		playSound(resources.collectBin2);
-	}
-
-	const ground = junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot);
-	if (ground && ground.type === "switch") {
-		ground.on = !ground.on;
-		for (const entity of entities) {
-			if (entity.type === "fire" || entity.type === "fan") {
-				// if (entity.switchID === ground.switchID) {
-				entity.on = !entity.on;
-			}
-		}
-		playSound(resources.switch);
-	}
-	if (ground && ground.type === "fire" && ground.on) {
-		junkbot.animationFrame = 0;
-		junkbot.dying = true;
-		junkbot.collectingBin = false;
-		playSound(resources.fire);
 	}
 };
 
