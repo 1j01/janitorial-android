@@ -148,6 +148,17 @@ const makeJump = ({ x, y, fixed }) => {
 		fixed,
 	};
 };
+const makeShield = ({ x, y, used = false }) => {
+	return {
+		type: "shield",
+		x,
+		y,
+		width: 2 * 15,
+		height: 1 * 18,
+		fixed: true,
+		used,
+	};
+};
 const makePipe = ({ x, y }) => {
 	return {
 		type: "pipe",
@@ -285,6 +296,8 @@ const loadLevelFromText = (levelData) => {
 					entities.push(makeJump({ x, y, fixed: true }));
 				} else if (typeName === "brick_slickjump") {
 					entities.push(makeJump({ x, y, fixed: false }));
+				} else if (typeName === "haz_slickshield") {
+					entities.push(makeShield({ x, y, used: animationName === "off" }));
 				} else if (typeName === "haz_slickpipe") {
 					entities.push(makePipe({ x, y }));
 				} else {
@@ -497,6 +510,12 @@ const drawJump = (ctx, entity) => {
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
+const drawShield = (ctx, entity) => {
+	const frame = resources.actorsAtlas[`HAZ_SLICKSHIELD_${entity.used ? "OFF" : "ON"}`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+};
+
 const drawPipe = (ctx, entity) => {
 	const frame = resources.actorsAtlas[`haz_slickPipe_dry_1`];
 	const [left, top, width, height] = frame.bounds;
@@ -547,6 +566,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "pipe":
 			drawPipe(ctx, entity);
+			break;
+		case "shield":
+			drawShield(ctx, entity);
 			break;
 		default:
 			drawBrick(ctx, entity);
@@ -1993,6 +2015,11 @@ const initUI = () => {
 		x: 0,
 		y: 0,
 		fixed: true,
+	}));
+
+	makeInsertEntityButton(makeShield({
+		x: 0,
+		y: 0,
 	}));
 
 	makeInsertEntityButton(makePipe({
