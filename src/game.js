@@ -454,11 +454,20 @@ const drawFire = (ctx, entity) => {
 };
 
 const drawJunkbot = (ctx, junkbot) => {
-	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.dead ? 11 : junkbot.collectingBin ? 17 : 10));
-	const animName = junkbot.dead ? "die" : junkbot.collectingBin ? "eat_start" : `walk_${junkbot.facing === 1 ? "r" : "l"}`;
-	const frame = resources.actorsAtlas[`minifig_${animName}_${1 + frameIndex}`];
+	let animName;
+	if (junkbot.dead) {
+		animName = "dead";
+	} else if (junkbot.dying) {
+		animName = "die";
+	} else if (junkbot.collectingBin) {
+		animName = "eat_start";
+	} else {
+		animName = `walk_${junkbot.facing === 1 ? "r" : "l"}`;
+	}
+	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.collectingBin ? 17 : 10));
+	const frame = resources.actorsAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	const fwd = (frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
+	const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
 	if (junkbot.facing === 1) {
 		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	} else {
@@ -1436,9 +1445,10 @@ const simulateJunkbot = (junkbot) => {
 			return;
 		}
 	}
-	if (junkbot.dead) {
+	if (junkbot.dying) {
 		if (junkbot.animationFrame > 11) {
-			junkbot.animationFrame = 11;
+			junkbot.animationFrame = 0;
+			junkbot.dead = true;
 		}
 		return;
 	}
@@ -1518,7 +1528,7 @@ const simulateJunkbot = (junkbot) => {
 	const ground = junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot);
 	if (ground && ground.type === "fire") {
 		junkbot.animationFrame = 0;
-		junkbot.dead = true;
+		junkbot.dying = true;
 		playSound(resources.fire);
 	}
 };
@@ -1987,7 +1997,6 @@ const main = async () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 	resources = await loadResources(resourcePaths);
-	resources.actorsAtlas.minifig_die_11 = resources.actorsAtlas.minifig_dead;
 	try {
 		deserialize(localStorage.JWorld);
 		dragging = entities.filter((entity) => entity.grabbed);
