@@ -217,6 +217,7 @@ const resourcePaths = {
 	switchOff: "audio/sound-effects/switch_off.ogg",
 	fire: "audio/sound-effects/fire.ogg",
 	waterDeath: "audio/sound-effects/electricity1.ogg",
+	getShield: "audio/sound-effects/shieldon2.ogg",
 	drip0: "audio/sound-effects/drip1.ogg",
 	drip1: "audio/sound-effects/drip2.ogg",
 	drip2: "audio/sound-effects/drip3.ogg",
@@ -590,8 +591,17 @@ const drawJunkbot = (ctx, junkbot) => {
 		animName = "die";
 	} else if (junkbot.collectingBin) {
 		animName = "eat_start";
+	} else if (junkbot.gettingShield) {
+		animName = `shield_on_${junkbot.facing === 1 ? "r" : "l"}`;
 	} else {
 		animName = `walk_${junkbot.facing === 1 ? "r" : "l"}`;
+	}
+	if (junkbot.armored && (!junkbot.losingShield || (junkbot.animationFrame % 4 < 2))) {
+		if (animName === "eat_start") {
+			animName = "shield_eat";
+		} else {
+			animName = `shield_${animName}`;
+		}
 	}
 	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.collectingBin ? 17 : 10));
 	const frame = resources.actorsAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
@@ -1602,6 +1612,14 @@ const simulateJunkbot = (junkbot) => {
 		}
 		return;
 	}
+	if (junkbot.gettingShield) {
+		if (junkbot.animationFrame > 12) {
+			junkbot.gettingShield = false;
+			junkbot.armored = true;
+		} else {
+			return;
+		}
+	}
 	const inside = junkbotCollisionTest(junkbot.x, junkbot.y, junkbot);
 	if (inside) {
 		debugJunkbot("STUCK IN WALL - GO UP");
@@ -1679,10 +1697,19 @@ const simulateJunkbot = (junkbot) => {
 					playSound("switchClick");
 					playSound(groundLevelEntity.on ? "switchOn" : "switchOff");
 				} else if (groundLevelEntity.type === "fire" && groundLevelEntity.on) {
+					if (junkbot.armored) {
+						junkbot.losingShield = true;
+					} else {
+						junkbot.animationFrame = 0;
+						junkbot.dying = true;
+						junkbot.collectingBin = false;
+						playSound("fire");
+					}
+				} else if (groundLevelEntity.type === "shield" && !groundLevelEntity.used && !junkbot.armored) {
 					junkbot.animationFrame = 0;
-					junkbot.dying = true;
-					junkbot.collectingBin = false;
-					playSound("fire");
+					junkbot.gettingShield = true;
+					groundLevelEntity.used = true;
+					playSound("getShield");
 				}
 			}
 		}
@@ -1716,11 +1743,15 @@ const simulateDrop = (drop) => {
 					ground.type !== "drop"
 				) {
 					if (ground.type === "junkbot" && !ground.dying && !ground.dead) {
-						ground.dying = true;
-						ground.dyingFromWater = true;
-						ground.collectingBin = false;
-						ground.animationFrame = 0;
-						playSound("waterDeath");
+						if (ground.armored) {
+							ground.losingShield = true;
+						} else {
+							ground.dying = true;
+							ground.dyingFromWater = true;
+							ground.collectingBin = false;
+							ground.animationFrame = 0;
+							playSound("waterDeath");
+						}
 					}
 					// ground.colorName = "blue";
 					drop.splashing = true;
