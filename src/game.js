@@ -548,6 +548,8 @@ const drawJunkbot = (ctx, junkbot) => {
 	let animName;
 	if (junkbot.dead) {
 		animName = "dead";
+	} else if (junkbot.dyingFromWater) {
+		animName = "water_die";
 	} else if (junkbot.dying) {
 		animName = "die";
 	} else if (junkbot.collectingBin) {
@@ -1753,6 +1755,7 @@ const animate = () => {
 							) {
 								if (ground.type === "junkbot") {
 									ground.dying = true;
+									ground.dyingFromWater = true;
 									ground.animationFrame = 0;
 								}
 								// ground.colorName = "blue";
