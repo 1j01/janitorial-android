@@ -1646,6 +1646,7 @@ const simulateJunkbot = (junkbot) => {
 	if (ground && ground.type === "fire" && ground.on) {
 		junkbot.animationFrame = 0;
 		junkbot.dying = true;
+		junkbot.collectingBin = false;
 		playSound(resources.fire);
 	}
 };
@@ -1670,6 +1671,7 @@ const simulateDrop = (drop) => {
 					if (ground.type === "junkbot" && !ground.dying && !ground.dead) {
 						ground.dying = true;
 						ground.dyingFromWater = true;
+						ground.collectingBin = false;
 						ground.animationFrame = 0;
 						playSound(resources.waterDeath);
 					}
