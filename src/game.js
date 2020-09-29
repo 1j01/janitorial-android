@@ -1744,6 +1744,22 @@ const animate = () => {
 		ctx.restore();
 	}
 
+	if (showDebug) {
+		for (const [name, frame] of Object.entries(resources.actorsAtlas)) {
+			const [left, top, width, height] = frame.bounds;
+			const x = left * 3;
+			const y = top * 2;
+			ctx.drawImage(
+				resources.actors,
+				left, top, width, height,
+				Math.floor(x + Math.sin(Date.now() / 1000 + y) * 5),
+				Math.floor(y + Math.cos(Date.now() / 1000 + x) * 5),
+				width, height
+			);
+			drawText(ctx, name, x, y + height, "white");
+		}
+	}
+
 	ctx.restore(); // world viewport
 
 	// active validity checking of the world
@@ -1833,20 +1849,6 @@ const animate = () => {
 	}
 
 	if (showDebug) {
-
-		for (const [name, frame] of Object.entries(resources.actorsAtlas)) {
-			const [left, top, width, height] = frame.bounds;
-			const x = left * 2;
-			const y = Math.floor(top * 1.5);
-			ctx.drawImage(
-				resources.actors,
-				left, top, width, height,
-				Math.floor(x + Math.sin(Date.now() / 1000 + y) * 5),
-				Math.floor(y + Math.cos(Date.now() / 1000 + x) * 5),
-				width, height
-			);
-			drawText(ctx, name, x, y + height, "white");
-		}
 
 		const x = 1 + sidebar.offsetWidth;
 		drawText(ctx, fontChars, x, 1, "white");
