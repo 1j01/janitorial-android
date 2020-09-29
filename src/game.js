@@ -270,9 +270,9 @@ const loadLevelFromText = (levelData) => {
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_slickfire") {
-					entities.push(makeFire({ x, y, on: animationName === "on" }));
+					entities.push(makeFire({ x, y, on: animationName === "on" || animationName === "none" }));
 				} else if (typeName === "haz_slickfan") {
-					entities.push(makeFan({ x, y, on: animationName === "on" }));
+					entities.push(makeFan({ x, y, on: animationName === "on" || animationName === "none" }));
 				} else if (typeName === "haz_slickjump") {
 					entities.push(makeJump({ x, y, fixed: true }));
 				} else if (typeName === "brick_slickjump") {
