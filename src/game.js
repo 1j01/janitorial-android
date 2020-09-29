@@ -1811,7 +1811,7 @@ const simulatePipe = (pipe) => {
 	}
 };
 
-const simulate = () => {
+const simulate = (entities) => {
 	simulateGravity();
 
 	for (const entity of entities) {
@@ -1957,7 +1957,7 @@ const animate = () => {
 	entities.sort((a, b) => b.y - a.y);
 
 	if (!paused) {
-		simulate();
+		simulate(entities);
 	}
 
 	sortEntitiesForRendering(entities);
@@ -2206,14 +2206,40 @@ const initUI = () => {
 			sidebar.style.cursor = "";
 			// button.style.borderColor = "transparent";
 		});
-		const previewEntity = getEntityCopy();
+		let previewEntity = getEntityCopy();
 		buttonCanvas.width = previewEntity.width + 15 * 1;
 		buttonCanvas.height = previewEntity.height + 18 * 2;
-		buttonCtx.translate(0, 28);
-		drawEntity(buttonCtx, previewEntity);
-		if (previewEntity.type === "fan") {
-			drawWind(buttonCtx, previewEntity, [3, 3]);
-		}
+		const drawPreview = () => {
+			buttonCtx.clearRect(0, 0, buttonCanvas.width, buttonCanvas.height);
+			buttonCtx.save();
+			buttonCtx.translate(0, 28);
+			drawEntity(buttonCtx, previewEntity);
+			if (previewEntity.type === "fan") {
+				drawWind(buttonCtx, previewEntity, [3, 3]);
+			}
+			buttonCtx.restore();
+		};
+		drawPreview();
+		let rafid;
+		button.addEventListener("mouseenter", () => {
+			const animate = () => {
+				rafid = requestAnimationFrame(animate);
+				const { x, y } = previewEntity;
+				const prevMuted = muted;
+				muted = true;
+				simulate([previewEntity]);
+				muted = prevMuted;
+				previewEntity.x = x;
+				previewEntity.y = y;
+				drawPreview();
+			};
+			animate();
+		});
+		button.addEventListener("mouseleave", () => {
+			cancelAnimationFrame(rafid);
+			previewEntity = getEntityCopy();
+			drawPreview();
+		});
 		button.append(buttonCanvas);
 		entitiesPalette.append(button);
 		return button;
