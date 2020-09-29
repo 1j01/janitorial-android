@@ -1650,11 +1650,14 @@ const simulateJunkbot = (junkbot) => {
 		return;
 	}
 	if (junkbot.floating) {
+		const abovePos = { x: junkbot.x, y: junkbot.y - 6 };
+		const aboveHead = junkbotCollisionTest(abovePos.x, abovePos.y, junkbot);
 		if (aboveHead) {
 			debugJunkbot("FLOATING - CAN'T GO UP");
 		} else {
 			debugJunkbot("FLOATING - GO UP");
-			junkbot.y -= 6;
+			junkbot.x = abovePos.x;
+			junkbot.y = abovePos.y;
 			entityMoved(junkbot);
 		}
 		return;
