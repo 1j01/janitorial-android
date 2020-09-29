@@ -140,6 +140,17 @@ const makeFan = ({ x, y, on }) => {
 		fixed: true,
 	};
 };
+const makeJump = ({ x, y, fixed }) => {
+	return {
+		type: "jump",
+		x,
+		y,
+		width: 2 * 15,
+		height: 1 * 18,
+		animationFrame: 0,
+		fixed,
+	};
+};
 
 let resources;
 const resourcePaths = {
@@ -263,11 +274,11 @@ const loadLevelFromText = (levelData) => {
 				} else if (typeName === "haz_slickfan") {
 					entities.push(makeFan({ x, y, on: animationName === "on" }));
 				} else if (typeName === "haz_slickjump") {
-					entities.push({ type: typeName, x, y, colorName: "gray", widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
+					entities.push(makeJump({ x, y, fixed: true }));
+				} else if (typeName === "brick_slickjump") {
+					entities.push(makeJump({ x, y, fixed: false }));
 				} else if (typeName === "haz_slickpipe") {
 					entities.push({ type: typeName, x, y, colorName: "blue", widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
-				} else if (typeName === "brick_slickjump") {
-					entities.push({ type: typeName, x, y, colorName: "yellow", widthInStuds: 2, width: 2 * 15, height: 18 });
 				} else {
 					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
 				}
@@ -472,6 +483,12 @@ const drawFan = (ctx, entity) => {
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
 };
 
+const drawJump = (ctx, entity) => {
+	const frame = resources.actorsAtlas[`${entity.fixed ? "haz" : "brick"}_slickJump_dormant_1`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
+};
+
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
 	if (junkbot.dead) {
@@ -510,6 +527,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "fan":
 			drawFan(ctx, entity);
+			break;
+		case "jump":
+			drawJump(ctx, entity);
 			break;
 		default:
 			drawBrick(ctx, entity);
@@ -1928,6 +1948,7 @@ const initUI = () => {
 	makeInsertEntityButton(makeFire({
 		x: 0,
 		y: 0,
+		on: false,
 	}));
 	makeInsertEntityButton(makeFire({
 		x: 0,
@@ -1938,11 +1959,23 @@ const initUI = () => {
 	makeInsertEntityButton(makeFan({
 		x: 0,
 		y: 0,
+		on: false,
 	}));
 	makeInsertEntityButton(makeFan({
 		x: 0,
 		y: 0,
 		on: true,
+	}));
+
+	makeInsertEntityButton(makeJump({
+		x: 0,
+		y: 0,
+		fixed: false,
+	}));
+	makeInsertEntityButton(makeJump({
+		x: 0,
+		y: 0,
+		fixed: true,
 	}));
 
 	let lastScrollSoundTime = Date.now(); // not 0 because a random scroll event happens on page load; don't want page load to make a sound
