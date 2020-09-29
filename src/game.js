@@ -166,7 +166,7 @@ const makePipe = ({ x, y }) => {
 		y,
 		width: 2 * 15,
 		height: 1 * 18,
-		animationFrame: 0,
+		timer: 0,
 		fixed: true,
 	};
 };
@@ -517,9 +517,12 @@ const drawShield = (ctx, entity) => {
 };
 
 const drawPipe = (ctx, entity) => {
-	const frame = resources.actorsAtlas[`haz_slickPipe_dry_1`];
+	const wet = entity.timer > 54;
+	const frameIndex = Math.floor(wet ? entity.timer - 54 : 0);
+	const frame = resources.actorsAtlas[`haz_slickPipe_${wet ? "wet" : "dry"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 11, entity.y + entity.height - height - 6, width, height);
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 11, entity.y - 12, width, height);
+	drawText(ctx, String(entity.timer), entity.x, entity.y + entity.height + 5, "white");
 };
 
 const drawJunkbot = (ctx, junkbot) => {
@@ -1699,6 +1702,11 @@ const animate = () => {
 		for (const entity of entities) {
 			if (entity.type === "junkbot") {
 				simulateJunkbot(entity);
+			} else if (entity.type === "pipe") {
+				entity.timer += 0.25;
+				if (entity.timer > 60) {
+					entity.timer = 0;
+				}
 			} else if ("animationFrame" in entity) {
 				entity.animationFrame += 0.25;
 			}
