@@ -1207,7 +1207,7 @@ const canRelease = () => {
 
 	const connectedToFixed = allConnectedToFixed();
 
-	if (dragging.every((entity) => {
+	const someCollision = dragging.some((entity) => {
 		for (const otherEntity of entities) {
 			if (
 				!otherEntity.grabbed &&
@@ -1222,49 +1222,49 @@ const canRelease = () => {
 					otherEntity.height,
 				)
 			) {
-				return false;
+				return true;
 			}
 		}
+		return false;
+	});
+	if (someCollision) {
+		return false;
+	}
+
+	if (dragging.every((entity) => entity.fixed)) {
 		return true;
-	})) {
-		if (dragging.every((entity) => entity.fixed)) {
-			return true;
-		}
-		let connectsToCeiling = false;
-		let connectsToFloor = false;
-		dragging.forEach((entity) => {
-			for (const otherEntity of entities) {
+	}
+	let connectsToCeiling = false;
+	let connectsToFloor = false;
+	dragging.forEach((entity) => {
+		for (const otherEntity of entities) {
+			if (
+				!otherEntity.grabbed
+			) {
 				if (
-					!otherEntity.grabbed
+					(
+						otherEntity.type === "fire" ||
+						otherEntity.type === "fan"
+					) &&
+					connects(entity, otherEntity)
 				) {
-					if (
-						(
-							otherEntity.type === "fire" ||
-							otherEntity.type === "fan"
-						) &&
-						connects(entity, otherEntity)
-					) {
-						return false;
+					return false;
+				}
+				if (
+					otherEntity.type === "brick" &&
+					connectedToFixed.indexOf(otherEntity) !== -1
+				) {
+					if (connects(entity, otherEntity, -1)) {
+						connectsToCeiling = true;
 					}
-					if (
-						otherEntity.type === "brick" &&
-						connectedToFixed.indexOf(otherEntity) !== -1
-					) {
-						if (connects(entity, otherEntity, -1)) {
-							connectsToCeiling = true;
-						}
-						if (connects(entity, otherEntity, +1)) {
-							connectsToFloor = true;
-						}
+					if (connects(entity, otherEntity, +1)) {
+						connectsToFloor = true;
 					}
 				}
 			}
-		});
-		if (connectsToCeiling !== connectsToFloor) {
-			return true;
 		}
-	}
-	return false;
+	});
+	return connectsToCeiling !== connectsToFloor;
 };
 addEventListener("mouseup", () => {
 	if (dragging.length) {
