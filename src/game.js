@@ -2217,10 +2217,13 @@ const initUI = () => {
 			buttonCtx.clearRect(0, 0, buttonCanvas.width, buttonCanvas.height);
 			buttonCtx.save();
 			buttonCtx.translate(0, 28);
+			const prevShowDebug = showDebug;
+			showDebug = false;
 			drawEntity(buttonCtx, previewEntity);
 			if (previewEntity.type === "fan") {
 				drawWind(buttonCtx, previewEntity, [3, 3]);
 			}
+			showDebug = prevShowDebug;
 			buttonCtx.restore();
 		};
 		drawPreview();
@@ -2230,9 +2233,12 @@ const initUI = () => {
 				rafid = requestAnimationFrame(animate);
 				const { x, y } = previewEntity;
 				const prevMuted = muted;
+				const prevEntities = entities;
 				muted = true;
+				entities = [];
 				simulate([previewEntity]);
 				muted = prevMuted;
+				entities = prevEntities;
 				previewEntity.x = x;
 				previewEntity.y = y;
 				drawPreview();
