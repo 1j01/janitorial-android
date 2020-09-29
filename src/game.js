@@ -689,6 +689,7 @@ const viewport = { centerX: 0, centerY: 0, scale: 2 };
 let keys = {};
 
 let entities = [];
+const wind = [];
 // acceleration structures
 const entitiesByTopY = {}; // y to array of entities with that y as their top
 const entitiesByBottomY = {}; // y to array of entities with that y as their bottom
@@ -1823,6 +1824,60 @@ const simulate = () => {
 			}
 		}
 	}
+
+	for (const entity of entities) {
+		if ("floating" in entity) {
+			entity._wasFloating = entity.floating;
+			delete entity.floating;
+		}
+	}
+	wind.length = [];
+	for (const entity of entities) {
+		if (entity.type === "fan") {
+			const fan = entity;
+			const extents = [];
+			for (let x = fan.x + 15; x < fan.x + fan.width - 15; x += 15) {
+				let extent = 0;
+				for (let y = fan.y - 18; y > -200; y -= 18) {
+					let collision = false;
+					for (const otherEntity of entities) {
+						if (rectanglesIntersect(
+							x,
+							y,
+							15,
+							18,
+							otherEntity.x,
+							otherEntity.y,
+							otherEntity.width,
+							otherEntity.height,
+						)) {
+							if (otherEntity.type === "junkbot") {
+								if (!otherEntity._wasFloating && !otherEntity.grabbed) {
+									playSound("fan");
+								}
+								otherEntity.floating = true;
+							} else if (
+								otherEntity.type !== "gearbot" &&
+								otherEntity.type !== "drop"
+							) {
+								collision = true;
+								break;
+							}
+						}
+					}
+					if (collision) {
+						break;
+					}
+					extent += 1;
+				}
+				extents.push(extent);
+			}
+			wind.push({ fan, extents });
+		}
+	}
+	for (const entity of entities) {
+		delete entity._wasFloating;
+	}
 };
 
 let rafid;
@@ -1957,89 +2012,9 @@ const animate = () => {
 		drawEntity(ctx, entity, shouldHilight(entity));
 		ctx.globalAlpha = 1;
 	}
-	for (const entity of entities) {
-		if ("floating" in entity) {
-			entity._wasFloating = entity.floating;
-			delete entity.floating;
-		}
+	for (const { fan, extents } of wind) {
+		drawWind(ctx, fan, extents);
 	}
-	for (const entity of entities) {
-		if (entity.type === "fan") {
-			const fan = entity;
-			const extents = [];
-			for (let x = fan.x + 15; x < fan.x + fan.width - 15; x += 15) {
-				let extent = 0;
-				for (let y = fan.y - 18; y > -200; y -= 18) {
-					let collision = false;
-					for (const otherEntity of entities) {
-						if (rectanglesIntersect(
-							x,
-							y,
-							15,
-							18,
-							otherEntity.x,
-							otherEntity.y,
-							otherEntity.width,
-							otherEntity.height,
-						)) {
-							if (otherEntity.type === "junkbot") {
-								if (!otherEntity._wasFloating && !otherEntity.grabbed) {
-									playSound("fan");
-								}
-								otherEntity.floating = true;
-							} else if (
-								otherEntity.type !== "gearbot" &&
-								otherEntity.type !== "drop"
-							) {
-								collision = true;
-								break;
-							}
-						}
-					}
-					if (collision) {
-						break;
-					}
-					// const junkbot = (entitiesByTopY[y] || []).find((otherEntity) => (
-					// 	otherEntity.type === "junkbot" &&
-					// 	otherEntity.x <= x &&
-					// 	otherEntity.x + otherEntity.width > x
-					// ));
-					// if (junkbot) {
-					// 	if (!junkbot._wasFloating) {
-					// 		playSound("fan");
-					// 	}
-					// 	junkbot.floating = true;
-					// }
-					// if ((entitiesByTopY[y] || []).some((otherEntity) => (
-					// 	otherEntity.type !== "junkbot" &&
-					// 	otherEntity.type !== "gearbot" &&
-					// 	otherEntity.type !== "drop" &&
-					// 	otherEntity.x <= x &&
-					// 	otherEntity.x + otherEntity.width > x
-					// ))) {
-					// 	break;
-					// }
-					extent += 1;
-				}
-				extents.push(extent);
-			}
-			drawWind(ctx, entity, extents);
-		}
-	}
-	for (const entity of entities) {
-		delete entity._wasFloating;
-	}
-
-	// const connectedToFixed = allConnectedToFixed({ ignoreEntities: [brickUnderMouse() || {}] });
-	// sortEntitiesForRendering(connectedToFixed);
-	// ctx.save(); // shake
-	// ctx.translate(Math.sin(Date.now() / 10), Math.cos(Date.now() / 10));
-	// for (const entity of connectedToFixed) {
-	// 	if (entity.type === "brick") {
-	// 		drawBrick(ctx, entity);
-	// 	}
-	// }
-	// ctx.restore(); // shake
 
 	if (selectionBox) {
 		ctx.save();
