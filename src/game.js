@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 document.body.append(canvas);
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
-const context = new AudioContext();
+const audioCtx = new AudioContext();
 
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
@@ -280,7 +280,7 @@ const loadLevelFromTextFile = async (path) => {
 const loadSound = async (path) => {
 	const response = await fetch(path);
 	if (response.ok) {
-		return await context.decodeAudioData(await response.arrayBuffer());
+		return await audioCtx.decodeAudioData(await response.arrayBuffer());
 	} else {
 		throw new Error(`got HTTP ${response.status} fetching '${path}'`);
 	}
@@ -359,14 +359,19 @@ const toggleInfoBox = () => {
 	} catch (error) { }
 };
 
-const playSound = (audioBuffer, playbackRate = 1) => {
+const playSound = (audioBuffer, playbackRate = 1, cutOffFromEndRatio = 0) => {
 	if (muted) {
 		return;
 	}
-	const source = context.createBufferSource();
+	const gain = audioCtx.createGain();
+	const source = audioCtx.createBufferSource();
 	source.buffer = audioBuffer;
-	source.connect(context.destination);
+	source.connect(gain);
+	gain.connect(audioCtx.destination);
 	source.playbackRate.value = playbackRate;
+	if (cutOffFromEndRatio) {
+		gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + audioBuffer.duration * (1 - cutOffFromEndRatio));
+	}
 	source.start(0);
 };
 
@@ -608,7 +613,7 @@ const undo = () => {
 	}
 	const didSomething = undoOrRedo(undos, redos);
 	if (didSomething) {
-		playSound(resources.undo, 1 / (1 + recentUndoSound / 2));
+		playSound(resources.undo, 1 / (1 + recentUndoSound / 2), Math.min(0.2, recentUndoSound / 5));
 		recentUndoSound += 1;
 		setTimeout(() => {
 			recentUndoSound -= 1;
