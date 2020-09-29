@@ -1830,7 +1830,7 @@ const simulate = () => {
 
 	for (const entity of entities) {
 		if ("floating" in entity) {
-			entity._wasFloating = entity.floating;
+			entity.wasFloating = entity.floating;
 			delete entity.floating;
 		}
 	}
@@ -1855,7 +1855,7 @@ const simulate = () => {
 							otherEntity.height,
 						)) {
 							if (otherEntity.type === "junkbot") {
-								if (!otherEntity._wasFloating && !otherEntity.grabbed) {
+								if (!otherEntity.wasFloating) {
 									playSound("fan");
 								}
 								otherEntity.floating = true;
@@ -1879,7 +1879,7 @@ const simulate = () => {
 		}
 	}
 	for (const entity of entities) {
-		delete entity._wasFloating;
+		delete entity.wasFloating;
 	}
 };
 
