@@ -1887,7 +1887,7 @@ const initUI = () => {
 		on: true,
 	}));
 
-	let lastScrollSoundTime = 0;
+	let lastScrollSoundTime = Date.now(); // not 0 because a random scroll event happens on page load; don't want page load to make a sound
 	entitiesScrollContainer.addEventListener("scroll", () => {
 		if (Date.now() > lastScrollSoundTime + 200) {
 			playSound(resources[`rustle${Math.floor(Math.random() * numRustles)}`]);
