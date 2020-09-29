@@ -13,7 +13,7 @@ Done so far:
 - Loading the original level format
 - Fire bricks
 - Dripping pipes (except for random interval)
-- Goal bins (animation needs positional tweaks)
+- Goal bins
 - Switches
 - Visible but not functional: fans, shields, and jump blocks
 - Level editing functionality (not present in the original games)

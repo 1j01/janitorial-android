@@ -607,7 +607,8 @@ const drawJunkbot = (ctx, junkbot) => {
 	const frame = resources.actorsAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
-	if (junkbot.facing === 1) {
+	const alignLeft = !(animName.match(/dead|die|eat/) || junkbot.facing === -1);
+	if (alignLeft) {
 		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	} else {
 		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
