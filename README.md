@@ -10,7 +10,12 @@ Not sure what direction this project will take.
 Done so far:
 - Brick dragging mechanics, including when grabs are ambiguous until you drag up or down, with cursors for different drags (up, down, or either)
 - Junkbot's movement, generally (no momentum when in air yet; and there will probably be edge cases with different blocks)
-- Level loading, with fire bricks (including death animation), goal bins (animation needs positional tweaks), fans and jump blocks (visual only)
+- Loading the original level format
+- Fire bricks
+- Dripping pipes (except for random interval)
+- Goal bins (animation needs positional tweaks)
+- Switches
+- Visible but not functional: fans, shields, and jump blocks
 - Level editing functionality (not present in the original games)
 	- Rectangular selection, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette
 	- With sound effects taken from Lego Creator
