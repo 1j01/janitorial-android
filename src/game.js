@@ -1026,7 +1026,8 @@ const updateMouse = (event) => {
 	updateMouseWorldPosition();
 };
 const brickUnderMouse = (includeFixed) => {
-	for (const entity of entities) {
+	for (let i = entities.length - 1; i >= 0; i -= 1) {
+		const entity = entities[i];
 		if (
 			(includeFixed || !entity.fixed) &&
 			entity.x < mouse.worldX &&
@@ -1176,7 +1177,7 @@ const possibleGrabs = () => {
 		return true;
 	};
 
-	const brick = brickUnderMouse() || brickUnderMouse(true);
+	const brick = brickUnderMouse(editing);
 	if (!brick) {
 		return [];
 	}
@@ -1262,6 +1263,7 @@ canvas.addEventListener("mousedown", (event) => {
 		worldY: mouse.worldY,
 	};
 	if (dragging.length === 0) {
+		sortEntitiesForRendering(entities);
 		const grabs = possibleGrabs();
 		if (!grabs.selection) {
 			for (const entity of entities) {
@@ -1699,6 +1701,8 @@ const animate = () => {
 		}
 	}
 
+	sortEntitiesForRendering(entities);
+
 	const hovered = dragging.length ? [] : possibleGrabs();
 
 	if (dragging.length) {
@@ -1734,10 +1738,6 @@ const animate = () => {
 	ctx.scale(viewport.scale, viewport.scale);
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
-
-	// for debug: shows where the sorting can in SOME CASES fail
-	// shuffle(entities);
-	sortEntitiesForRendering(entities);
 
 	const shouldHilight = (entity) => {
 		return editing && entity.selected;
@@ -1882,7 +1882,7 @@ ${debugInfoForJunkbot}
 
 ${debugInfoForFrame}`;
 		drawText(ctx, debugInfo, x, 50, "white");
-		const hoveredBrick = brickUnderMouse() || brickUnderMouse(true);
+		const hoveredBrick = brickUnderMouse(true);
 		if (dragging.length) {
 			drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
 			// } else if (hovered.length) {
