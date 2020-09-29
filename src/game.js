@@ -197,6 +197,10 @@ const resourcePaths = {
 	collectBin: "audio/sound-effects/eat1.ogg",
 	collectBin2: "audio/sound-effects/garbage1.ogg",
 	fire: "audio/sound-effects/fire.ogg",
+	waterDeath: "audio/sound-effects/electricity1.ogg",
+	drip1: "audio/sound-effects/drip1.ogg",
+	drip2: "audio/sound-effects/drip2.ogg",
+	drip3: "audio/sound-effects/drip3.ogg",
 	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
 	selectEnd: "audio/sound-effects/custom/select2.wav",
 	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
@@ -1753,14 +1757,22 @@ const animate = () => {
 								ground.type !== "pipe" &&
 								ground.type !== "drop"
 							) {
-								if (ground.type === "junkbot") {
+								if (ground.type === "junkbot" && !ground.dying && !ground.dead) {
 									ground.dying = true;
 									ground.dyingFromWater = true;
 									ground.animationFrame = 0;
+									playSound(resources.waterDeath);
 								}
 								// ground.colorName = "blue";
 								entity.splashing = true;
 								entity.animationFrame = 0;
+								if (Math.random() < 0.33) {
+									playSound(resources.drip1);
+								} else if (Math.random() < 0.5) {
+									playSound(resources.drip2);
+								} else {
+									playSound(resources.drip3);
+								}
 								break;
 							}
 						}
