@@ -125,6 +125,7 @@ const makeClimbbot = ({ x, y, facing = 1, facingY = 0 }) => {
 		facing,
 		facingY,
 		animationFrame: 0,
+		energy: 0,
 	};
 };
 const makeFlybot = ({ x, y, facing = 1 }) => {
@@ -1915,27 +1916,45 @@ const simulateFlybot = (flybot) => {
 
 const simulateClimbbot = (climbbot) => {
 	climbbot.animationFrame += 0.25;
-	if (climbbot.animationFrame > 2) {
+	if (climbbot.animationFrame > 6) {
 		climbbot.animationFrame = 0;
-		const aheadPos = { x: climbbot.x + (climbbot.facingY === 0) * climbbot.facing * 15, y: climbbot.y + climbbot.facingY * 18 };
+		const asidePos = { x: climbbot.x + climbbot.facing * 15, y: climbbot.y };
+		const aheadPos = climbbot.facingY === 0 ? asidePos : { x: climbbot.x, y: climbbot.y + climbbot.facingY * 18 };
+		const belowPos = { x: climbbot.x, y: climbbot.y + 18 };
+		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
-		if (ahead) {
-			if (ahead.type === "junkbot") {
-				hurtJunkbot(ahead, "bot");
-			} else {
-				if (climbbot.facingY === -1) {
-					climbbot.facingY = 1;
-				} else if (climbbot.facingY === 1) {
-					climbbot.facingY = 0;
-					climbbot.facing *= -1;
+		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
+		if (aside) {
+			if (ahead) {
+				if (ahead.type === "junkbot") {
+					hurtJunkbot(ahead, "bot");
 				} else {
-					climbbot.facingY = -1;
+					if (climbbot.facingY === -1) {
+						climbbot.facingY = 1;
+					} else if (climbbot.facingY === 1) {
+						climbbot.facingY = 0;
+						climbbot.facing *= -1;
+					} else {
+						climbbot.facingY = -1;
+					}
 				}
+			} else {
+				climbbot.x = aheadPos.x;
+				climbbot.y = aheadPos.y;
+				entityMoved(climbbot);
+			}
+		} else if (below && climbbot.facingY !== 0) {
+			climbbot.facingY = 0;
+		} else if (below || climbbot.energy > 0) {
+			climbbot.x = asidePos.x;
+			climbbot.y = asidePos.y;
+			entityMoved(climbbot);
+			climbbot.energy -= 1;
+			if (below) {
+				climbbot.energy = 6;
 			}
 		} else {
-			climbbot.x = aheadPos.x;
-			climbbot.y = aheadPos.y;
-			entityMoved(climbbot);
+			climbbot.facingY = 1;
 		}
 	}
 };
