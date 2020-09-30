@@ -1668,6 +1668,27 @@ const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => (
 	))
 );
 
+const hurtJunkbot = (junkbot, cause) => {
+	if (junkbot.dying || junkbot.dead || junkbot.grabbed) {
+		return;
+	}
+	if (junkbot.armored) {
+		junkbot.losingShield = true;
+	} else {
+		junkbot.animationFrame = 0;
+		junkbot.collectingBin = false;
+		junkbot.dying = true;
+		if (cause === "fire") {
+			playSound("deathByFire");
+		} else if (cause === "water") {
+			junkbot.dyingFromWater = true;
+			playSound("deathByWater");
+		} else {
+			playSound("deathByBot");
+		}
+	}
+};
+
 const simulateJunkbot = (junkbot) => {
 	junkbot.timer += 1;
 	const aboveHead = junkbotCollisionTest(junkbot.x, junkbot.y - 1, junkbot);
@@ -1805,14 +1826,7 @@ const simulateJunkbot = (junkbot) => {
 					playSound("switchClick");
 					playSound(groundLevelEntity.on ? "switchOn" : "switchOff");
 				} else if (groundLevelEntity.type === "fire" && groundLevelEntity.on) {
-					if (junkbot.armored) {
-						junkbot.losingShield = true;
-					} else {
-						junkbot.animationFrame = 0;
-						junkbot.dying = true;
-						junkbot.collectingBin = false;
-						playSound("deathByFire");
-					}
+					hurtJunkbot(junkbot, "fire");
 				} else if (groundLevelEntity.type === "shield" && !groundLevelEntity.used && !junkbot.armored) {
 					junkbot.animationFrame = 0;
 					junkbot.gettingShield = true;
@@ -1842,14 +1856,7 @@ const simulateGearbot = (gearbot) => {
 		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, (otherEntity) => otherEntity.type !== "drop");
 		if (ahead) {
 			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
-				if (ahead.armored) {
-					ahead.losingShield = true;
-				} else {
-					ahead.dying = true;
-					ahead.collectingBin = false;
-					ahead.animationFrame = 0;
-					playSound("deathByBot");
-				}
+				hurtJunkbot(ahead, "bot");
 			} else if (ahead.type !== "junkbot") {
 				gearbot.facing *= -1;
 			}
@@ -1870,16 +1877,9 @@ const simulateFlybot = (flybot) => {
 		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y };
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, flybot, (otherEntity) => otherEntity.type !== "drop");
 		if (ahead) {
-			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
-				if (ahead.armored) {
-					ahead.losingShield = true;
-				} else {
-					ahead.dying = true;
-					ahead.collectingBin = false;
-					ahead.animationFrame = 0;
-					playSound("deathByBot");
-				}
-			} else if (ahead.type !== "junkbot") {
+			if (ahead.type === "junkbot") {
+				hurtJunkbot(ahead, "bot");
+			} else {
 				flybot.facing *= -1;
 			}
 		} else {
@@ -1903,21 +1903,14 @@ const simulateDrop = (drop) => {
 			entityMoved(drop);
 			for (const ground of underneath) {
 				if (
+					!ground.grabbed &&
 					drop.x + drop.width > ground.x &&
 					drop.x < ground.x + ground.width &&
 					ground.type !== "pipe" &&
 					ground.type !== "drop"
 				) {
-					if (ground.type === "junkbot" && !ground.dying && !ground.dead) {
-						if (ground.armored) {
-							ground.losingShield = true;
-						} else {
-							ground.dying = true;
-							ground.dyingFromWater = true;
-							ground.collectingBin = false;
-							ground.animationFrame = 0;
-							playSound("deathByWater");
-						}
+					if (ground.type === "junkbot") {
+						hurtJunkbot(ground, "water");
 					}
 					// ground.colorName = "blue";
 					drop.splashing = true;
