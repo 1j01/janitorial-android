@@ -713,7 +713,7 @@ const viewport = { centerX: 0, centerY: 0, scale: 2 };
 let keys = {};
 
 let entities = [];
-const wind = [];
+let wind = [];
 // acceleration structures
 const entitiesByTopY = {}; // y to array of entities with that y as their top
 const entitiesByBottomY = {}; // y to array of entities with that y as their bottom
@@ -2304,11 +2304,14 @@ const initUI = () => {
 				const { x, y } = previewEntity;
 				const prevMuted = muted;
 				const prevEntities = entities;
+				const prevWind = wind;
 				muted = true;
 				entities = [];
+				wind = [];
 				simulate([previewEntity]);
 				muted = prevMuted;
 				entities = prevEntities;
+				wind = prevWind;
 				previewEntity.x = x;
 				previewEntity.y = y;
 				drawPreview();
