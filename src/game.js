@@ -1948,14 +1948,20 @@ const simulateClimbbot = (climbbot) => {
 			}
 		} else if (climbbot.facingY === 1) {
 			if (below) {
-				climbbot.facingY = 0;
-				if (aside) {
-					if (!behindHorizontally) {
-						climbbot.facing *= -1;
-					}
+				if (aside && behindHorizontally) {
+					climbbot.facingY = -1;
+					climbbot.energy = 3;
 				} else {
-					climbbot.x = asidePos.x;
-					climbbot.y = asidePos.y;
+					climbbot.facingY = 0;
+					if (aside) {
+						if (!behindHorizontally) {
+							climbbot.facing *= -1;
+						}
+					} else {
+						climbbot.x = asidePos.x;
+						climbbot.y = asidePos.y;
+						entityMoved(climbbot);
+					}
 				}
 			} else {
 				climbbot.x = belowPos.x;
