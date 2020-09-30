@@ -115,6 +115,18 @@ const makeGearbot = ({ x, y, facing = 1 }) => {
 		animationFrame: 0,
 	};
 };
+const makeClimbbot = ({ x, y, facing = 1, facingY = 0 }) => {
+	return {
+		type: "climbbot",
+		x,
+		y,
+		width: 2 * 15,
+		height: 2 * 18,
+		facing,
+		facingY,
+		animationFrame: 0,
+	};
+};
 const makeFlybot = ({ x, y, facing = 1 }) => {
 	return {
 		type: "flybot",
@@ -347,6 +359,8 @@ const loadLevelFromText = (levelData) => {
 					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_walker") {
 					entities.push(makeGearbot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
+				} else if (typeName === "haz_climber") {
+					entities.push(makeClimbbot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1, facingY: animationName.match(/_U/i) ? -1 : animationName.match(/_D/i) ? 1 : 0 }));
 				} else if (typeName === "haz_dumbfloat") {
 					entities.push(makeFlybot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "flag") {
@@ -634,6 +648,12 @@ const drawGearbot = (ctx, entity) => {
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
+const drawClimbbot = (ctx, entity) => {
+	const frameIndex = Math.floor(entity.animationFrame % 6);
+	const frame = resources.actorsAtlas[`climbbot_walk_${entity.facingY === 1 ? "d" : entity.facingY === -1 ? "u" : entity.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y - 3, width, height);
+};
 const drawFlybot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 2);
 	const frame = resources.actorsAtlas[`flybot_${1 + frameIndex}`];
@@ -685,6 +705,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "gearbot":
 			drawGearbot(ctx, entity);
+			break;
+		case "climbbot":
+			drawClimbbot(ctx, entity);
 			break;
 		case "flybot":
 			drawFlybot(ctx, entity);
@@ -1577,7 +1600,7 @@ addEventListener("mouseup", () => {
 
 const simulateGravity = () => {
 	for (const entity of entities) {
-		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "flybot" && entity.type !== "eyebot") {
+		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
 			let settled = false;
 			if (connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot") ? 1 : 0 })) {
 				settled = true;
@@ -1890,6 +1913,33 @@ const simulateFlybot = (flybot) => {
 	}
 };
 
+const simulateClimbbot = (climbbot) => {
+	climbbot.animationFrame += 0.25;
+	if (climbbot.animationFrame > 2) {
+		climbbot.animationFrame = 0;
+		const aheadPos = { x: climbbot.x + (climbbot.facingY === 0) * climbbot.facing * 15, y: climbbot.y + climbbot.facingY * 18 };
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
+		if (ahead) {
+			if (ahead.type === "junkbot") {
+				hurtJunkbot(ahead, "bot");
+			} else {
+				if (climbbot.facingY === -1) {
+					climbbot.facingY = 1;
+				} else if (climbbot.facingY === 1) {
+					climbbot.facingY = 0;
+					climbbot.facing *= -1;
+				} else {
+					climbbot.facingY = -1;
+				}
+			}
+		} else {
+			climbbot.x = aheadPos.x;
+			climbbot.y = aheadPos.y;
+			entityMoved(climbbot);
+		}
+	}
+};
+
 const simulateDrop = (drop) => {
 	if (drop.splashing) {
 		drop.animationFrame += 0.25;
@@ -1944,6 +1994,8 @@ const simulate = (entities) => {
 				simulateJunkbot(entity);
 			} else if (entity.type === "gearbot") {
 				simulateGearbot(entity);
+			} else if (entity.type === "climbbot") {
+				simulateClimbbot(entity);
 			} else if (entity.type === "flybot") {
 				simulateFlybot(entity);
 			} else if (entity.type === "pipe") {
@@ -2467,6 +2519,11 @@ const initUI = () => {
 	}));
 
 	makeInsertEntityButton(makeGearbot({
+		x: 0,
+		y: 0,
+		facing: 1,
+	}));
+	makeInsertEntityButton(makeClimbbot({
 		x: 0,
 		y: 0,
 		facing: 1,
