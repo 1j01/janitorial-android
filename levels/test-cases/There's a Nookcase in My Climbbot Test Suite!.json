@@ -1,0 +1,108 @@
+{
+	"version": 0.1,
+	"format": "janitorial-android",
+	"entities": [
+		{
+			"type": "brick",
+			"x": 210,
+			"y": 252,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 180,
+			"y": 234,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 165,
+			"y": 216,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 165,
+			"y": 198,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 180,
+			"y": 180,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "climbbot",
+			"x": 255,
+			"y": 216,
+			"width": 30,
+			"height": 36,
+			"facing": 1,
+			"facingY": 0,
+			"animationFrame": 0,
+			"energy": 0,
+			"selected": true
+		},
+		{
+			"type": "brick",
+			"x": 315,
+			"y": 234,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 330,
+			"y": 216,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 330,
+			"y": 198,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 315,
+			"y": 180,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		}
+	]
+}

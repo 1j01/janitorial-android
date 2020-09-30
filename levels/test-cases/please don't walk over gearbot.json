@@ -1,0 +1,77 @@
+{
+	"version": 0.1,
+	"format": "janitorial-android",
+	"entities": [
+		{
+			"type": "brick",
+			"x": 375,
+			"y": 306,
+			"widthInStuds": 6,
+			"width": 90,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 375,
+			"y": 288,
+			"widthInStuds": 2,
+			"width": 30,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 315,
+			"y": 270,
+			"widthInStuds": 6,
+			"width": 90,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "junkbot",
+			"x": 315,
+			"y": 198,
+			"width": 30,
+			"height": 72,
+			"facing": 1,
+			"armored": false,
+			"timer": 0,
+			"animationFrame": 0,
+			"headLoaded": false
+		},
+		{
+			"type": "gearbot",
+			"x": 405,
+			"y": 270,
+			"width": 30,
+			"height": 36,
+			"facing": 1,
+			"animationFrame": 0
+		},
+		{
+			"type": "brick",
+			"x": 435,
+			"y": 288,
+			"widthInStuds": 2,
+			"width": 30,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 435,
+			"y": 270,
+			"widthInStuds": 2,
+			"width": 30,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		}
+	]
+}

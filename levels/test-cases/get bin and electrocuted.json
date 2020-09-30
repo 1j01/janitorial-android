@@ -1,0 +1,276 @@
+{
+	"version": 0.1,
+	"format": "janitorial-android",
+	"entities": [
+		{
+			"type": "brick",
+			"x": 120,
+			"y": 378,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 105,
+			"y": 360,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 90,
+			"y": 342,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "blue",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 75,
+			"y": 324,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "blue",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 60,
+			"y": 306,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "blue",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 45,
+			"y": 288,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "blue",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 255,
+			"y": 378,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 315,
+			"y": 378,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 255,
+			"y": 360,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 375,
+			"y": 378,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 435,
+			"y": 378,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "white",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 30,
+			"y": 270,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "blue",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 15,
+			"y": 252,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "blue",
+			"fixed": false
+		},
+		{
+			"type": "shield",
+			"x": 165,
+			"y": 234,
+			"width": 30,
+			"height": 18,
+			"fixed": true,
+			"used": false
+		},
+		{
+			"type": "shield",
+			"x": 210,
+			"y": 234,
+			"width": 30,
+			"height": 18,
+			"fixed": true,
+			"used": false
+		},
+		{
+			"type": "junkbot",
+			"x": 330,
+			"y": 288,
+			"width": 30,
+			"height": 72,
+			"facing": 1,
+			"armored": false,
+			"timer": 10201,
+			"animationFrame": 3400,
+			"headLoaded": false
+		},
+		{
+			"type": "shield",
+			"x": 255,
+			"y": 234,
+			"width": 30,
+			"height": 18,
+			"fixed": true,
+			"used": false
+		},
+		{
+			"type": "fan",
+			"x": 315,
+			"y": 234,
+			"width": 60,
+			"height": 18,
+			"on": true,
+			"animationFrame": 2561,
+			"fixed": true
+		},
+		{
+			"type": "shield",
+			"x": 195,
+			"y": 198,
+			"width": 30,
+			"height": 18,
+			"fixed": true,
+			"used": false
+		},
+		{
+			"type": "shield",
+			"x": 240,
+			"y": 198,
+			"width": 30,
+			"height": 18,
+			"fixed": true,
+			"used": false
+		},
+		{
+			"type": "pipe",
+			"x": 225,
+			"y": 126,
+			"width": 30,
+			"height": 18,
+			"timer": 37.25,
+			"fixed": true
+		},
+		{
+			"type": "pipe",
+			"x": 285,
+			"y": 126,
+			"width": 30,
+			"height": 18,
+			"timer": 43.75,
+			"fixed": true
+		},
+		{
+			"type": "pipe",
+			"x": 345,
+			"y": 126,
+			"width": 30,
+			"height": 18,
+			"timer": 43.75,
+			"fixed": true
+		},
+		{
+			"type": "pipe",
+			"x": 345,
+			"y": 72,
+			"width": 30,
+			"height": 18,
+			"timer": 59.75,
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 375,
+			"y": 360,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "bin",
+			"x": 420,
+			"y": 306,
+			"width": 30,
+			"height": 54,
+			"facing": 1,
+			"scaredy": false
+		},
+		{
+			"type": "pipe",
+			"x": 405,
+			"y": 126,
+			"width": 30,
+			"height": 18,
+			"timer": 43.75,
+			"fixed": true
+		},
+		{
+			"type": "pipe",
+			"x": 465,
+			"y": 126,
+			"width": 30,
+			"height": 18,
+			"timer": 43.75,
+			"fixed": true
+		}
+	]
+}

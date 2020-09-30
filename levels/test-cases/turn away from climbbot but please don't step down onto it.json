@@ -1,0 +1,308 @@
+{
+	"version": 0.1,
+	"format": "janitorial-android",
+	"entities": [
+		{
+			"type": "brick",
+			"x": 15,
+			"y": 396,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 60,
+			"y": 396,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 15,
+			"y": 378,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 15,
+			"y": 360,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 15,
+			"y": 342,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 135,
+			"y": 378,
+			"widthInStuds": 2,
+			"width": 30,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 180,
+			"y": 396,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "bin",
+			"x": 15,
+			"y": 288,
+			"width": 30,
+			"height": 54,
+			"facing": 1,
+			"scaredy": false
+		},
+		{
+			"type": "brick",
+			"x": 15,
+			"y": 198,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 300,
+			"y": 396,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "junkbot",
+			"x": 195,
+			"y": 306,
+			"width": 30,
+			"height": 72,
+			"facing": 1,
+			"armored": false,
+			"timer": 0,
+			"animationFrame": 0,
+			"headLoaded": false
+		},
+		{
+			"type": "brick",
+			"x": 225,
+			"y": 378,
+			"widthInStuds": 6,
+			"width": 90,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 240,
+			"y": 360,
+			"widthInStuds": 2,
+			"width": 30,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 270,
+			"y": 360,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 360,
+			"y": 396,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 255,
+			"y": 342,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 390,
+			"y": 378,
+			"widthInStuds": 6,
+			"width": 90,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 480,
+			"y": 396,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "climbbot",
+			"x": 255,
+			"y": 216,
+			"width": 30,
+			"height": 36,
+			"facing": 1,
+			"facingY": 1,
+			"animationFrame": 4.5,
+			"energy": 0
+		},
+		{
+			"type": "brick",
+			"x": 300,
+			"y": 324,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "yellow",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 390,
+			"y": 360,
+			"widthInStuds": 3,
+			"width": 45,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 330,
+			"y": 306,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "yellow",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 240,
+			"y": 126,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 435,
+			"y": 360,
+			"widthInStuds": 2,
+			"width": 30,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 390,
+			"y": 342,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 375,
+			"y": 288,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "yellow",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 330,
+			"y": 108,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "yellow",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 360,
+			"y": 90,
+			"widthInStuds": 4,
+			"width": 60,
+			"height": 18,
+			"colorName": "yellow",
+			"fixed": false
+		},
+		{
+			"type": "brick",
+			"x": 450,
+			"y": 270,
+			"widthInStuds": 6,
+			"width": 90,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		},
+		{
+			"type": "brick",
+			"x": 420,
+			"y": 72,
+			"widthInStuds": 8,
+			"width": 120,
+			"height": 18,
+			"colorName": "gray",
+			"fixed": true
+		}
+	]
+}
