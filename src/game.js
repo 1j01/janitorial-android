@@ -1621,10 +1621,10 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 		if (
 			!otherEntity.grabbed &&
 			otherEntity.type !== "bin" &&
-			otherEntity.type !== "gearbot" &&
-			otherEntity.type !== "climbbot" &&
-			otherEntity.type !== "flybot" &&
-			otherEntity.type !== "eyebot" &&
+			// otherEntity.type !== "gearbot" &&
+			// otherEntity.type !== "climbbot" &&
+			// otherEntity.type !== "flybot" &&
+			// otherEntity.type !== "eyebot" &&
 			otherEntity.type !== "drop" &&
 			otherEntity !== junkbot && (
 				rectanglesIntersect(
