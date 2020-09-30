@@ -1903,9 +1903,8 @@ const simulateFlybot = (flybot) => {
 		if (ahead) {
 			if (ahead.type === "junkbot") {
 				hurtJunkbot(ahead, "bot");
-			} else {
-				flybot.facing *= -1;
 			}
+			flybot.facing *= -1;
 		} else {
 			flybot.x = aheadPos.x;
 			flybot.y = aheadPos.y;
