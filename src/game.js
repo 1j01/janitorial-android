@@ -115,6 +115,17 @@ const makeGearbot = ({ x, y, facing = 1 }) => {
 		animationFrame: 0,
 	};
 };
+const makeFlybot = ({ x, y, facing = 1 }) => {
+	return {
+		type: "flybot",
+		x,
+		y,
+		width: 2 * 15,
+		height: 2 * 18,
+		facing,
+		animationFrame: 0,
+	};
+};
 const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 	return {
 		type: "bin",
@@ -336,6 +347,8 @@ const loadLevelFromText = (levelData) => {
 					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_walker") {
 					entities.push(makeGearbot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
+				} else if (typeName === "haz_dumbfloat") {
+					entities.push(makeFlybot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_slickfire") {
@@ -621,6 +634,12 @@ const drawGearbot = (ctx, entity) => {
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
+const drawFlybot = (ctx, entity) => {
+	const frameIndex = Math.floor(entity.animationFrame % 2);
+	const frame = resources.actorsAtlas[`flybot_${1 + frameIndex}`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+};
 
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
@@ -666,6 +685,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "gearbot":
 			drawGearbot(ctx, entity);
+			break;
+		case "flybot":
+			drawFlybot(ctx, entity);
 			break;
 		case "bin":
 			drawBin(ctx, entity);
@@ -1555,9 +1577,9 @@ addEventListener("mouseup", () => {
 
 const simulateGravity = () => {
 	for (const entity of entities) {
-		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop") {
+		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "flybot" && entity.type !== "eyebot") {
 			let settled = false;
-			if (connectsToFixed(entity, { direction: entity.type === "junkbot" ? 1 : 0 })) {
+			if (connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot") ? 1 : 0 })) {
 				settled = true;
 			}
 			if (!settled) {
@@ -1831,6 +1853,33 @@ const simulateGearbot = (gearbot) => {
 	}
 };
 
+const simulateFlybot = (flybot) => {
+	flybot.animationFrame += 0.25;
+	if (flybot.animationFrame > 2) {
+		flybot.animationFrame = 0;
+		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y };
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, flybot, (otherEntity) => otherEntity.type !== "drop");
+		if (ahead) {
+			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
+				if (ahead.armored) {
+					ahead.losingShield = true;
+				} else {
+					ahead.dying = true;
+					ahead.collectingBin = false;
+					ahead.animationFrame = 0;
+					playSound("deathByBot");
+				}
+			} else if (ahead.type !== "junkbot") {
+				flybot.facing *= -1;
+			}
+		} else {
+			flybot.x = aheadPos.x;
+			flybot.y = aheadPos.y;
+			entityMoved(flybot);
+		}
+	}
+};
+
 const simulateDrop = (drop) => {
 	if (drop.splashing) {
 		drop.animationFrame += 0.25;
@@ -1892,6 +1941,8 @@ const simulate = (entities) => {
 				simulateJunkbot(entity);
 			} else if (entity.type === "gearbot") {
 				simulateGearbot(entity);
+			} else if (entity.type === "flybot") {
+				simulateFlybot(entity);
 			} else if (entity.type === "pipe") {
 				simulatePipe(entity);
 			} else if (entity.type === "drop") {
@@ -2416,6 +2467,11 @@ const initUI = () => {
 	}));
 
 	makeInsertEntityButton(makeGearbot({
+		x: 0,
+		y: 0,
+		facing: 1,
+	}));
+	makeInsertEntityButton(makeFlybot({
 		x: 0,
 		y: 0,
 		facing: 1,
