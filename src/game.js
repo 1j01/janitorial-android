@@ -1658,14 +1658,14 @@ const simulateJunkbot = (junkbot) => {
 	}
 	junkbot.animationFrame += 1;
 	if (junkbot.collectingBin) {
-		if (junkbot.animationFrame > 17) {
+		if (junkbot.animationFrame >= 17) {
 			junkbot.collectingBin = false;
 		} else {
 			return;
 		}
 	}
 	if (junkbot.dying) {
-		if (junkbot.animationFrame > 11) {
+		if (junkbot.animationFrame >= 10) {
 			junkbot.animationFrame = 0;
 			junkbot.dead = true;
 		}
