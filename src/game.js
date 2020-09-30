@@ -1919,43 +1919,134 @@ const simulateClimbbot = (climbbot) => {
 	if (climbbot.animationFrame > 6) {
 		climbbot.animationFrame = 0;
 		const asidePos = { x: climbbot.x + climbbot.facing * 15, y: climbbot.y };
+		// const groundBehindPos = { x: climbbot.x + climbbot.facing * -15, y: climbbot.y + 18 };
+		const groundAsidePos = { x: climbbot.x + climbbot.facing * 15, y: climbbot.y + 1 };
 		const aheadPos = climbbot.facingY === 0 ? asidePos : { x: climbbot.x, y: climbbot.y + climbbot.facingY * 18 };
 		const belowPos = { x: climbbot.x, y: climbbot.y + 18 };
 		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
+		// const groundBehind = entityCollisionTest(groundBehindPos.x, groundBehindPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
+		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
 		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
-		if (aside) {
-			if (ahead) {
-				if (ahead.type === "junkbot") {
-					hurtJunkbot(ahead, "bot");
-				} else {
-					if (climbbot.facingY === -1) {
-						climbbot.facingY = 1;
-					} else if (climbbot.facingY === 1) {
-						climbbot.facingY = 0;
-						climbbot.facing *= -1;
-					} else {
-						climbbot.facingY = -1;
-					}
-				}
+
+		if (climbbot.facingY === -1) {
+			if (ahead || climbbot.energy < 1) {
+				climbbot.facingY = 1;
+			} else if (!aside && groundAside) {
+				climbbot.facingY = 0;
 			} else {
+				climbbot.energy -= 1;
 				climbbot.x = aheadPos.x;
 				climbbot.y = aheadPos.y;
 				entityMoved(climbbot);
 			}
-		} else if (below && climbbot.facingY !== 0) {
-			climbbot.facingY = 0;
-		} else if (below || climbbot.energy > 0) {
-			climbbot.x = asidePos.x;
-			climbbot.y = asidePos.y;
-			entityMoved(climbbot);
-			climbbot.energy -= 1;
+		} else if (climbbot.facingY === 1) {
 			if (below) {
-				climbbot.energy = 6;
+				climbbot.facingY = 0;
+				if (aside) {
+					climbbot.facing *= -1;
+				}
+			} else {
+				climbbot.x = belowPos.x;
+				climbbot.y = belowPos.y;
+				entityMoved(climbbot);
 			}
 		} else {
-			climbbot.facingY = 1;
+			if (below) {
+				if (aside) {
+					climbbot.facingY = -1;
+					climbbot.energy = 4;
+				} else {
+					climbbot.x = asidePos.x;
+					climbbot.y = asidePos.y;
+					entityMoved(climbbot);
+				}
+			} else {
+				if (aside) {
+					climbbot.facingY = 1;
+				} else if (groundAside) {
+					climbbot.x = asidePos.x;
+					climbbot.y = asidePos.y;
+					entityMoved(climbbot);
+				} else {
+					climbbot.facingY = 1;
+				}
+			}
 		}
+
+		/// older:
+
+		// if (!below) {
+		// 	if (!aside) {
+		// 		if (climbbot.facingY === -1) {
+		// 			climbbot.facingY = 0;
+		// 		} else if (climbbot.facingY === 1) {
+		// 			climbbot.facingY = 0; // maybe? or maybe just continue downwards
+		// 		} else {
+		// 			climbbot.x = asidePos.x;
+		// 			climbbot.y = asidePos.y;
+		// 			entityMoved(climbbot);
+		// 		}
+		// 	} else {
+		// 		if (climbbot.facingY === -1) {
+		// 			climbbot.energy -= 1;
+		// 			if (climbbot.energy > 0 && !ahead) {
+		// 				climbbot.x = aheadPos.x;
+		// 				climbbot.y = aheadPos.y;
+		// 				entityMoved(climbbot);
+		// 			} else {
+		// 				climbbot.facingY = 1;
+		// 			}
+		// 		} else if (climbbot.facingY === 1) {
+		// 			climbbot.x = belowPos.x;
+		// 			climbbot.y = belowPos.y;
+		// 			entityMoved(climbbot);
+		// 		} else if (groundBehind) { // could be energy instead?
+		// 			climbbot.facingY = 1;
+		// 		} else {
+		// 			climbbot.x = asidePos.x;
+		// 			climbbot.y = asidePos.y;
+		// 			entityMoved(climbbot);
+		// 		}
+		// 	}
+		// } else {
+
+		// }
+
+		/// older:
+
+		// if (aside) {
+		// 	if (ahead) {
+		// 		if (ahead.type === "junkbot") {
+		// 			hurtJunkbot(ahead, "bot");
+		// 		} else {
+		// 			if (climbbot.facingY === -1) {
+		// 				climbbot.facingY = 1;
+		// 			} else if (climbbot.facingY === 1) {
+		// 				climbbot.facingY = 0;
+		// 				climbbot.facing *= -1;
+		// 			} else {
+		// 				climbbot.facingY = -1;
+		// 			}
+		// 		}
+		// 	} else {
+		// 		climbbot.x = aheadPos.x;
+		// 		climbbot.y = aheadPos.y;
+		// 		entityMoved(climbbot);
+		// 	}
+		// } else if (below && climbbot.facingY !== 0) {
+		// 	climbbot.facingY = 0;
+		// } else if (below || climbbot.energy > 0) {
+		// 	climbbot.x = asidePos.x;
+		// 	climbbot.y = asidePos.y;
+		// 	entityMoved(climbbot);
+		// 	climbbot.energy -= 1;
+		// 	if (below) {
+		// 		climbbot.energy = 6;
+		// 	}
+		// } else {
+		// 	climbbot.facingY = 1;
+		// }
 	}
 };
 
