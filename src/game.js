@@ -1934,6 +1934,8 @@ const simulateClimbbot = (climbbot) => {
 				climbbot.facingY = 1;
 			} else if (!aside && groundAside) {
 				climbbot.facingY = 0;
+				climbbot.x = asidePos.x;
+				climbbot.y = asidePos.y;
 			} else {
 				climbbot.energy -= 1;
 				climbbot.x = aheadPos.x;
@@ -1945,6 +1947,9 @@ const simulateClimbbot = (climbbot) => {
 				climbbot.facingY = 0;
 				if (aside) {
 					climbbot.facing *= -1;
+				} else {
+					climbbot.x = asidePos.x;
+					climbbot.y = asidePos.y;
 				}
 			} else {
 				climbbot.x = belowPos.x;
@@ -1970,6 +1975,9 @@ const simulateClimbbot = (climbbot) => {
 					entityMoved(climbbot);
 				} else {
 					climbbot.facingY = 1;
+					climbbot.x = belowPos.x;
+					climbbot.y = belowPos.y;
+					entityMoved(climbbot);
 				}
 			}
 		}
