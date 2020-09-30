@@ -783,6 +783,19 @@ const entityMoved = (entity) => {
 	lastKeys.set(entity, yKeys);
 };
 
+let didWinOrLose = "";
+const winOrLose = () => {
+	if (entities.some((entity) => entity.type === "junkbot" && !entity.dying && !entity.dead)) {
+		if (!entities.some((entity) => entity.type === "bin")) {
+			return "win";
+		} else {
+			return "";
+		}
+	} else {
+		return "lose";
+	}
+};
+
 const undos = [];
 const redos = [];
 const clipboard = {};
@@ -807,6 +820,7 @@ const deserialize = (json) => {
 		delete entity.grabbed;
 		delete entity.grabOffset;
 	});
+	didWinOrLose = winOrLose();
 };
 const save = () => {
 	localStorage.JWorld = serialize();
@@ -1028,6 +1042,7 @@ const initLevel = (level) => {
 	dragging = [];
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
+	didWinOrLose = winOrLose(); // in case there's no bins, don't say OH YEAH
 };
 
 // const initTestLevel = () => {
@@ -1782,7 +1797,7 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-		const stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true)
+		const stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true);
 		if (stepOrWall) {
 			// can we step up?
 			posInFront.y -= 18;
@@ -2120,19 +2135,6 @@ const simulate = (entities) => {
 	}
 };
 
-let wonOrLost = "";
-const winOrLose = () => {
-	if (entities.some((entity) => entity.type === "junkbot" && !entity.dying && !entity.dead)) {
-		if (!entities.some((entity) => entity.type === "bin")) {
-			return "win";
-		} else {
-			return "";
-		}
-	} else {
-		return "lose";
-	}
-};
-
 let rafid;
 window.addEventListener("error", () => {
 	// so my computer doesn't freeze up from the console logging messages about repeated errors
@@ -2210,13 +2212,13 @@ const animate = () => {
 		simulate(entities);
 	}
 
-	if (winOrLose() !== wonOrLost) {
-		wonOrLost = winOrLose();
-		if (wonOrLost === "win") {
+	if (winOrLose() !== didWinOrLose) {
+		didWinOrLose = winOrLose();
+		if (didWinOrLose === "win") {
 			setTimeout(() => {
 				playSound("ohYeah");
 			}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000);
-		} else if (wonOrLost === "lose") {
+		} else if (didWinOrLose === "lose") {
 			// playSound("ouch"); // or whatever
 		}
 	}
