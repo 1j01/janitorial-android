@@ -61,22 +61,15 @@ const remove = (array, value) => {
 	}
 };
 
-const brickColorToYIndex = {
-	white: 0,
-	red: 1,
-	green: 2,
-	blue: 3,
-	yellow: 4,
-	gray: 5,
-};
-// const brickColorNames = Object.keys(brickColorToYIndex);
+const brickColorNames = [
+	"white",
+	"red",
+	"green",
+	"blue",
+	"yellow",
+	"gray",
+];
 const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
-const brickWidthsInStudsToX = {};
-for (let x = 0, i = 0; i < brickWidthsInStuds.length; i++) {
-	brickWidthsInStudsToX[brickWidthsInStuds[i]] = x;
-	const w = brickWidthsInStuds[i] * 15 + 15;
-	x += w;
-}
 
 const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 	return {
@@ -236,7 +229,6 @@ let resources;
 const resourcePaths = {
 	actors: "images/spritesheet.png",
 	actorsAtlas: "images/spritesheet.json",
-	coloredBlocks: "images/colored-blocks.png",
 	font: "images/font.png",
 	turn: "audio/sound-effects/turn1.ogg",
 	blockPickUp: "audio/sound-effects/blockpickup.ogg",
@@ -562,10 +554,9 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 };
 
 const drawBrick = (ctx, brick) => {
-	const { x, y, widthInStuds, colorName } = brick;
-	const w = widthInStuds * 15 + 15; // sprite width
-	const h = 35; // sprite row height
-	ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], brickColorToYIndex[colorName] * h + 9, w, h, x, y - 15, w, h);
+	const frame = resources.actorsAtlas[`brick_${brick.colorName === "gray" ? "immobile" : brick.colorName}_${brick.widthInStuds}`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.actors, left, top, width, height, brick.x, brick.y + brick.height - height - 1, width, height);
 };
 
 const drawBin = (ctx, bin) => {
@@ -746,11 +737,24 @@ const drawEntity = (ctx, entity, hilight) => {
 	if (hilight) {
 		ctx.save();
 		ctx.globalAlpha = 0.5;
-		const widthInStuds = Math.ceil(entity.width / 15);
-		const w = widthInStuds * 15 + 15; // sprite width
-		const h = 35; // sprite row height
-		for (let iy = 0; iy < entity.height; iy += 18) {
-			ctx.drawImage(resources.coloredBlocks, brickWidthsInStudsToX[widthInStuds], (brickColorToYIndex.gray + 1) * h + 9, w, h, entity.x, entity.y - 15 + iy, w, h);
+		ctx.fillStyle = "aqua";
+		ctx.translate(0, -2);
+		for (let z = 0; z <= 10; z++) {
+			if (z === 0 || z === 10) {
+				for (const x of [entity.x, entity.x + entity.width]) {
+					ctx.fillRect(x, entity.y, 1, entity.height);
+				}
+				for (const y of [entity.y, entity.y + entity.height]) {
+					ctx.fillRect(entity.x, y, entity.width, 1);
+				}
+			} else {
+				for (const x of [entity.x, entity.x + entity.width]) {
+					for (const y of [entity.y, entity.y + entity.height]) {
+						ctx.fillRect(x, y, 1, 1);
+					}
+				}
+			}
+			ctx.translate(1, -1);
 		}
 		ctx.restore();
 	}
@@ -2517,7 +2521,7 @@ const initUI = () => {
 		return button;
 	};
 
-	Object.keys(brickColorToYIndex).forEach((colorName) => {
+	brickColorNames.forEach((colorName) => {
 		brickWidthsInStuds.forEach((widthInStuds) => {
 			makeInsertEntityButton(makeBrick({
 				colorName,
