@@ -1987,13 +1987,7 @@ const simulate = (entities) => {
 									playSound("fan");
 								}
 								otherEntity.floating = true;
-							} else if (
-								otherEntity.type !== "gearbot" &&
-								otherEntity.type !== "climbbot" &&
-								otherEntity.type !== "flybot" &&
-								otherEntity.type !== "eyebot" &&
-								otherEntity.type !== "drop"
-							) {
+							} else if (otherEntity.type !== "drop") {
 								collision = true;
 								break;
 							}
