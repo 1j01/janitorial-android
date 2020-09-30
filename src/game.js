@@ -1781,10 +1781,11 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-		if (junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true)) {
+		const stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true)
+		if (stepOrWall) {
 			// can we step up?
 			posInFront.y -= 18;
-			if (!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot)) {
+			if (!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot) && stepOrWall.type !== "gearbot" && stepOrWall.type !== "climbbot" && stepOrWall.type !== "flybot" && stepOrWall.type !== "eyebot") {
 				// step up
 				debugJunkbot("STEP UP");
 				junkbot.x = posInFront.x;
@@ -1798,9 +1799,10 @@ const simulateJunkbot = (junkbot) => {
 			}
 		} else {
 			// is there solid ground ahead to walk on?
+			const ground = junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot, true);
 			if (
-				junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot, true) &&
-				!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot)
+				ground && !junkbotCollisionTest(posInFront.x, posInFront.y, junkbot) &&
+				ground.type !== "gearbot" && ground.type !== "climbbot" && ground.type !== "flybot" && ground.type !== "eyebot"
 			) {
 				// what about that triangle tho
 				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot)) {
@@ -1816,10 +1818,8 @@ const simulateJunkbot = (junkbot) => {
 			} else {
 				// can we step down?
 				posInFront.y += 18;
-				if (
-					junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot, true) &&
-					!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true)
-				) {
+				const step = junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot, true);
+				if (step && !junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true) && step.type !== "gearbot" && step.type !== "climbbot" && step.type !== "flybot" && step.type !== "eyebot") {
 					// step down
 					debugJunkbot("STEP DOWN");
 					junkbot.x = posInFront.x;
