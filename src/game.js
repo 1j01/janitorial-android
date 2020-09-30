@@ -254,6 +254,7 @@ const resourcePaths = {
 	deathByWater: "audio/sound-effects/electricity1.ogg",
 	deathByBot: "audio/sound-effects/robottouch4.ogg",
 	getShield: "audio/sound-effects/shieldon2.ogg",
+	ohYeah: "audio/sound-effects/voice_ohyeah.ogg",
 	fan: "audio/sound-effects/fan.ogg",
 	drip0: "audio/sound-effects/drip1.ogg",
 	drip1: "audio/sound-effects/drip2.ogg",
@@ -2119,6 +2120,19 @@ const simulate = (entities) => {
 	}
 };
 
+let wonOrLost = "";
+const winOrLose = () => {
+	if (entities.some((entity) => entity.type === "junkbot" && !entity.dying && !entity.dead)) {
+		if (!entities.some((entity) => entity.type === "bin")) {
+			return "win";
+		} else {
+			return "";
+		}
+	} else {
+		return "lose";
+	}
+};
+
 let rafid;
 window.addEventListener("error", () => {
 	// so my computer doesn't freeze up from the console logging messages about repeated errors
@@ -2194,6 +2208,17 @@ const animate = () => {
 
 	if (!paused) {
 		simulate(entities);
+	}
+
+	if (winOrLose() !== wonOrLost) {
+		wonOrLost = winOrLose();
+		if (wonOrLost === "win") {
+			setTimeout(() => {
+				playSound("ohYeah");
+			}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000);
+		} else if (wonOrLost === "lose") {
+			// playSound("ouch"); // or whatever
+		}
 	}
 
 	sortEntitiesForRendering(entities);
