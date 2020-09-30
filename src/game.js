@@ -1598,6 +1598,9 @@ const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) =>
 			!otherEntity.grabbed &&
 			otherEntity.type !== "bin" &&
 			otherEntity.type !== "gearbot" &&
+			otherEntity.type !== "climbbot" &&
+			otherEntity.type !== "flybot" &&
+			otherEntity.type !== "eyebot" &&
 			otherEntity.type !== "drop" &&
 			otherEntity !== junkbot && (
 				rectanglesIntersect(
@@ -1668,7 +1671,14 @@ const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => (
 const simulateJunkbot = (junkbot) => {
 	junkbot.timer += 1;
 	const aboveHead = junkbotCollisionTest(junkbot.x, junkbot.y - 1, junkbot);
-	const headLoaded = aboveHead && (junkbot.floating || (!aboveHead.fixed && !connectsToFixed(aboveHead, { ignoreEntities: [junkbot] })));
+	const headLoaded = aboveHead && (
+		junkbot.floating || (
+			!aboveHead.fixed &&
+			!connectsToFixed(aboveHead, { ignoreEntities: [junkbot] }) &&
+			aboveHead.type !== "flybot" &&
+			aboveHead.type !== "eyebot"
+		)
+	);
 	if (junkbot.headLoaded && !headLoaded) {
 		junkbot.headLoaded = false;
 	} else if (headLoaded && !junkbot.headLoaded && !junkbot.grabbed) {
@@ -1986,6 +1996,9 @@ const simulate = (entities) => {
 								otherEntity.floating = true;
 							} else if (
 								otherEntity.type !== "gearbot" &&
+								otherEntity.type !== "climbbot" &&
+								otherEntity.type !== "flybot" &&
+								otherEntity.type !== "eyebot" &&
 								otherEntity.type !== "drop"
 							) {
 								collision = true;
