@@ -1925,22 +1925,24 @@ const simulateClimbbot = (climbbot) => {
 		const belowPos = { x: climbbot.x, y: climbbot.y + 18 };
 		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
 		// const groundBehind = entityCollisionTest(groundBehindPos.x, groundBehindPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
-		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
+		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, (otherEntity) => otherEntity.type !== "drop" && otherEntity.type !== "bin");
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
 		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
 
 		if (climbbot.facingY === -1) {
-			if (ahead || climbbot.energy < 1) {
+			if (ahead) {
 				climbbot.facingY = 1;
 			} else if (!aside && groundAside) {
 				climbbot.facingY = 0;
 				climbbot.x = asidePos.x;
 				climbbot.y = asidePos.y;
-			} else {
+			} else if (climbbot.energy > 0) {
 				climbbot.energy -= 1;
 				climbbot.x = aheadPos.x;
 				climbbot.y = aheadPos.y;
 				entityMoved(climbbot);
+			} else {
+				climbbot.facingY = 1;
 			}
 		} else if (climbbot.facingY === 1) {
 			if (below) {
@@ -1960,7 +1962,7 @@ const simulateClimbbot = (climbbot) => {
 			if (below) {
 				if (aside) {
 					climbbot.facingY = -1;
-					climbbot.energy = 4;
+					climbbot.energy = 3;
 				} else {
 					climbbot.x = asidePos.x;
 					climbbot.y = asidePos.y;
