@@ -654,7 +654,7 @@ const drawClimbbot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 6);
 	const frame = resources.actorsAtlas[`climbbot_walk_${entity.facingY === 1 ? "d" : entity.facingY === -1 ? "u" : entity.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y - 3, width, height);
+	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y - 6, width, height);
 };
 const drawFlybot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 2);
