@@ -1583,8 +1583,8 @@ const simulateGravity = () => {
 				settled = true;
 			}
 			if (!settled) {
-				entity.y += 1;
-				// entity.y += 6;
+				// entity.y += 1;
+				entity.y += 6;
 				entityMoved(entity);
 			}
 		}
