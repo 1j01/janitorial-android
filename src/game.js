@@ -1956,6 +1956,9 @@ const simulateClimbbot = (climbbot) => {
 					if (aside) {
 						if (!behindHorizontally) {
 							climbbot.facing *= -1;
+							climbbot.x = behindHorizontallyPos.x;
+							climbbot.y = behindHorizontallyPos.y;
+							entityMoved(climbbot);
 						}
 					} else {
 						climbbot.x = asidePos.x;
