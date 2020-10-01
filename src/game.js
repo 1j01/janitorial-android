@@ -689,7 +689,7 @@ const drawJunkbot = (ctx, junkbot) => {
 };
 
 const selectionHilightCanvases = {};
-const renderSelectionHilight = (width, height, depth = 10) => {
+const renderSelectionHilight = (width, height, depth = 10, studsOnTop = false) => {
 	const key = `${width}x${height}x${depth}`;
 	if (selectionHilightCanvases[key]) {
 		return selectionHilightCanvases[key];
@@ -721,12 +721,19 @@ const renderSelectionHilight = (width, height, depth = 10) => {
 		ctx.translate(-1, 1);
 	}
 	ctx.clearRect(2, 0, width - 1, height - 1);
+	if (studsOnTop) {
+		for (let z = 0; z < width; z += 6) {
+			for (let x = 0; x < width; x += 15) {
+				ctx.clearRect(x + 6 + z, -7 - z, 11, 5);
+			}
+		}
+	}
 
 	selectionHilightCanvases[key] = canvas;
 	return canvas;
 };
-const drawSelectionHilight = (ctx, x, y, width, height, depth = 10) => {
-	const image = renderSelectionHilight(width, height, depth);
+const drawSelectionHilight = (ctx, x, y, width, height, depth = 10, studsOnTop = false) => {
+	const image = renderSelectionHilight(width, height, depth, studsOnTop);
 	ctx.save();
 	ctx.translate(0, -2 - depth);
 	ctx.drawImage(image, x, y);
@@ -782,7 +789,7 @@ const drawEntity = (ctx, entity, hilight) => {
 	if (hilight) {
 		ctx.save();
 		ctx.globalAlpha = 0.5;
-		drawSelectionHilight(ctx, entity.x, entity.y, entity.width, entity.height);
+		drawSelectionHilight(ctx, entity.x, entity.y, entity.width, entity.height, 10, entity.type === "brick");
 		ctx.restore();
 	}
 };
