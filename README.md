@@ -93,8 +93,7 @@ Partially done:
 ## Credits
 
 ### Ripping resources
-- [Rory Fewell](https://github.com/rozniak) and [TommytheJerk](https://github.com/TommytheJerk) - [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
-- Sleepy Harry - [The Spriters Resource](https://www.spriters-resource.com/pc_computer/junkbot/) (will ditch these ones eventually)
+- [Rory Fewell](https://github.com/rozniak) and [TommytheJerk](https://github.com/TommytheJerk), via [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
 
 ### Some sounds taken from
 - Lego Creator (editor sounds)
