@@ -229,6 +229,8 @@ let resources;
 const resourcePaths = {
 	actors: "images/spritesheet.png",
 	actorsAtlas: "images/spritesheet.json",
+	backgrounds: "images/backgrounds-spritesheet.png",
+	backgroundsAtlas: "images/backgrounds-spritesheet.json",
 	font: "images/font.png",
 	turn: "audio/sound-effects/turn1.ogg",
 	blockPickUp: "audio/sound-effects/blockpickup.ogg",
@@ -379,8 +381,40 @@ const loadLevelFromText = (levelData) => {
 			});
 		}
 	});
-	sections.entities = entities;
-	return sections;
+
+	const level = {
+		title: "",
+		hint: "",
+		par: Infinity,
+		backdropName: null,
+		decals: [],
+		backgroundDecals: [],
+		entities,
+	};
+
+	if (sections.info) {
+		sections.info.forEach(([key, value]) => {
+			if (key.match(/^(title|hint)$/i)) {
+				level[key] = value;
+			} else if (key.match(/^par$/i)) {
+				level.par = Number(value);
+			}
+		});
+	}
+	if (sections.background) {
+		sections.background.forEach(([key, value]) => {
+			if (key.match(/^(bg)?(decals)$/i)) {
+				level.decals = level.decals.concat(value.split(",").map((str) => {
+					const [x, y, name] = str.split(";");
+					return { x: Number(x), y: Number(y), name };
+				}));
+			} else if (key.match(/^backdrop$/i)) {
+				level.backdropName = value;
+			}
+		});
+	}
+
+	return level;
 };
 
 const loadTextFile = async (path) => {
@@ -551,6 +585,12 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 			x += w + 1;
 		}
 	}
+};
+
+const drawDecal = (ctx, x, y, name) => {
+	const frame = resources.backgroundsAtlas[name];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.backgrounds, left, top, width, height, x, y, width, height);
 };
 
 const drawBrick = (ctx, brick) => {
@@ -799,6 +839,7 @@ let keys = {};
 
 let entities = [];
 let wind = [];
+let currentLevel;
 // acceleration structures
 let entitiesByTopY = {}; // y to array of entities with that y as their top
 let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
@@ -1074,6 +1115,7 @@ const sortEntitiesForRendering = (entities) => {
 };
 
 const initLevel = (level) => {
+	currentLevel = level;
 	entities = level.entities;
 	undos.length = 0;
 	redos.length = 0;
@@ -2299,6 +2341,20 @@ const animate = () => {
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
 
+	if (currentLevel && currentLevel.backdropName) {
+		drawDecal(ctx, 9, -7, currentLevel.backdropName);
+	}
+	if (currentLevel && currentLevel.backgroundDecals) {
+		for (const { x, y, name } of currentLevel.backgroundDecals) {
+			drawDecal(ctx, x, y + Math.random() * 5, name, true);
+		}
+	}
+	if (currentLevel && currentLevel.decals) {
+		for (const { x, y, name } of currentLevel.decals) {
+			drawDecal(ctx, x - 15, y - 46, name);
+		}
+	}
+
 	const shouldHilight = (entity) => {
 		return editing && entity.selected;
 		// if (dragging.length) {
@@ -2751,13 +2807,15 @@ const main = async () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 	resources = await loadResources(resourcePaths);
-	try {
-		deserialize(localStorage.JWorld);
-		dragging = entities.filter((entity) => entity.grabbed);
-	} catch (error) {
-		// initTestLevel();
-		deserialize(resources.world);
-	}
+
+	// try {
+	// 	deserialize(localStorage.JWorld);
+	// 	dragging = entities.filter((entity) => entity.grabbed);
+	// } catch (error) {
+	// 	// initTestLevel();
+	// 	deserialize(resources.world);
+	// }
+	loadLevelFromTextFile("levels/The Long Umbrella.txt").then(initLevel);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
