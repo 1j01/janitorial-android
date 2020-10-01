@@ -143,6 +143,15 @@ const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 		scaredy,
 	};
 };
+const makeCrate = ({ x, y }) => {
+	return {
+		type: "crate",
+		x,
+		y,
+		width: 3 * 15,
+		height: 2 * 18,
+	};
+};
 const makeFire = ({ x, y, on, switchID }) => {
 	return {
 		type: "fire",
@@ -389,6 +398,8 @@ const loadLevelFromText = (levelData, game) => {
 					entities.push(makeFlybot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing: animationName.match(/_L/i) ? -1 : 1 }));
+				} else if (typeName === "haz_slickcrate") {
+					entities.push(makeCrate({ x, y: y - 18 }));
 				} else if (typeName === "haz_slickfire") {
 					entities.push(makeFire({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slickfan") {
@@ -651,6 +662,12 @@ const drawBin = (ctx, bin) => {
 	ctx.drawImage(resources.sprites, left, top, width, height, bin.x + 4, bin.y + bin.height - height - 5, width, height);
 };
 
+const drawCrate = (ctx, bin) => {
+	const frame = resources.spritesUndercoverAtlas.HAZ_SLICKCRATE;
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.spritesUndercover, left, top, width, height, bin.x, bin.y + bin.height - height - 1, width, height);
+};
+
 const drawFire = (ctx, entity) => {
 	const frameIndex = entity.on ? Math.floor(entity.animationFrame % 8 < 4 ? entity.animationFrame % 4 : 4 - (entity.animationFrame % 4)) : 0;
 	// console.log(`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`);
@@ -865,6 +882,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "bin":
 			drawBin(ctx, entity);
+			break;
+		case "crate":
+			drawCrate(ctx, entity);
 			break;
 		case "fire":
 			drawFire(ctx, entity);
@@ -2719,6 +2739,11 @@ const initUI = () => {
 	}));
 
 	makeInsertEntityButton(makeBin({
+		x: 0,
+		y: 0,
+	}));
+
+	makeInsertEntityButton(makeCrate({
 		x: 0,
 		y: 0,
 	}));
