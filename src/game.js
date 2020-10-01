@@ -894,7 +894,11 @@ const serialize = () => {
 const deserialize = (json) => {
 	const state = JSON.parse(json);
 	entities = state.entities;
+	entitiesByTopY = {};
+	entitiesByBottomY = {};
+	lastKeys = new Map();
 	dragging.length = 0;
+	wind.length = 0;
 	entities.forEach((entity) => {
 		delete entity.grabbed;
 		delete entity.grabOffset;
@@ -1117,9 +1121,13 @@ const sortEntitiesForRendering = (entities) => {
 const initLevel = (level) => {
 	currentLevel = level;
 	entities = level.entities;
+	entitiesByTopY = {};
+	entitiesByBottomY = {};
+	lastKeys = new Map();
 	undos.length = 0;
 	redos.length = 0;
 	dragging = [];
+	wind = [];
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
 	didWinOrLose = winOrLose(); // in case there's no bins, don't say OH YEAH
