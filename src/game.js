@@ -2000,7 +2000,15 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-		const stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true);
+		let stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true);
+		while (stepOrWall && stepOrWall.type === "crate") {
+			const crate = stepOrWall;
+			if (entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, (otherEntity) => otherEntity.type !== "drop")) {
+				break;
+			}
+			crate.x += junkbot.facing * 15;
+			stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true);
+		}
 		if (stepOrWall) {
 			// can we step up?
 			posInFront.y -= 18;
