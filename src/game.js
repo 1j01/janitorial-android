@@ -688,6 +688,48 @@ const drawJunkbot = (ctx, junkbot) => {
 	}
 };
 
+const selectionHilightCanvases = {};
+const renderSelectionHilight = (width, height, depth = 10) => {
+	const key = `${width}x${height}x${depth}`;
+	if (selectionHilightCanvases[key]) {
+		return selectionHilightCanvases[key];
+	}
+	const canvas = document.createElement("canvas");
+	canvas.width = width + depth + 1;
+	canvas.height = height + depth + 1;
+	const ctx = canvas.getContext("2d");
+	ctx.fillStyle = "aqua";
+
+	ctx.translate(0, depth);
+	for (let z = 0; z <= 10; z++) {
+		if (z === 0 || z === 10) {
+			for (const x of [0, 0 + width]) {
+				ctx.fillRect(x, 0, 1, height);
+			}
+			for (const y of [0, 0 + height]) {
+				ctx.fillRect(0, y, width, 1);
+			}
+		} else {
+			for (const x of [0, 0 + width]) {
+				for (const y of [0, 0 + height]) {
+					ctx.fillRect(x, y, 1, 1);
+				}
+			}
+		}
+		ctx.translate(1, -1);
+	}
+
+	selectionHilightCanvases[key] = canvas;
+	return canvas;
+};
+const drawSelectionHilight = (ctx, x, y, width, height, depth = 10) => {
+	const image = renderSelectionHilight(width, height, depth);
+	ctx.save();
+	ctx.translate(0, -2 - depth);
+	ctx.drawImage(image, x, y);
+	ctx.restore();
+};
+
 const drawEntity = (ctx, entity, hilight) => {
 	switch (entity.type) {
 		case "brick":
@@ -737,25 +779,7 @@ const drawEntity = (ctx, entity, hilight) => {
 	if (hilight) {
 		ctx.save();
 		ctx.globalAlpha = 0.5;
-		ctx.fillStyle = "aqua";
-		ctx.translate(0, -2);
-		for (let z = 0; z <= 10; z++) {
-			if (z === 0 || z === 10) {
-				for (const x of [entity.x, entity.x + entity.width]) {
-					ctx.fillRect(x, entity.y, 1, entity.height);
-				}
-				for (const y of [entity.y, entity.y + entity.height]) {
-					ctx.fillRect(entity.x, y, entity.width, 1);
-				}
-			} else {
-				for (const x of [entity.x, entity.x + entity.width]) {
-					for (const y of [entity.y, entity.y + entity.height]) {
-						ctx.fillRect(x, y, 1, 1);
-					}
-				}
-			}
-			ctx.translate(1, -1);
-		}
+		drawSelectionHilight(ctx, entity.x, entity.y, entity.width, entity.height);
 		ctx.restore();
 	}
 };
