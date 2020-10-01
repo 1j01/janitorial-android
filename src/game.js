@@ -337,7 +337,7 @@ const loadAtlasJSON = async (path) => {
 	return result;
 };
 
-const loadLevelFromText = (levelData) => {
+const loadLevelFromText = (levelData, game) => {
 	const sections = {};
 	let sectionName = "";
 	for (const line of levelData.split(/\r?\n/g)) {
@@ -426,6 +426,7 @@ const loadLevelFromText = (levelData) => {
 		decals: [],
 		backgroundDecals: [],
 		entities,
+		game,
 	};
 
 	if (sections.info) {
@@ -463,7 +464,7 @@ const loadTextFile = async (path) => {
 };
 
 const loadLevelFromTextFile = async (path) => {
-	return loadLevelFromText(await loadTextFile(path));
+	return loadLevelFromText(await loadTextFile(path), path.match(/Undercover/i) ? "Junkbot Undercover" : "Junkbot");
 };
 
 const loadSound = async (path) => {
@@ -620,8 +621,14 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 	}
 };
 
-const drawDecal = (ctx, x, y, name) => {
-	const frame = resources.backgroundsAtlas[name];
+const drawDecal = (ctx, x, y, name, game) => {
+	let atlas = resources[game === "Junkbot Undercover" ? "backgroundsUndercoverAtlas" : "backgroundsAtlas"];
+	let frame = atlas[name];
+	if (!frame) {
+		atlas = resources.backgroundsAtlas;
+		frame = atlas[name];
+	}
+	const image = resources[atlas === resources.backgroundsUndercoverAtlas ? "backgroundsUndercover" : "backgrounds"];
 	if (!frame) {
 		if (showDebug) {
 			drawText(ctx, `decal ${name} missing`, x, y, "sand");
@@ -629,7 +636,7 @@ const drawDecal = (ctx, x, y, name) => {
 		return;
 	}
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.backgrounds, left, top, width, height, x, y, width, height);
+	ctx.drawImage(image, left, top, width, height, x, y, width, height);
 };
 
 const drawBrick = (ctx, brick) => {
@@ -2415,16 +2422,16 @@ const animate = () => {
 	ctx.imageSmoothingEnabled = false;
 
 	if (currentLevel && currentLevel.backdropName) {
-		drawDecal(ctx, 9, -7, currentLevel.backdropName);
+		drawDecal(ctx, 9, -7, currentLevel.backdropName, currentLevel.game);
 	}
 	if (currentLevel && currentLevel.backgroundDecals) {
 		for (const { x, y, name } of currentLevel.backgroundDecals) {
-			drawDecal(ctx, x, y + Math.random() * 5, name, true);
+			drawDecal(ctx, x, y + Math.random() * 5, name, currentLevel.game);
 		}
 	}
 	if (currentLevel && currentLevel.decals) {
 		for (const { x, y, name } of currentLevel.decals) {
-			drawDecal(ctx, x - 15, y - 46, name);
+			drawDecal(ctx, x - 15, y - 46, name, currentLevel.game);
 		}
 	}
 
