@@ -227,10 +227,18 @@ const makeDrop = ({ x, y }) => {
 
 let resources;
 const resourcePaths = {
-	actors: "images/spritesheet.png",
-	actorsAtlas: "images/spritesheet.json",
-	backgrounds: "images/backgrounds-spritesheet.png",
-	backgroundsAtlas: "images/backgrounds-spritesheet.json",
+	sprites: "images/spritesheets/sprites.png",
+	spritesAtlas: "images/spritesheets/sprites.json",
+	backgrounds: "images/spritesheets/backgrounds.png",
+	backgroundsAtlas: "images/spritesheets/backgrounds.json",
+	// menus: "images/spritesheets/menus.png",
+	// menusAtlas: "images/spritesheets/menus.json",
+	spritesUndercover: "images/spritesheets/Undercover Exclusive/sprites.png",
+	spritesUndercoverAtlas: "images/spritesheets/Undercover Exclusive/sprites.json",
+	backgroundsUndercover: "images/spritesheets/Undercover Exclusive/backgrounds.png",
+	backgroundsUndercoverAtlas: "images/spritesheets/Undercover Exclusive/backgrounds.json",
+	// menusUndercover: "images/spritesheets/Undercover Exclusive/menus.png",
+	// menusUndercoverAtlas: "images/spritesheets/Undercover Exclusive/menus.json",
 	font: "images/font.png",
 	turn: "audio/sound-effects/turn1.ogg",
 	blockPickUp: "audio/sound-effects/blockpickup.ogg",
@@ -295,11 +303,6 @@ const loadJSON = async (path) => {
 	}
 };
 
-// const loadRozniacAtlasJSON = async (path) => {
-// 	return Object.fromEntries((await loadJSON(path)).map(
-// 		({ Name, Bounds }) => [Name, { bounds: Bounds.split(", ").map((numberString) => Number(numberString)) }]
-// 	));
-// };
 const loadAtlasJSON = async (path) => {
 	const { frames, animations } = await loadJSON(path);
 	const result = {};
@@ -441,10 +444,7 @@ const loadSound = async (path) => {
 
 const loadResources = async (resourcePathsByID) => {
 	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path]) => {
-		// if (path.match(/atlas\.json$/i)) {
-		// 	return loadRozniacAtlasJSON(path).then((atlas) => [id, atlas]);
-		// } else
-		if (path.match(/spritesheet\.json$/i)) {
+		if (path.match(/spritesheets\/.*\.json$/i)) {
 			return loadAtlasJSON(path).then((atlas) => [id, atlas]);
 		} else if (path.match(/\.json$/i)) {
 			// return loadJSON(path).then((data) => [id, data]);
@@ -600,30 +600,30 @@ const drawDecal = (ctx, x, y, name) => {
 };
 
 const drawBrick = (ctx, brick) => {
-	const frame = resources.actorsAtlas[`brick_${brick.colorName === "gray" ? "immobile" : brick.colorName}_${brick.widthInStuds}`];
+	const frame = resources.spritesAtlas[`brick_${brick.colorName === "gray" ? "immobile" : brick.colorName}_${brick.widthInStuds}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, brick.x, brick.y + brick.height - height - 1, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, brick.x, brick.y + brick.height - height - 1, width, height);
 };
 
 const drawBin = (ctx, bin) => {
-	const frame = resources.actorsAtlas.bin;
+	const frame = resources.spritesAtlas.bin;
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, bin.x + 4, bin.y + bin.height - height - 5, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, bin.x + 4, bin.y + bin.height - height - 5, width, height);
 };
 
 const drawFire = (ctx, entity) => {
 	const frameIndex = entity.on ? Math.floor(entity.animationFrame % 8 < 4 ? entity.animationFrame % 4 : 4 - (entity.animationFrame % 4)) : 0;
 	// console.log(`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`);
-	const frame = resources.actorsAtlas[`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
 };
 
 const drawFan = (ctx, entity) => {
 	const frameIndex = entity.on ? Math.floor(entity.animationFrame % 4) : 0;
-	const frame = resources.actorsAtlas[`haz_slickFan_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`haz_slickFan_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
 };
 
 const drawWind = (ctx, fan, extents) => {
@@ -638,37 +638,37 @@ const drawWind = (ctx, fan, extents) => {
 			}
 			extent += 1;
 			const frameIndex = Math.floor(fan.animationFrame % 7);
-			const frame = resources.actorsAtlas[`fanAir_1_${1 + frameIndex}`];
+			const frame = resources.spritesAtlas[`fanAir_1_${1 + frameIndex}`];
 			const [left, top, width, height] = frame.bounds;
-			ctx.drawImage(resources.actors, left, top, width, height, x + 4, y - frameIndex * 2 + 8, width, height);
+			ctx.drawImage(resources.sprites, left, top, width, height, x + 4, y - frameIndex * 2 + 8, width, height);
 		}
 	}
 };
 
 const drawJump = (ctx, entity) => {
-	const frame = resources.actorsAtlas[`${entity.fixed ? "haz" : "brick"}_slickJump_dormant_1`];
+	const frame = resources.spritesAtlas[`${entity.fixed ? "haz" : "brick"}_slickJump_dormant_1`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
 const drawShield = (ctx, entity) => {
-	const frame = resources.actorsAtlas[`HAZ_SLICKSHIELD_${entity.used ? "OFF" : "ON"}`];
+	const frame = resources.spritesAtlas[`HAZ_SLICKSHIELD_${entity.used ? "OFF" : "ON"}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
 const drawSwitch = (ctx, entity) => {
-	const frame = resources.actorsAtlas[`haz_slickSwitch_${entity.on ? "on" : "off"}_1`];
+	const frame = resources.spritesAtlas[`haz_slickSwitch_${entity.on ? "on" : "off"}_1`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
 const drawPipe = (ctx, entity) => {
 	const wet = entity.timer > 54;
 	const frameIndex = Math.floor(wet ? entity.timer - 54 : 0);
-	const frame = resources.actorsAtlas[`haz_slickPipe_${wet ? "wet" : "dry"}_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`haz_slickPipe_${wet ? "wet" : "dry"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 11, entity.y - 12, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 11, entity.y - 12, width, height);
 	if (showDebug) {
 		drawText(ctx, String(entity.timer), entity.x, entity.y + entity.height + 5, "white");
 	}
@@ -676,28 +676,28 @@ const drawPipe = (ctx, entity) => {
 
 const drawDrop = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.splashing ? entity.animationFrame : 0);
-	const frame = resources.actorsAtlas[`drip_${entity.splashing ? "splashing" : "falling"}_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`drip_${entity.splashing ? "splashing" : "falling"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x + 15, entity.y, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 15, entity.y, width, height);
 };
 
 const drawGearbot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 2);
-	const frame = resources.actorsAtlas[`gearbot_walk_${entity.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`gearbot_walk_${entity.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 const drawClimbbot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 6);
-	const frame = resources.actorsAtlas[`climbbot_walk_${entity.facingY === 1 ? "d" : entity.facingY === -1 ? "u" : entity.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`climbbot_walk_${entity.facingY === 1 ? "d" : entity.facingY === -1 ? "u" : entity.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y - 6, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y - 6, width, height);
 };
 const drawFlybot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 2);
-	const frame = resources.actorsAtlas[`flybot_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`flybot_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.actors, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
 const drawJunkbot = (ctx, junkbot) => {
@@ -723,14 +723,14 @@ const drawJunkbot = (ctx, junkbot) => {
 		}
 	}
 	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.gettingShield ? 11 : junkbot.collectingBin ? 17 : 10));
-	const frame = resources.actorsAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
 	const alignLeft = !(animName.match(/dead|die|eat/) || junkbot.facing === -1);
 	if (alignLeft) {
-		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
+		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	} else {
-		ctx.drawImage(resources.actors, left, top, width, height, junkbot.x + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
+		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	}
 };
 
