@@ -132,6 +132,18 @@ const makeFlybot = ({ x, y, facing = 1 }) => {
 		animationFrame: 0,
 	};
 };
+const makeEyebot = ({ x, y, facing = 1, facingY = 0 }) => {
+	return {
+		type: "eyebot",
+		x,
+		y,
+		width: 2 * 15,
+		height: 2 * 18,
+		facing,
+		facingY,
+		animationFrame: 0,
+	};
+};
 const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 	return {
 		type: "bin",
@@ -396,6 +408,8 @@ const loadLevelFromText = (levelData, game) => {
 					entities.push(makeClimbbot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1, facingY: animationName.match(/_U/i) ? -1 : animationName.match(/_D/i) ? 1 : 0 }));
 				} else if (typeName === "haz_dumbfloat") {
 					entities.push(makeFlybot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
+				} else if (typeName === "haz_float") {
+					entities.push(makeEyebot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing: animationName.match(/_L/i) ? -1 : 1 }));
 				} else if (typeName === "haz_slickcrate") {
@@ -776,6 +790,12 @@ const drawFlybot = (ctx, entity) => {
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
+const drawEyebot = (ctx, entity) => {
+	const frameIndex = Math.floor(entity.animationFrame % 2);
+	const frame = resources.spritesAtlas[`eyebot_${1 + frameIndex}`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+};
 
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
@@ -879,6 +899,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "flybot":
 			drawFlybot(ctx, entity);
+			break;
+		case "eyebot":
+			drawEyebot(ctx, entity);
 			break;
 		case "bin":
 			drawBin(ctx, entity);
@@ -2109,6 +2132,11 @@ const simulateFlybot = (flybot) => {
 	}
 };
 
+const simulateEyebot = (eyebot) => {
+	// TODO
+	simulateFlybot(eyebot);
+};
+
 const simulateClimbbot = (climbbot) => {
 	climbbot.animationFrame += 0.25;
 	if (climbbot.animationFrame > 6) {
@@ -2253,6 +2281,8 @@ const simulate = (entities) => {
 				simulateClimbbot(entity);
 			} else if (entity.type === "flybot") {
 				simulateFlybot(entity);
+			} else if (entity.type === "eyebot") {
+				simulateEyebot(entity);
 			} else if (entity.type === "pipe") {
 				simulatePipe(entity);
 			} else if (entity.type === "drop") {
@@ -2853,6 +2883,10 @@ const initUI = () => {
 		x: 0,
 		y: 0,
 		facing: 1,
+	}));
+	makeInsertEntityButton(makeEyebot({
+		x: 0,
+		y: 0,
 	}));
 
 	let lastScrollSoundTime = Date.now(); // not 0 because a random scroll event happens on page load; don't want page load to make a sound
