@@ -195,6 +195,17 @@ const makeSwitch = ({ x, y, on, switchID }) => {
 		fixed: true,
 	};
 };
+const makeTeleport = ({ x, y, teleportID }) => {
+	return {
+		type: "teleport",
+		x,
+		y,
+		width: 4 * 15,
+		height: 1 * 18,
+		teleportID,
+		fixed: true,
+	};
+};
 const makeJump = ({ x, y, fixed }) => {
 	return {
 		type: "jump",
@@ -388,6 +399,8 @@ const loadLevelFromText = (levelData) => {
 					entities.push(makeLaser({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6], facing: 1 }));
 				} else if (typeName === "haz_slickswitch") {
 					entities.push(makeSwitch({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
+				} else if (typeName === "haz_slickteleport") {
+					entities.push(makeTeleport({ x, y, teleportID: e[6] }));
 				} else if (typeName === "haz_slickjump") {
 					entities.push(makeJump({ x, y, fixed: true }));
 				} else if (typeName === "brick_slickjump") {
@@ -620,7 +633,7 @@ const drawDecal = (ctx, x, y, name) => {
 };
 
 const drawBrick = (ctx, brick) => {
-	const frame = resources.spritesAtlas[`brick_${brick.colorName === "gray" ? "immobile" : brick.colorName}_${brick.widthInStuds}`];
+	const frame = resources.spritesAtlas[`brick_${(brick.colorName || "gray") === "gray" ? "immobile" : brick.colorName}_${brick.widthInStuds || 2}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.sprites, left, top, width, height, brick.x, brick.y + brick.height - height - 1, width, height);
 };
@@ -688,6 +701,13 @@ const drawLaser = (ctx, entity) => {
 	} else {
 		ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x, entity.y + entity.height - 1 - height, width, height);
 	}
+};
+
+const drawTeleport = (ctx, entity) => {
+	// const frameIndex = Math.floor(entity.animationFrame % 2 : 0);
+	const frame = resources.spritesUndercoverAtlas[`haz_slickTeleport_${entity.on ? "on" : "off"}_1`];
+	const [left, top, width, height] = frame.bounds;
+	ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
 const drawSwitch = (ctx, entity) => {
@@ -847,6 +867,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "laser":
 			drawLaser(ctx, entity);
+			break;
+		case "teleport":
+			drawTeleport(ctx, entity);
 			break;
 		case "jump":
 			drawJump(ctx, entity);
@@ -2732,6 +2755,12 @@ const initUI = () => {
 		on: true,
 		switchID: "switch1",
 		facing: -1,
+	}));
+
+	makeInsertEntityButton(makeTeleport({
+		x: 0,
+		y: 0,
+		teleportID: "tele1",
 	}));
 
 	makeInsertEntityButton(makeJump({
