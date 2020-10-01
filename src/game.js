@@ -800,9 +800,9 @@ let keys = {};
 let entities = [];
 let wind = [];
 // acceleration structures
-const entitiesByTopY = {}; // y to array of entities with that y as their top
-const entitiesByBottomY = {}; // y to array of entities with that y as their bottom
-const lastKeys = new Map(); // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
+let entitiesByTopY = {}; // y to array of entities with that y as their top
+let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
+let lastKeys = new Map(); // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
 
 const entityMoved = (entity) => {
 	const yKeys = lastKeys.get(entity) || {};
@@ -2532,13 +2532,22 @@ const initUI = () => {
 				const prevMuted = muted;
 				const prevEntities = entities;
 				const prevWind = wind;
+				const prevEntitiesByTopY = entitiesByTopY;
+				const prevEntitiesByBottomY = entitiesByBottomY;
+				const prevLastKeys = lastKeys;
 				muted = true;
 				entities = [];
 				wind = [];
+				entitiesByTopY = {};
+				entitiesByBottomY = {};
+				lastKeys = new Map();
 				simulate([previewEntity]);
 				muted = prevMuted;
 				entities = prevEntities;
 				wind = prevWind;
+				entitiesByTopY = prevEntitiesByTopY;
+				entitiesByBottomY = prevEntitiesByBottomY;
+				lastKeys = prevLastKeys;
 				previewEntity.x = x;
 				previewEntity.y = y;
 				drawPreview();
