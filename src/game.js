@@ -700,14 +700,14 @@ const renderSelectionHilight = (width, height, depth = 10) => {
 	const ctx = canvas.getContext("2d");
 	ctx.fillStyle = "aqua";
 
-	ctx.translate(0, depth);
+	ctx.translate(depth, 0);
 	for (let z = 0; z <= 10; z++) {
 		if (z === 0 || z === 10) {
 			for (const x of [0, 0 + width]) {
-				ctx.fillRect(x, 0, 1, height);
+				ctx.fillRect(x, 0, 1, height + 1);
 			}
 			for (const y of [0, 0 + height]) {
-				ctx.fillRect(0, y, width, 1);
+				ctx.fillRect(0, y, width + 1, 1);
 			}
 		} else {
 			for (const x of [0, 0 + width]) {
@@ -715,9 +715,12 @@ const renderSelectionHilight = (width, height, depth = 10) => {
 					ctx.fillRect(x, y, 1, 1);
 				}
 			}
+			ctx.clearRect(1, 0, width - 1, 1);
+			ctx.clearRect(width, 1, 1, height - 1);
 		}
-		ctx.translate(1, -1);
+		ctx.translate(-1, 1);
 	}
+	ctx.clearRect(2, 0, width - 1, height - 1);
 
 	selectionHilightCanvases[key] = canvas;
 	return canvas;
