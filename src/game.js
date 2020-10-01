@@ -1877,17 +1877,16 @@ const rectangleCollisionTest = (x, y, width, height, filter) => {
 	for (const otherEntity of entities) {
 		if (
 			!otherEntity.grabbed &&
-			filter(otherEntity) && (
-				rectanglesIntersect(
-					x,
-					y,
-					width,
-					height,
-					otherEntity.x,
-					otherEntity.y,
-					otherEntity.width,
-					otherEntity.height,
-				)
+			filter(otherEntity) &&
+			rectanglesIntersect(
+				x,
+				y,
+				width,
+				height,
+				otherEntity.x,
+				otherEntity.y,
+				otherEntity.width,
+				otherEntity.height,
 			)
 		) {
 			return otherEntity;
@@ -1895,6 +1894,22 @@ const rectangleCollisionTest = (x, y, width, height, filter) => {
 	}
 	return null;
 };
+const rectangleCollisionAll = (x, y, width, height, filter) => (
+	entities.filter((otherEntity) => (
+		!otherEntity.grabbed &&
+		filter(otherEntity) &&
+		rectanglesIntersect(
+			x,
+			y,
+			width,
+			height,
+			otherEntity.x,
+			otherEntity.y,
+			otherEntity.width,
+			otherEntity.height,
+		)
+	))
+);
 const entityCollisionTest = (entityX, entityY, entity, filter) => (
 	// Note: make sure not to use entity.x/y!
 	rectangleCollisionTest(
@@ -1905,7 +1920,18 @@ const entityCollisionTest = (entityX, entityY, entity, filter) => (
 		(otherEntity) => otherEntity !== entity && filter(otherEntity)
 	)
 );
+const entityCollisionAll = (entityX, entityY, entity, filter) => (
+	// Note: make sure not to use entity.x/y!
+	rectangleCollisionAll(
+		entityX,
+		entityY,
+		entity.width,
+		entity.height,
+		(otherEntity) => otherEntity !== entity && filter(otherEntity)
+	)
+);
 const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => (
+	// Note: make sure not to use junkbot.x/y!
 	entityCollisionTest(junkbotX, junkbotY, junkbot, (otherEntity) => (
 		otherEntity.type === "bin"
 	))
@@ -2000,15 +2026,13 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-		let stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true);
-		while (stepOrWall && stepOrWall.type === "crate") {
-			const crate = stepOrWall;
-			if (entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, (otherEntity) => otherEntity.type !== "drop")) {
-				break;
+		const cratesInFront = entityCollisionAll(posInFront.x, posInFront.y, junkbot, (otherEntity) => otherEntity.type === "crate");
+		if (cratesInFront.every((crate) => !entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, (otherEntity) => otherEntity.type !== "drop"))) {
+			for (const crate of cratesInFront) {
+				crate.x += junkbot.facing * 15;
 			}
-			crate.x += junkbot.facing * 15;
-			stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true);
 		}
+		const stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true);
 		if (stepOrWall) {
 			// can we step up?
 			posInFront.y -= 18;
