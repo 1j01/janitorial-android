@@ -730,7 +730,7 @@ const drawJunkbot = (ctx, junkbot) => {
 
 const selectionHilightCanvases = {};
 const renderSelectionHilight = (width, height, depth = 10, studsOnTop = false) => {
-	const key = `${width}x${height}x${depth}`;
+	const key = `${width}x${height}x${depth} studsOnTop=${studsOnTop}`;
 	if (selectionHilightCanvases[key]) {
 		return selectionHilightCanvases[key];
 	}
