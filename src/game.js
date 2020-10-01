@@ -2916,14 +2916,14 @@ const main = async () => {
 	} catch (error) { }
 	resources = await loadResources(resourcePaths);
 
-	// try {
-	// 	deserialize(localStorage.JWorld);
-	// 	dragging = entities.filter((entity) => entity.grabbed);
-	// } catch (error) {
-	// 	// initTestLevel();
-	// 	deserialize(resources.world);
-	// }
-	loadLevelFromTextFile("levels/The Long Umbrella.txt").then(initLevel);
+	try {
+		deserialize(localStorage.JWorld);
+		dragging = entities.filter((entity) => entity.grabbed);
+	} catch (error) {
+		// initTestLevel();
+		deserialize(resources.world);
+	}
+	// loadLevelFromTextFile("levels/The Long Umbrella.txt").then(initLevel);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
