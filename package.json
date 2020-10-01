@@ -19,6 +19,7 @@
   "author": "Isaiah Odhner <isaiahodhner@gmail.com>",
   "scripts": {
     "start": "live-server",
+    "pack-spritesheets": "node pack-spritesheets.js",
     "lint": "eslint src/ .eslintrc.js"
   },
   "repository": {
@@ -29,6 +30,7 @@
     "url": "https://github.com/1j01/junkbot/issues"
   },
   "dependencies": {
+    "gamefroot-texture-packer": "^1.1.2",
     "live-server": "^1.2.1"
   },
   "devDependencies": {
