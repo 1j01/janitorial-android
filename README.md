@@ -12,7 +12,9 @@ Done so far:
 - Junkbot's movement, generally (no momentum when in air yet; and there will probably be edge cases with different blocks)
 - Loading the original level format
 - Fire bricks
+- Fans
 - Dripping pipes (except for random interval)
+- Gearbots, climbbots, flybots
 - Goal bins
 - Switches
 - Level editing functionality (not present in the original games)
@@ -20,7 +22,7 @@ Done so far:
 	- With sound effects taken from Lego Creator
 
 Partially done:
-- Shields, fans, and jump blocks
+- Shields, and jump blocks
 - I've started making a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo]; I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
 
 ## Controls
