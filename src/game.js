@@ -268,7 +268,7 @@ const resourcePaths = {
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
 	world: "levels/junkbot-world.json",
 	levelNames: "levels/%23%23%23LEVEL LISTING.txt",
-	// levelNames: "levels/Undercover Exclusive/%23%23%23LEVEL LISTING.txt",
+	levelNamesUndercover: "levels/Undercover Exclusive/%23%23%23LEVEL LISTING.txt",
 };
 const numRustles = 6;
 const numDrips = 3;
@@ -589,6 +589,12 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 
 const drawDecal = (ctx, x, y, name) => {
 	const frame = resources.backgroundsAtlas[name];
+	if (!frame) {
+		if (showDebug) {
+			drawText(ctx, `decal ${name} missing`, x, y, "sand");
+		}
+		return;
+	}
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.backgrounds, left, top, width, height, x, y, width, height);
 };
@@ -2758,20 +2764,28 @@ const initUI = () => {
 	option.textContent = "Custom World";
 	option.defaultSelected = true;
 	levelSelect.append(option);
-	for (const levelName of resources.levelNames) {
-		const option = document.createElement("option");
-		option.textContent = levelName;
-		levelSelect.append(option);
+	for (const game of ["Junkbot", "Junkbot Undercover"]) {
+		const optgroup = document.createElement("optgroup");
+		optgroup.label = game;
+		optgroup.value = game;
+		levelSelect.append(optgroup);
+		for (const levelName of resources[game === "Junkbot Undercover" ? "levelNamesUndercover" : "levelNames"]) {
+			const option = document.createElement("option");
+			option.textContent = levelName;
+			optgroup.append(option);
+		}
 	}
 	levelSelect.onchange = async () => {
+		const option = levelSelect.options[levelSelect.selectedIndex];
+		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
 		if (levelSelect.value === "Custom World") {
 			// openFromFile(), maybe?
 		} else {
 			const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.txt`;
-			const folder = "levels";
-			// const folder = "levels/Undercover Exclusive";
+			const game = optgroup ? optgroup.value : "Custom";
+			const folder = game === "Junkbot Undercover" ? "levels/Undercover Exclusive" : "levels";
 			try {
-				await loadLevelFromTextFile(`${folder}/${fileName}`).then(initLevel);
+				await loadLevelFromTextFile(`${folder}/${fileName}`, { game }).then(initLevel);
 			} catch (error) {
 				showMessageBox(`Failed to load level:\n\n${error}`);
 			}
