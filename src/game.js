@@ -192,14 +192,14 @@ const makeJump = ({ x, y, fixed }) => {
 		fixed,
 	};
 };
-const makeShield = ({ x, y, used = false }) => {
+const makeShield = ({ x, y, used = false, fixed = true }) => {
 	return {
 		type: "shield",
 		x,
 		y,
 		width: 2 * 15,
 		height: 1 * 18,
-		fixed: true,
+		fixed,
 		used,
 	};
 };
@@ -375,7 +375,9 @@ const loadLevelFromText = (levelData) => {
 				} else if (typeName === "brick_slickjump") {
 					entities.push(makeJump({ x, y, fixed: false }));
 				} else if (typeName === "haz_slickshield") {
-					entities.push(makeShield({ x, y, used: animationName === "off" }));
+					entities.push(makeShield({ x, y, used: animationName === "off", fixed: true }));
+				} else if (typeName === "brick_slickshield") {
+					entities.push(makeShield({ x, y, used: animationName === "off", fixed: false }));
 				} else if (typeName === "haz_slickpipe") {
 					entities.push(makePipe({ x, y }));
 				} else {
@@ -652,9 +654,11 @@ const drawJump = (ctx, entity) => {
 };
 
 const drawShield = (ctx, entity) => {
-	const frame = resources.spritesAtlas[`HAZ_SLICKSHIELD_${entity.used ? "OFF" : "ON"}`];
+	const atlas = resources[entity.fixed ? "spritesAtlas" : "spritesUndercoverAtlas"];
+	const image = resources[entity.fixed ? "sprites" : "spritesUndercover"];
+	const frame = atlas[`${entity.fixed ? "HAZ" : "BRICK"}_SLICKSHIELD_${entity.used ? "OFF" : "ON"}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+	ctx.drawImage(image, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
 const drawSwitch = (ctx, entity) => {
@@ -2710,6 +2714,12 @@ const initUI = () => {
 	makeInsertEntityButton(makeShield({
 		x: 0,
 		y: 0,
+		fixed: false,
+	}));
+	makeInsertEntityButton(makeShield({
+		x: 0,
+		y: 0,
+		fixed: true,
 	}));
 
 	makeInsertEntityButton(makePipe({
