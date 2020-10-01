@@ -1834,45 +1834,6 @@ const simulateGravity = () => {
 	}
 };
 
-const junkbotCollisionTest = (junkbotX, junkbotY, junkbot, irregular = false) => {
-	// Note: make sure not to use junkbot.x/y!
-	for (const otherEntity of entities) {
-		if (
-			!otherEntity.grabbed &&
-			otherEntity.type !== "bin" &&
-			// otherEntity.type !== "gearbot" &&
-			// otherEntity.type !== "climbbot" &&
-			// otherEntity.type !== "flybot" &&
-			// otherEntity.type !== "eyebot" &&
-			otherEntity.type !== "drop" &&
-			otherEntity !== junkbot && (
-				rectanglesIntersect(
-					junkbotX + (junkbot.facing === 1 ? 0 : 15),
-					junkbotY,
-					junkbot.width / 2,
-					junkbot.height,
-					otherEntity.x,
-					otherEntity.y,
-					otherEntity.width,
-					otherEntity.height,
-				) ||
-				rectanglesIntersect(
-					junkbotX,
-					junkbotY + 18 * irregular,
-					junkbot.width,
-					junkbot.height - 18 * irregular,
-					otherEntity.x,
-					otherEntity.y,
-					otherEntity.width,
-					otherEntity.height,
-				)
-			)
-		) {
-			return otherEntity;
-		}
-	}
-	return null;
-};
 const rectangleCollisionTest = (x, y, width, height, filter) => {
 	for (const otherEntity of entities) {
 		if (
@@ -1930,6 +1891,13 @@ const entityCollisionAll = (entityX, entityY, entity, filter) => (
 		(otherEntity) => otherEntity !== entity && filter(otherEntity)
 	)
 );
+const junkbotCollisionTest = (junkbotX, junkbotY, junkbot) => (
+	// Note: make sure not to use junkbot.x/y!
+	entityCollisionTest(junkbotX, junkbotY, junkbot, (otherEntity) => (
+		otherEntity.type !== "bin" &&
+		otherEntity.type !== "drop"
+	))
+);
 const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => (
 	// Note: make sure not to use junkbot.x/y!
 	entityCollisionTest(junkbotX, junkbotY, junkbot, (otherEntity) => (
@@ -1955,6 +1923,70 @@ const hurtJunkbot = (junkbot, cause) => {
 		} else {
 			playSound("deathByBot");
 		}
+	}
+};
+
+const isEnemyBot = (entity) => (
+	entity.type === "gearbot" ||
+	entity.type === "climbbot" ||
+	entity.type === "flybot" ||
+	entity.type === "eyebot"
+);
+
+const walk = (junkbot) => {
+	const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
+	let stepOrWallOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot);
+	if (stepOrWallOrEnemy) {
+		// can we step up?
+		const posStepUp = { x: posInFront.x, y: stepOrWallOrEnemy.y - junkbot.height };
+		if (
+			posStepUp.y - junkbot.y >= -18 &&
+			!junkbotCollisionTest(posStepUp.x, posStepUp.y, junkbot) &&
+			!isEnemyBot(stepOrWallOrEnemy)
+		) {
+			debugJunkbot("STEP UP");
+			junkbot.x = posStepUp.x;
+			junkbot.y = posStepUp.y;
+			entityMoved(junkbot);
+			return;
+		}
+	}
+	// is there solid ground ahead to walk on?
+	const ground = junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot);
+	if (
+		ground &&
+		!isEnemyBot(ground) &&
+		!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot)
+	) {
+		debugJunkbot("WALK");
+		junkbot.x = posInFront.x;
+		junkbot.y = posInFront.y;
+		entityMoved(junkbot);
+		return;
+	}
+	stepOrWallOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y + 18 + 1, junkbot);
+	if (stepOrWallOrEnemy) {
+		// can we step down?
+		const posStepDown = { x: posInFront.x, y: stepOrWallOrEnemy.y - junkbot.height };
+		const step = junkbotCollisionTest(posStepDown.x, posStepDown.y + 1, junkbot);
+		if (
+			step &&
+			!isEnemyBot(step) &&
+			!junkbotCollisionTest(posStepDown.x, posStepDown.y, junkbot)
+		) {
+			debugJunkbot("STEP DOWN");
+			junkbot.x = posStepDown.x;
+			junkbot.y = posStepDown.y;
+			entityMoved(junkbot);
+			return;
+		}
+	}
+	if (junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot)) {
+		debugJunkbot("CLIFF/WALL/BOT - TURN AROUND");
+		junkbot.facing *= -1;
+		playSound("turn");
+	} else {
+		debugJunkbot("FALLING");
 	}
 };
 
@@ -2032,60 +2064,7 @@ const simulateJunkbot = (junkbot) => {
 				crate.x += junkbot.facing * 15;
 			}
 		}
-		const stepOrWall = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true);
-		if (stepOrWall) {
-			// can we step up?
-			posInFront.y -= 18;
-			if (!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot) && stepOrWall.type !== "gearbot" && stepOrWall.type !== "climbbot" && stepOrWall.type !== "flybot" && stepOrWall.type !== "eyebot") {
-				// step up
-				debugJunkbot("STEP UP");
-				junkbot.x = posInFront.x;
-				junkbot.y = posInFront.y;
-				entityMoved(junkbot);
-			} else {
-				// reached wall; turn around
-				debugJunkbot("WALL - TURN AROUND");
-				junkbot.facing *= -1;
-				playSound("turn");
-			}
-		} else {
-			// is there solid ground ahead to walk on?
-			const ground = junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot, true);
-			if (
-				ground && !junkbotCollisionTest(posInFront.x, posInFront.y, junkbot) &&
-				ground.type !== "gearbot" && ground.type !== "climbbot" && ground.type !== "flybot" && ground.type !== "eyebot"
-			) {
-				// what about that triangle tho
-				if (junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot)) {
-					debugJunkbot("WALK");
-					junkbot.x = posInFront.x;
-					junkbot.y = posInFront.y;
-					entityMoved(junkbot);
-				} else {
-					debugJunkbot("NOPE");
-					junkbot.facing *= -1;
-					playSound("turn");
-				}
-			} else {
-				// can we step down?
-				posInFront.y += 18;
-				const step = junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot, true);
-				if (step && !junkbotCollisionTest(posInFront.x, posInFront.y, junkbot, true) && step.type !== "gearbot" && step.type !== "climbbot" && step.type !== "flybot" && step.type !== "eyebot") {
-					// step down
-					debugJunkbot("STEP DOWN");
-					junkbot.x = posInFront.x;
-					junkbot.y = posInFront.y;
-					entityMoved(junkbot);
-				} else if (junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot)) {
-					// reached cliff/ledge/edge/precipice or wall would bonk head; turn around
-					debugJunkbot("CLIFF/WALL - TURN AROUND");
-					junkbot.facing *= -1;
-					playSound("turn");
-				} else {
-					debugJunkbot("FALLING");
-				}
-			}
-		}
+		walk(junkbot);
 		const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
 		for (const groundLevelEntity of groundLevelEntities) {
 			if (groundLevelEntity.x <= junkbot.x && groundLevelEntity.x + groundLevelEntity.width >= junkbot.x + junkbot.width) {
