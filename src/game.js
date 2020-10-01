@@ -169,6 +169,20 @@ const makeFan = ({ x, y, on, switchID }) => {
 		fixed: true,
 	};
 };
+const makeLaser = ({ x, y, on, switchID, facing }) => {
+	return {
+		type: "laser",
+		x,
+		y,
+		width: 2 * 15,
+		height: 1 * 18,
+		on,
+		switchID,
+		animationFrame: 0,
+		facing,
+		fixed: true,
+	};
+};
 const makeSwitch = ({ x, y, on, switchID }) => {
 	return {
 		type: "switch",
@@ -368,6 +382,10 @@ const loadLevelFromText = (levelData) => {
 					entities.push(makeFire({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slickfan") {
 					entities.push(makeFan({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
+				} else if (typeName === "haz_slicklaser_l") {
+					entities.push(makeLaser({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6], facing: -1 }));
+				} else if (typeName === "haz_slicklaser_r") {
+					entities.push(makeLaser({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6], facing: 1 }));
 				} else if (typeName === "haz_slickswitch") {
 					entities.push(makeSwitch({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slickjump") {
@@ -661,6 +679,17 @@ const drawShield = (ctx, entity) => {
 	ctx.drawImage(image, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
 
+const drawLaser = (ctx, entity) => {
+	const frame = resources.spritesUndercoverAtlas[`haz_slickLaser_${entity.facing === 1 ? "R" : "L"}_ON_1`];
+	const [left, top, width, height] = frame.bounds;
+	const alignRight = entity.facing === 1;
+	if (alignRight) {
+		ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x + entity.width - width + 11, entity.y + entity.height - 1 - height, width, height);
+	} else {
+		ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x, entity.y + entity.height - 1 - height, width, height);
+	}
+};
+
 const drawSwitch = (ctx, entity) => {
 	const frame = resources.spritesAtlas[`haz_slickSwitch_${entity.on ? "on" : "off"}_1`];
 	const [left, top, width, height] = frame.bounds;
@@ -815,6 +844,9 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "fan":
 			drawFan(ctx, entity);
+			break;
+		case "laser":
+			drawLaser(ctx, entity);
 			break;
 		case "jump":
 			drawJump(ctx, entity);
@@ -2685,6 +2717,21 @@ const initUI = () => {
 		y: 0,
 		on: true,
 		switchID: "switch1",
+	}));
+
+	makeInsertEntityButton(makeLaser({
+		x: 0,
+		y: 0,
+		on: true,
+		switchID: "switch1",
+		facing: 1,
+	}));
+	makeInsertEntityButton(makeLaser({
+		x: 0,
+		y: 0,
+		on: true,
+		switchID: "switch1",
+		facing: -1,
 	}));
 
 	makeInsertEntityButton(makeJump({
