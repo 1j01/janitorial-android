@@ -1461,7 +1461,7 @@ const possibleGrabs = () => {
 				for (const entity of entitiesToCheck2) {
 					if (
 						!entity.fixed &&
-						entity.type === "brick" &&
+						(entity.type === "brick" || entity.type === "jump" || entity.type === "shield") &&
 						brick.x + brick.width > entity.x &&
 						brick.x < entity.x + entity.width &&
 						attached.indexOf(entity) === -1 &&
@@ -1500,7 +1500,7 @@ const possibleGrabs = () => {
 		grabs.push(grabs.selection = entities.filter((entity) => entity.selected));
 		return grabs;
 	}
-	if (brick.type !== "brick" || brick.fixed) {
+	if (brick.fixed || (brick.type !== "brick" && brick.type !== "jump" && brick.type !== "shield")) {
 		if (editing) {
 			grabs.push([brick]);
 			return grabs;
