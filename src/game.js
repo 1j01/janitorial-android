@@ -2111,9 +2111,8 @@ const simulateGearbot = (gearbot) => {
 		if (ahead) {
 			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
 				hurtJunkbot(ahead, "bot");
-			} else if (ahead.type !== "junkbot") {
-				gearbot.facing *= -1;
 			}
+			gearbot.facing *= -1;
 		} else if (groundAhead) {
 			gearbot.x = aheadPos.x;
 			gearbot.y = aheadPos.y;
