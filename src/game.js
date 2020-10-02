@@ -392,6 +392,7 @@ const loadLevelFromText = (levelData, game) => {
 				// [3] - color index (in the colors array)
 				// [4] - starting animation name (0 for objects that don't animate)
 				// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
+				// [6] - object relation ID, either a teleporter or a switch; two teleporters can reference each other with the same ID
 				const x = e[0] * 15;
 				const y = e[1] * 18;
 				const typeName = types[e[2] - 1].toLowerCase();
@@ -956,7 +957,7 @@ let keys = {};
 
 let entities = [];
 let wind = [];
-let currentLevel;
+let currentLevel = { entities, title: "Custom World" };
 // acceleration structures
 let entitiesByTopY = {}; // y to array of entities with that y as their top
 let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
@@ -1000,16 +1001,129 @@ const mouse = { x: undefined, y: undefined };
 let dragging = [];
 let selectionBox;
 
-const serialize = () => {
-	return JSON.stringify({ version: 0.1, format: "janitorial-android", entities }, (name, value) => {
+const serializeToJSON = () => {
+	return JSON.stringify({ version: 0.2, format: "janitorial-android", entities, level: currentLevel }, (name, value) => {
 		if (name === "grabbed" || name === "grabOffset") {
 			return undefined;
 		}
 		return value;
 	}, "\t");
 };
-const deserialize = (json) => {
+const serializeLevel = (level) => {
+	// let text = [];
+	// const addSection = (name, keyValuePairs) => {
+	// 	text += `[${name}]\n`;
+	// 	for (const [key, value] of keyValuePairs) {
+	// 		text += `${key}=${value}`;
+	// 	}
+	// 	text += "\n";
+	// };
+	// addSection("info", [
+	// 	["", ""]
+	// ]);
+	const types = [];
+	const unknownTypeMappings = [];
+	const parts = [];
+	// console.log(level.entities);
+	for (const entity of level.entities) {
+		let type;
+		if (entity.type === "brick") {
+			type = `brick_${String(entity.widthInStuds).padStart(2, "0")}`;
+		} else if (entity.type === "jump") {
+			type = `${entity.fixed ? "haz" : "brick"}_slickjump`;
+		} else if (entity.type === "shield") {
+			type = `${entity.fixed ? "haz" : "brick"}_slickshield`;
+		} else if (entity.type === "laser") {
+			type = `haz_slicklaser_${entity.facing === 1 ? "r" : "l"}`;
+		} else {
+			type = {
+				junkbot: "minifig",
+				gearbot: "haz_walker",
+				climbbot: "haz_climber",
+				flybot: "haz_dumbfloat",
+				eyebot: "haz_float",
+				bin: "flag",
+				crate: "haz_slickcrate",
+				fire: "haz_slickfire",
+				fan: "haz_slickfan",
+				switch: "haz_slickswitch",
+				teleport: "haz_slickteleport",
+				pipe: "haz_slickpipe",
+			}[entity.type];
+		}
+		if (type) {
+			if (types.indexOf(type) === -1) {
+				types.push(type);
+			}
+			// [0] - x coordinate
+			// [1] - y coordinate
+			// [2] - type index (in the types array)
+			// [3] - color index (in the colors array)
+			// [4] - starting animation name (0 for objects that don't animate)
+			// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
+			// [6] - object relation ID, either a teleporter or a switch; two teleporters can reference each other with the same ID
+			// TODO: 1-based x/y
+			const x = entity.x / 15;
+			const y = (entity.y + entity.height) / 18 - 1;
+			const typeIndex = types.indexOf(type);
+			const colorIndex = brickColorNames.indexOf(entity.colorName || "red");
+			let animationName;
+			if ("on" in entity) {
+				animationName = entity.on ? "on" : "off";
+			} else if (entity.type === "flybot" || entity.type === "eyebot") {
+				if (entity.facingY === -1) {
+					animationName = "U";
+				} else if (entity.facingY === 1) {
+					animationName = "D";
+				} else if (entity.facing === -1) {
+					animationName = "L";
+				} else {
+					animationName = "R";
+				}
+			} else if ("facing" in entity) {
+				animationName = entity.facing > 0 ? "walk_r" : "walk_l";
+			} else if (entity.type === "jump") {
+				animationName = "dormant";
+			} else if (entity.type === "pipe") {
+				animationName = "dry";
+			} else {
+				animationName = "";
+			}
+			parts.push(`${x};${y};${typeIndex + 1};${colorIndex + 1};${animationName};${entity.animationFrame || 1};${entity.switchID || entity.teleportID || ""}`);
+		} else {
+			unknownTypeMappings.push(entity.type);
+		}
+	}
+	if (unknownTypeMappings.length) {
+		showMessageBox(`Unknown type mappings for entity types:\n\n${unknownTypeMappings.join("\n")}`);
+	}
+	const stringifyDecals = (decals = []) => decals.map(({ x, y, name }) => `${x};${y};${name}`).join(",");
+	return `[info]
+title=${level.title || "Saved World"}
+par=${isFinite(level.par) ? level.par : 10000}
+hint=${level.hint || ""}
+
+[playfield]
+size=35,22
+spacing=15,18
+scale=1
+
+[background]
+backdrop=${level.backdropName || ""}
+decals=${stringifyDecals(level.decals)}
+bgdecals=${stringifyDecals(level.backgroundDecals)}
+
+[partslist]
+types=${types.join(",")}
+colors=${brickColorNames.join(",")}
+parts=${parts.join(",")}
+`;
+};
+const deserializeJSON = (json) => {
 	const state = JSON.parse(json);
+	if (state.level) {
+		currentLevel = state.level;
+	}
 	entities = state.entities;
 	entitiesByTopY = {};
 	entitiesByBottomY = {};
@@ -1023,15 +1137,30 @@ const deserialize = (json) => {
 	didWinOrLose = winOrLose();
 };
 const save = () => {
-	localStorage.JWorld = serialize();
+	localStorage.JunkbotLevel = serializeLevel(currentLevel);
+	localStorage.JWorld = serializeToJSON();
 };
 
-const saveToFile = () => {
+const saveToJSONFile = () => {
 	const file = new Blob([localStorage.JWorld], { type: "application/json" });
 	const a = document.createElement("a");
 	const url = URL.createObjectURL(file);
 	a.href = url;
 	a.download = "junkbot-world.json";
+	document.body.appendChild(a);
+	a.click();
+	setTimeout(() => {
+		document.body.removeChild(a);
+		window.URL.revokeObjectURL(url);
+	}, 0);
+};
+
+const saveToFile = () => {
+	const file = new Blob([localStorage.JunkbotLevel], { type: "text/plain" });
+	const a = document.createElement("a");
+	const url = URL.createObjectURL(file);
+	a.href = url;
+	a.download = "junkbot-world.txt";
 	document.body.appendChild(a);
 	a.click();
 	setTimeout(() => {
@@ -1049,7 +1178,11 @@ const openFromFile = () => {
 		reader.onload = (readerEvent) => {
 			const content = readerEvent.target.result;
 			try {
-				deserialize(content);
+				if (content.match(/^\s*{/)) {
+					deserializeJSON(content);
+				} else {
+					initLevel(loadLevelFromText(content));
+				}
 			} catch (error) {
 				showMessageBox(`Failed to load from file:\n\n${error}`);
 			}
@@ -1063,7 +1196,7 @@ const openFromFile = () => {
 };
 
 const undoable = (fn) => {
-	undos.push(serialize());
+	undos.push(serializeToJSON());
 	redos.length = 0;
 	if (fn) {
 		fn();
@@ -1074,8 +1207,8 @@ const undoOrRedo = (undos, redos) => {
 	if (undos.length === 0) {
 		return false;
 	}
-	redos.push(serialize());
-	deserialize(undos.pop());
+	redos.push(serializeToJSON());
+	deserializeJSON(undos.pop());
 	save();
 	return true;
 };
@@ -3028,11 +3161,11 @@ const main = async () => {
 	resources = await loadResources(resourcePaths);
 
 	try {
-		deserialize(localStorage.JWorld);
+		deserializeJSON(localStorage.JWorld);
 		dragging = entities.filter((entity) => entity.grabbed);
 	} catch (error) {
 		// initTestLevel();
-		deserialize(resources.world);
+		deserializeJSON(resources.world);
 	}
 	// loadLevelFromTextFile("levels/The Long Umbrella.txt").then(initLevel);
 	for (const [colorName, color] of Object.entries(fontColors)) {
