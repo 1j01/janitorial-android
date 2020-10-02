@@ -1442,6 +1442,10 @@ const updateMouseWorldPosition = () => {
 	const worldPos = canvasToWorld(mouse.x, mouse.y);
 	mouse.worldX = worldPos.x;
 	mouse.worldY = worldPos.y;
+	if (selectionBox) {
+		selectionBox.x2 = mouse.worldX;
+		selectionBox.y2 = mouse.worldY;
+	}
 };
 const updateMouse = (event) => {
 	mouse.x = event.offsetX;
@@ -1674,9 +1678,6 @@ canvas.addEventListener("mousemove", (event) => {
 			startGrab(pendingGrabs.downward);
 			pendingGrabs = [];
 		}
-	} else if (selectionBox) {
-		selectionBox.x2 = mouse.worldX;
-		selectionBox.y2 = mouse.worldY;
 	}
 });
 canvas.addEventListener("mousedown", (event) => {
