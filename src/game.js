@@ -2699,7 +2699,7 @@ const animate = () => {
 
 	ctx.strokeStyle = "black";
 	ctx.lineWidth = 1;
-	ctx.strokeRect(levelBounds.x - 0.5, levelBounds.y - 0.5, levelBounds.width + 2, levelBounds.height + 2);
+	ctx.strokeRect(levelBounds.x - 0.5, levelBounds.y - 0.5, levelBounds.width + 1, levelBounds.height + 1);
 
 	ctx.restore(); // world viewport
 
