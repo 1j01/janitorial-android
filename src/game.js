@@ -1512,7 +1512,7 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {}) => {
 	const visited = [];
 	const search = (fromEntity) => {
-		if (fromEntity.y + fromEntity.height >= levelBoundBottom) {
+		if (fromEntity.y + fromEntity.height >= levelBounds.y + levelBounds.height) {
 			// for case of non-fixed brick at bottom of level
 			// which shouldn't happen in the game, but can happen in the editor
 			return true;
@@ -1826,22 +1826,24 @@ addEventListener("mouseup", () => {
 	}
 });
 
-const levelBoundLeft = 15;
-const levelBoundRight = 15 + 35 * 15;
-const levelBoundTop = 18;
-const levelBoundBottom = 18 + 22 * 18;
+const levelBounds = {
+	x: 15,
+	y: 18,
+	width: 35 * 15,
+	height: 22 * 18,
+};
 const rectangleLevelBoundsCollisionTest = (x, y, width, height) => {
-	if (x < levelBoundLeft) {
-		return { type: "levelBounds", x: levelBoundLeft - 15, y: levelBoundTop, width: 15, height: levelBoundBottom - levelBoundTop };
+	if (x < levelBounds.x) {
+		return { type: "levelBounds", x: levelBounds.x - 15, y: levelBounds.y, width: 15, height: levelBounds.height };
 	}
-	if (y < levelBoundTop) {
-		return { type: "levelBounds", x: levelBoundLeft, y: levelBoundTop - 18, width: levelBoundRight - levelBoundLeft, height: 18 };
+	if (y < levelBounds.y) {
+		return { type: "levelBounds", x: levelBounds.x, y: levelBounds.y - 18, width: levelBounds.width, height: 18 };
 	}
-	if (x + width > levelBoundRight) {
-		return { type: "levelBounds", x: levelBoundRight, y: levelBoundTop, width: 15, height: levelBoundBottom - levelBoundTop };
+	if (x + width > levelBounds.x + levelBounds.width) {
+		return { type: "levelBounds", x: levelBounds.x + levelBounds.width, y: levelBounds.y, width: 15, height: levelBounds.height };
 	}
-	if (y + height > levelBoundBottom) {
-		return { type: "levelBounds", x: levelBoundLeft, y: levelBoundBottom, width: levelBoundRight - levelBoundLeft, height: 18 };
+	if (y + height > levelBounds.y + levelBounds.height) {
+		return { type: "levelBounds", x: levelBounds.x, y: levelBounds.y + levelBounds.height, width: levelBounds.width, height: 18 };
 	}
 };
 const rectangleCollisionTest = (x, y, width, height, filter) => {
@@ -2561,7 +2563,7 @@ const animate = () => {
 
 	ctx.strokeStyle = "black";
 	ctx.lineWidth = 1;
-	ctx.strokeRect(levelBoundLeft - 0.5, levelBoundTop - 0.5, levelBoundRight - levelBoundLeft + 2, levelBoundBottom - levelBoundTop + 2);
+	ctx.strokeRect(levelBounds.x - 0.5, levelBounds.y - 0.5, levelBounds.width + 2, levelBounds.height + 2);
 
 	ctx.restore(); // world viewport
 
