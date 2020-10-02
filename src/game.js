@@ -323,8 +323,8 @@ const resourcePaths = {
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
 	world: "levels/junkbot-world.json",
-	levelNames: "levels/LEVEL-LISTING.txt",
-	levelNamesUndercover: "levels/Undercover Exclusive/LEVEL-LISTING.txt",
+	levelNames: "levels/~LEVEL_LISTING.txt",
+	levelNamesUndercover: "levels/Undercover Exclusive/~LEVEL_LISTING.txt",
 };
 const numRustles = 6;
 const numDrips = 3;
