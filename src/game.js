@@ -2512,8 +2512,8 @@ const animate = () => {
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
 
-	if (currentLevel && currentLevel.backdropName) {
-		drawDecal(ctx, 9, -7, currentLevel.backdropName, currentLevel.game);
+	if (currentLevel) {
+		drawDecal(ctx, 9, -7, currentLevel.backdropName || "bkg1", currentLevel.game);
 	}
 	if (currentLevel && currentLevel.backgroundDecals) {
 		for (const { x, y, name } of currentLevel.backgroundDecals) {
