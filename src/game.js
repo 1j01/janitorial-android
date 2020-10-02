@@ -2064,9 +2064,10 @@ const simulateJunkbot = (junkbot) => {
 	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notBinOrDrop);
 	if (inside) {
 		debugInfoForJunkbot = "";
-		debugJunkbot("STUCK IN WALL - GO UP");
-		junkbot.y = inside.y - junkbot.height;
-		entityMoved(junkbot);
+		debugJunkbot("STUCK IN WALL");
+		// debugJunkbot("STUCK IN WALL - GO UP");
+		// junkbot.y = inside.y - junkbot.height;
+		// entityMoved(junkbot);
 		return;
 	}
 	if (junkbot.floating) {
