@@ -323,8 +323,8 @@ const resourcePaths = {
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
 	world: "levels/junkbot-world.json",
-	levelNames: "levels/%23%23%23LEVEL LISTING.txt",
-	levelNamesUndercover: "levels/Undercover Exclusive/%23%23%23LEVEL LISTING.txt",
+	levelNames: "levels/_LEVEL_LISTING.txt",
+	levelNamesUndercover: "levels/Undercover Exclusive/_LEVEL_LISTING.txt",
 };
 const numRustles = 6;
 const numDrips = 3;
@@ -510,7 +510,7 @@ const loadResources = async (resourcePathsByID) => {
 		} else if (path.match(/\.json$/i)) {
 			// return loadJSON(path).then((data) => [id, data]);
 			return loadTextFile(path).then((json) => [id, json]);
-		} else if (path.match(/levels\/.*(#|%23){3}.*\.txt$/i)) { // ###LEVEL LISTING.txt
+		} else if (path.match(/level.listing\.txt$/i)) {
 			return loadTextFile(path).then((text) => [id, text.trim().split(/\r?\n/g)]);
 		} else if (path.match(/levels\/.*\.txt$/i)) {
 			return loadLevelFromTextFile(path).then((level) => [id, level]);
