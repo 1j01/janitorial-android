@@ -2330,13 +2330,11 @@ const simulateClimbbot = (climbbot) => {
 			hurtJunkbot(ahead, "bot");
 		}
 		if (climbbot.facingY === -1) {
-			if (ahead) {
-				climbbot.facingY = 1;
-			} else if (!aside && groundAside) {
+			if (!aside && groundAside) {
 				climbbot.facingY = 0;
 				climbbot.x = asidePos.x;
 				climbbot.y = asidePos.y;
-			} else if (climbbot.energy > 0) {
+			} else if (climbbot.energy > 0 && !ahead) {
 				climbbot.energy -= 1;
 				climbbot.x = aheadPos.x;
 				climbbot.y = aheadPos.y;
