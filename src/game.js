@@ -393,8 +393,8 @@ const loadLevelFromText = (levelData, game) => {
 				// [4] - starting animation name (0 for objects that don't animate)
 				// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
 				// [6] - object relation ID, either a teleporter or a switch; two teleporters can reference each other with the same ID
-				const x = e[0] * 15;
-				const y = e[1] * 18;
+				const x = (e[0] - 1) * 15;
+				const y = (e[1] - 1) * 18;
 				const typeName = types[e[2] - 1].toLowerCase();
 				const colorName = colors[e[3] - 1].toLowerCase();
 				const animationName = e[4].toLowerCase();
@@ -1062,9 +1062,8 @@ const serializeLevel = (level) => {
 			// [4] - starting animation name (0 for objects that don't animate)
 			// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
 			// [6] - object relation ID, either a teleporter or a switch; two teleporters can reference each other with the same ID
-			// TODO: 1-based x/y
-			const x = entity.x / 15;
-			const y = (entity.y + entity.height) / 18 - 1;
+			const x = entity.x / 15 + 1;
+			const y = (entity.y + entity.height) / 18;
 			const typeIndex = types.indexOf(type);
 			const colorIndex = brickColorNames.indexOf(entity.colorName || "red");
 			let animationName;
@@ -1960,8 +1959,8 @@ addEventListener("mouseup", () => {
 });
 
 const levelBounds = {
-	x: 15,
-	y: 18,
+	x: 0,
+	y: 0,
 	width: 35 * 15,
 	height: 22 * 18,
 };
@@ -2648,7 +2647,7 @@ const animate = () => {
 	ctx.imageSmoothingEnabled = false;
 
 	if (currentLevel) {
-		drawDecal(ctx, 9, -7, currentLevel.backdropName || "bkg1", currentLevel.game);
+		drawDecal(ctx, -6, -25, currentLevel.backdropName || "bkg1", currentLevel.game);
 	}
 	if (currentLevel && currentLevel.backgroundDecals) {
 		for (const { x, y, name } of currentLevel.backgroundDecals) {
@@ -2657,7 +2656,7 @@ const animate = () => {
 	}
 	if (currentLevel && currentLevel.decals) {
 		for (const { x, y, name } of currentLevel.decals) {
-			drawDecal(ctx, x - 15, y - 46, name, currentLevel.game);
+			drawDecal(ctx, x - 15 * 2, y - 64, name, currentLevel.game);
 		}
 	}
 
