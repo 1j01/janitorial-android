@@ -1934,8 +1934,8 @@ const walk = (junkbot) => {
 		// can we step up?
 		const posStepUp = { x: posInFront.x, y: stepOrWall.y - junkbot.height };
 		if (
-			// posStepUp.y - junkbot.y >= -18 &&
-			posStepUp.y - junkbot.y === -18 &&
+			posStepUp.y - junkbot.y >= -18 &&
+			posStepUp.y - junkbot.y < 0 &&
 			!entityCollisionTest(posStepUp.x, posStepUp.y, junkbot, notBinOrDrop)
 		) {
 			debugJunkbot("STEP UP");
@@ -1957,15 +1957,16 @@ const walk = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	let step = entityCollisionTest(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropOrEnemyBot);
+	let step = entityCollisionAll(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropOrEnemyBot).sort((a, b) => a.y - b.y)[0];
 	if (step) {
 		// can we step down?
-		// debugJunkbot(`step: ${JSON.stringify(step)}`);
+		// debugJunkbot(`step: ${JSON.stringify(step, null, "\t")}`);
 		const posStepDown = { x: posInFront.x, y: step.y - junkbot.height };
-		step = entityCollisionTest(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropOrEnemyBot);
-		// debugJunkbot(`step: ${JSON.stringify(step)}`);
+		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropOrEnemyBot).sort((a, b) => a.y - b.y)[0];
+		// debugJunkbot(`step: ${JSON.stringify(step, null, "\t")}`);
 		if (
-			posStepDown.y - junkbot.y === 18 &&
+			posStepDown.y - junkbot.y <= 18 &&
+			posStepDown.y - junkbot.y > 0 &&
 			step &&
 			!entityCollisionTest(posStepDown.x, posStepDown.y, junkbot, notBinOrDrop)
 		) {
