@@ -1891,19 +1891,6 @@ const entityCollisionAll = (entityX, entityY, entity, filter) => (
 		(otherEntity) => otherEntity !== entity && filter(otherEntity)
 	)
 );
-const junkbotCollisionTest = (junkbotX, junkbotY, junkbot) => (
-	// Note: make sure not to use junkbot.x/y!
-	entityCollisionTest(junkbotX, junkbotY, junkbot, (otherEntity) => (
-		otherEntity.type !== "bin" &&
-		otherEntity.type !== "drop"
-	))
-);
-const junkbotBinCollisionTest = (junkbotX, junkbotY, junkbot) => (
-	// Note: make sure not to use junkbot.x/y!
-	entityCollisionTest(junkbotX, junkbotY, junkbot, (otherEntity) => (
-		otherEntity.type === "bin"
-	))
-);
 
 const hurtJunkbot = (junkbot, cause) => {
 	if (junkbot.dying || junkbot.dead || junkbot.grabbed) {
@@ -1926,23 +1913,30 @@ const hurtJunkbot = (junkbot, cause) => {
 	}
 };
 
-const isEnemyBot = (entity) => (
-	entity.type === "gearbot" ||
-	entity.type === "climbbot" ||
-	entity.type === "flybot" ||
-	entity.type === "eyebot"
+// i.e. space generally free
+const notBinOrDrop = (entity) => (
+	entity.type !== "bin" &&
+	entity.type !== "drop"
+);
+// i.e. good ground to walk on
+const notBinOrDropOrEnemyBot = (entity) => (
+	notBinOrDrop(entity) &&
+	entity.type !== "gearbot" &&
+	entity.type !== "climbbot" &&
+	entity.type !== "flybot" &&
+	entity.type !== "eyebot"
 );
 
 const walk = (junkbot) => {
 	const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-	const stepOrWallOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot);
-	if (stepOrWallOrEnemy && !isEnemyBot(stepOrWallOrEnemy)) {
+	const stepOrWall = entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDropOrEnemyBot);
+	if (stepOrWall) {
 		// can we step up?
-		const posStepUp = { x: posInFront.x, y: stepOrWallOrEnemy.y - junkbot.height };
+		const posStepUp = { x: posInFront.x, y: stepOrWall.y - junkbot.height };
 		if (
 			// posStepUp.y - junkbot.y >= -18 &&
 			posStepUp.y - junkbot.y === -18 &&
-			!junkbotCollisionTest(posStepUp.x, posStepUp.y, junkbot)
+			!entityCollisionTest(posStepUp.x, posStepUp.y, junkbot, notBinOrDrop)
 		) {
 			debugJunkbot("STEP UP");
 			junkbot.x = posStepUp.x;
@@ -1952,11 +1946,10 @@ const walk = (junkbot) => {
 		}
 	}
 	// is there solid ground ahead to walk on?
-	const groundOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot);
+	const ground = entityCollisionTest(posInFront.x, posInFront.y + 1, junkbot, notBinOrDropOrEnemyBot);
 	if (
-		groundOrEnemy &&
-		!isEnemyBot(groundOrEnemy) &&
-		!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot)
+		ground &&
+		!entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDrop)
 	) {
 		debugJunkbot("WALK");
 		junkbot.x = posInFront.x;
@@ -1964,18 +1957,17 @@ const walk = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	let stepOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y + 18 + 1, junkbot);
-	if (stepOrEnemy) {
+	let step = entityCollisionTest(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropOrEnemyBot);
+	if (step) {
 		// can we step down?
-		// debugJunkbot("stepOrEnemy: " + JSON.stringify(stepOrEnemy));
-		const posStepDown = { x: posInFront.x, y: stepOrEnemy.y - junkbot.height };
-		stepOrEnemy = junkbotCollisionTest(posStepDown.x, posStepDown.y + 1, junkbot);
-		// debugJunkbot("stepOrEnemy: " + JSON.stringify(stepOrEnemy));
+		// debugJunkbot(`step: ${JSON.stringify(step)}`);
+		const posStepDown = { x: posInFront.x, y: step.y - junkbot.height };
+		step = entityCollisionTest(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropOrEnemyBot);
+		// debugJunkbot(`step: ${JSON.stringify(step)}`);
 		if (
 			posStepDown.y - junkbot.y === 18 &&
-			stepOrEnemy &&
-			!isEnemyBot(stepOrEnemy) &&
-			!junkbotCollisionTest(posStepDown.x, posStepDown.y, junkbot)
+			step &&
+			!entityCollisionTest(posStepDown.x, posStepDown.y, junkbot, notBinOrDrop)
 		) {
 			debugJunkbot("STEP DOWN");
 			junkbot.x = posStepDown.x;
@@ -1984,7 +1976,7 @@ const walk = (junkbot) => {
 			return;
 		}
 	}
-	if (junkbotCollisionTest(junkbot.x, junkbot.y + 1, junkbot)) {
+	if (entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop)) {
 		debugJunkbot("CLIFF/WALL/BOT - TURN AROUND");
 		junkbot.facing *= -1;
 		playSound("turn");
@@ -1995,7 +1987,7 @@ const walk = (junkbot) => {
 
 const simulateJunkbot = (junkbot) => {
 	junkbot.timer += 1;
-	const aboveHead = junkbotCollisionTest(junkbot.x, junkbot.y - 1, junkbot);
+	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notBinOrDrop);
 	const headLoaded = aboveHead && (
 		junkbot.floating || (
 			!aboveHead.fixed &&
@@ -2036,7 +2028,7 @@ const simulateJunkbot = (junkbot) => {
 			return;
 		}
 	}
-	const inside = junkbotCollisionTest(junkbot.x, junkbot.y, junkbot);
+	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notBinOrDrop);
 	if (inside) {
 		debugInfoForJunkbot = "";
 		debugJunkbot("STUCK IN WALL - GO UP");
@@ -2046,7 +2038,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 	if (junkbot.floating) {
 		const abovePos = { x: junkbot.x, y: junkbot.y - 18 };
-		const aboveHead = junkbotCollisionTest(abovePos.x, abovePos.y, junkbot);
+		const aboveHead = entityCollisionTest(abovePos.x, abovePos.y, junkbot, notBinOrDrop);
 		debugInfoForJunkbot = "";
 		if (aboveHead) {
 			debugJunkbot("FLOATING - CAN'T GO UP");
@@ -2094,7 +2086,9 @@ const simulateJunkbot = (junkbot) => {
 		}
 	}
 
-	const bin = junkbotBinCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot);
+	const bin = entityCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot, (otherEntity) => (
+		otherEntity.type === "bin"
+	));
 	if (bin) {
 		junkbot.animationFrame = 0;
 		junkbot.collectingBin = true;
