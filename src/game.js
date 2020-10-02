@@ -2393,6 +2393,10 @@ const simulateClimbbot = (climbbot) => {
 			}
 		}
 	}
+	// may not be necessary, but it "feels right" to reset this
+	if (climbbot.facingY !== -1) {
+		climbbot.energy = 0;
+	}
 };
 
 const simulateDrop = (drop) => {
