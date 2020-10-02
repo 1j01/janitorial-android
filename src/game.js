@@ -41,6 +41,8 @@ const showMessageBox = (message) => {
 	closeButton.focus();
 };
 
+const floor = (x, multiple) => Math.floor(x / multiple) * multiple;
+
 const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 	ax + aw > bx &&
 	ax < bx + bw &&
@@ -1173,8 +1175,8 @@ const pasteEntities = (newEntities) => {
 	collectiveCenter.x /= centers.length;
 	collectiveCenter.y /= centers.length;
 
-	const offsetX = -15 * Math.floor(collectiveCenter.x / 15);
-	const offsetY = -18 * Math.floor(collectiveCenter.y / 18);
+	const offsetX = -floor(collectiveCenter.x, 15);
+	const offsetY = -floor(collectiveCenter.y, 18);
 
 	for (const entity of newEntities) {
 		entity.grabOffset = {
@@ -1643,11 +1645,11 @@ const startGrab = (grab) => {
 	for (const brick of dragging) {
 		brick.grabbed = true;
 		brick.grabOffset = {
-			// x: brick.x - (15 * Math.floor(mouse.worldX/15)),
-			// y: brick.y - (18 * Math.floor(mouse.worldY/18)),
+			// x: brick.x - floor(mouse.worldX, 15),
+			// y: brick.y - floor(mouse.worldY, 18),
 			// so you can place blocks that were grabbed when they weren't on the grid:
-			x: (15 * Math.floor(brick.x / 15)) - (15 * Math.floor(mouse.worldX / 15)),
-			y: (18 * Math.floor(brick.y / 18)) - (18 * Math.floor(mouse.worldY / 18)),
+			x: floor(brick.x, 15) - floor(mouse.worldX, 15),
+			y: floor(brick.y, 18) - floor(mouse.worldY, 18),
 		};
 		if (editing) {
 			brick.selected = true;
@@ -2448,8 +2450,8 @@ const animate = () => {
 
 	if (dragging.length) {
 		for (const brick of dragging) {
-			brick.x = 15 * Math.floor((mouse.worldX) / 15) + brick.grabOffset.x;
-			brick.y = 18 * Math.floor((mouse.worldY) / 18) + brick.grabOffset.y;
+			brick.x = floor(mouse.worldX, 15) + brick.grabOffset.x;
+			brick.y = floor(mouse.worldY, 18) + brick.grabOffset.y;
 			entityMoved(brick);
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
