@@ -1935,14 +1935,14 @@ const isEnemyBot = (entity) => (
 
 const walk = (junkbot) => {
 	const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-	let stepOrWallOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot);
-	if (stepOrWallOrEnemy) {
+	const stepOrWallOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y, junkbot);
+	if (stepOrWallOrEnemy && !isEnemyBot(stepOrWallOrEnemy)) {
 		// can we step up?
 		const posStepUp = { x: posInFront.x, y: stepOrWallOrEnemy.y - junkbot.height };
 		if (
-			posStepUp.y - junkbot.y >= -18 &&
-			!junkbotCollisionTest(posStepUp.x, posStepUp.y, junkbot) &&
-			!isEnemyBot(stepOrWallOrEnemy)
+			// posStepUp.y - junkbot.y >= -18 &&
+			posStepUp.y - junkbot.y === -18 &&
+			!junkbotCollisionTest(posStepUp.x, posStepUp.y, junkbot)
 		) {
 			debugJunkbot("STEP UP");
 			junkbot.x = posStepUp.x;
@@ -1952,10 +1952,10 @@ const walk = (junkbot) => {
 		}
 	}
 	// is there solid ground ahead to walk on?
-	const ground = junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot);
+	const groundOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y + 1, junkbot);
 	if (
-		ground &&
-		!isEnemyBot(ground) &&
+		groundOrEnemy &&
+		!isEnemyBot(groundOrEnemy) &&
 		!junkbotCollisionTest(posInFront.x, posInFront.y, junkbot)
 	) {
 		debugJunkbot("WALK");
@@ -1964,14 +1964,17 @@ const walk = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	stepOrWallOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y + 18 + 1, junkbot);
-	if (stepOrWallOrEnemy) {
+	let stepOrEnemy = junkbotCollisionTest(posInFront.x, posInFront.y + 18 + 1, junkbot);
+	if (stepOrEnemy) {
 		// can we step down?
-		const posStepDown = { x: posInFront.x, y: stepOrWallOrEnemy.y - junkbot.height };
-		const step = junkbotCollisionTest(posStepDown.x, posStepDown.y + 1, junkbot);
+		// debugJunkbot("stepOrEnemy: " + JSON.stringify(stepOrEnemy));
+		const posStepDown = { x: posInFront.x, y: stepOrEnemy.y - junkbot.height };
+		stepOrEnemy = junkbotCollisionTest(posStepDown.x, posStepDown.y + 1, junkbot);
+		// debugJunkbot("stepOrEnemy: " + JSON.stringify(stepOrEnemy));
 		if (
-			step &&
-			!isEnemyBot(step) &&
+			posStepDown.y - junkbot.y === 18 &&
+			stepOrEnemy &&
+			!isEnemyBot(stepOrEnemy) &&
 			!junkbotCollisionTest(posStepDown.x, posStepDown.y, junkbot)
 		) {
 			debugJunkbot("STEP DOWN");
