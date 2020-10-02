@@ -1309,12 +1309,12 @@ const initLevel = (level) => {
 // };
 
 const worldToCanvas = (worldX, worldY) => ({
-	x: (worldX - viewport.centerX) * viewport.scale + canvas.width / 2,
-	y: (worldY - viewport.centerY) * viewport.scale + canvas.height / 2,
+	x: (worldX - viewport.centerX) * viewport.scale + Math.floor(canvas.width / 2),
+	y: (worldY - viewport.centerY) * viewport.scale + Math.floor(canvas.height / 2),
 });
 const canvasToWorld = (canvasX, canvasY) => ({
-	x: (canvasX - canvas.width / 2) / viewport.scale + viewport.centerX,
-	y: (canvasY - canvas.height / 2) / viewport.scale + viewport.centerY,
+	x: (canvasX - Math.floor(canvas.width / 2)) / viewport.scale + viewport.centerX,
+	y: (canvasY - Math.floor(canvas.height / 2)) / viewport.scale + viewport.centerY,
 });
 
 addEventListener("keydown", (event) => {
@@ -1512,6 +1512,11 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {}) => {
 	const visited = [];
 	const search = (fromEntity) => {
+		if (fromEntity.y + fromEntity.height >= levelBoundBottom) {
+			// for case of non-fixed brick at bottom of level
+			// which shouldn't happen in the game, but can happen in the editor
+			return true;
+		}
 		const entitiesToCheck = [].concat(
 			(fromEntity !== startEntity || direction !== -1) && entitiesByTopY[fromEntity.y + fromEntity.height] || [],
 			(fromEntity !== startEntity || direction !== +1) && entitiesByBottomY[fromEntity.y] || [],
@@ -1821,23 +1826,29 @@ addEventListener("mouseup", () => {
 	}
 });
 
-const simulateGravity = () => {
-	for (const entity of entities) {
-		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
-			let settled = false;
-			if (connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot") ? 1 : 0 })) {
-				settled = true;
-			}
-			if (!settled) {
-				// entity.y += 1;
-				entity.y += 6;
-				entityMoved(entity);
-			}
-		}
+const levelBoundLeft = 15;
+const levelBoundRight = 15 + 35 * 15;
+const levelBoundTop = 18;
+const levelBoundBottom = 18 + 22 * 18;
+const rectangleLevelBoundsCollisionTest = (x, y, width, height) => {
+	if (x < levelBoundLeft) {
+		return { type: "levelBounds", x: levelBoundLeft - 15, y: levelBoundTop, width: 15, height: levelBoundBottom - levelBoundTop };
+	}
+	if (y < levelBoundTop) {
+		return { type: "levelBounds", x: levelBoundLeft, y: levelBoundTop - 18, width: levelBoundRight - levelBoundLeft, height: 18 };
+	}
+	if (x + width > levelBoundRight) {
+		return { type: "levelBounds", x: levelBoundRight, y: levelBoundTop, width: 15, height: levelBoundBottom - levelBoundTop };
+	}
+	if (y + height > levelBoundBottom) {
+		return { type: "levelBounds", x: levelBoundLeft, y: levelBoundBottom, width: levelBoundRight - levelBoundLeft, height: 18 };
 	}
 };
-
 const rectangleCollisionTest = (x, y, width, height, filter) => {
+	const boundsHit = rectangleLevelBoundsCollisionTest(x, y, width, height);
+	if (boundsHit && filter(boundsHit)) {
+		return boundsHit;
+	}
 	for (const otherEntity of entities) {
 		if (
 			!otherEntity.grabbed &&
@@ -1858,8 +1869,9 @@ const rectangleCollisionTest = (x, y, width, height, filter) => {
 	}
 	return null;
 };
-const rectangleCollisionAll = (x, y, width, height, filter) => (
-	entities.filter((otherEntity) => (
+const rectangleCollisionAll = (x, y, width, height, filter) => {
+	const boundsHit = rectangleLevelBoundsCollisionTest(x, y, width, height);
+	return ((boundsHit && filter(boundsHit)) ? [boundsHit] : []).concat(entities.filter((otherEntity) => (
 		!otherEntity.grabbed &&
 		filter(otherEntity) &&
 		rectanglesIntersect(
@@ -1872,8 +1884,8 @@ const rectangleCollisionAll = (x, y, width, height, filter) => (
 			otherEntity.width,
 			otherEntity.height,
 		)
-	))
-);
+	)));
+};
 const entityCollisionTest = (entityX, entityY, entity, filter) => (
 	// Note: make sure not to use entity.x/y!
 	rectangleCollisionTest(
@@ -1894,6 +1906,21 @@ const entityCollisionAll = (entityX, entityY, entity, filter) => (
 		(otherEntity) => otherEntity !== entity && filter(otherEntity)
 	)
 );
+
+const simulateGravity = () => {
+	for (const entity of entities) {
+		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
+			if (
+				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
+				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot") ? 1 : 0 })
+			) {
+				// entity.y += 1;
+				entity.y += 6;
+				entityMoved(entity);
+			}
+		}
+	}
+};
 
 const hurtJunkbot = (junkbot, cause) => {
 	if (junkbot.dying || junkbot.dead || junkbot.grabbed) {
@@ -2477,7 +2504,7 @@ const animate = () => {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	ctx.save(); // world viewport
-	ctx.translate(canvas.width / 2, canvas.height / 2);
+	ctx.translate(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2));
 	ctx.scale(viewport.scale, viewport.scale);
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
@@ -2531,6 +2558,10 @@ const animate = () => {
 		ctx.stroke();
 		ctx.restore();
 	}
+
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 1;
+	ctx.strokeRect(levelBoundLeft - 0.5, levelBoundTop - 0.5, levelBoundRight - levelBoundLeft + 2, levelBoundBottom - levelBoundTop + 2);
 
 	ctx.restore(); // world viewport
 
