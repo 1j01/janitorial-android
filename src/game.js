@@ -1062,8 +1062,8 @@ const serializeLevel = (level) => {
 			// [4] - starting animation name (0 for objects that don't animate)
 			// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
 			// [6] - object relation ID, either a teleporter or a switch; two teleporters can reference each other with the same ID
-			const x = entity.x / 15 + 1;
-			const y = (entity.y + entity.height) / 18;
+			const gridX = entity.x / 15 + 1;
+			const gridY = (entity.y + entity.height) / 18;
 			const typeIndex = types.indexOf(type);
 			const colorIndex = brickColorNames.indexOf(entity.colorName || "red");
 			let animationName;
@@ -1088,7 +1088,7 @@ const serializeLevel = (level) => {
 			} else {
 				animationName = "";
 			}
-			parts.push(`${x};${y};${typeIndex + 1};${colorIndex + 1};${animationName};${entity.animationFrame || 1};${entity.switchID || entity.teleportID || ""}`);
+			parts.push(`${gridX};${gridY};${typeIndex + 1};${colorIndex + 1};${animationName};${entity.animationFrame || 1};${entity.switchID || entity.teleportID || ""}`);
 		} else {
 			unknownTypeMappings.push(entity.type);
 		}
