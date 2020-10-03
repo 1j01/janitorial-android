@@ -34,10 +34,10 @@ Partially done:
 		<td><kbd>E</kbd></td>
 		<td>Toggle edit mode</td>
 	</tr>
-	<tr>
+	<!-- <tr>
 		<td><kbd>P</kbd> or <kbd>Spacebar</kbd></td>
 		<td>Pause / unpause</td>
-	</tr>
+	</tr> -->
 	<tr>
 		<td><kbd>M</kbd></td>
 		<td>Mute / unmute</td>

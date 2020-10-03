@@ -562,6 +562,10 @@ const toggleMute = () => {
 };
 const togglePause = () => {
 	paused = !paused;
+	// if (editing && !paused) {
+	// if (editing !== paused) {
+	// 	toggleEditing();
+	// }
 	try {
 		localStorage.paused = paused;
 		// eslint-disable-next-line no-empty
@@ -1217,6 +1221,9 @@ const openFromFile = () => {
 };
 
 const undoable = (fn) => {
+	if (!editing) {
+		return; // TODO: allow undos during gameplay again, but handle it well
+	}
 	undos.push(serializeToJSON(currentLevel));
 	redos.length = 0;
 	if (fn) {
@@ -1496,7 +1503,7 @@ addEventListener("keydown", (event) => {
 		case " ": // Spacebar
 		case "P":
 			if (!event.repeat) {
-				togglePause();
+				// togglePause();
 			}
 			break;
 		case "E":
