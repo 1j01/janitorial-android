@@ -2219,7 +2219,7 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-		const cratesInFront = entityCollisionAll(posInFront.x, posInFront.y, junkbot, (otherEntity) => otherEntity.type === "crate");
+		const cratesInFront = rectangleCollisionAll(posInFront.x, posInFront.y, junkbot.width, junkbot.height + 1, (otherEntity) => otherEntity.type === "crate");
 		if (cratesInFront.every((crate) => !entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, (otherEntity) => otherEntity.type !== "drop"))) {
 			for (const crate of cratesInFront) {
 				crate.x += junkbot.facing * 15;
