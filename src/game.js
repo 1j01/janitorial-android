@@ -467,12 +467,17 @@ const loadLevelFromText = (levelData, game) => {
 		});
 	}
 	if (sections.background) {
+		const parseDecals = (value) => (
+			value.split(",").map((str) => {
+				const [x, y, name] = str.split(";");
+				return { x: Number(x), y: Number(y), name };
+			})
+		);
 		sections.background.forEach(([key, value]) => {
-			if (key.match(/^(bg)?(decals)$/i)) {
-				level.decals = level.decals.concat(value.split(",").map((str) => {
-					const [x, y, name] = str.split(";");
-					return { x: Number(x), y: Number(y), name };
-				}));
+			if (key.match(/^bgdecals$/i)) {
+				level.backgroundDecals = level.backgroundDecals.concat(parseDecals(value));
+			} else if (key.match(/^decals$/i)) {
+				level.decals = level.decals.concat(parseDecals(value));
 			} else if (key.match(/^backdrop$/i)) {
 				level.backdropName = value;
 			}
@@ -2651,7 +2656,7 @@ const animate = () => {
 	}
 	if (currentLevel && currentLevel.backgroundDecals) {
 		for (const { x, y, name } of currentLevel.backgroundDecals) {
-			drawDecal(ctx, x, y + Math.random() * 5, name, currentLevel.game);
+			drawDecal(ctx, x - 3, y - 20, name, currentLevel.game);
 		}
 	}
 	if (currentLevel && currentLevel.decals) {
