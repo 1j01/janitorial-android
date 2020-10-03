@@ -1494,10 +1494,13 @@ addEventListener("keydown", (event) => {
 		keys[event.key] = true;
 	}
 	if (event.code === "Equal" || event.code === "NumpadAdd") {
-		viewport.scale = Math.min(10, viewport.scale + 1);
+		viewport.scale = Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1);
 	}
 	if (event.code === "Minus" || event.code === "NumpadSubtract") {
-		viewport.scale = Math.max(1, viewport.scale - 1);
+		viewport.scale = Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1);
+	}
+	if (Math.abs(viewport.scale - 1) < 0.01) {
+		viewport.scale = 1;
 	}
 	switch (event.key.toUpperCase()) {
 		case " ": // Spacebar
