@@ -529,6 +529,15 @@ const loadResources = async (resourcePathsByID) => {
 	})));
 };
 
+const serializeToJSON = (level) => {
+	return JSON.stringify({ version: 0.2, format: "janitorial-android", entities, level }, (name, value) => {
+		if (name === "grabbed" || name === "grabOffset") {
+			return undefined;
+		}
+		return value;
+	}, "\t");
+};
+
 let showDebug = false;
 let muted = false;
 let paused = false;
@@ -561,6 +570,12 @@ const togglePause = () => {
 const toggleEditing = () => {
 	editing = !editing;
 	sidebar.hidden = !editing;
+	if (editing) {
+		deserializeJSON(editorLevelState);
+	}
+	if (editing !== paused) {
+		togglePause();
+	}
 	try {
 		localStorage.editing = editing;
 		// eslint-disable-next-line no-empty
@@ -963,6 +978,7 @@ let keys = {};
 let entities = [];
 let wind = [];
 let currentLevel = { entities, title: "Custom World" };
+let editorLevelState = serializeToJSON(currentLevel);
 // acceleration structures
 let entitiesByTopY = {}; // y to array of entities with that y as their top
 let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
@@ -985,7 +1001,7 @@ const entityMoved = (entity) => {
 	lastKeys.set(entity, yKeys);
 };
 
-let didWinOrLose = "";
+let winLoseState = "";
 const winOrLose = () => {
 	if (entities.some((entity) => entity.type === "junkbot" && !entity.dying && !entity.dead)) {
 		if (!entities.some((entity) => entity.type === "bin")) {
@@ -1006,14 +1022,6 @@ const mouse = { x: undefined, y: undefined };
 let dragging = [];
 let selectionBox;
 
-const serializeToJSON = () => {
-	return JSON.stringify({ version: 0.2, format: "janitorial-android", entities, level: currentLevel }, (name, value) => {
-		if (name === "grabbed" || name === "grabOffset") {
-			return undefined;
-		}
-		return value;
-	}, "\t");
-};
 const serializeLevel = (level) => {
 	// let text = [];
 	// const addSection = (name, keyValuePairs) => {
@@ -1121,6 +1129,7 @@ bgdecals=${stringifyDecals(level.backgroundDecals)}
 types=${types.join(",")}
 colors=${brickColorNames.join(",")}
 parts=${parts.join(",")}
+
 `;
 };
 const deserializeJSON = (json) => {
@@ -1129,6 +1138,7 @@ const deserializeJSON = (json) => {
 		currentLevel = state.level;
 	}
 	entities = state.entities;
+	currentLevel.entities = entities;
 	entitiesByTopY = {};
 	entitiesByBottomY = {};
 	lastKeys = new Map();
@@ -1138,29 +1148,36 @@ const deserializeJSON = (json) => {
 		delete entity.grabbed;
 		delete entity.grabOffset;
 	});
-	didWinOrLose = winOrLose();
+	winLoseState = winOrLose();
 };
 const save = () => {
+	if (editing) {
+		editorLevelState = serializeToJSON(currentLevel);
+	}
 	localStorage.JunkbotLevel = serializeLevel(currentLevel);
-	localStorage.JWorld = serializeToJSON();
+	localStorage.JWorld = editorLevelState;
 };
 
-const saveToJSONFile = () => {
-	const file = new Blob([localStorage.JWorld], { type: "application/json" });
-	const a = document.createElement("a");
-	const url = URL.createObjectURL(file);
-	a.href = url;
-	a.download = "junkbot-world.json";
-	document.body.appendChild(a);
-	a.click();
-	setTimeout(() => {
-		document.body.removeChild(a);
-		window.URL.revokeObjectURL(url);
-	}, 0);
-};
+// const saveToJSONFile = () => {
+// 	const file = new Blob([serializeToJSON?(editorLevelState)], { type: "application/json" });
+// 	const a = document.createElement("a");
+// 	const url = URL.createObjectURL(file);
+// 	a.href = url;
+// 	a.download = "junkbot-world.json";
+// 	document.body.appendChild(a);
+// 	a.click();
+// 	setTimeout(() => {
+// 		document.body.removeChild(a);
+// 		window.URL.revokeObjectURL(url);
+// 	}, 0);
+// };
 
 const saveToFile = () => {
-	const file = new Blob([localStorage.JunkbotLevel], { type: "text/plain" });
+	// this is sort of a weird way for this to work!
+	undoable(() => {
+		deserializeJSON(editorLevelState);
+	});
+	const file = new Blob([serializeLevel(currentLevel)], { type: "text/plain" });
 	const a = document.createElement("a");
 	const url = URL.createObjectURL(file);
 	a.href = url;
@@ -1200,7 +1217,7 @@ const openFromFile = () => {
 };
 
 const undoable = (fn) => {
-	undos.push(serializeToJSON());
+	undos.push(serializeToJSON(currentLevel));
 	redos.length = 0;
 	if (fn) {
 		fn();
@@ -1211,7 +1228,7 @@ const undoOrRedo = (undos, redos) => {
 	if (undos.length === 0) {
 		return false;
 	}
-	redos.push(serializeToJSON());
+	redos.push(serializeToJSON(currentLevel));
 	deserializeJSON(undos.pop());
 	save();
 	return true;
@@ -1374,6 +1391,7 @@ const sortEntitiesForRendering = (entities) => {
 
 const initLevel = (level) => {
 	currentLevel = level;
+	editorLevelState = serializeToJSON(level);
 	entities = level.entities;
 	entitiesByTopY = {};
 	entitiesByBottomY = {};
@@ -1384,7 +1402,7 @@ const initLevel = (level) => {
 	wind = [];
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
-	didWinOrLose = winOrLose(); // in case there's no bins, don't say OH YEAH
+	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
 };
 
 // const initTestLevel = () => {
@@ -2602,13 +2620,13 @@ const animate = () => {
 		simulate(entities);
 	}
 
-	if (winOrLose() !== didWinOrLose) {
-		didWinOrLose = winOrLose();
-		if (didWinOrLose === "win") {
+	if (winOrLose() !== winLoseState) {
+		winLoseState = winOrLose();
+		if (winLoseState === "win") {
 			setTimeout(() => {
 				playSound("ohYeah");
 			}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000);
-		} else if (didWinOrLose === "lose") {
+		} else if (winLoseState === "lose") {
 			// playSound("ouch"); // or whatever
 		}
 	}
@@ -3173,7 +3191,8 @@ const main = async () => {
 		// initTestLevel();
 		deserializeJSON(resources.world);
 	}
-	// loadLevelFromTextFile("levels/The Long Umbrella.txt").then(initLevel);
+	// await loadLevelFromTextFile("levels/The Long Umbrella.txt").then(initLevel);
+	editorLevelState = serializeToJSON(currentLevel);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
