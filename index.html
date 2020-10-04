@@ -82,26 +82,47 @@
 			pointer-events: all;
 		}
 
-		#editor-ui {
+		#editor-ui:not([hidden]) {
 			position: fixed;
 			left: 0px;
 			top: 0px;
 			bottom: 0px;
 			background-color: #224;
 			color: white;
+			display: flex;
+			flex-direction: column;
 		}
 		#entities-scroll-container {
 			width: 320px; /* assuming scrollbar < 20px */
-			height: calc(100% - 300px);
 			overflow-y: auto;
 			background-color: black;
+			flex: 1;
 		}
 		#entities-palette {
 			width: 300px;
 		}
 		.controls > *,
-		.level > * {
+		.level > *,
+		#level-select {
 			margin: 10px;
+		}
+		#level-select {
+			margin-top: 2px;
+		}
+		#open-world {
+			margin-left: 0px;
+		}
+		.level {
+			display: flex;
+		    flex-direction: column;
+		}
+		.label-input-row {
+			display: flex;
+			flex-direction: row;
+		}
+		.label-input-row label {
+			width: 50px;
+			align-self: center;
 		}
 	</style>
 </head>
@@ -197,30 +218,32 @@
 		</div>
 		<div class="controls">
 			<div class="level">
-				<label>
-					Title:
+				<div class="label-input-row">
+					<label for="level-title">Title:</label>
 					<input type="text" id="level-title" />
-				</label>
-				<br>
-				<label>
-					Hint:
+				</div>
+				<div class="label-input-row">
+					<label for="level-hint">Hint:</label>
 					<input type="text" id="level-hint" />
-				</label>
-				<br>
-				<label>
-					Par:
+				</div>
+				<div class="label-input-row">
+					<label for="level-par">Par:</label>
 					<input type="number" id="level-par" min="0" step="1" />
-				</label>
-				<br>
-				<label>
-					<input type="checkbox" id="level-bounds-checkbox">
-					Level Bounds
-				</label>
+				</div>
+				<div>
+					<label for="level-bounds-checkbox">
+						<input type="checkbox" id="level-bounds-checkbox">
+						Level Bounds
+					</label>
+				</div>
 			</div>
 			<button id="save-world">Save World</button>
 			<button id="open-world">Open World</button>
 			<br>
-			<select id="level-select"></select>
+			<label>
+				Choose Level:<br>
+				<select id="level-select"></select>
+			</label>
 		</div>
 	</div>
 </body>
