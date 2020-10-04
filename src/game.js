@@ -563,7 +563,7 @@ const loadResources = async (resourcePathsByID) => {
 };
 
 const serializeToJSON = (level) => {
-	return JSON.stringify({ version: 0.2, format: "janitorial-android", entities, level }, (name, value) => {
+	return JSON.stringify({ version: 0.2, format: "janitorial-android", entities: level.entities, level }, (name, value) => {
 		if (name === "grabbed" || name === "grabOffset") {
 			return undefined;
 		}
