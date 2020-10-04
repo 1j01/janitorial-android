@@ -458,8 +458,8 @@ const loadLevelFromText = (levelData, game) => {
 				// [4] - starting animation name (0 for objects that don't animate)
 				// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
 				// [6] - object relation ID, either a teleporter or a switch; two teleporters can reference each other with the same ID
-				const x = (e[0] - 1) * 15;
-				const y = (e[1] - 1) * 18;
+				const x = (e[0] - 1) * spacing[0];
+				const y = (e[1] - 1) * spacing[1];
 				const typeName = types[e[2] - 1].toLowerCase();
 				const colorName = colors[e[3] - 1].toLowerCase();
 				const animationName = e[4].toLowerCase();
