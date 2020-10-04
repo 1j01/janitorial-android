@@ -1255,6 +1255,7 @@ const openFromFile = () => {
 			try {
 				if (content.match(/^\s*{/)) {
 					deserializeJSON(content);
+					editorLevelState = content;
 				} else {
 					initLevel(loadLevelFromText(content));
 				}
