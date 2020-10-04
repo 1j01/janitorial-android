@@ -3300,21 +3300,35 @@ const initUI = () => {
 	updateInfoBoxHidden();
 };
 
-const expect = (condition, maxTimeSteps) => {
+const expect = async (condition, maxTimeSteps, realTime) => {
 	for (let timeStep = 0; timeStep < maxTimeSteps; timeStep++) {
 		if (condition()) {
 			return true;
 		}
-		simulate(entities);
+		if (realTime) {
+			// eslint-disable-next-line no-await-in-loop
+			await new Promise((resolve) => {
+				requestAnimationFrame(resolve);
+			});
+		} else {
+			simulate(entities);
+		}
 	}
 	return false;
 };
 
 const runTests = async () => {
+	const realTime = location.hash.match(/realtime/);
+	if (realTime && paused) {
+		togglePause();
+	}
+	if (editing) {
+		toggleEditing();
+	}
 	// initLevel(await loadLevelFromTextFile("test-cases/Tippy Toast.txt"));
 	deserializeJSON(await loadTextFile("levels/test-cases/Tippy Toast.json"));
 	editorLevelState = serializeToJSON(currentLevel);
-	const pass = expect(() => winOrLose() === "win", 1000);
+	const pass = await expect(() => winOrLose() === "win", 1000, realTime);
 	if (pass) {
 		showMessageBox("Test passed!");
 	} else {
@@ -3348,7 +3362,7 @@ const main = async () => {
 	}
 	initUI();
 	animate();
-	if (location.hash.match(/run-tests!/)) {
+	if (location.hash.match(/run-tests/)) {
 		runTests();
 	}
 };
