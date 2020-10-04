@@ -1199,7 +1199,7 @@ const saveToFile = () => {
 	const a = document.createElement("a");
 	const url = URL.createObjectURL(file);
 	a.href = url;
-	a.download = "junkbot-world.txt";
+	a.download = `${currentLevel.title}.txt`;
 	document.body.appendChild(a);
 	a.click();
 	setTimeout(() => {
