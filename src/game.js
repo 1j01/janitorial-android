@@ -1920,95 +1920,6 @@ canvas.addEventListener("mousedown", (event) => {
 		}
 	}
 });
-
-const entitiesWithinSelection = () => {
-	const minX = Math.min(selectionBox.x1, selectionBox.x2);
-	const maxX = Math.max(selectionBox.x1, selectionBox.x2);
-	const minY = Math.min(selectionBox.y1, selectionBox.y2);
-	const maxY = Math.max(selectionBox.y1, selectionBox.y2);
-	return rectangleCollisionAll(
-		minX,
-		minY,
-		maxX - minX,
-		maxY - minY,
-		() => true
-	);
-};
-
-const canRelease = () => {
-	if (dragging.length === 0) {
-		return false; // optimization mainly - don't do allConnectedToFixed()
-	}
-	if (editing) {
-		return true;
-	}
-
-	const connectedToFixed = allConnectedToFixed();
-
-	const someCollision = dragging.some((entity) => (
-		entityCollisionTest(entity.x, entity.y, entity, () => true)
-	));
-	if (someCollision) {
-		return false;
-	}
-
-	if (dragging.every((entity) => entity.fixed)) {
-		return true;
-	}
-	let connectsToCeiling = false;
-	let connectsToFloor = false;
-	for (const entity of dragging) {
-		for (const otherEntity of entities) {
-			if (
-				!otherEntity.grabbed
-			) {
-				if (
-					(
-						otherEntity.type === "fire" ||
-						otherEntity.type === "fan"
-					) &&
-					connects(entity, otherEntity)
-				) {
-					return false;
-				}
-				if (
-					otherEntity.type === "brick" &&
-					connectedToFixed.indexOf(otherEntity) !== -1
-				) {
-					if (connects(entity, otherEntity, -1)) {
-						connectsToCeiling = true;
-					}
-					if (connects(entity, otherEntity, +1)) {
-						connectsToFloor = true;
-					}
-				}
-			}
-		}
-	}
-	return connectsToCeiling !== connectsToFloor;
-};
-addEventListener("mouseup", () => {
-	if (dragging.length) {
-		if (canRelease()) {
-			dragging.forEach((entity) => {
-				delete entity.grabbed;
-				delete entity.grabOffset;
-			});
-			dragging = [];
-			playSound("blockDrop");
-			save();
-		}
-	} else if (selectionBox) {
-		const toSelect = entitiesWithinSelection();
-		toSelect.forEach((entity) => {
-			entity.selected = true;
-		});
-		selectionBox = null;
-		if (toSelect.length) {
-			playSound("selectEnd");
-		}
-	}
-});
 const rectangleLevelBoundsCollisionTest = (x, y, width, height) => {
 	const { bounds } = currentLevel;
 	if (!bounds) {
@@ -2106,6 +2017,94 @@ const raycast = ({ startX, startY, width, height, directionX, directionY, maxSte
 	return { steps, hit: null };
 };
 
+const entitiesWithinSelection = () => {
+	const minX = Math.min(selectionBox.x1, selectionBox.x2);
+	const maxX = Math.max(selectionBox.x1, selectionBox.x2);
+	const minY = Math.min(selectionBox.y1, selectionBox.y2);
+	const maxY = Math.max(selectionBox.y1, selectionBox.y2);
+	return rectangleCollisionAll(
+		minX,
+		minY,
+		maxX - minX,
+		maxY - minY,
+		() => true
+	);
+};
+
+const canRelease = () => {
+	if (dragging.length === 0) {
+		return false; // optimization mainly - don't do allConnectedToFixed()
+	}
+	if (editing) {
+		return true;
+	}
+
+	const connectedToFixed = allConnectedToFixed();
+
+	const someCollision = dragging.some((entity) => (
+		entityCollisionTest(entity.x, entity.y, entity, () => true)
+	));
+	if (someCollision) {
+		return false;
+	}
+
+	if (dragging.every((entity) => entity.fixed)) {
+		return true;
+	}
+	let connectsToCeiling = false;
+	let connectsToFloor = false;
+	for (const entity of dragging) {
+		for (const otherEntity of entities) {
+			if (
+				!otherEntity.grabbed
+			) {
+				if (
+					(
+						otherEntity.type === "fire" ||
+						otherEntity.type === "fan"
+					) &&
+					connects(entity, otherEntity)
+				) {
+					return false;
+				}
+				if (
+					otherEntity.type === "brick" &&
+					connectedToFixed.indexOf(otherEntity) !== -1
+				) {
+					if (connects(entity, otherEntity, -1)) {
+						connectsToCeiling = true;
+					}
+					if (connects(entity, otherEntity, +1)) {
+						connectsToFloor = true;
+					}
+				}
+			}
+		}
+	}
+	return connectsToCeiling !== connectsToFloor;
+};
+addEventListener("mouseup", () => {
+	if (dragging.length) {
+		if (canRelease()) {
+			dragging.forEach((entity) => {
+				delete entity.grabbed;
+				delete entity.grabOffset;
+			});
+			dragging = [];
+			playSound("blockDrop");
+			save();
+		}
+	} else if (selectionBox) {
+		const toSelect = entitiesWithinSelection();
+		toSelect.forEach((entity) => {
+			entity.selected = true;
+		});
+		selectionBox = null;
+		if (toSelect.length) {
+			playSound("selectEnd");
+		}
+	}
+});
 
 const simulateGravity = () => {
 	for (const entity of entities) {
