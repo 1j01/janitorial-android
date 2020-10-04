@@ -1190,20 +1190,6 @@ const save = () => {
 	localStorage.JWorld = editorLevelState;
 };
 
-// const saveToJSONFile = () => {
-// 	const file = new Blob([serializeToJSON?(editorLevelState)], { type: "application/json" });
-// 	const a = document.createElement("a");
-// 	const url = URL.createObjectURL(file);
-// 	a.href = url;
-// 	a.download = "junkbot-world.json";
-// 	document.body.appendChild(a);
-// 	a.click();
-// 	setTimeout(() => {
-// 		document.body.removeChild(a);
-// 		window.URL.revokeObjectURL(url);
-// 	}, 0);
-// };
-
 const toggleShowDebug = () => {
 	showDebug = !showDebug;
 	try {
