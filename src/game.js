@@ -2602,9 +2602,6 @@ const animate = () => {
 	if (mouse.x > canvas.width - panMarginSize) {
 		viewport.centerX += panFromMarginSpeed;
 	}
-	if (!editing) {
-		viewport.centerY = Math.min(23 * 18 - canvas.height / 2 / viewport.scale, viewport.centerY);
-	}
 	if (currentLevel.bounds) {
 		viewport.centerY = Math.min((currentLevel.bounds.y + currentLevel.bounds.height - 36) + canvas.height / 2 / viewport.scale, viewport.centerY);
 		viewport.centerY = Math.max((currentLevel.bounds.y + 36) - canvas.height / 2 / viewport.scale, viewport.centerY);
