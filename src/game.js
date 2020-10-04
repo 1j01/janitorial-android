@@ -1926,18 +1926,13 @@ const entitiesWithinSelection = () => {
 	const maxX = Math.max(selectionBox.x1, selectionBox.x2);
 	const minY = Math.min(selectionBox.y1, selectionBox.y2);
 	const maxY = Math.max(selectionBox.y1, selectionBox.y2);
-	return entities.filter((entity) => (
-		rectanglesIntersect(
-			entity.x,
-			entity.y,
-			entity.width,
-			entity.height,
-			minX,
-			minY,
-			maxX - minX,
-			maxY - minY,
-		)
-	));
+	return rectangleCollisionAll(
+		minX,
+		minY,
+		maxX - minX,
+		maxY - minY,
+		() => true
+	);
 };
 
 const canRelease = () => {
@@ -1950,26 +1945,9 @@ const canRelease = () => {
 
 	const connectedToFixed = allConnectedToFixed();
 
-	const someCollision = dragging.some((entity) => {
-		for (const otherEntity of entities) {
-			if (
-				!otherEntity.grabbed &&
-				rectanglesIntersect(
-					entity.x,
-					entity.y,
-					entity.width,
-					entity.height,
-					otherEntity.x,
-					otherEntity.y,
-					otherEntity.width,
-					otherEntity.height,
-				)
-			) {
-				return true;
-			}
-		}
-		return false;
-	});
+	const someCollision = dragging.some((entity) => (
+		entityCollisionTest(entity.x, entity.y, entity, () => true)
+	));
 	if (someCollision) {
 		return false;
 	}
