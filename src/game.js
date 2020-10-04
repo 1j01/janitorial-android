@@ -981,7 +981,16 @@ let keys = {};
 
 let entities = [];
 let wind = [];
-let currentLevel = { entities, title: "Custom World" };
+let currentLevel = {
+	entities,
+	title: "Custom World",
+	bounds: {
+		x: 0,
+		y: 0,
+		width: 35 * 15,
+		height: 22 * 18,
+	},
+};
 let editorLevelState = serializeToJSON(currentLevel);
 // acceleration structures
 let entitiesByTopY = {}; // y to array of entities with that y as their top
@@ -1120,7 +1129,7 @@ par=${isFinite(level.par) ? level.par : 10000}
 hint=${level.hint || ""}
 
 [playfield]
-size=35,22
+size=${level.bounds ? `${level.bounds.width / 15},${level.bounds.height / 18}` : "35,22"}
 spacing=15,18
 scale=1
 
@@ -1677,10 +1686,12 @@ const allConnectedToFixed = ({ ignoreEntities = [] } = {}) => {
 const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {}) => {
 	const visited = [];
 	const search = (fromEntity) => {
-		if (fromEntity.y + fromEntity.height >= levelBounds.y + levelBounds.height) {
-			// for case of non-fixed brick at bottom of level
-			// which shouldn't happen in the game, but can happen in the editor
-			return true;
+		if (currentLevel.bounds) {
+			if (fromEntity.y + fromEntity.height >= currentLevel.bounds.y + currentLevel.bounds.height) {
+				// for case of non-fixed brick at bottom of level
+				// which shouldn't happen in the game, but can happen in the editor
+				return true;
+			}
 		}
 		const entitiesToCheck = [].concat(
 			(fromEntity !== startEntity || direction !== -1) && entitiesByTopY[fromEntity.y + fromEntity.height] || [],
@@ -1990,25 +2001,22 @@ addEventListener("mouseup", () => {
 		}
 	}
 });
-
-const levelBounds = {
-	x: 0,
-	y: 0,
-	width: 35 * 15,
-	height: 22 * 18,
-};
 const rectangleLevelBoundsCollisionTest = (x, y, width, height) => {
-	if (x < levelBounds.x) {
-		return { type: "levelBounds", x: levelBounds.x - 15, y: levelBounds.y, width: 15, height: levelBounds.height };
+	const { bounds } = currentLevel;
+	if (!bounds) {
+		return;
 	}
-	if (y < levelBounds.y) {
-		return { type: "levelBounds", x: levelBounds.x, y: levelBounds.y - 18, width: levelBounds.width, height: 18 };
+	if (x < bounds.x) {
+		return { type: "levelBounds", x: bounds.x - 15, y: bounds.y, width: 15, height: bounds.height };
 	}
-	if (x + width > levelBounds.x + levelBounds.width) {
-		return { type: "levelBounds", x: levelBounds.x + levelBounds.width, y: levelBounds.y, width: 15, height: levelBounds.height };
+	if (y < bounds.y) {
+		return { type: "levelBounds", x: bounds.x, y: bounds.y - 18, width: bounds.width, height: 18 };
 	}
-	if (y + height > levelBounds.y + levelBounds.height) {
-		return { type: "levelBounds", x: levelBounds.x, y: levelBounds.y + levelBounds.height, width: levelBounds.width, height: 18 };
+	if (x + width > bounds.x + bounds.width) {
+		return { type: "levelBounds", x: bounds.x + bounds.width, y: bounds.y, width: 15, height: bounds.height };
+	}
+	if (y + height > bounds.y + bounds.height) {
+		return { type: "levelBounds", x: bounds.x, y: bounds.y + bounds.height, width: bounds.width, height: 18 };
 	}
 };
 const rectangleCollisionTest = (x, y, width, height, filter) => {
@@ -2679,15 +2687,13 @@ const animate = () => {
 	ctx.translate(-viewport.centerX, -viewport.centerY);
 	ctx.imageSmoothingEnabled = false;
 
-	if (currentLevel) {
-		drawDecal(ctx, -6, -25, currentLevel.backdropName || "bkg1", currentLevel.game);
-	}
-	if (currentLevel && currentLevel.backgroundDecals) {
+	drawDecal(ctx, -6, -25, currentLevel.backdropName || "bkg1", currentLevel.game);
+	if (currentLevel.backgroundDecals) {
 		for (const { x, y, name } of currentLevel.backgroundDecals) {
 			drawDecal(ctx, x - 3, y - 20, name, currentLevel.game);
 		}
 	}
-	if (currentLevel && currentLevel.decals) {
+	if (currentLevel.decals) {
 		for (const { x, y, name } of currentLevel.decals) {
 			drawDecal(ctx, x - 15 * 2, y - 64, name, currentLevel.game);
 		}
@@ -2731,7 +2737,10 @@ const animate = () => {
 
 	ctx.strokeStyle = "black";
 	ctx.lineWidth = 1;
-	ctx.strokeRect(levelBounds.x - 0.5, levelBounds.y - 0.5, levelBounds.width + 1, levelBounds.height + 1);
+	const { bounds } = currentLevel;
+	if (bounds) {
+		ctx.strokeRect(bounds.x - 0.5, bounds.y - 0.5, bounds.width + 1, bounds.height + 1);
+	}
 
 	ctx.restore(); // world viewport
 
@@ -2859,6 +2868,7 @@ const initUI = () => {
 	sidebar.style.top = "0px";
 	sidebar.style.bottom = "0px";
 	sidebar.style.backgroundColor = "#224";
+	sidebar.style.color = "white";
 
 	const entitiesPalette = document.createElement("div");
 	entitiesPalette.style.width = "300px";
@@ -3157,6 +3167,34 @@ const initUI = () => {
 	};
 	levelSelect.style.margin = "10px";
 	sidebar.append(levelSelect);
+
+	sidebar.append(document.createElement("br"));
+
+	const boundsCheckboxLabel = document.createElement("label");
+	const boundsCheckbox = document.createElement("input");
+	boundsCheckboxLabel.textContent = "Level Bounds";
+	boundsCheckbox.type = "checkbox";
+	boundsCheckbox.checked = currentLevel.bounds;
+	setInterval(() => {
+		boundsCheckbox.checked = currentLevel.bounds;
+	}, 100);
+	boundsCheckbox.onchange = () => {
+		undoable(() => {
+			if (boundsCheckbox.checked) {
+				currentLevel.bounds = {
+					x: 0,
+					y: 0,
+					width: 35 * 15,
+					height: 22 * 18,
+				};
+			} else {
+				currentLevel.bounds = null;
+			}
+		});
+	};
+	boundsCheckbox.style.margin = "10px";
+	boundsCheckboxLabel.prepend(boundsCheckbox);
+	sidebar.append(boundsCheckboxLabel);
 
 	document.body.append(sidebar);
 
