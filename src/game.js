@@ -546,6 +546,8 @@ let hideInfoBox = false;
 let sidebar;
 let infoBox;
 let toggleInfoButton;
+// eslint-disable-next-line no-empty-function
+let updateEditorUIForLevelChange = () => { };
 const toggleShowDebug = () => {
 	showDebug = !showDebug;
 	try {
@@ -1162,6 +1164,7 @@ const deserializeJSON = (json) => {
 		delete entity.grabOffset;
 	});
 	winLoseState = winOrLose();
+	updateEditorUIForLevelChange(currentLevel);
 };
 const save = () => {
 	if (editing) {
@@ -1419,6 +1422,7 @@ const initLevel = (level) => {
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
 	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
+	updateEditorUIForLevelChange(currentLevel);
 };
 
 // const initTestLevel = () => {
@@ -3174,10 +3178,6 @@ const initUI = () => {
 	const boundsCheckbox = document.createElement("input");
 	boundsCheckboxLabel.textContent = "Level Bounds";
 	boundsCheckbox.type = "checkbox";
-	boundsCheckbox.checked = currentLevel.bounds;
-	setInterval(() => {
-		boundsCheckbox.checked = currentLevel.bounds;
-	}, 100);
 	boundsCheckbox.onchange = () => {
 		undoable(() => {
 			if (boundsCheckbox.checked) {
@@ -3195,6 +3195,11 @@ const initUI = () => {
 	boundsCheckbox.style.margin = "10px";
 	boundsCheckboxLabel.prepend(boundsCheckbox);
 	sidebar.append(boundsCheckboxLabel);
+
+	updateEditorUIForLevelChange = (level) => {
+		boundsCheckbox.checked = level.bounds;
+	};
+	updateEditorUIForLevelChange(currentLevel);
 
 	document.body.append(sidebar);
 
