@@ -380,10 +380,69 @@ const loadLevelFromText = (levelData, game) => {
 			}
 		}
 	}
-	// console.log(sections);
+
+	const level = {
+		title: "",
+		hint: "",
+		par: Infinity,
+		backdropName: null,
+		decals: [],
+		backgroundDecals: [],
+		entities: [],
+		game,
+		bounds: {
+			x: 0,
+			y: 0,
+			width: 35 * 15,
+			height: 22 * 18,
+		},
+	};
+
+	if (sections.info) {
+		sections.info.forEach(([key, value]) => {
+			if (key.match(/^(title|hint)$/i)) {
+				level[key] = value;
+			} else if (key.match(/^par$/i)) {
+				level.par = Number(value);
+			}
+		});
+	}
+	let spacing = [15, 18];
+	if (sections.playfield) {
+		sections.playfield.forEach(([key, value]) => {
+			if (key.match(/^spacing$/i)) {
+				spacing = value.split(",").map(Number);
+			}
+		});
+		sections.playfield.forEach(([key, value]) => {
+			if (key.match(/^size$/i)) {
+				const size = value.split(",").map(Number);
+				level.bounds.width = size[0] * spacing[0];
+				level.bounds.height = size[1] * spacing[1];
+			}
+		});
+	}
+	if (sections.background) {
+		const parseDecals = (value) => (
+			value.split(",").map((str) => {
+				const [x, y, name] = str.split(";");
+				return { x: Number(x), y: Number(y), name };
+			})
+		);
+		sections.background.forEach(([key, value]) => {
+			if (key.match(/^bgdecals$/i)) {
+				level.backgroundDecals = level.backgroundDecals.concat(parseDecals(value));
+			} else if (key.match(/^decals$/i)) {
+				level.decals = level.decals.concat(parseDecals(value));
+			} else if (key.match(/^backdrop$/i)) {
+				level.backdropName = value;
+			}
+		});
+	}
+
 	let types = [];
 	let colors = [];
-	const entities = [];
+	const { entities } = level;
 	sections.partslist.forEach(([key, value]) => {
 		if (key === "types") {
 			types = types.concat(value.toLowerCase().split(","));
@@ -451,65 +510,6 @@ const loadLevelFromText = (levelData, game) => {
 			});
 		}
 	});
-
-	const level = {
-		title: "",
-		hint: "",
-		par: Infinity,
-		backdropName: null,
-		decals: [],
-		backgroundDecals: [],
-		entities,
-		game,
-		bounds: {
-			x: 0,
-			y: 0,
-			width: 35 * 15,
-			height: 22 * 18,
-		},
-	};
-
-	if (sections.info) {
-		sections.info.forEach(([key, value]) => {
-			if (key.match(/^(title|hint)$/i)) {
-				level[key] = value;
-			} else if (key.match(/^par$/i)) {
-				level.par = Number(value);
-			}
-		});
-	}
-	let spacing = [15, 18];
-	if (sections.playfield) {
-		sections.playfield.forEach(([key, value]) => {
-			if (key.match(/^spacing$/i)) {
-				spacing = value.split(",").map(Number);
-			}
-		});
-		sections.playfield.forEach(([key, value]) => {
-			if (key.match(/^size$/i)) {
-				const size = value.split(",").map(Number);
-				level.bounds.width = size[0] * spacing[0];
-				level.bounds.height = size[1] * spacing[1];
-			}
-		});
-	}
-	if (sections.background) {
-		const parseDecals = (value) => (
-			value.split(",").map((str) => {
-				const [x, y, name] = str.split(";");
-				return { x: Number(x), y: Number(y), name };
-			})
-		);
-		sections.background.forEach(([key, value]) => {
-			if (key.match(/^bgdecals$/i)) {
-				level.backgroundDecals = level.backgroundDecals.concat(parseDecals(value));
-			} else if (key.match(/^decals$/i)) {
-				level.decals = level.decals.concat(parseDecals(value));
-			} else if (key.match(/^backdrop$/i)) {
-				level.backdropName = value;
-			}
-		});
-	}
 
 	return level;
 };
