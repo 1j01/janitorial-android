@@ -821,7 +821,7 @@ const drawFlybot = (ctx, entity) => {
 };
 const drawEyebot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 2);
-	const frame = resources.spritesAtlas[`eyebot_${entity.active ? "active_" : ""}${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`eyebot_${(entity.activeTimer > 0) ? "active_" : ""}${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
@@ -2353,14 +2353,13 @@ const simulateFlybot = (flybot) => {
 	flybot.animationFrame += 0.25;
 	if (flybot.animationFrame > 2) {
 		flybot.animationFrame = 0;
-		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y + (flybot.facingY || 0) * 18 };
+		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y };
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, flybot, (otherEntity) => otherEntity.type !== "drop");
 		if (ahead) {
 			if (ahead.type === "junkbot") {
 				hurtJunkbot(ahead, "bot");
 			}
 			flybot.facing *= -1;
-			flybot.facingY *= -1;
 		} else {
 			flybot.x = aheadPos.x;
 			flybot.y = aheadPos.y;
@@ -2370,7 +2369,6 @@ const simulateFlybot = (flybot) => {
 };
 
 const simulateEyebot = (eyebot) => {
-	let target;
 	for (const [directionX, directionY] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
 		const offsets = directionY === 0 ? [[0, 0], [15, 0]] : [[0, 0], [0, 18]];
 		for (const [offsetX, offsetY] of offsets) {
@@ -2384,19 +2382,32 @@ const simulateEyebot = (eyebot) => {
 				entityFilter: (entity) => entity.type !== "drop" && entity !== eyebot,
 			});
 			if (hit && hit.type === "junkbot") {
-				target = hit;
 				eyebot.facing = directionX;
 				eyebot.facingY = directionY;
-				eyebot.active = true;
+				eyebot.activeTimer = 110;
 			}
 		}
 	}
-	if (target) {
-		simulateFlybot(eyebot);
-		simulateFlybot(eyebot);
-	} else {
-		eyebot.active = false;
-		simulateFlybot(eyebot);
+
+	eyebot.activeTimer -= 1;
+	eyebot.animationFrame += 0.25;
+	if (eyebot.animationFrame % ((eyebot.activeTimer > 0) ? 1 : 2) === 0) {
+		const aheadPos = { x: eyebot.x + eyebot.facing * 15, y: eyebot.y + (eyebot.facingY || 0) * 18 };
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, eyebot, (otherEntity) => otherEntity.type !== "drop");
+		if (ahead) {
+			if (ahead.type === "junkbot") {
+				hurtJunkbot(ahead, "bot");
+			}
+			eyebot.facing *= -1;
+			eyebot.facingY *= -1;
+		} else {
+			eyebot.x = aheadPos.x;
+			eyebot.y = aheadPos.y;
+			entityMoved(eyebot);
+		}
+	}
+	if (eyebot.animationFrame > 2) {
+		eyebot.animationFrame = 0;
 	}
 };
 
