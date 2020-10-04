@@ -2605,6 +2605,12 @@ const animate = () => {
 	if (!editing) {
 		viewport.centerY = Math.min(23 * 18 - canvas.height / 2 / viewport.scale, viewport.centerY);
 	}
+	if (currentLevel.bounds) {
+		viewport.centerY = Math.min((currentLevel.bounds.y + currentLevel.bounds.height - 36) + canvas.height / 2 / viewport.scale, viewport.centerY);
+		viewport.centerY = Math.max((currentLevel.bounds.y + 36) - canvas.height / 2 / viewport.scale, viewport.centerY);
+		viewport.centerX = Math.min((currentLevel.bounds.x + currentLevel.bounds.width - 30) + canvas.width / 2 / viewport.scale, viewport.centerX);
+		viewport.centerX = Math.max((currentLevel.bounds.x + 30) - canvas.width / 2 / viewport.scale, viewport.centerX);
+	}
 	updateMouseWorldPosition();
 
 	// add new entities to acceleration structures
