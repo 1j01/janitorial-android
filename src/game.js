@@ -3233,7 +3233,7 @@ const initUI = () => {
 	};
 	levelHintInput.onchange = () => {
 		undoable(() => {
-			currentLevel.hint = levelTitleInput.value;
+			currentLevel.hint = levelHintInput.value;
 		});
 	};
 	levelParInput.onchange = () => {
