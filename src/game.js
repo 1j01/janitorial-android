@@ -2549,7 +2549,42 @@ const simulatePipe = (pipe) => {
 	}
 };
 
+const updateAccelerationStructures = () => {
+	// add new entities to acceleration structures
+	for (const entity of entities) {
+		if (!lastKeys.has(entity)) {
+			entityMoved(entity);
+		}
+	}
+	// clean up acceleration structures
+	lastKeys.forEach((yKeys, entity) => {
+		if (entities.indexOf(entity) === -1) {
+			if (yKeys.topY) {
+				remove(entitiesByTopY[yKeys.topY], entity);
+			}
+			if (yKeys.bottomY) {
+				remove(entitiesByBottomY[yKeys.bottomY], entity);
+			}
+			lastKeys.delete(entity);
+		}
+	});
+	const cleanByYObj = (entitiesByY) => {
+		Object.keys(entitiesByY).forEach((y) => {
+			if (entitiesByY[y].length === 0) {
+				delete entitiesByY[y];
+			}
+		});
+	};
+	cleanByYObj(entitiesByTopY);
+	cleanByYObj(entitiesByBottomY);
+};
+
 const simulate = (entities) => {
+	updateAccelerationStructures();
+
+	// sort for gravity
+	entities.sort((a, b) => b.y - a.y);
+
 	simulateGravity();
 
 	for (const entity of entities) {
@@ -2632,8 +2667,10 @@ window.addEventListener("error", () => {
 	cancelAnimationFrame(rafid);
 });
 
+let frameNumber = 0;
 const animate = () => {
 	rafid = requestAnimationFrame(animate);
+	frameNumber += 1;
 
 	if (!keys.ControlLeft && !keys.ControlRight) {
 		if (keys.KeyW || keys.ArrowUp) {
@@ -2671,39 +2708,10 @@ const animate = () => {
 	}
 	updateMouseWorldPosition();
 
-	// add new entities to acceleration structures
-	for (const entity of entities) {
-		if (!lastKeys.has(entity)) {
-			entityMoved(entity);
-		}
-	}
-	// clean up acceleration structures
-	lastKeys.forEach((yKeys, entity) => {
-		if (entities.indexOf(entity) === -1) {
-			if (yKeys.topY) {
-				remove(entitiesByTopY[yKeys.topY], entity);
-			}
-			if (yKeys.bottomY) {
-				remove(entitiesByBottomY[yKeys.bottomY], entity);
-			}
-			lastKeys.delete(entity);
-		}
-	});
-	const cleanByYObj = (entitiesByY) => {
-		Object.keys(entitiesByY).forEach((y) => {
-			if (entitiesByY[y].length === 0) {
-				delete entitiesByY[y];
-			}
-		});
-	};
-	cleanByYObj(entitiesByTopY);
-	cleanByYObj(entitiesByBottomY);
-
-	// sort for gravity
-	entities.sort((a, b) => b.y - a.y);
-
 	if (!paused) {
 		simulate(entities);
+	} else {
+		updateAccelerationStructures(); // also within simulate()
 	}
 
 	if (winOrLose() !== winLoseState) {
@@ -3292,6 +3300,28 @@ const initUI = () => {
 	updateInfoBoxHidden();
 };
 
+const expect = (condition, maxTimeSteps) => {
+	for (let timeStep = 0; timeStep < maxTimeSteps; timeStep++) {
+		if (condition()) {
+			return true;
+		}
+		simulate(entities);
+	}
+	return false;
+};
+
+const runTests = async () => {
+	// initLevel(await loadLevelFromTextFile("test-cases/Tippy Toast.txt"));
+	deserializeJSON(await loadTextFile("levels/test-cases/Tippy Toast.json"));
+	editorLevelState = serializeToJSON(currentLevel);
+	const pass = expect(() => winOrLose() === "win", 1000);
+	if (pass) {
+		showMessageBox("Test passed!");
+	} else {
+		showMessageBox("Test failed!");
+	}
+};
+
 const main = async () => {
 	try {
 		showDebug = localStorage.showDebug === "true";
@@ -3318,6 +3348,9 @@ const main = async () => {
 	}
 	initUI();
 	animate();
+	if (location.hash.match(/run-tests!/)) {
+		runTests();
+	}
 };
 
 main();
