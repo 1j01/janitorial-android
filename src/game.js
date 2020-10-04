@@ -821,7 +821,7 @@ const drawFlybot = (ctx, entity) => {
 };
 const drawEyebot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 2);
-	const frame = resources.spritesAtlas[`eyebot_${1 + frameIndex}`];
+	const frame = resources.spritesAtlas[`eyebot_${entity.active ? "active_" : ""}${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
@@ -1097,7 +1097,9 @@ const serializeLevel = (level) => {
 			let animationName;
 			if ("on" in entity) {
 				animationName = entity.on ? "on" : "off";
-			} else if (entity.type === "flybot" || entity.type === "eyebot") {
+			} else if (entity.type === "eyebot") {
+				animationName = "inactive";
+			} else if (entity.type === "flybot") {
 				if (entity.facingY === -1) {
 					animationName = "U";
 				} else if (entity.facingY === 1) {
@@ -1866,7 +1868,7 @@ canvas.addEventListener("mousemove", (event) => {
 	}
 });
 canvas.addEventListener("mousedown", (event) => {
-	canvas.focus(); // for keyboard shortcuts like Space, after interacting with dropdown
+	canvas.focus(); // for keyboard shortcuts, after interacting with dropdown
 	updateMouse(event);
 	mouse.atDragStart = {
 		x: mouse.x,
@@ -2085,6 +2087,22 @@ const entityCollisionAll = (entityX, entityY, entity, filter) => (
 		(otherEntity) => otherEntity !== entity && filter(otherEntity)
 	)
 );
+const raycast = ({ startX, startY, width, height, directionX, directionY, maxSteps, entityFilter }) => {
+	let steps = 0;
+	let x = startX;
+	let y = startY;
+	while (steps < maxSteps) {
+		x += 18 * directionX;
+		y += 18 * directionY;
+		const hit = rectangleCollisionTest(x, y, width, height, entityFilter);
+		if (hit) {
+			return { steps, hit };
+		}
+		steps += 1;
+	}
+	return { steps, hit: null };
+};
+
 
 const simulateGravity = () => {
 	for (const entity of entities) {
@@ -2335,13 +2353,14 @@ const simulateFlybot = (flybot) => {
 	flybot.animationFrame += 0.25;
 	if (flybot.animationFrame > 2) {
 		flybot.animationFrame = 0;
-		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y };
+		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y + (flybot.facingY || 0) * 18 };
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, flybot, (otherEntity) => otherEntity.type !== "drop");
 		if (ahead) {
 			if (ahead.type === "junkbot") {
 				hurtJunkbot(ahead, "bot");
 			}
 			flybot.facing *= -1;
+			flybot.facingY *= -1;
 		} else {
 			flybot.x = aheadPos.x;
 			flybot.y = aheadPos.y;
@@ -2351,8 +2370,34 @@ const simulateFlybot = (flybot) => {
 };
 
 const simulateEyebot = (eyebot) => {
-	// TODO
-	simulateFlybot(eyebot);
+	let target;
+	for (const [directionX, directionY] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+		const offsets = directionY === 0 ? [[0, 0], [15, 0]] : [[0, 0], [0, 18]];
+		for (const [offsetX, offsetY] of offsets) {
+			const { hit } = raycast({
+				startX: eyebot.x + offsetX,
+				startY: eyebot.y + offsetY,
+				width: 0,
+				height: 0,
+				directionX, directionY,
+				maxSteps: 50,
+				entityFilter: (entity) => entity.type !== "drop" && entity !== eyebot,
+			});
+			if (hit && hit.type === "junkbot") {
+				target = hit;
+				eyebot.facing = directionX;
+				eyebot.facingY = directionY;
+				eyebot.active = true;
+			}
+		}
+	}
+	if (target) {
+		simulateFlybot(eyebot);
+		simulateFlybot(eyebot);
+	} else {
+		eyebot.active = false;
+		simulateFlybot(eyebot);
+	}
 };
 
 const simulateClimbbot = (climbbot) => {
@@ -2908,7 +2953,7 @@ const initUI = () => {
 			button.style.borderColor = "yellow";
 			hilitButton = button;
 			playSound("insert");
-			canvas.focus(); // for keyboard shortcuts like Space
+			canvas.focus(); // for keyboard shortcuts
 		});
 		sidebar.addEventListener("mouseleave", () => {
 			sidebar.style.cursor = "";
@@ -3227,7 +3272,7 @@ const main = async () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 	resources = await loadResources(resourcePaths);
-
+	resources.spritesAtlas.eyebot_active_1 = resources.spritesAtlas.eyebot_active_1fix;
 	try {
 		deserializeJSON(localStorage.JWorld);
 		dragging = entities.filter((entity) => entity.grabbed);
