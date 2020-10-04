@@ -328,7 +328,7 @@ const resourcePaths = {
 	rustle3: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML4.WAV",
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
-	world: "levels/junkbot-world.json",
+	defaultLevel: "levels/custom/Default World.txt",
 	levelNames: "levels/_LEVEL_LISTING.txt",
 	levelNamesUndercover: "levels/Undercover Exclusive/_LEVEL_LISTING.txt",
 };
@@ -3319,7 +3319,7 @@ const main = async () => {
 		dragging = entities.filter((entity) => entity.grabbed);
 	} catch (error) {
 		// initTestLevel();
-		deserializeJSON(resources.world);
+		initLevel(resources.defaultLevel);
 	}
 	// await loadLevelFromTextFile("levels/The Long Umbrella.txt").then(initLevel);
 	editorLevelState = serializeToJSON(currentLevel);
