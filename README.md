@@ -43,9 +43,16 @@ Partially done:
 		<td>Mute / unmute</td>
 	</tr>
 	<tr>
+		<td><kbd>+</kbd></td>
+		<td>Zoom in</td>
+	</tr>
+	<tr>
+		<td><kbd>-</kbd></td>
+		<td>Zoom out</td>
+	</tr>
+	<tr>
 		<td><kbd>`</kbd></td>
-		<td>Toggle debug information, including checking for collisions and other problems in the world state
-		</td>
+		<td>Toggle debug information (including collision and NaN detection)</td>
 	</tr>
 </table>
 <p>When in editor mode:</p>

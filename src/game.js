@@ -3168,7 +3168,7 @@ const initUI = () => {
 		const match = kbd.textContent.match(/(Ctrl\+)?(.+)/);
 		if (match) {
 			const ctrlKey = match[1] !== "";
-			const key = match[2];
+			const key = match[2] === "+" ? "NumpadAdd" : match[2] === "-" ? "NumpadSubtract" : match[2];
 			const button = document.createElement("button");
 			button.addEventListener("click", () => {
 				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
