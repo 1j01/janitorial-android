@@ -8,6 +8,16 @@ document.body.append(canvas);
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
+const viewport = { centerX: 0, centerY: 0, scale: 2 };
+let keys = {};
+
+let entities = [];
+let wind = [];
+let currentLevel = {
+	entities,
+	title: "Custom World",
+};
+
 let showDebug = false;
 let muted = false;
 let paused = false;
@@ -66,6 +76,117 @@ const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 	ay + ah > by &&
 	ay < by + bh
 );
+
+const rectangleLevelBoundsCollisionTest = (x, y, width, height) => {
+	const { bounds } = currentLevel;
+	if (!bounds) {
+		return;
+	}
+	if (x < bounds.x) {
+		return { type: "levelBounds", x: bounds.x - 15, y: bounds.y, width: 15, height: bounds.height };
+	}
+	if (y < bounds.y) {
+		return { type: "levelBounds", x: bounds.x, y: bounds.y - 18, width: bounds.width, height: 18 };
+	}
+	if (x + width > bounds.x + bounds.width) {
+		return { type: "levelBounds", x: bounds.x + bounds.width, y: bounds.y, width: 15, height: bounds.height };
+	}
+	if (y + height > bounds.y + bounds.height) {
+		return { type: "levelBounds", x: bounds.x, y: bounds.y + bounds.height, width: bounds.width, height: 18 };
+	}
+};
+const rectangleCollisionTest = (x, y, width, height, filter) => {
+	const boundsHit = rectangleLevelBoundsCollisionTest(x, y, width, height);
+	if (boundsHit && filter(boundsHit)) {
+		return boundsHit;
+	}
+	for (const otherEntity of entities) {
+		if (
+			!otherEntity.grabbed &&
+			filter(otherEntity) &&
+			rectanglesIntersect(
+				x,
+				y,
+				width,
+				height,
+				otherEntity.x,
+				otherEntity.y,
+				otherEntity.width,
+				otherEntity.height,
+			)
+		) {
+			return otherEntity;
+		}
+	}
+	return null;
+};
+const rectangleCollisionAll = (x, y, width, height, filter) => {
+	const boundsHit = rectangleLevelBoundsCollisionTest(x, y, width, height);
+	return ((boundsHit && filter(boundsHit)) ? [boundsHit] : []).concat(entities.filter((otherEntity) => (
+		!otherEntity.grabbed &&
+		filter(otherEntity) &&
+		rectanglesIntersect(
+			x,
+			y,
+			width,
+			height,
+			otherEntity.x,
+			otherEntity.y,
+			otherEntity.width,
+			otherEntity.height,
+		)
+	)));
+};
+const entityCollisionTest = (entityX, entityY, entity, filter) => (
+	// Note: make sure not to use entity.x/y!
+	rectangleCollisionTest(
+		entityX,
+		entityY,
+		entity.width,
+		entity.height,
+		(otherEntity) => otherEntity !== entity && filter(otherEntity)
+	)
+);
+const entityCollisionAll = (entityX, entityY, entity, filter) => (
+	// Note: make sure not to use entity.x/y!
+	rectangleCollisionAll(
+		entityX,
+		entityY,
+		entity.width,
+		entity.height,
+		(otherEntity) => otherEntity !== entity && filter(otherEntity)
+	)
+);
+const raycast = ({ startX, startY, width, height, directionX, directionY, maxSteps, entityFilter }) => {
+	let steps = 0;
+	let x = startX;
+	let y = startY;
+	while (steps < maxSteps) {
+		x += 15 * directionX;
+		y += 18 * directionY;
+		debugWorldSpaceRect(x, y, width, height);
+		const hit = rectangleCollisionTest(x, y, width, height, entityFilter);
+		if (hit) {
+			return { steps, hit };
+		}
+		steps += 1;
+	}
+	return { steps, hit: null };
+};
+
+const entitiesWithinSelection = (selectionBox) => {
+	const minX = Math.min(selectionBox.x1, selectionBox.x2);
+	const maxX = Math.max(selectionBox.x1, selectionBox.x2);
+	const minY = Math.min(selectionBox.y1, selectionBox.y2);
+	const maxY = Math.max(selectionBox.y1, selectionBox.y2);
+	return rectangleCollisionAll(
+		minX,
+		minY,
+		maxX - minX,
+		maxY - minY,
+		() => true
+	);
+};
 
 const remove = (array, value) => {
 	if (!array) {
@@ -582,6 +703,8 @@ const serializeToJSON = (level) => {
 	}, "\t");
 };
 
+let editorLevelState = serializeToJSON(currentLevel);
+
 const updateInfoBoxHidden = () => {
 	infoBox.hidden = hideInfoBox;
 	toggleInfoButton.setAttribute("aria-expanded", hideInfoBox ? "false" : "true");
@@ -982,16 +1105,6 @@ const drawEntity = (ctx, entity, hilight) => {
 	}
 };
 
-const viewport = { centerX: 0, centerY: 0, scale: 2 };
-let keys = {};
-
-let entities = [];
-let wind = [];
-let currentLevel = {
-	entities,
-	title: "Custom World",
-};
-let editorLevelState = serializeToJSON(currentLevel);
 // acceleration structures
 let entitiesByTopY = {}; // y to array of entities with that y as their top
 let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
@@ -1920,116 +2033,6 @@ canvas.addEventListener("mousedown", (event) => {
 		}
 	}
 });
-const rectangleLevelBoundsCollisionTest = (x, y, width, height) => {
-	const { bounds } = currentLevel;
-	if (!bounds) {
-		return;
-	}
-	if (x < bounds.x) {
-		return { type: "levelBounds", x: bounds.x - 15, y: bounds.y, width: 15, height: bounds.height };
-	}
-	if (y < bounds.y) {
-		return { type: "levelBounds", x: bounds.x, y: bounds.y - 18, width: bounds.width, height: 18 };
-	}
-	if (x + width > bounds.x + bounds.width) {
-		return { type: "levelBounds", x: bounds.x + bounds.width, y: bounds.y, width: 15, height: bounds.height };
-	}
-	if (y + height > bounds.y + bounds.height) {
-		return { type: "levelBounds", x: bounds.x, y: bounds.y + bounds.height, width: bounds.width, height: 18 };
-	}
-};
-const rectangleCollisionTest = (x, y, width, height, filter) => {
-	const boundsHit = rectangleLevelBoundsCollisionTest(x, y, width, height);
-	if (boundsHit && filter(boundsHit)) {
-		return boundsHit;
-	}
-	for (const otherEntity of entities) {
-		if (
-			!otherEntity.grabbed &&
-			filter(otherEntity) &&
-			rectanglesIntersect(
-				x,
-				y,
-				width,
-				height,
-				otherEntity.x,
-				otherEntity.y,
-				otherEntity.width,
-				otherEntity.height,
-			)
-		) {
-			return otherEntity;
-		}
-	}
-	return null;
-};
-const rectangleCollisionAll = (x, y, width, height, filter) => {
-	const boundsHit = rectangleLevelBoundsCollisionTest(x, y, width, height);
-	return ((boundsHit && filter(boundsHit)) ? [boundsHit] : []).concat(entities.filter((otherEntity) => (
-		!otherEntity.grabbed &&
-		filter(otherEntity) &&
-		rectanglesIntersect(
-			x,
-			y,
-			width,
-			height,
-			otherEntity.x,
-			otherEntity.y,
-			otherEntity.width,
-			otherEntity.height,
-		)
-	)));
-};
-const entityCollisionTest = (entityX, entityY, entity, filter) => (
-	// Note: make sure not to use entity.x/y!
-	rectangleCollisionTest(
-		entityX,
-		entityY,
-		entity.width,
-		entity.height,
-		(otherEntity) => otherEntity !== entity && filter(otherEntity)
-	)
-);
-const entityCollisionAll = (entityX, entityY, entity, filter) => (
-	// Note: make sure not to use entity.x/y!
-	rectangleCollisionAll(
-		entityX,
-		entityY,
-		entity.width,
-		entity.height,
-		(otherEntity) => otherEntity !== entity && filter(otherEntity)
-	)
-);
-const raycast = ({ startX, startY, width, height, directionX, directionY, maxSteps, entityFilter }) => {
-	let steps = 0;
-	let x = startX;
-	let y = startY;
-	while (steps < maxSteps) {
-		x += 15 * directionX;
-		y += 18 * directionY;
-		debugWorldSpaceRect(x, y, width, height);
-		const hit = rectangleCollisionTest(x, y, width, height, entityFilter);
-		if (hit) {
-			return { steps, hit };
-		}
-		steps += 1;
-	}
-	return { steps, hit: null };
-};
-
-const entitiesWithinSelection = () => {
-	const minX = Math.min(selectionBox.x1, selectionBox.x2);
-	const maxX = Math.max(selectionBox.x1, selectionBox.x2);
-	const minY = Math.min(selectionBox.y1, selectionBox.y2);
-	const maxY = Math.max(selectionBox.y1, selectionBox.y2);
-	return rectangleCollisionAll(
-		minX,
-		minY,
-		maxX - minX,
-		maxY - minY,
-		() => true
-	);
-};
 
 const canRelease = () => {
 	if (dragging.length === 0) {
@@ -2095,7 +2098,7 @@ addEventListener("mouseup", () => {
 			save();
 		}
 	} else if (selectionBox) {
-		const toSelect = entitiesWithinSelection();
+		const toSelect = entitiesWithinSelection(selectionBox);
 		toSelect.forEach((entity) => {
 			entity.selected = true;
 		});
