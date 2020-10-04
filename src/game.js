@@ -10,11 +10,17 @@ const audioCtx = new AudioContext();
 
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
+let debugWorldSpaceRects = [];
 const debug = (text) => {
 	debugInfoForFrame += `${text}\n`;
 };
 const debugJunkbot = (text) => {
 	debugInfoForJunkbot += `${text}\n`;
+};
+const debugWorldSpaceRect = (x, y, width, height) => {
+	if (showDebug) {
+		debugWorldSpaceRects.push({ x, y, width, height });
+	}
 };
 
 let messageBox;
@@ -2092,8 +2098,9 @@ const raycast = ({ startX, startY, width, height, directionX, directionY, maxSte
 	let x = startX;
 	let y = startY;
 	while (steps < maxSteps) {
-		x += 18 * directionX;
+		x += 15 * directionX;
 		y += 18 * directionY;
+		debugWorldSpaceRect(x, y, width, height);
 		const hit = rectangleCollisionTest(x, y, width, height, entityFilter);
 		if (hit) {
 			return { steps, hit };
@@ -2370,13 +2377,13 @@ const simulateFlybot = (flybot) => {
 
 const simulateEyebot = (eyebot) => {
 	for (const [directionX, directionY] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-		const offsets = directionY === 0 ? [[0, 0], [15, 0]] : [[0, 0], [0, 18]];
+		const offsets = directionY !== 0 ? [[0, 0], [15, 0]] : [[0, 0], [0, 18]];
 		for (const [offsetX, offsetY] of offsets) {
 			const { hit } = raycast({
 				startX: eyebot.x + offsetX,
 				startY: eyebot.y + offsetY,
-				width: 0,
-				height: 0,
+				width: 15,
+				height: 18,
 				directionX, directionY,
 				maxSteps: 50,
 				entityFilter: (entity) => entity.type !== "drop" && entity !== eyebot,
@@ -2804,6 +2811,15 @@ const animate = () => {
 	if (bounds) {
 		ctx.strokeRect(bounds.x - 0.5, bounds.y - 0.5, bounds.width + 1, bounds.height + 1);
 	}
+
+	if (showDebug) {
+		ctx.strokeStyle = "#f0f";
+		ctx.lineWidth = 1;
+		for (const { x, y, width, height } of debugWorldSpaceRects) {
+			ctx.strokeRect(x - 0.5, y - 0.5, width, height);
+		}
+	}
+	debugWorldSpaceRects.length = 0;
 
 	ctx.restore(); // world viewport
 
