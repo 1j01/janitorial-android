@@ -563,7 +563,7 @@ const loadResources = async (resourcePathsByID) => {
 };
 
 const serializeToJSON = (level) => {
-	return JSON.stringify({ version: 0.2, format: "janitorial-android", entities: level.entities, level }, (name, value) => {
+	return JSON.stringify({ version: 0.3, format: "janitorial-android", level }, (name, value) => {
 		if (name === "grabbed" || name === "grabOffset") {
 			return undefined;
 		}
@@ -1187,11 +1187,11 @@ parts=${parts.join(",")}
 };
 const deserializeJSON = (json) => {
 	const state = JSON.parse(json);
-	if (state.level) {
-		currentLevel = state.level;
+	if ("version" in state && state.version < 0.3) {
+		state.level = { entities: state.entities };
 	}
-	entities = state.entities;
-	currentLevel.entities = entities;
+	currentLevel = state.level;
+	entities = currentLevel.entities;
 	entitiesByTopY = {};
 	entitiesByBottomY = {};
 	lastKeys = new Map();
