@@ -2865,26 +2865,18 @@ const wrapContents = (target, wrapper) => {
 
 const initUI = () => {
 
-	sidebar = document.createElement("div");
+	sidebar = document.getElementById("editor-ui");
+	const entitiesPalette = document.getElementById("entities-palette");
+	const entitiesScrollContainer = document.getElementById("entities-scroll-container");
+	const levelBoundsCheckbox = document.getElementById("level-bounds-checkbox");
+	const levelTitleInput = document.getElementById("level-title");
+	const levelHintInput = document.getElementById("level-hint");
+	const levelParInput = document.getElementById("level-par");
+	const saveButton = document.getElementById("save-world");
+	const openButton = document.getElementById("open-world");
+	const levelSelect = document.getElementById("level-select");
+
 	sidebar.hidden = !editing;
-	sidebar.style.position = "fixed";
-	sidebar.style.left = "0px";
-	sidebar.style.top = "0px";
-	sidebar.style.bottom = "0px";
-	sidebar.style.backgroundColor = "#224";
-	sidebar.style.color = "white";
-
-	const entitiesPalette = document.createElement("div");
-	entitiesPalette.style.width = "300px";
-	// wrapper to make layout consistent regardless of scrollbar
-	const entitiesScrollContainer = document.createElement("div");
-	entitiesScrollContainer.style.width = "320px"; // assuming scrollbar < 20px
-	entitiesScrollContainer.style.height = "calc(100% - 140px)";
-	entitiesScrollContainer.style.overflowY = "auto";
-	entitiesScrollContainer.style.backgroundColor = "black";
-
-	entitiesScrollContainer.append(entitiesPalette);
-	sidebar.append(entitiesScrollContainer);
 
 	let hilitButton;
 	const makeInsertEntityButton = (protoEntity) => {
@@ -3123,21 +3115,10 @@ const initUI = () => {
 		}
 	});
 
-	const saveButton = document.createElement("button");
-	saveButton.textContent = "Save World";
 	saveButton.onclick = saveToFile;
-	saveButton.style.margin = "10px";
-	sidebar.append(saveButton);
 
-	const openButton = document.createElement("button");
-	openButton.textContent = "Open World";
 	openButton.onclick = openFromFile;
-	openButton.style.margin = "10px";
-	sidebar.append(openButton);
 
-	sidebar.append(document.createElement("br"));
-
-	const levelSelect = document.createElement("select");
 	const option = document.createElement("option");
 	option.textContent = "Custom World";
 	option.defaultSelected = true;
@@ -3169,18 +3150,12 @@ const initUI = () => {
 			}
 		}
 	};
-	levelSelect.style.margin = "10px";
-	sidebar.append(levelSelect);
 
-	sidebar.append(document.createElement("br"));
-
-	const boundsCheckboxLabel = document.createElement("label");
-	const boundsCheckbox = document.createElement("input");
-	boundsCheckboxLabel.textContent = "Level Bounds";
-	boundsCheckbox.type = "checkbox";
-	boundsCheckbox.onchange = () => {
+	// It's important that these do undoable() because that makes it save the editorLevelState
+	// so if you go into play mode and back into editing mode, it doesn't reset these.
+	levelBoundsCheckbox.onchange = () => {
 		undoable(() => {
-			if (boundsCheckbox.checked) {
+			if (levelBoundsCheckbox.checked) {
 				currentLevel.bounds = {
 					x: 0,
 					y: 0,
@@ -3192,16 +3167,29 @@ const initUI = () => {
 			}
 		});
 	};
-	boundsCheckbox.style.margin = "10px";
-	boundsCheckboxLabel.prepend(boundsCheckbox);
-	sidebar.append(boundsCheckboxLabel);
+	levelTitleInput.onchange = () => {
+		undoable(() => {
+			currentLevel.title = levelTitleInput.value;
+		});
+	};
+	levelHintInput.onchange = () => {
+		undoable(() => {
+			currentLevel.hint = levelTitleInput.value;
+		});
+	};
+	levelParInput.onchange = () => {
+		undoable(() => {
+			currentLevel.par = levelParInput.valueAsNumber;
+		});
+	};
 
 	updateEditorUIForLevelChange = (level) => {
-		boundsCheckbox.checked = level.bounds;
+		levelBoundsCheckbox.checked = level.bounds;
+		levelTitleInput.value = level.title || "";
+		levelHintInput.value = level.hint || "";
+		levelParInput.valueAsNumber = level.par;
 	};
 	updateEditorUIForLevelChange(currentLevel);
-
-	document.body.append(sidebar);
 
 	infoBox = document.getElementById("info");
 	const controlsTableRows = document.querySelectorAll("#info table tr");

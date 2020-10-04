@@ -81,6 +81,28 @@
 			white-space: pre;
 			pointer-events: all;
 		}
+
+		#editor-ui {
+			position: fixed;
+			left: 0px;
+			top: 0px;
+			bottom: 0px;
+			background-color: #224;
+			color: white;
+		}
+		#entities-scroll-container {
+			width: 320px; /* assuming scrollbar < 20px */
+			height: calc(100% - 300px);
+			overflow-y: auto;
+			background-color: black;
+		}
+		#entities-palette {
+			width: 300px;
+		}
+		.controls > *,
+		.level > * {
+			margin: 10px;
+		}
 	</style>
 </head>
 
@@ -167,6 +189,39 @@
 				<td>Open a saved world file</td>
 			</tr>
 		</table>
+	</div>
+	<div id="editor-ui">
+		<!-- wrapper to make layout consistent regardless of scrollbar, without using overflow: auto -->
+		<div id="entities-scroll-container">
+			<div id="entities-palette"></div>
+		</div>
+		<div class="controls">
+			<div class="level">
+				<label>
+					Title:
+					<input type="text" id="level-title" />
+				</label>
+				<br>
+				<label>
+					Hint:
+					<input type="text" id="level-hint" />
+				</label>
+				<br>
+				<label>
+					Par:
+					<input type="number" id="level-par" min="0" step="1" />
+				</label>
+				<br>
+				<label>
+					<input type="checkbox" id="level-bounds-checkbox">
+					Level Bounds
+				</label>
+			</div>
+			<button id="save-world">Save World</button>
+			<button id="open-world">Open World</button>
+			<br>
+			<select id="level-select"></select>
+		</div>
 	</div>
 </body>
 
