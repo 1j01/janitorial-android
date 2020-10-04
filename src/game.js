@@ -867,6 +867,7 @@ const drawEyebot = (ctx, entity) => {
 
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
+	let animLength = 10;
 	if (junkbot.dead) {
 		animName = "dead";
 	} else if (junkbot.dyingFromWater) {
@@ -875,8 +876,10 @@ const drawJunkbot = (ctx, junkbot) => {
 		animName = "die";
 	} else if (junkbot.collectingBin) {
 		animName = "eat_start";
+		animLength = 17;
 	} else if (junkbot.gettingShield) {
 		animName = `shield_on_${junkbot.facing === 1 ? "r" : "l"}`;
+		animLength = 11;
 	} else {
 		animName = `walk_${junkbot.facing === 1 ? "r" : "l"}`;
 	}
@@ -887,7 +890,7 @@ const drawJunkbot = (ctx, junkbot) => {
 			animName = `shield_${animName}`;
 		}
 	}
-	const frameIndex = Math.floor(junkbot.animationFrame % (junkbot.gettingShield ? 11 : junkbot.collectingBin ? 17 : 10));
+	const frameIndex = Math.floor(junkbot.animationFrame % animLength);
 	const frame = resources.spritesAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
