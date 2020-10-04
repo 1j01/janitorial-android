@@ -461,6 +461,12 @@ const loadLevelFromText = (levelData, game) => {
 		backgroundDecals: [],
 		entities,
 		game,
+		bounds: {
+			x: 0,
+			y: 0,
+			width: 35 * 15,
+			height: 22 * 18,
+		},
 	};
 
 	if (sections.info) {
@@ -469,6 +475,21 @@ const loadLevelFromText = (levelData, game) => {
 				level[key] = value;
 			} else if (key.match(/^par$/i)) {
 				level.par = Number(value);
+			}
+		});
+	}
+	let spacing = [15, 18];
+	if (sections.playfield) {
+		sections.playfield.forEach(([key, value]) => {
+			if (key.match(/^spacing$/i)) {
+				spacing = value.split(",").map(Number);
+			}
+		});
+		sections.playfield.forEach(([key, value]) => {
+			if (key.match(/^size$/i)) {
+				const size = value.split(",").map(Number);
+				level.bounds.width = size[0] * spacing[0];
+				level.bounds.height = size[1] * spacing[1];
 			}
 		});
 	}
