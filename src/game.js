@@ -3237,7 +3237,7 @@ const initUI = () => {
 			const game = optgroup ? optgroup.value : "Custom";
 			const folder = game === "Junkbot Undercover" ? "levels/Undercover Exclusive" : "levels";
 			try {
-				await loadLevelFromTextFile(`${folder}/${fileName}`, { game }).then(initLevel);
+				initLevel(await loadLevelFromTextFile(`${folder}/${fileName}`, { game }));
 			} catch (error) {
 				showMessageBox(`Failed to load level:\n\n${error}`);
 			}
@@ -3331,7 +3331,7 @@ const main = async () => {
 		// initTestLevel();
 		initLevel(resources.defaultLevel);
 	}
-	// await loadLevelFromTextFile("levels/The Long Umbrella.txt").then(initLevel);
+	// initLevel(await loadLevelFromTextFile("levels/The Long Umbrella.txt"));
 	editorLevelState = serializeToJSON(currentLevel);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
