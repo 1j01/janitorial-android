@@ -1012,12 +1012,6 @@ let wind = [];
 let currentLevel = {
 	entities,
 	title: "Custom World",
-	bounds: {
-		x: 0,
-		y: 0,
-		width: 35 * 15,
-		height: 22 * 18,
-	},
 };
 let editorLevelState = serializeToJSON(currentLevel);
 // acceleration structures
