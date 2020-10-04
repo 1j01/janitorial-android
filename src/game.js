@@ -8,6 +8,17 @@ document.body.append(canvas);
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
+let showDebug = false;
+let muted = false;
+let paused = false;
+let editing = false;
+let hideInfoBox = false;
+let sidebar;
+let infoBox;
+let toggleInfoButton;
+// eslint-disable-next-line no-empty-function
+let updateEditorUIForLevelChange = () => { };
+
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
 const debugWorldSpaceRects = [];
@@ -571,55 +582,6 @@ const serializeToJSON = (level) => {
 	}, "\t");
 };
 
-let showDebug = false;
-let muted = false;
-let paused = false;
-let editing = false;
-let hideInfoBox = false;
-let sidebar;
-let infoBox;
-let toggleInfoButton;
-// eslint-disable-next-line no-empty-function
-let updateEditorUIForLevelChange = () => { };
-const toggleShowDebug = () => {
-	showDebug = !showDebug;
-	try {
-		localStorage.showDebug = showDebug;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
-};
-const toggleMute = () => {
-	muted = !muted;
-	try {
-		localStorage.muteSoundEffects = muted;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
-};
-const togglePause = () => {
-	paused = !paused;
-	// if (editing && !paused) {
-	// if (editing !== paused) {
-	// 	toggleEditing();
-	// }
-	try {
-		localStorage.paused = paused;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
-};
-const toggleEditing = () => {
-	editing = !editing;
-	sidebar.hidden = !editing;
-	if (editing) {
-		deserializeJSON(editorLevelState);
-	}
-	if (editing !== paused) {
-		togglePause();
-	}
-	try {
-		localStorage.editing = editing;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
-};
 const updateInfoBoxHidden = () => {
 	infoBox.hidden = hideInfoBox;
 	toggleInfoButton.setAttribute("aria-expanded", hideInfoBox ? "false" : "true");
@@ -1204,6 +1166,22 @@ const deserializeJSON = (json) => {
 	winLoseState = winOrLose();
 	updateEditorUIForLevelChange(currentLevel);
 };
+const initLevel = (level) => {
+	currentLevel = level;
+	editorLevelState = serializeToJSON(level);
+	entities = level.entities;
+	entitiesByTopY = {};
+	entitiesByBottomY = {};
+	lastKeys = new Map();
+	undos.length = 0;
+	redos.length = 0;
+	dragging = [];
+	wind = [];
+	viewport.centerX = 35 / 2 * 15;
+	viewport.centerY = 24 / 2 * 15;
+	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
+	updateEditorUIForLevelChange(currentLevel);
+};
 const save = () => {
 	if (editing) {
 		editorLevelState = serializeToJSON(currentLevel);
@@ -1226,49 +1204,44 @@ const save = () => {
 // 	}, 0);
 // };
 
-const saveToFile = () => {
-	// this is sort of a weird way for this to work!
-	undoable(() => {
-		deserializeJSON(editorLevelState);
-	});
-	const file = new Blob([serializeLevel(currentLevel)], { type: "text/plain" });
-	const a = document.createElement("a");
-	const url = URL.createObjectURL(file);
-	a.href = url;
-	a.download = `${currentLevel.title}.txt`;
-	document.body.appendChild(a);
-	a.click();
-	setTimeout(() => {
-		document.body.removeChild(a);
-		window.URL.revokeObjectURL(url);
-	}, 0);
+const toggleShowDebug = () => {
+	showDebug = !showDebug;
+	try {
+		localStorage.showDebug = showDebug;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
 };
-
-const openFromFile = () => {
-	const input = document.createElement("input");
-	input.type = "file";
-	input.onchange = (event) => {
-		const file = event.target.files[0];
-		const reader = new FileReader();
-		reader.onload = (readerEvent) => {
-			const content = readerEvent.target.result;
-			try {
-				if (content.match(/^\s*{/)) {
-					deserializeJSON(content);
-					editorLevelState = content;
-				} else {
-					initLevel(loadLevelFromText(content));
-				}
-			} catch (error) {
-				showMessageBox(`Failed to load from file:\n\n${error}`);
-			}
-		};
-		reader.onerror = () => {
-			showMessageBox(`Failed to read file:\n\n${reader.error}`);
-		};
-		reader.readAsText(file, "UTF-8");
-	};
-	input.click();
+const toggleMute = () => {
+	muted = !muted;
+	try {
+		localStorage.muteSoundEffects = muted;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
+};
+const togglePause = () => {
+	paused = !paused;
+	// if (editing && !paused) {
+	// if (editing !== paused) {
+	// 	toggleEditing();
+	// }
+	try {
+		localStorage.paused = paused;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
+};
+const toggleEditing = () => {
+	editing = !editing;
+	sidebar.hidden = !editing;
+	if (editing) {
+		deserializeJSON(editorLevelState);
+	}
+	if (editing !== paused) {
+		togglePause();
+	}
+	try {
+		localStorage.editing = editing;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
 };
 
 const undoable = (fn) => {
@@ -1322,6 +1295,51 @@ const redo = () => {
 			recentRedoSound -= 1;
 		}, 400);
 	}
+};
+
+const saveToFile = () => {
+	// this is sort of a weird way for this to work!
+	undoable(() => {
+		deserializeJSON(editorLevelState);
+	});
+	const file = new Blob([serializeLevel(currentLevel)], { type: "text/plain" });
+	const a = document.createElement("a");
+	const url = URL.createObjectURL(file);
+	a.href = url;
+	a.download = `${currentLevel.title}.txt`;
+	document.body.appendChild(a);
+	a.click();
+	setTimeout(() => {
+		document.body.removeChild(a);
+		window.URL.revokeObjectURL(url);
+	}, 0);
+};
+
+const openFromFile = () => {
+	const input = document.createElement("input");
+	input.type = "file";
+	input.onchange = (event) => {
+		const file = event.target.files[0];
+		const reader = new FileReader();
+		reader.onload = (readerEvent) => {
+			const content = readerEvent.target.result;
+			try {
+				if (content.match(/^\s*{/)) {
+					deserializeJSON(content);
+					editorLevelState = content;
+				} else {
+					initLevel(loadLevelFromText(content));
+				}
+			} catch (error) {
+				showMessageBox(`Failed to load from file:\n\n${error}`);
+			}
+		};
+		reader.onerror = () => {
+			showMessageBox(`Failed to read file:\n\n${reader.error}`);
+		};
+		reader.readAsText(file, "UTF-8");
+	};
+	input.click();
 };
 
 const selectAll = () => {
@@ -1445,23 +1463,6 @@ const sortEntitiesForRendering = (entities) => {
 	// 		n := newn
 	// 	until n ≤ 1
 	// end procedure
-};
-
-const initLevel = (level) => {
-	currentLevel = level;
-	editorLevelState = serializeToJSON(level);
-	entities = level.entities;
-	entitiesByTopY = {};
-	entitiesByBottomY = {};
-	lastKeys = new Map();
-	undos.length = 0;
-	redos.length = 0;
-	dragging = [];
-	wind = [];
-	viewport.centerX = 35 / 2 * 15;
-	viewport.centerY = 24 / 2 * 15;
-	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
-	updateEditorUIForLevelChange(currentLevel);
 };
 
 // const initTestLevel = () => {
