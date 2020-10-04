@@ -10,7 +10,7 @@ const audioCtx = new AudioContext();
 
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
-let debugWorldSpaceRects = [];
+const debugWorldSpaceRects = [];
 const debug = (text) => {
 	debugInfoForFrame += `${text}\n`;
 };
@@ -462,23 +462,30 @@ const loadLevelFromText = (levelData, game) => {
 				const typeName = types[e[2] - 1].toLowerCase();
 				const colorName = colors[e[3] - 1].toLowerCase();
 				const animationName = e[4].toLowerCase();
+				const facing = animationName.match(/_L/i) ? -1 : 1;
+				let facingY = 0;
+				if (animationName.match(/_U/i)) {
+					facingY = -1;
+				} else if (animationName.match(/_D/i)) {
+					facingY = 1;
+				}
 				const brickMatch = typeName.match(/brick_(\d+)/i);
 				if (brickMatch) {
 					entities.push(makeBrick({
 						x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
 					}));
 				} else if (typeName === "minifig") {
-					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing: animationName.match(/_L/i) ? -1 : 1 }));
+					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing }));
 				} else if (typeName === "haz_walker") {
-					entities.push(makeGearbot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
+					entities.push(makeGearbot({ x, y: y - 18 * 1, facing }));
 				} else if (typeName === "haz_climber") {
-					entities.push(makeClimbbot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1, facingY: animationName.match(/_U/i) ? -1 : animationName.match(/_D/i) ? 1 : 0 }));
+					entities.push(makeClimbbot({ x, y: y - 18 * 1, facing, facingY }));
 				} else if (typeName === "haz_dumbfloat") {
-					entities.push(makeFlybot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
+					entities.push(makeFlybot({ x, y: y - 18 * 1, facing }));
 				} else if (typeName === "haz_float") {
-					entities.push(makeEyebot({ x, y: y - 18 * 1, facing: animationName.match(/_L/i) ? -1 : 1 }));
+					entities.push(makeEyebot({ x, y: y - 18 * 1, facing }));
 				} else if (typeName === "flag") {
-					entities.push(makeBin({ x, y: y - 18 * 2, facing: animationName.match(/_L/i) ? -1 : 1 }));
+					entities.push(makeBin({ x, y: y - 18 * 2, facing }));
 				} else if (typeName === "haz_slickcrate") {
 					entities.push(makeCrate({ x, y: y - 18 }));
 				} else if (typeName === "haz_slickfire") {
@@ -835,7 +842,13 @@ const drawGearbot = (ctx, entity) => {
 };
 const drawClimbbot = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.animationFrame % 6);
-	const frame = resources.spritesAtlas[`climbbot_walk_${entity.facingY === 1 ? "d" : entity.facingY === -1 ? "u" : entity.facing === 1 ? "r" : "l"}_${1 + frameIndex}`];
+	let direction = entity.facing === 1 ? "r" : "l";
+	if (entity.facingY === -1) {
+		direction = "u";
+	} else if (entity.facingY === 1) {
+		direction = "d";
+	}
+	const frame = resources.spritesAtlas[`climbbot_walk_${direction}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y - 6, width, height);
 };
@@ -3288,7 +3301,12 @@ const initUI = () => {
 		const match = kbd.textContent.match(/(Ctrl\+)?(.+)/);
 		if (match) {
 			const ctrlKey = match[1] !== "";
-			const key = match[2] === "+" ? "NumpadAdd" : match[2] === "-" ? "NumpadSubtract" : match[2];
+			let key = match[2];
+			if (key === "+") {
+				key = "NumpadAdd";
+			} else if (key === "-") {
+				key = "NumpadSubtract";
+			}
 			const button = document.createElement("button");
 			button.addEventListener("click", () => {
 				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
@@ -3313,6 +3331,7 @@ const main = async () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 	resources = await loadResources(resourcePaths);
+	// eslint-disable-next-line camelcase
 	resources.spritesAtlas.eyebot_active_1 = resources.spritesAtlas.eyebot_active_1fix;
 	try {
 		deserializeJSON(localStorage.JWorld);
