@@ -2,6 +2,8 @@ const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
 canvas.tabIndex = 0;
+// canvas.setAttribute("touch-action", "none"); // if we were using PEP.js
+canvas.style.touchAction = "none";
 
 document.body.append(canvas);
 
@@ -781,7 +783,7 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 		} else if (char === "\n") {
 			x = startX;
 			y += fontCharHeight + 4;
-			if (y > innerHeight) {
+			if (y > canvas.height) {
 				return; // optimization for lazily-implemented debug text
 			}
 		} else {
@@ -1749,33 +1751,34 @@ addEventListener("keyup", (event) => {
 addEventListener("blur", () => {
 	// prevent stuck keys
 	keys = {};
-	// prevent margin panning until mousemove
+	// prevent margin panning until pointermove
 	mouse.x = undefined;
 	mouse.y = undefined;
 	mouse.worldX = undefined;
 	mouse.worldY = undefined;
 });
-// sort of planning for in case game is embedded (without an iframe)
-canvas.addEventListener("mouseleave", () => {
-	// prevent margin panning until mousemove
+canvas.addEventListener("pointerout", () => {
+	// prevent margin panning until pointermove
 	mouse.x = undefined;
 	mouse.y = undefined;
-	mouse.worldX = undefined;
-	mouse.worldY = undefined;
+	// mouse.worldX = undefined;
+	// mouse.worldY = undefined;
 });
 
 const updateMouseWorldPosition = () => {
-	const worldPos = canvasToWorld(mouse.x, mouse.y);
-	mouse.worldX = worldPos.x;
-	mouse.worldY = worldPos.y;
+	if (mouse.x !== undefined && mouse.y !== undefined) {
+		const worldPos = canvasToWorld(mouse.x, mouse.y);
+		mouse.worldX = worldPos.x;
+		mouse.worldY = worldPos.y;
+	}
 	if (selectionBox) {
 		selectionBox.x2 = mouse.worldX;
 		selectionBox.y2 = mouse.worldY;
 	}
 };
 const updateMouse = (event) => {
-	mouse.x = event.offsetX;
-	mouse.y = event.offsetY;
+	mouse.x = event.offsetX * window.devicePixelRatio;
+	mouse.y = event.offsetY * window.devicePixelRatio;
 	updateMouseWorldPosition();
 };
 const brickUnderMouse = (includeFixed) => {
@@ -1995,7 +1998,7 @@ const startGrab = (grab) => {
 	playSound("blockPickUp");
 };
 
-canvas.addEventListener("mousemove", (event) => {
+canvas.addEventListener("pointermove", (event) => {
 	updateMouse(event);
 	if (pendingGrabs.length) {
 		const threshold = 10;
@@ -2013,7 +2016,7 @@ canvas.addEventListener("mousemove", (event) => {
 		}
 	}
 });
-canvas.addEventListener("mousedown", (event) => {
+canvas.addEventListener("pointerdown", (event) => {
 	canvas.focus(); // for keyboard shortcuts, after interacting with dropdown
 	updateMouse(event);
 	mouse.atDragStart = {
@@ -2095,7 +2098,7 @@ const canRelease = () => {
 	}
 	return connectsToCeiling !== connectsToFloor;
 };
-addEventListener("mouseup", () => {
+addEventListener("pointerup", () => {
 	if (dragging.length) {
 		if (canRelease()) {
 			dragging.forEach((entity) => {
@@ -2708,7 +2711,7 @@ const animate = () => {
 	if (mouse.y > canvas.height - panMarginSize) {
 		viewport.centerY += panFromMarginSpeed;
 	}
-	if (mouse.x < panMarginSize + (sidebar.hidden ? 0 : sidebar.offsetWidth)) {
+	if (mouse.x < panMarginSize + (sidebar.hidden ? 0 : sidebar.offsetWidth * window.devicePixelRatio)) {
 		viewport.centerX -= panFromMarginSpeed;
 	}
 	if (mouse.x > canvas.width - panMarginSize) {
@@ -2760,11 +2763,13 @@ const animate = () => {
 		canvas.style.cursor = "default";
 	}
 
-	if (canvas.width !== innerWidth) {
-		canvas.width = innerWidth;
+	if (canvas.width !== innerWidth * window.devicePixelRatio) {
+		canvas.width = innerWidth * window.devicePixelRatio;
+		canvas.style.width = `${innerWidth}px`;
 	}
-	if (canvas.height !== innerHeight) {
-		canvas.height = innerHeight;
+	if (canvas.height !== innerHeight * window.devicePixelRatio) {
+		canvas.height = innerHeight * window.devicePixelRatio;
+		canvas.style.height = `${innerHeight}px`;
 	}
 	ctx.fillStyle = "#bbb";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
