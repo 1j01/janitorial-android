@@ -3300,29 +3300,35 @@ const initUI = () => {
 	updateInfoBoxHidden();
 };
 
-const expect = async (condition, failureMessage, maxTimeSteps, realTime) => {
-	for (let timeStep = 0; timeStep < maxTimeSteps; timeStep++) {
-		if (condition()) {
-			return true;
-		}
-		if (realTime) {
-			// eslint-disable-next-line no-await-in-loop
-			await new Promise((resolve) => {
-				requestAnimationFrame(resolve);
-			});
-		} else {
-			simulate(entities);
-		}
-	}
-	throw new Error(`${failureMessage} (in ${maxTimeSteps} time steps)`);
-};
+// const expect = async ({ atLeastOnce, always, failureMessage, maxTimeSteps, realTime }) => {
+// 	let atLeastOnce
+// 	for (let timeStep = 0; timeStep < maxTimeSteps; timeStep++) {
+// 		if (atLeastOnce()) {
+// 			return true;
+// 		}
+// 		if (realTime) {
+// 			// eslint-disable-next-line no-await-in-loop
+// 			await new Promise((resolve) => {
+// 				requestAnimationFrame(resolve);
+// 			});
+// 		} else {
+// 			simulate(entities);
+// 		}
+// 	}
+// 	throw new Error(`${failureMessage} (in ${maxTimeSteps} time steps)`);
+// };
 
-const expectWin = async (maxTimeSteps, realTime) => {
-	await expect(() => winOrLose() === "win", "Expected win", maxTimeSteps, realTime);
-};
-const expectLose = async (maxTimeSteps, realTime) => {
-	await expect(() => winOrLose() === "lose", "Expected lose", maxTimeSteps, realTime);
-};
+// const expectWin = async (maxTimeSteps, realTime) => {
+// 	await expect(() => winOrLose() === "win", "Expected win", maxTimeSteps, realTime);
+// };
+// const expectLose = async (maxTimeSteps, realTime) => {
+// 	await expect({
+// 		atLeastOnce: () => winOrLose() === "lose",
+// 		always: () => winOrLose() !== "win",
+// 		atLeastOnceFailureMessage: "Expected lose",
+// 		maxTimeSteps, realTime
+// 	});
+// };
 
 const runTests = async () => {
 	const realTime = location.hash.match(/realtime/);
@@ -3332,36 +3338,107 @@ const runTests = async () => {
 	if (editing) {
 		toggleEditing();
 	}
-	// initLevel(await loadLevelFromTextFile("test-cases/Tippy Toast.txt"));
 
-	const tests = [];
-	const addTest = (name, fn) => {
-		tests.push({ name, fn, state: "pending" });
-	};
+	const tests = [
+		{
+			name: "Tippy Toast", expectations: [
+				{ type: "win", maxTimeSteps: 1000 },
+			]
+		},
+		{
+			name: "tight squeeze stairs", expectations: [
+				{ type: "win", maxTimeSteps: 1000 },
+			]
+		},
+		{
+			name: "get bin and electrocuted", expectations: [
+				{ type: "lose", maxTimeSteps: 1000 },
+			]
+		},
+	];
 
-	addTest("Tippy Toast", async () => {
-		await expectWin(1000, realTime);
-	});
-	addTest("tight squeeze stairs", async () => {
-		await expectWin(1000, realTime);
-	});
-	addTest("get bin and electrocuted", async () => {
-		// TODO: also expect win state to never be win
-		await expectLose(1000, realTime);
-	});
+	for (const test of tests) {
+		test.state = "pending";
+		for (const expectation of test.expectations) {
+			if (expectation.type === "win") {
+				expectation.atLeastOnce = () => winOrLose() === "win";
+				test.expectations.push({
+					type: "not to lose (ever)",
+					minTimeSteps: expectation.minTimeSteps,
+					always: () => winOrLose() !== "lose",
+				});
+			}
+			if (expectation.type === "lose") {
+				expectation.atLeastOnce = () => winOrLose() === "lose";
+				test.expectations.push({
+					type: "not to win (ever)",
+					minTimeSteps: expectation.minTimeSteps,
+					always: () => winOrLose() !== "win",
+				});
+			}
+		}
+		for (const expectation of test.expectations) {
+			expectation.state = "pending";
+		}
+	}
 
 	/* eslint-disable no-await-in-loop */
 	for (const test of tests) {
+		// initLevel(await loadLevelFromTextFile(`levels/test-cases/${test.name}.txt`));
 		deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
 		editorLevelState = serializeToJSON(currentLevel);
-		try {
-			await test.fn();
-		} catch (error) {
-			test.error = error;
-			test.state = "failed";
+
+		for (let timeStep = 0; timeStep < Math.max(...test.expectations.map(
+			({ state, maxTimeSteps, minTimeSteps }) => (
+				state === "met" ? 0 : Math.max(maxTimeSteps || 0, minTimeSteps || 0)
+			)
+		)); timeStep++) {
+			for (const expectation of test.expectations) {
+				if (expectation.state === "pending") {
+					if (expectation.atLeastOnce) {
+						if (expectation.atLeastOnce()) {
+							expectation.state = "met";
+						}
+					}
+					if (expectation.always) {
+						if (!expectation.always()) {
+							expectation.state = "failed";
+							expectation.message = `Expected ${expectation.type}`;
+						}
+					}
+				}
+			}
+			if (realTime) {
+				// eslint-disable-next-line no-await-in-loop
+				await new Promise((resolve) => {
+					requestAnimationFrame(resolve);
+				});
+			} else {
+				simulate(entities);
+			}
 		}
-		if (!test.error) {
+		for (const expectation of test.expectations) {
+			if (expectation.state === "pending") {
+				if (expectation.always) {
+					expectation.state = "met";
+				} else if (expectation.atLeastOnce) {
+					expectation.state = "failed";
+					expectation.message = `Expected ${expectation.type}`;
+				} else {
+					expectation.state = "failed";
+					expectation.message = "???";
+				}
+			}
+		}
+		// throw new Error(`${failureMessage} (in ${maxTimeSteps} time steps)`);
+		if (test.expectations.every((expectation) => expectation.state === "met")) {
 			test.state = "passed";
+		} else {
+			test.state = "failed";
+			test.message = test.expectations
+				.filter(({ state }) => state === "failed")
+				.map(({ message }) => message)
+				.join("\n");
 		}
 	}
 	/* eslint-enable no-await-in-loop */
@@ -3369,7 +3446,10 @@ const runTests = async () => {
 	if (tests.every((test) => test.state === "passed")) {
 		showMessageBox("All tests passed!");
 	} else {
-		showMessageBox(`Some tests failed!\n\n${tests.map((test) => `${test.name}\n${test.error}`).join("\n")}`);
+		showMessageBox(`Some tests failed!\n\n${tests
+			.filter((test) => test.state === "failed")
+			.map((test) => `${test.name}\n${test.message}`)
+			.join("\n")}`);
 	}
 };
 
