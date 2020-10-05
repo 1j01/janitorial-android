@@ -3342,6 +3342,9 @@ const runTests = async () => {
 	addTest("Tippy Toast", async () => {
 		await expectWin(1000, realTime);
 	});
+	addTest("tight squeeze stairs", async () => {
+		await expectWin(1000, realTime);
+	});
 	addTest("get bin and electrocuted", async () => {
 		// TODO: also expect win state to never be win
 		await expectLose(1000, realTime);
