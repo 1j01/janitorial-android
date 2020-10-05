@@ -2121,7 +2121,7 @@ const simulateGravity = () => {
 		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
 			if (
 				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
-				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot") ? 1 : 0 })
+				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot" || entity.type === "crate" || entity.type === "bin") ? 1 : 0 })
 			) {
 				// entity.y += 1;
 				entity.y += 6;
