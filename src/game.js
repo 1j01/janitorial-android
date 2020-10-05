@@ -1130,7 +1130,7 @@ const entityMoved = (entity) => {
 let winLoseState = "";
 const winOrLose = () => {
 	if (entities.some((entity) => entity.type === "junkbot" && !entity.dying && !entity.dead)) {
-		if (!entities.some((entity) => entity.type === "bin")) {
+		if (!entities.some((entity) => entity.type === "bin") && entities.every((entity) => !entity.collectingBin)) {
 			return "win";
 		} else {
 			return "";
@@ -2329,6 +2329,11 @@ const simulateJunkbot = (junkbot) => {
 		remove(entities, bin);
 		playSound("collectBin");
 		playSound("collectBin2");
+		setTimeout(() => {
+			if (winOrLose() === "win") {
+				playSound("ohYeah");
+			}
+		}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000);
 	}
 };
 
@@ -2716,13 +2721,11 @@ const animate = () => {
 
 	if (winOrLose() !== winLoseState) {
 		winLoseState = winOrLose();
-		if (winLoseState === "win") {
-			setTimeout(() => {
-				playSound("ohYeah");
-			}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000);
-		} else if (winLoseState === "lose") {
-			// playSound("ouch"); // or whatever
-		}
+		// if (winLoseState === "win") {
+
+		// } else if (winLoseState === "lose") {
+		// 	// playSound("ouch"); // or whatever
+		// }
 	}
 
 	sortEntitiesForRendering(entities);
