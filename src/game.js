@@ -8,7 +8,7 @@ document.body.append(canvas);
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
-const viewport = { centerX: 0, centerY: 0, scale: 2 };
+const viewport = { centerX: 0, centerY: 0, scale: 1 };
 let keys = {};
 
 let entities = [];
