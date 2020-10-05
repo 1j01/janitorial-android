@@ -3300,7 +3300,7 @@ const initUI = () => {
 	updateInfoBoxHidden();
 };
 
-const expect = async (condition, maxTimeSteps, realTime) => {
+const expect = async (condition, failureMessage, maxTimeSteps, realTime) => {
 	for (let timeStep = 0; timeStep < maxTimeSteps; timeStep++) {
 		if (condition()) {
 			return true;
@@ -3314,7 +3314,14 @@ const expect = async (condition, maxTimeSteps, realTime) => {
 			simulate(entities);
 		}
 	}
-	return false;
+	throw new Error(`${failureMessage} (in ${maxTimeSteps} time steps)`);
+};
+
+const expectWin = async (maxTimeSteps, realTime) => {
+	await expect(() => winOrLose() === "win", "Expected win", maxTimeSteps, realTime);
+};
+const expectLose = async (maxTimeSteps, realTime) => {
+	await expect(() => winOrLose() === "lose", "Expected lose", maxTimeSteps, realTime);
 };
 
 const runTests = async () => {
@@ -3326,13 +3333,40 @@ const runTests = async () => {
 		toggleEditing();
 	}
 	// initLevel(await loadLevelFromTextFile("test-cases/Tippy Toast.txt"));
-	deserializeJSON(await loadTextFile("levels/test-cases/Tippy Toast.json"));
-	editorLevelState = serializeToJSON(currentLevel);
-	const pass = await expect(() => winOrLose() === "win", 1000, realTime);
-	if (pass) {
-		showMessageBox("Test passed!");
+
+	const tests = [];
+	const addTest = (name, fn) => {
+		tests.push({ name, fn, state: "pending" });
+	};
+
+	addTest("Tippy Toast", async () => {
+		await expectWin(1000, realTime);
+	});
+	addTest("get bin and electrocuted", async () => {
+		// TODO: also expect win state to never be win
+		await expectLose(1000, realTime);
+	});
+
+	/* eslint-disable no-await-in-loop */
+	for (const test of tests) {
+		deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
+		editorLevelState = serializeToJSON(currentLevel);
+		try {
+			await test.fn();
+		} catch (error) {
+			test.error = error;
+			test.state = "failed";
+		}
+		if (!test.error) {
+			test.state = "passed";
+		}
+	}
+	/* eslint-enable no-await-in-loop */
+
+	if (tests.every((test) => test.state === "passed")) {
+		showMessageBox("All tests passed!");
 	} else {
-		showMessageBox("Test failed!");
+		showMessageBox(`Some tests failed!\n\n${tests.map((test) => `${test.name}\n${test.error}`).join("\n")}`);
 	}
 };
 
