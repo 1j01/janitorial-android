@@ -1,5 +1,6 @@
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
 
 canvas.tabIndex = 0;
 // canvas.setAttribute("touch-action", "none"); // if we were using PEP.js
@@ -754,6 +755,7 @@ const colorizeWhiteAlphaImage = (image, color) => {
 	const ctx = canvas.getContext("2d");
 	canvas.width = image.width;
 	canvas.height = image.height;
+	ctx.imageSmoothingEnabled = false;
 	ctx.drawImage(image, 0, 0);
 	ctx.globalCompositeOperation = "source-atop";
 	ctx.fillStyle = color;
