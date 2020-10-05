@@ -1538,6 +1538,8 @@ const pasteFromClipboard = async () => {
 };
 
 const sortEntitiesForRendering = (entities) => {
+	entities.sort((a, b) => b.y - a.y);
+
 	let n = entities.length;
 	do {
 		let newN = 0;
