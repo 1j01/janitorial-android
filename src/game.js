@@ -1414,29 +1414,33 @@ const saveToFile = () => {
 	}, 0);
 };
 
-const openFromFile = () => {
+const openFromFile = (file) => {
+	const reader = new FileReader();
+	reader.onload = (readerEvent) => {
+		const content = readerEvent.target.result;
+		try {
+			if (content.match(/^\s*{/)) {
+				deserializeJSON(content);
+				editorLevelState = content;
+			} else {
+				initLevel(loadLevelFromText(content));
+			}
+		} catch (error) {
+			showMessageBox(`Failed to load from file:\n\n${error}`);
+		}
+	};
+	reader.onerror = () => {
+		showMessageBox(`Failed to read file:\n\n${reader.error}`);
+	};
+	reader.readAsText(file, "UTF-8");
+};
+
+const openFromFileDialog = () => {
 	const input = document.createElement("input");
 	input.type = "file";
 	input.onchange = (event) => {
 		const file = event.target.files[0];
-		const reader = new FileReader();
-		reader.onload = (readerEvent) => {
-			const content = readerEvent.target.result;
-			try {
-				if (content.match(/^\s*{/)) {
-					deserializeJSON(content);
-					editorLevelState = content;
-				} else {
-					initLevel(loadLevelFromText(content));
-				}
-			} catch (error) {
-				showMessageBox(`Failed to load from file:\n\n${error}`);
-			}
-		};
-		reader.onerror = () => {
-			showMessageBox(`Failed to read file:\n\n${reader.error}`);
-		};
-		reader.readAsText(file, "UTF-8");
+		openFromFile(file);
 	};
 	input.click();
 };
@@ -1722,7 +1726,7 @@ addEventListener("keydown", (event) => {
 			break;
 		case "O":
 			if (event.ctrlKey) {
-				openFromFile();
+				openFromFileDialog();
 			}
 			break;
 		default:
@@ -3201,7 +3205,7 @@ const initUI = () => {
 
 	saveButton.onclick = saveToFile;
 
-	openButton.onclick = openFromFile;
+	openButton.onclick = openFromFileDialog;
 
 	const option = document.createElement("option");
 	option.textContent = "Custom World";
@@ -3301,6 +3305,13 @@ const initUI = () => {
 	toggleInfoButton.addEventListener("click", toggleInfoBox);
 
 	updateInfoBoxHidden();
+
+	canvas.addEventListener("dragover", (event) => event.preventDefault());
+	canvas.addEventListener("dragenter", (event) => event.preventDefault());
+	canvas.addEventListener("drop", (event) => {
+		event.preventDefault();
+		openFromFile(event.dataTransfer.files[0]);
+	});
 };
 
 // const expect = async ({ atLeastOnce, always, failureMessage, maxTimeSteps, realTime }) => {
