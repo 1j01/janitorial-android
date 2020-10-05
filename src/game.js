@@ -3360,6 +3360,10 @@ const initUI = () => {
 
 const runTests = async () => {
 	const realTime = location.hash.match(/realtime/);
+	const wasMuted = muted;
+	if (!realTime && !muted) {
+		muted = true;
+	}
 	if (realTime && paused) {
 		togglePause();
 	}
@@ -3479,6 +3483,8 @@ const runTests = async () => {
 			.map((test) => `${test.name}\n${test.message}`)
 			.join("\n")}`);
 	}
+
+	muted = wasMuted;
 };
 
 const main = async () => {
