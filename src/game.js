@@ -1347,7 +1347,8 @@ const undoable = (fn) => {
 	if (!editing) {
 		return; // TODO: allow undos during gameplay again, but handle it well
 	}
-	undos.push(serializeToJSON(currentLevel));
+	editorLevelState = serializeToJSON(currentLevel);
+	undos.push(editorLevelState);
 	redos.length = 0;
 	if (fn) {
 		fn();
@@ -1359,7 +1360,8 @@ const undoOrRedo = (undos, redos) => {
 		return false;
 	}
 	redos.push(serializeToJSON(currentLevel));
-	deserializeJSON(undos.pop());
+	editorLevelState = undos.pop();
+	deserializeJSON(editorLevelState);
 	save();
 	return true;
 };
@@ -1460,6 +1462,7 @@ const deleteSelected = () => {
 	if (entities.some((entity) => entity.selected)) {
 		undoable(() => {
 			entities = entities.filter((entity) => !entity.selected);
+			currentLevel.entities = entities;
 		});
 		playSound("delete");
 	}
@@ -3020,28 +3023,39 @@ const initUI = () => {
 		button.addEventListener("mouseenter", () => {
 			const animate = () => {
 				rafid = requestAnimationFrame(animate);
-				const { x, y } = previewEntity;
-				const prevMuted = muted;
-				const prevEntities = entities;
-				const prevWind = wind;
-				const prevEntitiesByTopY = entitiesByTopY;
-				const prevEntitiesByBottomY = entitiesByBottomY;
-				const prevLastKeys = lastKeys;
+				const prev = {
+					x: previewEntity.x,
+					y: previewEntity.y,
+					muted,
+					showDebug,
+					currentLevel,
+					entities,
+					wind,
+					entitiesByTopY,
+					entitiesByBottomY,
+					lastKeys,
+				};
 				muted = true;
+				showDebug = false;
 				entities = [];
+				currentLevel = { entities };
 				wind = [];
 				entitiesByTopY = {};
 				entitiesByBottomY = {};
 				lastKeys = new Map();
 				simulate([previewEntity]);
-				muted = prevMuted;
-				entities = prevEntities;
-				wind = prevWind;
-				entitiesByTopY = prevEntitiesByTopY;
-				entitiesByBottomY = prevEntitiesByBottomY;
-				lastKeys = prevLastKeys;
-				previewEntity.x = x;
-				previewEntity.y = y;
+				({
+					muted,
+					showDebug,
+					currentLevel,
+					entities,
+					wind,
+					entitiesByTopY,
+					entitiesByBottomY,
+					lastKeys,
+				} = prev);
+				previewEntity.x = prev.x;
+				previewEntity.y = prev.y;
 				drawPreview();
 			};
 			animate();
