@@ -35,11 +35,11 @@ let updateEditorUIForLevelChange = () => { };
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
 const debugWorldSpaceRects = [];
-const debug = (text) => {
-	debugInfoForFrame += `${text}\n`;
+const debug = (...texts) => {
+	debugInfoForFrame += `${texts.join(" ")}\n`;
 };
-const debugJunkbot = (text) => {
-	debugInfoForJunkbot += `${text}\n`;
+const debugJunkbot = (...texts) => {
+	debugInfoForJunkbot += `${texts.join(" ")}\n`;
 };
 const debugWorldSpaceRect = (x, y, width, height) => {
 	if (showDebug) {
@@ -790,9 +790,12 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 			}
 		} else {
 			const index = fontChars.indexOf(char);
-			const w = fontCharW[index];
-			ctx.drawImage(fontImage, fontCharX[index], 0, w, fontCharHeight, x, y, w, fontCharHeight);
-			x += w + 1;
+			// TODO: fallback glyph?
+			if (index > -1) {
+				const w = fontCharW[index];
+				ctx.drawImage(fontImage, fontCharX[index], 0, w, fontCharHeight, x, y, w, fontCharHeight);
+				x += w + 1;
+			}
 		}
 	}
 };
@@ -1750,6 +1753,10 @@ addEventListener("keyup", (event) => {
 		delete keys[event.key];
 	}
 });
+
+let pointerEventCache = [];
+let prevPointerDist = -1;
+
 addEventListener("blur", () => {
 	// prevent stuck keys
 	keys = {};
@@ -1759,12 +1766,18 @@ addEventListener("blur", () => {
 	mouse.worldX = undefined;
 	mouse.worldY = undefined;
 });
-canvas.addEventListener("pointerout", () => {
+canvas.addEventListener("pointerout", (event) => {
 	// prevent margin panning until pointermove
 	mouse.x = undefined;
 	mouse.y = undefined;
 	// mouse.worldX = undefined;
 	// mouse.worldY = undefined;
+
+	pointerEventCache = pointerEventCache.filter((oldEvent) => oldEvent.pointerId !== event.pointerId);
+
+	if (pointerEventCache.length < 2) {
+		prevPointerDist = -1;
+	}
 });
 
 const updateMouseWorldPosition = () => {
@@ -2017,8 +2030,38 @@ canvas.addEventListener("pointermove", (event) => {
 			pendingGrabs = [];
 		}
 	}
+	// Find this event in the cache and update its record with this event
+	for (let i = 0; i < pointerEventCache.length; i++) {
+		if (event.pointerId === pointerEventCache[i].pointerId) {
+			pointerEventCache[i] = event;
+			break;
+		}
+	}
+	// If two pointers are down, check for pinch gestures
+	// debug("pointers down:", pointerEventCache.length);
+	if (pointerEventCache.length === 2) {
+		// Calculate the distance between the two pointers
+		const [a, b] = pointerEventCache;
+		const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+
+		if (prevPointerDist > 0) {
+			if (dist > prevPointerDist + 50) {
+				// debug("Pinch moving OUT -> Zoom in", event);
+				viewport.scale = Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1);
+				prevPointerDist = dist;
+			}
+			if (dist < prevPointerDist - 50) {
+				// debug("Pinch moving IN -> Zoom out", event);
+				viewport.scale = Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1);
+				prevPointerDist = dist;
+			}
+		} else {
+			prevPointerDist = dist;
+		}
+	}
 });
 canvas.addEventListener("pointerdown", (event) => {
+	pointerEventCache.push(event);
 	canvas.focus(); // for keyboard shortcuts, after interacting with dropdown
 	updateMouse(event);
 	mouse.atDragStart = {
