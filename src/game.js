@@ -1644,6 +1644,16 @@ const canvasToWorld = (canvasX, canvasY) => ({
 	y: (canvasY - Math.floor(canvas.height / 2)) / viewport.scale + viewport.centerY,
 });
 
+const zoomIn = () => {
+	viewport.scale = Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1);
+};
+const zoomOut = () => {
+	viewport.scale = Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1);
+	if (Math.abs(viewport.scale - 1) < 0.01) {
+		viewport.scale = 1;
+	}
+};
+
 addEventListener("keydown", (event) => {
 	if (event.defaultPrevented) {
 		return; // Do nothing if the event was already processed
@@ -1659,13 +1669,10 @@ addEventListener("keydown", (event) => {
 		keys[event.key] = true;
 	}
 	if (event.code === "Equal" || event.code === "NumpadAdd") {
-		viewport.scale = Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1);
+		zoomIn();
 	}
 	if (event.code === "Minus" || event.code === "NumpadSubtract") {
-		viewport.scale = Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1);
-	}
-	if (Math.abs(viewport.scale - 1) < 0.01) {
-		viewport.scale = 1;
+		zoomOut();
 	}
 	switch (event.key.toUpperCase()) {
 		case " ": // Spacebar
@@ -2039,11 +2046,11 @@ canvas.addEventListener("pointermove", (event) => {
 
 		if (prevPointerDist > 0) {
 			if (dist > prevPointerDist + 50) {
-				viewport.scale = Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1);
+				zoomIn();
 				prevPointerDist = dist;
 			}
 			if (dist < prevPointerDist - 50) {
-				viewport.scale = Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1);
+				zoomOut();
 				prevPointerDist = dist;
 			}
 		} else {
