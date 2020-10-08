@@ -3,7 +3,6 @@ const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
 canvas.tabIndex = 0;
-// canvas.setAttribute("touch-action", "none"); // if we were using PEP.js
 canvas.style.touchAction = "none";
 
 document.body.append(canvas);
@@ -838,7 +837,6 @@ const drawCrate = (ctx, bin) => {
 
 const drawFire = (ctx, entity) => {
 	const frameIndex = entity.on ? Math.floor(entity.animationFrame % 8 < 4 ? entity.animationFrame % 4 : 4 - (entity.animationFrame % 4)) : 0;
-	// console.log(`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`);
 	const frame = resources.spritesAtlas[`haz_slickFire_${entity.on ? "on" : "off"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
@@ -1170,7 +1168,6 @@ const serializeLevel = (level) => {
 	const types = [];
 	const unknownTypeMappings = [];
 	const parts = [];
-	// console.log(level.entities);
 	for (const entity of level.entities) {
 		let type;
 		if (entity.type === "brick") {
@@ -1742,7 +1739,7 @@ addEventListener("keydown", (event) => {
 			}
 			break;
 		default:
-			// Prevent preventing default action if event not handled
+			// Don't prevent default action if event not handled
 			return;
 	}
 	event.preventDefault();
@@ -1870,10 +1867,8 @@ const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {
 		for (const otherEntity of entitiesToCheck) {
 			if (
 				!otherEntity.grabbed &&
-				// otherEntity.type === "brick" && // TODO? but don't break behavior of bricks falling on junkbot...
 				ignoreEntities.indexOf(otherEntity) === -1 &&
 				visited.indexOf(otherEntity) === -1 &&
-				// connects(fromEntity, otherEntity, fromEntity === startEntity ? direction : 0)
 				fromEntity.x + fromEntity.width > otherEntity.x &&
 				fromEntity.x < otherEntity.x + otherEntity.width
 			) {
@@ -1939,7 +1934,6 @@ const possibleGrabs = () => {
 								if (
 									entity.x + entity.width > junk.x &&
 									entity.x < junk.x + junk.width
-									// connects(entity, junk, -1)
 								) {
 									return false;
 								}
@@ -2003,6 +1997,7 @@ const startGrab = (grab) => {
 			// x: brick.x - floor(mouse.worldX, 15),
 			// y: brick.y - floor(mouse.worldY, 18),
 			// so you can place blocks that were grabbed when they weren't on the grid:
+			// (note: this does lose relative sub-grid positions of bricks)
 			x: floor(brick.x, 15) - floor(mouse.worldX, 15),
 			y: floor(brick.y, 18) - floor(mouse.worldY, 18),
 		};
@@ -2030,7 +2025,7 @@ canvas.addEventListener("pointermove", (event) => {
 			pendingGrabs = [];
 		}
 	}
-	// Find this event in the cache and update its record with this event
+	// Find this pointer in the cache and update its record with the latest event
 	for (let i = 0; i < pointerEventCache.length; i++) {
 		if (event.pointerId === pointerEventCache[i].pointerId) {
 			pointerEventCache[i] = event;
@@ -2038,20 +2033,16 @@ canvas.addEventListener("pointermove", (event) => {
 		}
 	}
 	// If two pointers are down, check for pinch gestures
-	// debug("pointers down:", pointerEventCache.length);
 	if (pointerEventCache.length === 2) {
-		// Calculate the distance between the two pointers
 		const [a, b] = pointerEventCache;
 		const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
 
 		if (prevPointerDist > 0) {
 			if (dist > prevPointerDist + 50) {
-				// debug("Pinch moving OUT -> Zoom in", event);
 				viewport.scale = Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1);
 				prevPointerDist = dist;
 			}
 			if (dist < prevPointerDist - 50) {
-				// debug("Pinch moving IN -> Zoom out", event);
 				viewport.scale = Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1);
 				prevPointerDist = dist;
 			}
@@ -2729,10 +2720,8 @@ window.addEventListener("error", () => {
 	cancelAnimationFrame(rafid);
 });
 
-let frameNumber = 0;
 const animate = () => {
 	rafid = requestAnimationFrame(animate);
-	frameNumber += 1;
 
 	if (!keys.ControlLeft && !keys.ControlRight) {
 		if (keys.KeyW || keys.ArrowUp) {
@@ -2778,11 +2767,6 @@ const animate = () => {
 
 	if (winOrLose() !== winLoseState) {
 		winLoseState = winOrLose();
-		// if (winLoseState === "win") {
-
-		// } else if (winLoseState === "lose") {
-		// 	// playSound("ouch"); // or whatever
-		// }
 	}
 
 	sortEntitiesForRendering(entities);
@@ -3052,7 +3036,6 @@ const initUI = () => {
 		});
 		sidebar.addEventListener("mouseleave", () => {
 			sidebar.style.cursor = "";
-			// button.style.borderColor = "transparent";
 		});
 		let previewEntity = getEntityCopy();
 		buttonCanvas.width = previewEntity.width + 15 * 1;
@@ -3291,9 +3274,7 @@ const initUI = () => {
 	levelSelect.onchange = async () => {
 		const option = levelSelect.options[levelSelect.selectedIndex];
 		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
-		if (levelSelect.value === "Custom World") {
-			// openFromFile(), maybe?
-		} else {
+		if (levelSelect.value !== "Custom World") {
 			const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.txt`;
 			const game = optgroup ? optgroup.value : "Custom";
 			const folder = game === "Junkbot Undercover" ? "levels/Undercover Exclusive" : "levels";
@@ -3379,36 +3360,6 @@ const initUI = () => {
 		openFromFile(event.dataTransfer.files[0]);
 	});
 };
-
-// const expect = async ({ atLeastOnce, always, failureMessage, maxTimeSteps, realTime }) => {
-// 	let atLeastOnce
-// 	for (let timeStep = 0; timeStep < maxTimeSteps; timeStep++) {
-// 		if (atLeastOnce()) {
-// 			return true;
-// 		}
-// 		if (realTime) {
-// 			// eslint-disable-next-line no-await-in-loop
-// 			await new Promise((resolve) => {
-// 				requestAnimationFrame(resolve);
-// 			});
-// 		} else {
-// 			simulate(entities);
-// 		}
-// 	}
-// 	throw new Error(`${failureMessage} (in ${maxTimeSteps} time steps)`);
-// };
-
-// const expectWin = async (maxTimeSteps, realTime) => {
-// 	await expect(() => winOrLose() === "win", "Expected win", maxTimeSteps, realTime);
-// };
-// const expectLose = async (maxTimeSteps, realTime) => {
-// 	await expect({
-// 		atLeastOnce: () => winOrLose() === "lose",
-// 		always: () => winOrLose() !== "win",
-// 		atLeastOnceFailureMessage: "Expected lose",
-// 		maxTimeSteps, realTime
-// 	});
-// };
 
 const runTests = async () => {
 	const realTime = location.hash.match(/realtime/);
@@ -3514,7 +3465,6 @@ const runTests = async () => {
 				}
 			}
 		}
-		// throw new Error(`${failureMessage} (in ${maxTimeSteps} time steps)`);
 		if (test.expectations.every((expectation) => expectation.state === "met")) {
 			test.state = "passed";
 		} else {
@@ -3558,7 +3508,6 @@ const main = async () => {
 		// initTestLevel();
 		initLevel(resources.defaultLevel);
 	}
-	// initLevel(await loadLevelFromTextFile("levels/The Long Umbrella.txt"));
 	editorLevelState = serializeToJSON(currentLevel);
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
