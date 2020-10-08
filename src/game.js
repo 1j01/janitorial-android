@@ -1792,18 +1792,23 @@ addEventListener("blur", () => {
 	mouse.worldX = undefined;
 	mouse.worldY = undefined;
 });
+const releasePointer = (event) => {
+	pointerEventCache = pointerEventCache.filter((oldEvent) => oldEvent.pointerId !== event.pointerId);
+
+	if (pointerEventCache.length < 2) {
+		prevPointerDist = -1;
+	}
+};
 canvas.addEventListener("pointerout", (event) => {
 	// prevent margin panning until pointermove
 	mouse.x = undefined;
 	mouse.y = undefined;
 	// mouse.worldX = undefined;
 	// mouse.worldY = undefined;
-
-	pointerEventCache = pointerEventCache.filter((oldEvent) => oldEvent.pointerId !== event.pointerId);
-
-	if (pointerEventCache.length < 2) {
-		prevPointerDist = -1;
-	}
+	releasePointer(event);
+});
+canvas.addEventListener("pointerup", (event) => {
+	releasePointer(event);
 });
 
 const updateMouseWorldPosition = () => {
