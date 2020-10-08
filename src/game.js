@@ -1647,10 +1647,6 @@ const canvasToWorld = (canvasX, canvasY) => ({
 });
 
 const zoomTo = (newScale, focalPointOnCanvas) => {
-	if (Math.abs(newScale - 1) < 0.01) {
-		newScale = 1;
-	}
-
 	focalPointOnCanvas ||= { x: canvas.width / 2, y: canvas.height / 2 };
 	if (pointerEventCache.length === 2) {
 		const [a, b] = pointerEventCache;
@@ -1667,11 +1663,20 @@ const zoomTo = (newScale, focalPointOnCanvas) => {
 	viewport.centerY += focalPointInWorld.y - mouseInWorldAfterZoomButBeforePan.y;
 	viewport.scale = newScale;
 };
+const scales = [1 / 15, 1 / 10, 1 / 5, 1 / 3, 1 / 2, 3 / 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const getScaleIndex = () => {
+	for (let index = 0; index < scales.length; index++) {
+		if (scales[index] >= viewport.scale) {
+			return index;
+		}
+	}
+	return scales.length - 1;
+};
 const zoomIn = (focalPointOnCanvas) => {
-	zoomTo(Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1), focalPointOnCanvas);
+	zoomTo(scales[Math.min(getScaleIndex() + 1, scales.length - 1)], focalPointOnCanvas);
 };
 const zoomOut = (focalPointOnCanvas) => {
-	zoomTo(Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1), focalPointOnCanvas);
+	zoomTo(scales[Math.max(getScaleIndex() - 1, 0)], focalPointOnCanvas);
 };
 
 addEventListener("keydown", (event) => {
