@@ -1646,12 +1646,12 @@ const canvasToWorld = (canvasX, canvasY) => ({
 	y: (canvasY - Math.floor(canvas.height / 2)) / viewport.scale + viewport.centerY,
 });
 
-const zoomTo = (newScale) => {
+const zoomTo = (newScale, focalPointOnCanvas) => {
 	if (Math.abs(newScale - 1) < 0.01) {
 		newScale = 1;
 	}
 
-	const focalPointOnCanvas = { x: canvas.width / 2, y: canvas.height / 2 };
+	focalPointOnCanvas ||= { x: canvas.width / 2, y: canvas.height / 2 };
 	if (pointerEventCache.length === 2) {
 		const [a, b] = pointerEventCache;
 		focalPointOnCanvas.x = (a.offsetX + b.offsetX) / 2 * window.devicePixelRatio;
@@ -1667,11 +1667,11 @@ const zoomTo = (newScale) => {
 	viewport.centerY += focalPointInWorld.y - mouseInWorldAfterZoomButBeforePan.y;
 	viewport.scale = newScale;
 };
-const zoomIn = () => {
-	zoomTo(Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1));
+const zoomIn = (focalPointOnCanvas) => {
+	zoomTo(Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1), focalPointOnCanvas);
 };
-const zoomOut = () => {
-	zoomTo(Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1));
+const zoomOut = (focalPointOnCanvas) => {
+	zoomTo(Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1), focalPointOnCanvas);
 };
 
 addEventListener("keydown", (event) => {
@@ -2031,6 +2031,18 @@ const startGrab = (grab) => {
 	}
 	playSound("blockPickUp");
 };
+
+canvas.addEventListener("wheel", (event) => {
+	updateMouse(event);
+	event.preventDefault();
+	// Normalize to deltaX in case shift modifier is used on Mac
+	const delta = event.deltaY === 0 && event.deltaX ? event.deltaX : event.deltaY;
+	if (delta < 0) {
+		zoomIn({ x: mouse.x, y: mouse.y });
+	} else {
+		zoomOut({ x: mouse.x, y: mouse.y });
+	}
+});
 
 canvas.addEventListener("pointermove", (event) => {
 	updateMouse(event);
