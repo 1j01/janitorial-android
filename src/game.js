@@ -12,6 +12,8 @@ const audioCtx = new AudioContext();
 
 const viewport = { centerX: 0, centerY: 0, scale: 1 };
 let keys = {};
+let pointerEventCache = [];
+let prevPointerDist = -1;
 
 let entities = [];
 let wind = [];
@@ -1644,14 +1646,32 @@ const canvasToWorld = (canvasX, canvasY) => ({
 	y: (canvasY - Math.floor(canvas.height / 2)) / viewport.scale + viewport.centerY,
 });
 
+const zoomTo = (newScale) => {
+	if (Math.abs(newScale - 1) < 0.01) {
+		newScale = 1;
+	}
+
+	const focalPointOnCanvas = { x: canvas.width / 2, y: canvas.height / 2 };
+	if (pointerEventCache.length === 2) {
+		const [a, b] = pointerEventCache;
+		focalPointOnCanvas.x = (a.offsetX + b.offsetX) / 2 * window.devicePixelRatio;
+		focalPointOnCanvas.y = (a.offsetY + b.offsetY) / 2 * window.devicePixelRatio;
+	}
+	// const oldScale = viewport.scale;
+	const focalPointInWorld = canvasToWorld(focalPointOnCanvas.x, focalPointOnCanvas.y);
+	viewport.scale = newScale;
+	const mouseInWorldAfterZoomButBeforePan = canvasToWorld(focalPointOnCanvas.x, focalPointOnCanvas.y);
+	// viewport.scale = oldScale;
+
+	viewport.centerX += focalPointInWorld.x - mouseInWorldAfterZoomButBeforePan.x;
+	viewport.centerY += focalPointInWorld.y - mouseInWorldAfterZoomButBeforePan.y;
+	viewport.scale = newScale;
+};
 const zoomIn = () => {
-	viewport.scale = Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1);
+	zoomTo(Math.min(10, viewport.scale < 1 ? viewport.scale * 1.25 : viewport.scale + 1));
 };
 const zoomOut = () => {
-	viewport.scale = Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1);
-	if (Math.abs(viewport.scale - 1) < 0.01) {
-		viewport.scale = 1;
-	}
+	zoomTo(Math.max(1 / 15, viewport.scale <= 1 ? viewport.scale / 1.25 : viewport.scale - 1));
 };
 
 addEventListener("keydown", (event) => {
@@ -1757,9 +1777,6 @@ addEventListener("keyup", (event) => {
 		delete keys[event.key];
 	}
 });
-
-let pointerEventCache = [];
-let prevPointerDist = -1;
 
 addEventListener("blur", () => {
 	// prevent stuck keys
