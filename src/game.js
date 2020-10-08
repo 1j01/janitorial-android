@@ -2744,19 +2744,21 @@ const animate = () => {
 			viewport.centerX += 20;
 		}
 	}
-	const panMarginSize = Math.min(innerWidth, innerHeight) * 0.07;
-	const panFromMarginSpeed = 10 * document.hasFocus();
-	if (mouse.y < panMarginSize) {
-		viewport.centerY -= panFromMarginSpeed;
-	}
-	if (mouse.y > canvas.height - panMarginSize) {
-		viewport.centerY += panFromMarginSpeed;
-	}
-	if (mouse.x < panMarginSize + (sidebar.hidden ? 0 : sidebar.offsetWidth * window.devicePixelRatio)) {
-		viewport.centerX -= panFromMarginSpeed;
-	}
-	if (mouse.x > canvas.width - panMarginSize) {
-		viewport.centerX += panFromMarginSpeed;
+	if (pointerEventCache.length < 2) {
+		const panMarginSize = Math.min(innerWidth, innerHeight) * 0.07;
+		const panFromMarginSpeed = 10 * document.hasFocus();
+		if (mouse.y < panMarginSize) {
+			viewport.centerY -= panFromMarginSpeed;
+		}
+		if (mouse.y > canvas.height - panMarginSize) {
+			viewport.centerY += panFromMarginSpeed;
+		}
+		if (mouse.x < panMarginSize + (sidebar.hidden ? 0 : sidebar.offsetWidth * window.devicePixelRatio)) {
+			viewport.centerX -= panFromMarginSpeed;
+		}
+		if (mouse.x > canvas.width - panMarginSize) {
+			viewport.centerX += panFromMarginSpeed;
+		}
 	}
 	if (currentLevel.bounds) {
 		viewport.centerY = Math.min((currentLevel.bounds.y + currentLevel.bounds.height - 36) + canvas.height / 2 / viewport.scale, viewport.centerY);
