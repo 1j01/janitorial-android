@@ -1646,8 +1646,7 @@ const canvasToWorld = (canvasX, canvasY) => ({
 	y: (canvasY - Math.floor(canvas.height / 2)) / viewport.scale + viewport.centerY,
 });
 
-const zoomTo = (newScale, focalPointOnCanvas) => {
-	focalPointOnCanvas ||= { x: canvas.width / 2, y: canvas.height / 2 };
+const zoomTo = (newScale, focalPointOnCanvas = { x: canvas.width / 2, y: canvas.height / 2 }) => {
 	if (pointerEventCache.length === 2) {
 		const [a, b] = pointerEventCache;
 		focalPointOnCanvas.x = (a.offsetX + b.offsetX) / 2 * window.devicePixelRatio;
