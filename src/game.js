@@ -3528,37 +3528,37 @@ const runTests = async () => {
 		{
 			levelType: "json",
 			name: "Tippy Toast", expectations: [
-				{ type: "win", maxTimeSteps: 1000 },
+				{ type: "to win", maxTimeSteps: 1000 },
 			]
 		},
 		{
 			levelType: "json",
 			name: "tight squeeze stairs", expectations: [
-				{ type: "win", maxTimeSteps: 1000 },
+				{ type: "to win", maxTimeSteps: 1000 },
 			]
 		},
 		{
 			levelType: "json",
 			name: "get bin and electrocuted", expectations: [
-				{ type: "lose", maxTimeSteps: 1000 },
+				{ type: "to lose", maxTimeSteps: 1000 },
 			]
 		},
 		{
 			levelType: "junkbot",
 			name: "Jump Stair Case", expectations: [
-				{ type: "win", maxTimeSteps: 1000 },
+				{ type: "to win", maxTimeSteps: 1000 },
 			]
 		},
 		{
 			levelType: "junkbot",
 			name: "Jump Around (bricks in place)", expectations: [
-				{ type: "win", maxTimeSteps: 1000 },
+				{ type: "to win", maxTimeSteps: 1000 },
 			]
 		},
 		{
 			levelType: "junkbot",
 			name: "Jump Around (bricks out of place)", expectations: [
-				{ type: "lose", maxTimeSteps: 1000 },
+				{ type: "to lose", maxTimeSteps: 1000 },
 			]
 		},
 	];
@@ -3566,18 +3566,18 @@ const runTests = async () => {
 	for (const test of tests) {
 		test.state = "pending";
 		for (const expectation of test.expectations) {
-			if (expectation.type === "win") {
+			if (expectation.type === "to win") {
 				expectation.atLeastOnce = () => winOrLose() === "win";
 				test.expectations.push({
-					type: "not to lose (ever)",
+					type: "not to lose",
 					minTimeSteps: expectation.minTimeSteps,
 					always: () => winOrLose() !== "lose",
 				});
 			}
-			if (expectation.type === "lose") {
+			if (expectation.type === "to lose") {
 				expectation.atLeastOnce = () => winOrLose() === "lose";
 				test.expectations.push({
-					type: "not to win (ever)",
+					type: "not to win",
 					minTimeSteps: expectation.minTimeSteps,
 					always: () => winOrLose() !== "win",
 				});
@@ -3645,7 +3645,7 @@ const runTests = async () => {
 			test.state = "failed";
 			test.message = test.expectations
 				.filter(({ state }) => state === "failed")
-				.map(({ message }) => message)
+				.map(({ message }) => `  - ${message}`)
 				.join("\n");
 		}
 	}
