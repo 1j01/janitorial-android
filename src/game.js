@@ -11,12 +11,12 @@ document.body.append(canvas);
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
-maxSidewardsVelocity = 20;
-maxDownwardsVelocity = 20;
-maxUpwardsVelocity = 20;
+maxSidewardsVelocity = 40;
+maxDownwardsVelocity = 40;
+maxUpwardsVelocity = 40;
 jumpUpwardsVelocity = 20;
-jumpSidewardsVelocity = 10;
-gravity = 3;
+jumpSidewardsVelocity = 14;
+gravity = 7;
 
 const viewport = { centerX: 0, centerY: 0, scale: 1 };
 let keys = {};
