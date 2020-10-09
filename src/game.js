@@ -4,6 +4,7 @@ ctx.imageSmoothingEnabled = false;
 
 canvas.tabIndex = 0;
 canvas.style.touchAction = "none";
+canvas.setAttribute("touch-action", "none"); // for PEP.js
 
 document.body.append(canvas);
 
@@ -1649,8 +1650,8 @@ const canvasToWorld = (canvasX, canvasY) => ({
 const zoomTo = (newScale, focalPointOnCanvas = { x: canvas.width / 2, y: canvas.height / 2 }) => {
 	if (pointerEventCache.length === 2) {
 		const [a, b] = pointerEventCache;
-		focalPointOnCanvas.x = (a.offsetX + b.offsetX) / 2 * window.devicePixelRatio;
-		focalPointOnCanvas.y = (a.offsetY + b.offsetY) / 2 * window.devicePixelRatio;
+		focalPointOnCanvas.x = (a.pageX + b.pageX) / 2 * window.devicePixelRatio;
+		focalPointOnCanvas.y = (a.pageY + b.pageY) / 2 * window.devicePixelRatio;
 	}
 	// const oldScale = viewport.scale;
 	const focalPointInWorld = canvasToWorld(focalPointOnCanvas.x, focalPointOnCanvas.y);
@@ -1822,8 +1823,8 @@ const updateMouseWorldPosition = () => {
 	}
 };
 const updateMouse = (event) => {
-	mouse.x = event.offsetX * window.devicePixelRatio;
-	mouse.y = event.offsetY * window.devicePixelRatio;
+	mouse.x = event.pageX * window.devicePixelRatio;
+	mouse.y = event.pageY * window.devicePixelRatio;
 	updateMouseWorldPosition();
 };
 const brickUnderMouse = (includeFixed) => {
