@@ -2397,7 +2397,6 @@ const simulateJunkbot = (junkbot) => {
 			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
 				debugJunkbot(`collision in y direction (with ${toGoX} to go)`);
 				junkbot.velocityY = 0;
-				// toGoX = floor(floor(toGoX / dirX - junkbot.x, 15) * dirX + junkbot.x, 15);
 				if (dirX === 1) {
 					toGoX = 15 - junkbot.x + floor(junkbot.x, 15);
 				} else {
@@ -2408,6 +2407,16 @@ const simulateJunkbot = (junkbot) => {
 				debugJunkbot("move y");
 				junkbot.x = newPos.x;
 				junkbot.y = newPos.y;
+				if (
+					entityCollisionTest(newPos.x + dirX, newPos.y + 1, junkbot, notBinOrDrop) &&
+					!entityCollisionTest(newPos.x, newPos.y + 1, junkbot, notBinOrDrop) &&
+					!entityCollisionTest(newPos.x + dirX, newPos.y, junkbot, notBinOrDrop)
+				) {
+					junkbot.velocityX = 0;
+					junkbot.velocityY = 0;
+					toGoX = dirX;
+					break;
+				}
 			}
 		}
 		while (Math.abs(toGoX) >= 1) {
@@ -2415,6 +2424,7 @@ const simulateJunkbot = (junkbot) => {
 			const newPos = { x: junkbot.x + dirX, y: junkbot.y };
 			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
 				debugJunkbot(`collision in x direction (with ${toGoY} to go)`);
+				junkbot.velocityX = dirX;
 				break;
 			} else {
 				debugJunkbot("move x");
