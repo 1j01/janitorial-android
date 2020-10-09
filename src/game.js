@@ -2439,9 +2439,19 @@ const simulateJunkbot = (junkbot) => {
 	}
 	junkbot.velocityX = Math.min(20, Math.max(-20, junkbot.velocityX));
 	junkbot.velocityY = Math.min(20, Math.max(-20, junkbot.velocityY));
-	if (!entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop) || junkbot.velocityY < 0) {
+	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop);
+	const unaligned = junkbot.x % 15 !== 0;
+	const jumpStarting = junkbot.velocityY < 0;
+	if (inAir || jumpStarting || unaligned) {
 		debugInfoForJunkbot = "";
-		debugJunkbot("IN AIR - DO BALLISTIC MOTION");
+		if (inAir) {
+			debugJunkbot("IN AIR - DO BALLISTIC MOTION (AND SNAPPING ON COLLISION WITH GROUND)");
+		} else if (jumpStarting) {
+			debugJunkbot("JUMP - DO BALLISTIC MOTION (AND SNAPPING ON COLLISION WITH GROUND)");
+		} else if (unaligned) {
+			debugJunkbot("UNALIGNED - DO (BALLISTIC MOTION AND) SNAPPING TO GROUND");
+		}
+
 		debugJunkbot("velocity x:", junkbot.velocityX);
 		debugJunkbot("velocity y:", junkbot.velocityY);
 		let toGoX = junkbot.velocityX;
