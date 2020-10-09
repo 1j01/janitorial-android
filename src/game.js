@@ -876,7 +876,14 @@ const drawWind = (ctx, fan, extents) => {
 };
 
 const drawJump = (ctx, entity) => {
-	const frame = resources.spritesAtlas[`${entity.fixed ? "haz" : "brick"}_slickJump_dormant_1`];
+	let animName = "dormant";
+	let animLength = 1;
+	if (entity.active) {
+		animName = "active";
+		animLength = 5;
+	}
+	const frameIndex = Math.floor(entity.animationFrame % animLength);
+	const frame = resources.spritesAtlas[`${entity.fixed ? "haz" : "brick"}_slickJump_${animName}_${frameIndex + 1}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.sprites, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
 };
@@ -2483,6 +2490,8 @@ const simulateJunkbot = (junkbot) => {
 					junkbot.velocityY = -20;
 					junkbot.velocityX = junkbot.facing * 10;
 					playSound("jump");
+					groundLevelEntity.active = true;
+					groundLevelEntity.animationFrame = 0;
 				}
 			}
 		}
@@ -2718,6 +2727,14 @@ const simulatePipe = (pipe) => {
 	}
 };
 
+const simulateJump = (jump) => {
+	jump.animationFrame += 0.5;
+	if (jump.animationFrame >= 5) {
+		jump.animationFrame = 0;
+		jump.active = false;
+	}
+};
+
 const updateAccelerationStructures = () => {
 	// add new entities to acceleration structures
 	for (const entity of entities) {
@@ -2768,6 +2785,8 @@ const simulate = (entities) => {
 				simulateFlybot(entity);
 			} else if (entity.type === "eyebot") {
 				simulateEyebot(entity);
+			} else if (entity.type === "jump") {
+				simulateJump(entity);
 			} else if (entity.type === "pipe") {
 				simulatePipe(entity);
 			} else if (entity.type === "drop") {
