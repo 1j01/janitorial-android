@@ -1309,9 +1309,9 @@ const initLevel = (level) => {
 const save = () => {
 	if (editing) {
 		editorLevelState = serializeToJSON(currentLevel);
+		localStorage.JunkbotLevel = serializeLevel(currentLevel);
+		localStorage.JWorld = editorLevelState;
 	}
-	localStorage.JunkbotLevel = serializeLevel(currentLevel);
-	localStorage.JWorld = editorLevelState;
 };
 
 const toggleShowDebug = () => {
