@@ -28,6 +28,7 @@ let showDebug = false;
 let muted = false;
 let paused = false;
 let editing = false;
+let testing = false;
 let hideInfoBox = false;
 let sidebar;
 let infoBox;
@@ -2883,31 +2884,35 @@ const animate = () => {
 	if (winOrLose() !== winLoseState) {
 		winLoseState = winOrLose();
 		if (winLoseState === "win") {
-			paused = true;
-			const timeSinceCollectBin = Date.now() - collectBinTime;
-			setTimeout(() => {
-				playSound("ohYeah");
-				try {
-					const key = `fewest moves for ${currentLevel.title.toLowerCase()}`;
-					const formerFewest = Number(localStorage[key]);
-					let fewest = moves;
-					if (isFinite(formerFewest)) {
-						fewest = Math.min(fewest, formerFewest);
-					}
-					localStorage[key] = fewest;
-				} catch (error) {
-					showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
-				}
+			if (!testing) {
+				paused = true;
+				const timeSinceCollectBin = Date.now() - collectBinTime;
 				setTimeout(() => {
-					const levelSelect = document.getElementById("level-select");
-					if (levelSelect.selectedIndex === 0) {
-						levelSelect.selectedIndex += 1;
+					playSound("ohYeah");
+					try {
+						if (currentLevel.title) {
+							const key = `fewest moves for ${currentLevel.title.toLowerCase()}`;
+							const formerFewest = Number(localStorage[key]);
+							let fewest = moves;
+							if (isFinite(formerFewest)) {
+								fewest = Math.min(fewest, formerFewest);
+							}
+							localStorage[key] = fewest;
+						}
+					} catch (error) {
+						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
 					}
-					levelSelect.selectedIndex += 1;
-					levelSelect.onchange();
-					paused = false;
-				}, 500);
-			}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000 - timeSinceCollectBin);
+					setTimeout(() => {
+						const levelSelect = document.getElementById("level-select");
+						if (levelSelect.selectedIndex === 0) {
+							levelSelect.selectedIndex += 1;
+						}
+						levelSelect.selectedIndex += 1;
+						levelSelect.onchange();
+						paused = false;
+					}, 500);
+				}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000 - timeSinceCollectBin);
+			}
 		}
 	}
 
@@ -3505,6 +3510,8 @@ const initUI = () => {
 };
 
 const runTests = async () => {
+	testing = true;
+
 	const realTime = location.hash.match(/realtime/);
 	const wasMuted = muted;
 	if (!realTime && !muted) {
@@ -3630,6 +3637,9 @@ const runTests = async () => {
 	}
 
 	muted = wasMuted;
+	setTimeout(() => {
+		testing = false;
+	});
 };
 
 const main = async () => {
