@@ -1361,8 +1361,18 @@ const initLevel = (level) => {
 const save = () => {
 	if (editing) {
 		editorLevelState = serializeToJSON(currentLevel);
-		localStorage.JunkbotLevel = serializeLevel(currentLevel);
-		localStorage.JWorld = editorLevelState;
+		try {
+			if (!location.hash.match(/level=local;/)) {
+				const originalTitle = currentLevel.title;
+				for (let n = 1; n < 100 && localStorage[`level:${currentLevel.title}`]; n++) {
+					currentLevel.title = `${originalTitle} (${n})`;
+				}
+				location.hash = `level=local;${currentLevel.title}`;
+			}
+			localStorage[`level:${currentLevel.title}`] = editorLevelState;
+		} catch (error) {
+			showMessageBox("Couldn't save level.\nAllow local storage (sometimes called 'cookies') to enable autosave.");
+		}
 	}
 };
 
@@ -3522,6 +3532,9 @@ const initUI = () => {
 			} catch (error) {
 				showMessageBox(`Failed to load level:\n\n${error}`);
 			}
+			if (location.hash.indexOf(`level=${game};${levelSelect.value}`) === -1) {
+				location.hash = `level=${game};${levelSelect.value}`;
+			}
 		}
 	};
 
@@ -3621,6 +3634,9 @@ const runTests = async () => {
 
 	/* eslint-disable no-await-in-loop */
 	for (const test of tests) {
+		if (!testing) {
+			break;
+		}
 		if (test.levelType === "json") {
 			deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
 		} else {
@@ -3692,21 +3708,23 @@ const runTests = async () => {
 	}
 	/* eslint-enable no-await-in-loop */
 
-	if (tests.every((test) => test.state === "passed")) {
-		showMessageBox("All tests passed!");
-	} else {
-		const failuresList = document.createElement("ul");
-		const message = document.createElement("div");
-		message.innerHTML = "<h2>Some tests Failed!</h2>";
-		for (const test of tests) {
-			if (test.state === "failed") {
-				const li = document.createElement("li");
-				li.innerHTML = `<h3><a href="#level=test;${encodeURIComponent(test.name)}">${test.name}</a></h3><div>${test.message}</div>`;
-				failuresList.append(li);
+	if (testing) {
+		if (tests.every((test) => test.state === "passed")) {
+			showMessageBox("All tests passed!");
+		} else {
+			const failuresList = document.createElement("ul");
+			const message = document.createElement("div");
+			message.innerHTML = "<h2>Some tests Failed!</h2>";
+			for (const test of tests) {
+				if (test.state === "failed") {
+					const li = document.createElement("li");
+					li.innerHTML = `<h3><a href="#level=Test Cases;${encodeURIComponent(test.name)}">${test.name}</a></h3><div>${test.message}</div>`;
+					failuresList.append(li);
+				}
 			}
+			message.append(failuresList);
+			showMessageBox(message);
 		}
-		message.append(failuresList);
-		showMessageBox(message);
 	}
 
 	muted = wasMuted;
@@ -3726,7 +3744,10 @@ const loadFromHash = () => {
 		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
 		if (game === "local") {
 			try {
-				deserializeJSON(localStorage[`editor: level ${levelName}`]);
+				if (!localStorage[`level:${levelName}`]) {
+					throw new Error("Level does not exist.");
+				}
+				deserializeJSON(localStorage[`level:${levelName}`]);
 				dragging = entities.filter((entity) => entity.grabbed);
 			} catch (error) {
 				showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
@@ -3756,6 +3777,8 @@ const loadFromHash = () => {
 	}
 	if (location.hash.match(/run-tests/)) {
 		runTests();
+	} else {
+		testing = false; // stop tests
 	}
 };
 
