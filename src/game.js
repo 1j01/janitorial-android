@@ -3526,17 +3526,38 @@ const runTests = async () => {
 
 	const tests = [
 		{
+			levelType: "json",
 			name: "Tippy Toast", expectations: [
 				{ type: "win", maxTimeSteps: 1000 },
 			]
 		},
 		{
+			levelType: "json",
 			name: "tight squeeze stairs", expectations: [
 				{ type: "win", maxTimeSteps: 1000 },
 			]
 		},
 		{
+			levelType: "json",
 			name: "get bin and electrocuted", expectations: [
+				{ type: "lose", maxTimeSteps: 1000 },
+			]
+		},
+		{
+			levelType: "junkbot",
+			name: "Jump Stair Case", expectations: [
+				{ type: "win", maxTimeSteps: 1000 },
+			]
+		},
+		{
+			levelType: "junkbot",
+			name: "Jump Around (bricks in place)", expectations: [
+				{ type: "win", maxTimeSteps: 1000 },
+			]
+		},
+		{
+			levelType: "junkbot",
+			name: "Jump Around (bricks out of place)", expectations: [
 				{ type: "lose", maxTimeSteps: 1000 },
 			]
 		},
@@ -3569,8 +3590,11 @@ const runTests = async () => {
 
 	/* eslint-disable no-await-in-loop */
 	for (const test of tests) {
-		// initLevel(await loadLevelFromTextFile(`levels/test-cases/${test.name}.txt`));
-		deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
+		if (test.levelType === "json") {
+			deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
+		} else {
+			initLevel(await loadLevelFromTextFile(`levels/test-cases/${test.name}.txt`));
+		}
 		editorLevelState = serializeToJSON(currentLevel);
 
 		for (let timeStep = 0; timeStep < Math.max(...test.expectations.map(
