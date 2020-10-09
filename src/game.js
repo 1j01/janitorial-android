@@ -418,6 +418,45 @@ const makeDrop = ({ x, y }) => {
 	};
 };
 
+const tests = [
+	{
+		levelType: "json",
+		name: "Tippy Toast",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "json",
+		name: "tight squeeze stairs",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "json",
+		name: "get bin and electrocuted",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Jump Stair Case",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Jump Around (bricks in place)",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Jump Around (bricks out of place)",
+		expect: "to draw",
+		timeSteps: 1000,
+	},
+];
+
 let resources;
 const resourcePaths = {
 	sprites: "images/spritesheets/sprites.png",
@@ -3432,12 +3471,12 @@ const initUI = () => {
 	option.textContent = "Custom World";
 	option.defaultSelected = true;
 	levelSelect.append(option);
-	for (const game of ["Junkbot", "Junkbot Undercover"]) {
+	for (const game of ["Junkbot", "Junkbot Undercover", "Test Cases"]) {
 		const optgroup = document.createElement("optgroup");
 		optgroup.label = game;
 		optgroup.value = game;
 		levelSelect.append(optgroup);
-		for (const levelName of resources[game === "Junkbot Undercover" ? "levelNamesUndercover" : "levelNames"]) {
+		for (const levelName of game === "Test Cases" ? tests.map((test) => test.name) : resources[game === "Junkbot Undercover" ? "levelNamesUndercover" : "levelNames"]) {
 			const option = document.createElement("option");
 			option.textContent = levelName;
 			optgroup.append(option);
@@ -3448,11 +3487,20 @@ const initUI = () => {
 		const option = levelSelect.options[levelSelect.selectedIndex];
 		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
 		if (levelSelect.value !== "Custom World") {
-			const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.txt`;
+			const test = optgroup.value === "Test Cases" && tests.find((test) => test.name === levelSelect.value);
+			const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.${(test && test.levelType === "json") ? "json" : "txt"}`;
 			const game = optgroup ? optgroup.value : "Custom";
-			const folder = game === "Junkbot Undercover" ? "levels/Undercover Exclusive" : "levels";
+			const folder = {
+				"Junkbot Undercover": "levels/Undercover Exclusive",
+				"Junkbot": "levels",
+				"Test Cases": "levels/test-cases",
+			}[game];
 			try {
-				initLevel(await loadLevelFromTextFile(`${folder}/${fileName}`, { game }));
+				if (test.levelType === "json") {
+					deserializeJSON(await loadTextFile(`${folder}/${fileName}`));
+				} else {
+					initLevel(await loadLevelFromTextFile(`${folder}/${fileName}`, { game }));
+				}
 			} catch (error) {
 				showMessageBox(`Failed to load level:\n\n${error}`);
 			}
@@ -3548,45 +3596,6 @@ const runTests = async () => {
 	if (editing) {
 		toggleEditing();
 	}
-
-	const tests = [
-		{
-			levelType: "json",
-			name: "Tippy Toast",
-			expect: "to win",
-			timeSteps: 1000,
-		},
-		{
-			levelType: "json",
-			name: "tight squeeze stairs",
-			expect: "to win",
-			timeSteps: 1000,
-		},
-		{
-			levelType: "json",
-			name: "get bin and electrocuted",
-			expect: "to lose",
-			timeSteps: 1000,
-		},
-		{
-			levelType: "junkbot",
-			name: "Jump Stair Case",
-			expect: "to win",
-			timeSteps: 1000,
-		},
-		{
-			levelType: "junkbot",
-			name: "Jump Around (bricks in place)",
-			expect: "to win",
-			timeSteps: 1000,
-		},
-		{
-			levelType: "junkbot",
-			name: "Jump Around (bricks out of place)",
-			expect: "to draw",
-			timeSteps: 1000,
-		},
-	];
 
 	for (const test of tests) {
 		test.state = "pending";
