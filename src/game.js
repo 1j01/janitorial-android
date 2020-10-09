@@ -3687,7 +3687,7 @@ const runTests = async () => {
 			}
 		} else {
 			test.state = "failed";
-			test.message = `Unknown test type "${test.expect}"`
+			test.message = `Unknown test type "${test.expect}"`;
 		}
 	}
 	/* eslint-enable no-await-in-loop */
@@ -3701,7 +3701,7 @@ const runTests = async () => {
 		for (const test of tests) {
 			if (test.state === "failed") {
 				const li = document.createElement("li");
-				li.innerHTML = `<h3>${test.name}</h3><div>${test.message}</div>`;
+				li.innerHTML = `<h3><a href="#level=test;${encodeURIComponent(test.name)}">${test.name}</a></h3><div>${test.message}</div>`;
 				failuresList.append(li);
 			}
 		}
@@ -3715,6 +3715,52 @@ const runTests = async () => {
 	});
 };
 
+const loadFromHash = () => {
+	const keyValuePairs = location.hash.replace(/^#/, "")
+		.split(",")
+		.map((str) => str.split("="));
+	const hashOptions = Object.fromEntries(keyValuePairs);
+	// console.log("From URL hash:", hashOptions);
+
+	if (hashOptions.level) {
+		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
+		if (game === "local") {
+			try {
+				deserializeJSON(localStorage[`editor: level ${levelName}`]);
+				dragging = entities.filter((entity) => entity.grabbed);
+			} catch (error) {
+				showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
+			}
+		} else {
+			const levelSelect = document.getElementById("level-select");
+			levelSelect.value = levelName;
+			if (levelSelect.selectedIndex === -1) {
+				showMessageBox(`Unknown level "${levelName}"`);
+			} else {
+				try {
+					levelSelect.onchange();
+				} catch (error) {
+					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
+				}
+			}
+		}
+	} else {
+		try {
+			deserializeJSON(localStorage.JWorld);
+			dragging = entities.filter((entity) => entity.grabbed);
+		} catch (error) {
+			// initTestLevel();
+			initLevel(resources.defaultLevel);
+		}
+		editorLevelState = serializeToJSON(currentLevel);
+	}
+	if (location.hash.match(/run-tests/)) {
+		runTests();
+	}
+};
+
+window.addEventListener("hashchange", loadFromHash);
+
 const main = async () => {
 	try {
 		showDebug = localStorage.showDebug === "true";
@@ -3727,22 +3773,14 @@ const main = async () => {
 	resources = await loadResources(resourcePaths);
 	// eslint-disable-next-line camelcase
 	resources.spritesAtlas.eyebot_active_1 = resources.spritesAtlas.eyebot_active_1fix;
-	try {
-		deserializeJSON(localStorage.JWorld);
-		dragging = entities.filter((entity) => entity.grabbed);
-	} catch (error) {
-		// initTestLevel();
-		initLevel(resources.defaultLevel);
-	}
-	editorLevelState = serializeToJSON(currentLevel);
+
 	for (const [colorName, color] of Object.entries(fontColors)) {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
 	initUI();
 	animate();
-	if (location.hash.match(/run-tests/)) {
-		runTests();
-	}
+
+	loadFromHash();
 };
 
 main();
