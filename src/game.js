@@ -2396,6 +2396,8 @@ const simulateJunkbot = (junkbot) => {
 	if (!entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop) || junkbot.velocityY < 0) {
 		debugInfoForJunkbot = "";
 		debugJunkbot("IN AIR - DO BALLISTIC MOTION");
+		debugJunkbot("velocity x:", junkbot.velocityX);
+		debugJunkbot("velocity y:", junkbot.velocityY);
 		let toGoX = junkbot.velocityX;
 		let toGoY = junkbot.velocityY;
 		const dirX = Math.sign(toGoX);
@@ -2423,7 +2425,7 @@ const simulateJunkbot = (junkbot) => {
 				) {
 					junkbot.velocityX = 0;
 					junkbot.velocityY = 0;
-					toGoX = dirX;
+					toGoX = 15 * dirX;
 					break;
 				}
 			}
@@ -3033,6 +3035,10 @@ const animate = () => {
 				debug(`Invalid position (x/y) for entity ${JSON.stringify(entity, null, "\t")}\n`);
 				continue;
 			}
+			if (entity.x % 15 !== 0) {
+				debug(`x position not aligned to grid for entity ${JSON.stringify(entity, null, "\t")}\n`);
+				continue;
+			}
 			if (!isNum(entity.width) || !isNum(entity.height)) {
 				debug(`Invalid size (width/height) for entity ${JSON.stringify(entity, null, "\t")}\n`);
 				continue;
@@ -3558,7 +3564,11 @@ const runTests = async () => {
 		{
 			levelType: "junkbot",
 			name: "Jump Around (bricks out of place)", expectations: [
-				{ type: "to lose", maxTimeSteps: 1000 },
+				{
+					type: "not to win",
+					minTimeSteps: 1000,
+					always: () => winOrLose() !== "win",
+				},
 			]
 		},
 	];
