@@ -2384,6 +2384,14 @@ const simulateJunkbot = (junkbot) => {
 		}
 		return;
 	}
+	if (junkbot.velocityX === undefined) {
+		junkbot.velocityX = 0;
+	}
+	if (junkbot.velocityY === undefined) {
+		junkbot.velocityY = 0;
+	}
+	junkbot.velocityX = Math.min(20, Math.max(-20, junkbot.velocityX));
+	junkbot.velocityY = Math.min(20, Math.max(-20, junkbot.velocityY));
 	if (!entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop) || junkbot.velocityY < 0) {
 		debugInfoForJunkbot = "";
 		debugJunkbot("IN AIR - DO BALLISTIC MOTION");
