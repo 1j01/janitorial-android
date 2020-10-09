@@ -1500,6 +1500,7 @@ const openFromFile = (file) => {
 			} else {
 				initLevel(loadLevelFromText(content));
 			}
+			editorLevelState = serializeToJSON(currentLevel);
 		} catch (error) {
 			showMessageBox(`Failed to load from file:\n\n${error}`);
 		}
@@ -3531,6 +3532,7 @@ const initUI = () => {
 				} else {
 					initLevel(await loadLevelFromTextFile(`${folder}/${fileName}`, { game }));
 				}
+				editorLevelState = serializeToJSON(currentLevel);
 			} catch (error) {
 				showMessageBox(`Failed to load level:\n\n${error}`);
 			}
@@ -3752,6 +3754,7 @@ const loadFromHash = () => {
 				}
 				deserializeJSON(localStorage[`level:${levelName}`]);
 				dragging = entities.filter((entity) => entity.grabbed);
+				editorLevelState = serializeToJSON(currentLevel);
 			} catch (error) {
 				showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
 			}
