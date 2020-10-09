@@ -2326,6 +2326,7 @@ const simulateJunkbot = (junkbot) => {
 		junkbot.floating || (
 			!aboveHead.fixed &&
 			!connectsToFixed(aboveHead, { ignoreEntities: [junkbot] }) &&
+			aboveHead.type !== "levelBounds" &&
 			aboveHead.type !== "flybot" &&
 			aboveHead.type !== "eyebot"
 		)
