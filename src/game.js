@@ -22,6 +22,7 @@ let currentLevel = {
 	entities,
 	title: "Custom World",
 };
+let moves = 0;
 
 let showDebug = false;
 let muted = false;
@@ -465,7 +466,7 @@ const resourcePaths = {
 	rustle3: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML4.WAV",
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
-	defaultLevel: "levels/custom/Default World.txt",
+	defaultLevel: "levels/custom/New Employee Training (1j01).txt",
 	levelNames: "levels/_LEVEL_LISTING.txt",
 	levelNamesUndercover: "levels/Undercover Exclusive/_LEVEL_LISTING.txt",
 };
@@ -1279,6 +1280,7 @@ const deserializeJSON = (json) => {
 	lastKeys = new Map();
 	dragging.length = 0;
 	wind.length = 0;
+	moves = 0;
 	entities.forEach((entity) => {
 		delete entity.grabbed;
 		delete entity.grabOffset;
@@ -1297,6 +1299,7 @@ const initLevel = (level) => {
 	redos.length = 0;
 	dragging = [];
 	wind = [];
+	moves = 0;
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
 	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
@@ -2040,6 +2043,9 @@ const startGrab = (grab) => {
 		}
 	}
 	playSound("blockPickUp");
+	if (!editing) {
+		moves += 1;
+	}
 };
 
 canvas.addEventListener("wheel", (event) => {
@@ -2426,6 +2432,23 @@ const simulateJunkbot = (junkbot) => {
 		setTimeout(() => {
 			if (winOrLose() === "win") {
 				playSound("ohYeah");
+				try {
+					const key = `fewest moves for ${currentLevel.title.toLowerCase()}`;
+					const formerFewest = Number(localStorage[key]);
+					let fewest = moves;
+					if (isFinite(formerFewest)) {
+						fewest = Math.min(fewest, formerFewest);
+					}
+					localStorage[key] = fewest;
+				} catch (error) {
+					showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
+				}
+				const levelSelect = document.getElementById("level-select");
+				if (levelSelect.selectedIndex === 0) {
+					levelSelect.selectedIndex += 1;
+				}
+				levelSelect.selectedIndex += 1;
+				levelSelect.onchange();
 			}
 		}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000);
 	}
@@ -3319,6 +3342,7 @@ const initUI = () => {
 			optgroup.append(option);
 		}
 	}
+	// must not be addEventListener - called directly
 	levelSelect.onchange = async () => {
 		const option = levelSelect.options[levelSelect.selectedIndex];
 		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
