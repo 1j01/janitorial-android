@@ -2462,8 +2462,8 @@ const simulateJunkbot = (junkbot) => {
 			for (const crate of cratesInFront) {
 				crate.x += junkbot.facing * 15;
 			}
-			walk(junkbot);
 		}
+		walk(junkbot);
 		const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
 		for (const groundLevelEntity of groundLevelEntities) {
 			if (groundLevelEntity.x <= junkbot.x && groundLevelEntity.x + groundLevelEntity.width >= junkbot.x + junkbot.width) {
