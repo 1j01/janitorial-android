@@ -2396,7 +2396,38 @@ const simulateJunkbot = (junkbot) => {
 		if (entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop) && junkbot.velocityY === undefined || junkbot.velocityY >= 0) {
 			walk(junkbot);
 		} else {
-
+			debugJunkbot("FALLING - GO BALLISTIC");
+			let toGoX = junkbot.velocityX;
+			let toGoY = junkbot.velocityY;
+			const dirX = Math.sign(toGoX);
+			const dirY = Math.sign(toGoY);
+			while (Math.abs(toGoX) >= 1) {
+				toGoX -= dirX;
+				const newPos = { x: junkbot.x + dirX, y: junkbot.y };
+				if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
+					debugJunkbot("break", toGoX);
+					break;
+				} else {
+					debugJunkbot("move");
+					junkbot.x = newPos.x;
+					junkbot.y = newPos.y;
+				}
+			}
+			while (Math.abs(toGoY) >= 1) {
+				toGoY -= dirY;
+				const newPos = { x: junkbot.x, y: junkbot.y + dirY };
+				if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
+					debugJunkbot("breaky", toGoY);
+					junkbot.velocityY = 0;
+					break;
+				} else {
+					debugJunkbot("movey");
+					junkbot.x = newPos.x;
+					junkbot.y = newPos.y;
+				}
+			}
+			junkbot.velocityY += 1;
+			entityMoved(junkbot);
 		}
 		const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
 		for (const groundLevelEntity of groundLevelEntities) {
