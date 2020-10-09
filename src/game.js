@@ -2988,12 +2988,14 @@ const animate = () => {
 					}
 					setTimeout(() => {
 						const levelSelect = document.getElementById("level-select");
-						if (levelSelect.selectedIndex === 0) {
+						if (location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/)) {
+							if (levelSelect.selectedIndex === 0) {
+								levelSelect.selectedIndex += 1;
+							}
 							levelSelect.selectedIndex += 1;
+							levelSelect.onchange();
+							paused = false;
 						}
-						levelSelect.selectedIndex += 1;
-						levelSelect.onchange();
-						paused = false;
 					}, 500);
 				}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000 - timeSinceCollectBin);
 			}
