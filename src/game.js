@@ -2501,9 +2501,7 @@ const simulateJunkbot = (junkbot) => {
 		}
 		junkbot.velocityY += 3;
 		entityMoved(junkbot);
-		return;
-	}
-	if (junkbot.animationFrame % 5 === 3) {
+	} else if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
 		const cratesInFront = rectangleCollisionAll(posInFront.x, posInFront.y, junkbot.width, junkbot.height + 1, (otherEntity) => otherEntity.type === "crate");
@@ -2513,49 +2511,50 @@ const simulateJunkbot = (junkbot) => {
 			}
 		}
 		walk(junkbot);
-		const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
-		for (const groundLevelEntity of groundLevelEntities) {
-			if (groundLevelEntity.x <= junkbot.x && groundLevelEntity.x + groundLevelEntity.width >= junkbot.x + junkbot.width) {
-				if (groundLevelEntity.type === "switch") {
-					groundLevelEntity.on = !groundLevelEntity.on;
-					for (const entity of entities) {
-						if (entity.type === "fire" || entity.type === "fan") {
-							if (entity.switchID === groundLevelEntity.switchID) {
-								entity.on = !entity.on;
-							}
-						}
-					}
-					playSound("switchClick");
-					playSound(groundLevelEntity.on ? "switchOn" : "switchOff");
-				} else if (groundLevelEntity.type === "fire" && groundLevelEntity.on) {
-					hurtJunkbot(junkbot, "fire");
-				} else if (groundLevelEntity.type === "shield" && !groundLevelEntity.used && !junkbot.armored) {
-					junkbot.animationFrame = 0;
-					junkbot.gettingShield = true;
-					groundLevelEntity.used = true;
-					playSound("getShield");
-				} else if (groundLevelEntity.type === "jump") {
-					junkbot.animationFrame = 0;
-					junkbot.velocityY = -20;
-					junkbot.velocityX = junkbot.facing * 10;
-					playSound("jump");
-					groundLevelEntity.active = true;
-					groundLevelEntity.animationFrame = 0;
-				}
-			}
+
+		const bin = entityCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot, (otherEntity) => (
+			otherEntity.type === "bin"
+		));
+		if (bin) {
+			junkbot.animationFrame = 0;
+			junkbot.collectingBin = true;
+			remove(entities, bin);
+			playSound("collectBin");
+			playSound("collectBin2");
+			collectBinTime = Date.now();
 		}
 	}
 
-	const bin = entityCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot, (otherEntity) => (
-		otherEntity.type === "bin"
-	));
-	if (bin) {
-		junkbot.animationFrame = 0;
-		junkbot.collectingBin = true;
-		remove(entities, bin);
-		playSound("collectBin");
-		playSound("collectBin2");
-		collectBinTime = Date.now();
+	const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
+	for (const groundLevelEntity of groundLevelEntities) {
+		if (groundLevelEntity.x <= junkbot.x && groundLevelEntity.x + groundLevelEntity.width >= junkbot.x + junkbot.width) {
+			if (groundLevelEntity.type === "switch") {
+				groundLevelEntity.on = !groundLevelEntity.on;
+				for (const entity of entities) {
+					if (entity.type === "fire" || entity.type === "fan") {
+						if (entity.switchID === groundLevelEntity.switchID) {
+							entity.on = !entity.on;
+						}
+					}
+				}
+				playSound("switchClick");
+				playSound(groundLevelEntity.on ? "switchOn" : "switchOff");
+			} else if (groundLevelEntity.type === "fire" && groundLevelEntity.on) {
+				hurtJunkbot(junkbot, "fire");
+			} else if (groundLevelEntity.type === "shield" && !groundLevelEntity.used && !junkbot.armored) {
+				junkbot.animationFrame = 0;
+				junkbot.gettingShield = true;
+				groundLevelEntity.used = true;
+				playSound("getShield");
+			} else if (groundLevelEntity.type === "jump") {
+				junkbot.animationFrame = 0;
+				junkbot.velocityY = -20;
+				junkbot.velocityX = junkbot.facing * 10;
+				playSound("jump");
+				groundLevelEntity.active = true;
+				groundLevelEntity.animationFrame = 0;
+			}
+		}
 	}
 };
 
