@@ -3009,12 +3009,16 @@ const animate = () => {
 		canvas.style.cursor = "default";
 	}
 
-	if (canvas.width !== innerWidth * window.devicePixelRatio) {
+	// Note: while zooming, innerWidth * window.devicePixelRatio often stays the same, while both factors change
+	if (
+		canvas.width !== innerWidth * window.devicePixelRatio ||
+		canvas.height !== innerHeight * window.devicePixelRatio ||
+		canvas.style.width !== `${innerWidth}px` ||
+		canvas.style.height !== `${innerHeight}px`
+	) {
 		canvas.width = innerWidth * window.devicePixelRatio;
-		canvas.style.width = `${innerWidth}px`;
-	}
-	if (canvas.height !== innerHeight * window.devicePixelRatio) {
 		canvas.height = innerHeight * window.devicePixelRatio;
+		canvas.style.width = `${innerWidth}px`;
 		canvas.style.height = `${innerHeight}px`;
 	}
 	ctx.fillStyle = "#bbb";
