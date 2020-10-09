@@ -472,6 +472,7 @@ const resourcePaths = {
 };
 const numRustles = 6;
 const numDrips = 3;
+let collectBinTime = -1;
 
 const loadImage = (imagePath) => {
 	const image = new Image();
@@ -2342,6 +2343,7 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.collectingBin) {
 		if (junkbot.animationFrame >= 17) {
 			junkbot.collectingBin = false;
+			junkbot.animationFrame = 0;
 		} else {
 			return;
 		}
@@ -2429,28 +2431,7 @@ const simulateJunkbot = (junkbot) => {
 		remove(entities, bin);
 		playSound("collectBin");
 		playSound("collectBin2");
-		setTimeout(() => {
-			if (winOrLose() === "win") {
-				playSound("ohYeah");
-				try {
-					const key = `fewest moves for ${currentLevel.title.toLowerCase()}`;
-					const formerFewest = Number(localStorage[key]);
-					let fewest = moves;
-					if (isFinite(formerFewest)) {
-						fewest = Math.min(fewest, formerFewest);
-					}
-					localStorage[key] = fewest;
-				} catch (error) {
-					showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
-				}
-				const levelSelect = document.getElementById("level-select");
-				if (levelSelect.selectedIndex === 0) {
-					levelSelect.selectedIndex += 1;
-				}
-				levelSelect.selectedIndex += 1;
-				levelSelect.onchange();
-			}
-		}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000);
+		collectBinTime = Date.now();
 	}
 };
 
@@ -2838,6 +2819,33 @@ const animate = () => {
 
 	if (winOrLose() !== winLoseState) {
 		winLoseState = winOrLose();
+		if (winLoseState === "win") {
+			paused = true;
+			const timeSinceCollectBin = Date.now() - collectBinTime;
+			setTimeout(() => {
+				playSound("ohYeah");
+				try {
+					const key = `fewest moves for ${currentLevel.title.toLowerCase()}`;
+					const formerFewest = Number(localStorage[key]);
+					let fewest = moves;
+					if (isFinite(formerFewest)) {
+						fewest = Math.min(fewest, formerFewest);
+					}
+					localStorage[key] = fewest;
+				} catch (error) {
+					showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
+				}
+				setTimeout(() => {
+					const levelSelect = document.getElementById("level-select");
+					if (levelSelect.selectedIndex === 0) {
+						levelSelect.selectedIndex += 1;
+					}
+					levelSelect.selectedIndex += 1;
+					levelSelect.onchange();
+					paused = false;
+				}, 500);
+			}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000 - timeSinceCollectBin);
+		}
 	}
 
 	sortEntitiesForRendering(entities);
