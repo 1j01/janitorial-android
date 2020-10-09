@@ -2883,7 +2883,7 @@ const animate = () => {
 
 	if (winOrLose() !== winLoseState) {
 		winLoseState = winOrLose();
-		if (winLoseState === "win") {
+		if (winLoseState === "win" && !paused) {
 			if (!testing) {
 				paused = true;
 				const timeSinceCollectBin = Date.now() - collectBinTime;
