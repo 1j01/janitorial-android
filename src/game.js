@@ -3532,8 +3532,9 @@ const initUI = () => {
 			} catch (error) {
 				showMessageBox(`Failed to load level:\n\n${error}`);
 			}
-			if (location.hash.indexOf(`level=${game};${levelSelect.value}`) === -1) {
-				location.hash = `level=${game};${levelSelect.value}`;
+			const newHash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
+			if (location.hash.indexOf(newHash) === -1) {
+				location.hash = newHash;
 			}
 		}
 	};
@@ -3735,7 +3736,7 @@ const runTests = async () => {
 
 const loadFromHash = () => {
 	const keyValuePairs = location.hash.replace(/^#/, "")
-		.split(",")
+		.split("&")
 		.map((str) => str.split("="));
 	const hashOptions = Object.fromEntries(keyValuePairs);
 	// console.log("From URL hash:", hashOptions);
