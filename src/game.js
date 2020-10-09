@@ -11,6 +11,13 @@ document.body.append(canvas);
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
+maxSidewardsVelocity = 20;
+maxDownwardsVelocity = 20;
+maxUpwardsVelocity = 20;
+jumpUpwardsVelocity = 20;
+jumpSidewardsVelocity = 10;
+gravity = 3;
+
 const viewport = { centerX: 0, centerY: 0, scale: 1 };
 let keys = {};
 let pointerEventCache = [];
@@ -2437,8 +2444,8 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.velocityY === undefined) {
 		junkbot.velocityY = 0;
 	}
-	junkbot.velocityX = Math.min(20, Math.max(-20, junkbot.velocityX));
-	junkbot.velocityY = Math.min(20, Math.max(-20, junkbot.velocityY));
+	junkbot.velocityX = Math.min(window.maxSidewardsVelocity, Math.max(-window.maxSidewardsVelocity, junkbot.velocityX));
+	junkbot.velocityY = Math.min(window.maxDownwardsVelocity, Math.max(-window.maxUpwardsVelocity, junkbot.velocityY));
 	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop);
 	const unaligned = junkbot.x % 15 !== 0;
 	const jumpStarting = junkbot.velocityY < 0;
@@ -2499,7 +2506,7 @@ const simulateJunkbot = (junkbot) => {
 				junkbot.y = newPos.y;
 			}
 		}
-		junkbot.velocityY += 3;
+		junkbot.velocityY += window.gravity;
 		entityMoved(junkbot);
 	} else if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
@@ -2548,8 +2555,8 @@ const simulateJunkbot = (junkbot) => {
 				playSound("getShield");
 			} else if (groundLevelEntity.type === "jump") {
 				junkbot.animationFrame = 0;
-				junkbot.velocityY = -20;
-				junkbot.velocityX = junkbot.facing * 10;
+				junkbot.velocityY = -window.jumpUpwardsVelocity; //-20;
+				junkbot.velocityX = junkbot.facing * window.jumpSidewardsVelocity; //junkbot.facing * 10;
 				playSound("jump");
 				groundLevelEntity.active = true;
 				groundLevelEntity.animationFrame = 0;
