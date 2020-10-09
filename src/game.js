@@ -61,7 +61,11 @@ const showMessageBox = (message) => {
 	messageBoxContainer.className = "dialog-container";
 	messageBox = document.createElement("div");
 	messageBox.className = "dialog";
-	messageBox.textContent = message;
+	if (typeof message === "string") {
+		messageBox.textContent = message;
+	} else {
+		messageBox.append(message);
+	}
 	const closeButton = document.createElement("button");
 	closeButton.onclick = () => {
 		messageBoxContainer.remove();
@@ -3691,10 +3695,18 @@ const runTests = async () => {
 	if (tests.every((test) => test.state === "passed")) {
 		showMessageBox("All tests passed!");
 	} else {
-		showMessageBox(`Some tests failed!\n\n${tests
-			.filter((test) => test.state === "failed")
-			.map((test) => `${test.name}\n  ${test.message}`)
-			.join("\n")}`);
+		const failuresList = document.createElement("ul");
+		const message = document.createElement("div");
+		message.innerHTML = "<h2>Some tests Failed!</h2>";
+		for (const test of tests) {
+			if (test.state === "failed") {
+				const li = document.createElement("li");
+				li.innerHTML = `<h3>${test.name}</h3><div>${test.message}</div>`;
+				failuresList.append(li);
+			}
+		}
+		message.append(failuresList);
+		showMessageBox(message);
 	}
 
 	muted = wasMuted;
