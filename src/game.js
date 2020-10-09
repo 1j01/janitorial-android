@@ -2384,6 +2384,48 @@ const simulateJunkbot = (junkbot) => {
 		}
 		return;
 	}
+	if (!entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop) || junkbot.velocityY < 0) {
+		debugInfoForJunkbot = "";
+		debugJunkbot("IN AIR - DO BALLISTIC MOTION");
+		let toGoX = junkbot.velocityX;
+		let toGoY = junkbot.velocityY;
+		const dirX = Math.sign(toGoX);
+		const dirY = Math.sign(toGoY);
+		while (Math.abs(toGoY) >= 1) {
+			toGoY -= dirY;
+			const newPos = { x: junkbot.x, y: junkbot.y + dirY };
+			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
+				debugJunkbot(`collision in y direction (with ${toGoX} to go)`);
+				junkbot.velocityY = 0;
+				// toGoX = floor(floor(toGoX / dirX - junkbot.x, 15) * dirX + junkbot.x, 15);
+				if (dirX === 1) {
+					toGoX = 15 - junkbot.x + floor(junkbot.x, 15);
+				} else {
+					toGoX = floor(junkbot.x, 15) - junkbot.x;
+				}
+				break;
+			} else {
+				debugJunkbot("move y");
+				junkbot.x = newPos.x;
+				junkbot.y = newPos.y;
+			}
+		}
+		while (Math.abs(toGoX) >= 1) {
+			toGoX -= dirX;
+			const newPos = { x: junkbot.x + dirX, y: junkbot.y };
+			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
+				debugJunkbot(`collision in x direction (with ${toGoY} to go)`);
+				break;
+			} else {
+				debugJunkbot("move x");
+				junkbot.x = newPos.x;
+				junkbot.y = newPos.y;
+			}
+		}
+		junkbot.velocityY += 3;
+		entityMoved(junkbot);
+		return;
+	}
 	if (junkbot.animationFrame % 5 === 3) {
 		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
@@ -2392,42 +2434,7 @@ const simulateJunkbot = (junkbot) => {
 			for (const crate of cratesInFront) {
 				crate.x += junkbot.facing * 15;
 			}
-		}
-		if (entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop) && junkbot.velocityY === undefined || junkbot.velocityY >= 0) {
 			walk(junkbot);
-		} else {
-			debugJunkbot("FALLING - GO BALLISTIC");
-			let toGoX = junkbot.velocityX;
-			let toGoY = junkbot.velocityY;
-			const dirX = Math.sign(toGoX);
-			const dirY = Math.sign(toGoY);
-			while (Math.abs(toGoX) >= 1) {
-				toGoX -= dirX;
-				const newPos = { x: junkbot.x + dirX, y: junkbot.y };
-				if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
-					debugJunkbot("break", toGoX);
-					break;
-				} else {
-					debugJunkbot("move");
-					junkbot.x = newPos.x;
-					junkbot.y = newPos.y;
-				}
-			}
-			while (Math.abs(toGoY) >= 1) {
-				toGoY -= dirY;
-				const newPos = { x: junkbot.x, y: junkbot.y + dirY };
-				if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
-					debugJunkbot("breaky", toGoY);
-					junkbot.velocityY = 0;
-					break;
-				} else {
-					debugJunkbot("movey");
-					junkbot.x = newPos.x;
-					junkbot.y = newPos.y;
-				}
-			}
-			junkbot.velocityY += 1;
-			entityMoved(junkbot);
 		}
 		const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
 		for (const groundLevelEntity of groundLevelEntities) {
@@ -2452,8 +2459,8 @@ const simulateJunkbot = (junkbot) => {
 					playSound("getShield");
 				} else if (groundLevelEntity.type === "jump") {
 					junkbot.animationFrame = 0;
-					junkbot.velocityY = -5;
-					junkbot.velocityX = junkbot.facing * 3;
+					junkbot.velocityY = -20;
+					junkbot.velocityX = junkbot.facing * 10;
 					playSound("jump");
 				}
 			}
