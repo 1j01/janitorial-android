@@ -62,7 +62,7 @@ module.exports = {
 		"default-case": "error",
 		"default-case-last": "error",
 		"default-param-last": "error",
-		"dot-location": "error",
+		"dot-location": ["error", "property"],
 		"dot-notation": "error",
 		"eol-last": "error",
 		"eqeqeq": "error",
