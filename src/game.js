@@ -449,6 +449,7 @@ const resourcePaths = {
 	deathByBot: "audio/sound-effects/robottouch4.ogg",
 	getShield: "audio/sound-effects/shieldon2.ogg",
 	ohYeah: "audio/sound-effects/voice_ohyeah.ogg",
+	jump: "audio/sound-effects/jump3.ogg",
 	fan: "audio/sound-effects/fan.ogg",
 	drip0: "audio/sound-effects/drip1.ogg",
 	drip1: "audio/sound-effects/drip2.ogg",
@@ -2212,7 +2213,7 @@ addEventListener("pointerup", () => {
 
 const simulateGravity = () => {
 	for (const entity of entities) {
-		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
+		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "junkbot" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
 			if (
 				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
 				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot" || entity.type === "crate" || entity.type === "bin") ? 1 : 0 })
@@ -2260,7 +2261,7 @@ const notBinOrDropOrEnemyBot = (entity) => (
 	entity.type !== "eyebot"
 );
 
-const walk = (junkbot) => {
+const walkAndSometimesGoBallistic = (junkbot) => {
 	const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
 	const stepOrWall = entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDropOrEnemyBot);
 	if (stepOrWall) {
@@ -2310,12 +2311,41 @@ const walk = (junkbot) => {
 			return;
 		}
 	}
-	if (entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop)) {
+	if (entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop) && junkbot.velocityY === undefined || junkbot.velocityY >= 0) {
 		debugJunkbot("CLIFF/WALL/BOT - TURN AROUND");
 		junkbot.facing *= -1;
 		playSound("turn");
 	} else {
-		debugJunkbot("FALLING");
+		debugJunkbot("FALLING - GO BALLISTIC");
+		let toGoX = junkbot.velocityX;
+		let toGoY = junkbot.velocityY;
+		const dirX = Math.sign(toGoX);
+		const dirY = Math.sign(toGoY);
+		while (Math.abs(toGoX) >= 1) {
+			toGoX -= dirX;
+			const newPos = { x: junkbot.x + dirX, y: junkbot.y };
+			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
+				debugJunkbot("break", toGoX);
+				break;
+			} else {
+				debugJunkbot("move");
+				junkbot.x = newPos.x;
+				junkbot.y = newPos.y;
+			}
+		}
+		while (Math.abs(toGoY) >= 1) {
+			toGoY -= dirY;
+			const newPos = { x: junkbot.x, y: junkbot.y + dirY };
+			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
+				debugJunkbot("breaky", toGoY);
+				break;
+			} else {
+				debugJunkbot("movey");
+				junkbot.x = newPos.x;
+				junkbot.y = newPos.y;
+			}
+		}
+		entityMoved(junkbot);
 	}
 };
 
@@ -2396,7 +2426,7 @@ const simulateJunkbot = (junkbot) => {
 				crate.x += junkbot.facing * 15;
 			}
 		}
-		walk(junkbot);
+		walkAndSometimesGoBallistic(junkbot);
 		const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
 		for (const groundLevelEntity of groundLevelEntities) {
 			if (groundLevelEntity.x <= junkbot.x && groundLevelEntity.x + groundLevelEntity.width >= junkbot.x + junkbot.width) {
@@ -2418,6 +2448,11 @@ const simulateJunkbot = (junkbot) => {
 					junkbot.gettingShield = true;
 					groundLevelEntity.used = true;
 					playSound("getShield");
+				} else if (groundLevelEntity.type === "jump") {
+					junkbot.animationFrame = 0;
+					junkbot.velocityY = -5;
+					junkbot.velocityX = junkbot.facing * 3;
+					playSound("jump");
 				}
 			}
 		}
