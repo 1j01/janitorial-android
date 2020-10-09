@@ -3533,69 +3533,44 @@ const runTests = async () => {
 	const tests = [
 		{
 			levelType: "json",
-			name: "Tippy Toast", expectations: [
-				{ type: "to win", maxTimeSteps: 1000 },
-			]
+			name: "Tippy Toast",
+			expect: "to win",
+			timeSteps: 1000,
 		},
 		{
 			levelType: "json",
-			name: "tight squeeze stairs", expectations: [
-				{ type: "to win", maxTimeSteps: 1000 },
-			]
+			name: "tight squeeze stairs",
+			expect: "to win",
+			timeSteps: 1000,
 		},
 		{
 			levelType: "json",
-			name: "get bin and electrocuted", expectations: [
-				{ type: "to lose", maxTimeSteps: 1000 },
-			]
+			name: "get bin and electrocuted",
+			expect: "to lose",
+			timeSteps: 1000,
 		},
 		{
 			levelType: "junkbot",
-			name: "Jump Stair Case", expectations: [
-				{ type: "to win", maxTimeSteps: 1000 },
-			]
+			name: "Jump Stair Case",
+			expect: "to win",
+			timeSteps: 1000,
 		},
 		{
 			levelType: "junkbot",
-			name: "Jump Around (bricks in place)", expectations: [
-				{ type: "to win", maxTimeSteps: 1000 },
-			]
+			name: "Jump Around (bricks in place)",
+			expect: "to win",
+			timeSteps: 1000,
 		},
 		{
 			levelType: "junkbot",
-			name: "Jump Around (bricks out of place)", expectations: [
-				{
-					type: "not to win",
-					minTimeSteps: 1000,
-					always: () => winOrLose() !== "win",
-				},
-			]
+			name: "Jump Around (bricks out of place)",
+			expect: "to draw",
+			timeSteps: 1000,
 		},
 	];
 
 	for (const test of tests) {
 		test.state = "pending";
-		for (const expectation of test.expectations) {
-			if (expectation.type === "to win") {
-				expectation.atLeastOnce = () => winOrLose() === "win";
-				test.expectations.push({
-					type: "not to lose",
-					minTimeSteps: expectation.minTimeSteps,
-					always: () => winOrLose() !== "lose",
-				});
-			}
-			if (expectation.type === "to lose") {
-				expectation.atLeastOnce = () => winOrLose() === "lose";
-				test.expectations.push({
-					type: "not to win",
-					minTimeSteps: expectation.minTimeSteps,
-					always: () => winOrLose() !== "win",
-				});
-			}
-		}
-		for (const expectation of test.expectations) {
-			expectation.state = "pending";
-		}
 	}
 
 	/* eslint-disable no-await-in-loop */
@@ -3607,26 +3582,9 @@ const runTests = async () => {
 		}
 		editorLevelState = serializeToJSON(currentLevel);
 
-		for (let timeStep = 0; timeStep < Math.max(...test.expectations.map(
-			({ state, maxTimeSteps, minTimeSteps }) => (
-				state === "met" ? 0 : Math.max(maxTimeSteps || 0, minTimeSteps || 0)
-			)
-		)); timeStep++) {
-			for (const expectation of test.expectations) {
-				if (expectation.state === "pending") {
-					if (expectation.atLeastOnce) {
-						if (expectation.atLeastOnce()) {
-							expectation.state = "met";
-						}
-					}
-					if (expectation.always) {
-						if (!expectation.always()) {
-							expectation.state = "failed";
-							expectation.message = `Expected ${expectation.type}`;
-						}
-					}
-				}
-			}
+		let won = false;
+		let lost = false;
+		for (let timeStep = 0; timeStep < test.timeSteps; timeStep++) {
 			if (realTime) {
 				// eslint-disable-next-line no-await-in-loop
 				await new Promise((resolve) => {
@@ -3635,28 +3593,55 @@ const runTests = async () => {
 			} else {
 				simulate(entities);
 			}
-		}
-		for (const expectation of test.expectations) {
-			if (expectation.state === "pending") {
-				if (expectation.always) {
-					expectation.state = "met";
-				} else if (expectation.atLeastOnce) {
-					expectation.state = "failed";
-					expectation.message = `Expected ${expectation.type}`;
-				} else {
-					expectation.state = "failed";
-					expectation.message = "???";
-				}
+			if (winOrLose() === "win") {
+				won = true;
+			}
+			if (winOrLose() === "lose") {
+				lost = true;
 			}
 		}
-		if (test.expectations.every((expectation) => expectation.state === "met")) {
-			test.state = "passed";
+		if (won && lost) {
+			test.state = "failed";
+			test.message = "Both won and lost (at different times) - this should never happen!";
+		} else if (test.expect === "to win") {
+			if (won) {
+				test.state = "passed";
+			} else {
+				test.state = "failed";
+				test.message = `Expected to win (in ${test.timeSteps} time steps)`;
+				if (lost) {
+					test.message += ", but lost instead";
+				} else {
+					test.message += ", but it was a draw (neither win nor lose)";
+				}
+			}
+		} else if (test.expect === "to lose") {
+			if (lost) {
+				test.state = "passed";
+			} else {
+				test.state = "failed";
+				test.message = `Expected to lose (in ${test.timeSteps} time steps)`;
+				if (won) {
+					test.message += ", but won instead";
+				} else {
+					test.message += ", but it was a draw (neither win nor lose)";
+				}
+			}
+		} else if (test.expect === "to draw") {
+			if (!lost && !won) {
+				test.state = "passed";
+			} else {
+				test.state = "failed";
+				test.message = `Expected to draw - neither win nor lose (in ${test.timeSteps} time steps)`;
+				if (won) {
+					test.message += ", but won instead";
+				} else if (lost) {
+					test.message += ", but lost instead";
+				}
+			}
 		} else {
 			test.state = "failed";
-			test.message = test.expectations
-				.filter(({ state }) => state === "failed")
-				.map(({ message }) => `  - ${message}`)
-				.join("\n");
+			test.message = `Unknown test type "${test.expect}"`
 		}
 	}
 	/* eslint-enable no-await-in-loop */
@@ -3666,7 +3651,7 @@ const runTests = async () => {
 	} else {
 		showMessageBox(`Some tests failed!\n\n${tests
 			.filter((test) => test.state === "failed")
-			.map((test) => `${test.name}\n${test.message}`)
+			.map((test) => `${test.name}\n  ${test.message}`)
 			.join("\n")}`);
 	}
 
