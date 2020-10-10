@@ -24,6 +24,9 @@ let currentLevel = {
 };
 let moves = 0;
 
+const snapX = 15;
+const snapY = 18;//6;
+
 let showDebug = false;
 let muted = false;
 let paused = false;
@@ -2183,12 +2186,12 @@ const startGrab = (grab) => {
 	for (const brick of dragging) {
 		brick.grabbed = true;
 		brick.grabOffset = {
-			// x: brick.x - floor(mouse.worldX, 15),
-			// y: brick.y - floor(mouse.worldY, 18),
+			// x: brick.x - floor(mouse.worldX, snapX),
+			// y: brick.y - floor(mouse.worldY, snapY),
 			// so you can place blocks that were grabbed when they weren't on the grid:
 			// (note: this does lose relative sub-grid positions of bricks)
-			x: floor(brick.x, 15) - floor(mouse.worldX, 15),
-			y: floor(brick.y, 18) - floor(mouse.worldY, 18),
+			x: floor(brick.x, snapX) - floor(mouse.worldX, snapX),
+			y: floor(brick.y, snapY) - floor(mouse.worldY, snapY),
 		};
 		if (editing) {
 			brick.selected = true;
@@ -3097,8 +3100,8 @@ const animate = () => {
 
 	if (dragging.length) {
 		for (const brick of dragging) {
-			brick.x = floor(mouse.worldX, 15) + brick.grabOffset.x;
-			brick.y = floor(mouse.worldY, 18) + brick.grabOffset.y;
+			brick.x = floor(mouse.worldX, snapX) + brick.grabOffset.x;
+			brick.y = floor(mouse.worldY, snapY) + brick.grabOffset.y;
 			entityMoved(brick);
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
