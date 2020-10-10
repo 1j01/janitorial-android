@@ -434,14 +434,14 @@ const makeDrop = ({ x, y }) => {
 
 const tests = [
 	{
-		levelType: "json",
+		levelType: "junkbot",
 		name: "Tippy Toast",
 		expect: "to win",
 		timeSteps: 1000,
 	},
 	{
-		levelType: "json",
-		name: "tight squeeze stairs",
+		levelType: "junkbot",
+		name: "Tight Squeeze Stairs",
 		expect: "to win",
 		timeSteps: 1000,
 	},
