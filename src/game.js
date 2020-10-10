@@ -458,6 +458,12 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		levelType: "junkbot",
+		name: "Twixt Crates",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
 		levelType: "json",
 		name: "get bin and electrocuted",
 		expect: "to lose",
