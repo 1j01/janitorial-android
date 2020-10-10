@@ -33,8 +33,8 @@ let hideInfoBox = false;
 let sidebar;
 let infoBox;
 let toggleInfoButton;
-// eslint-disable-next-line no-empty-function
-let updateEditorUIForLevelChange = () => { };
+// eslint-disable-next-line no-empty-function, no-unused-vars
+let updateEditorUIForLevelChange = (level) => { };
 
 let debugInfoForFrame = "";
 let debugInfoForJunkbot = "";
@@ -1369,17 +1369,20 @@ const save = () => {
 	if (editing) {
 		editorLevelState = serializeToJSON(currentLevel);
 		try {
-			// if (location.hash.indexOf(`level=local;${encodeURIComponent(currentLevel.title)}`) === -1) {
-			if (parseLocationHash().level !== `local;${encodeURIComponent(currentLevel.title)}`) {
-				const originalTitle = currentLevel.title;
+			if (decodeURIComponent(parseLocationHash().level || "") !== `local;${currentLevel.title}`) {
+				const originalTitle = currentLevel.title.replace(/\s\(\d+\)$/, "");
 				for (let n = 1; n < 100 && localStorage[`level:${currentLevel.title}`]; n++) {
 					currentLevel.title = `${originalTitle} (${n})`;
 				}
+				editorLevelState = serializeToJSON(currentLevel); // for title update
+				localStorage[`level:${currentLevel.title}`] = editorLevelState;
 				location.hash = `level=local;${encodeURIComponent(currentLevel.title)}`;
+				updateEditorUIForLevelChange(currentLevel); // for title update
+			} else {
+				localStorage[`level:${currentLevel.title}`] = editorLevelState;
 			}
-			localStorage[`level:${currentLevel.title}`] = editorLevelState;
 		} catch (error) {
-			showMessageBox("Couldn't save level.\nAllow local storage (sometimes called 'cookies') to enable autosave.");
+			showMessageBox(`Couldn't save level.\nAllow local storage (sometimes called 'cookies') to enable autosave.\n\n${error}`);
 		}
 	}
 };
@@ -3564,11 +3567,7 @@ const initUI = () => {
 			} catch (error) {
 				showMessageBox(`Failed to load level:\n\n${error}`);
 			}
-			// const newHash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
-			// if (location.hash.indexOf(newHash) === -1) {
-			// 	location.hash = newHash;
-			// }
-			if (parseLocationHash().level !== `${game};${encodeURIComponent(levelSelect.value)}`) {
+			if (decodeURIComponent(parseLocationHash().level || "") !== `${game};${currentLevel.title}`) {
 				location.hash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
 			}
 		}
