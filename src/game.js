@@ -31,6 +31,7 @@ let editing = false;
 let testing = false;
 let hideInfoBox = false;
 let sidebar;
+let levelSelect;
 let infoBox;
 let toggleInfoButton;
 // eslint-disable-next-line no-empty-function, no-unused-vars
@@ -1388,6 +1389,33 @@ const initLevel = (level) => {
 	viewport.centerY = 24 / 2 * 15;
 	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
 	updateEditorUIForLevelChange(currentLevel);
+};
+const loadLevelFromLevelSelect = async () => {
+	const option = levelSelect.options[levelSelect.selectedIndex];
+	const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
+	if (levelSelect.value !== "Custom World") {
+		const test = optgroup.value === "Test Cases" && tests.find((test) => test.name === levelSelect.value);
+		const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.${(test && test.levelType === "json") ? "json" : "txt"}`;
+		const game = optgroup ? optgroup.value : "Custom";
+		const folder = {
+			"Junkbot Undercover": "levels/Undercover Exclusive",
+			"Junkbot": "levels",
+			"Test Cases": "levels/test-cases",
+		}[game];
+		try {
+			if (test.levelType === "json") {
+				deserializeJSON(await loadTextFile(`${folder}/${fileName}`));
+			} else {
+				initLevel(await loadLevelFromTextFile(`${folder}/${fileName}`, { game }));
+			}
+			editorLevelState = serializeToJSON(currentLevel);
+		} catch (error) {
+			showMessageBox(`Failed to load level:\n\n${error}`);
+		}
+		if (decodeURIComponent(parseLocationHash().level || "") !== `${game};${currentLevel.title}`) {
+			location.hash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
+		}
+	}
 };
 const save = () => {
 	if (editing) {
@@ -3048,14 +3076,13 @@ const animate = () => {
 					} catch (error) {
 						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
 					}
-					setTimeout(() => {
-						const levelSelect = document.getElementById("level-select");
+					setTimeout(async () => {
 						if (location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/)) {
 							if (levelSelect.selectedIndex === 0) {
 								levelSelect.selectedIndex += 1;
 							}
 							levelSelect.selectedIndex += 1;
-							levelSelect.onchange();
+							await loadLevelFromLevelSelect();
 							paused = false;
 						}
 					}, 500);
@@ -3296,6 +3323,7 @@ const wrapContents = (target, wrapper) => {
 const initUI = () => {
 
 	sidebar = document.getElementById("editor-ui");
+	levelSelect = document.getElementById("level-select");
 	const entitiesPalette = document.getElementById("entities-palette");
 	const entitiesScrollContainer = document.getElementById("entities-scroll-container");
 	const levelBoundsCheckbox = document.getElementById("level-bounds-checkbox");
@@ -3304,7 +3332,6 @@ const initUI = () => {
 	const levelParInput = document.getElementById("level-par");
 	const saveButton = document.getElementById("save-world");
 	const openButton = document.getElementById("open-world");
-	const levelSelect = document.getElementById("level-select");
 
 	sidebar.hidden = !editing;
 
@@ -3574,34 +3601,7 @@ const initUI = () => {
 			optgroup.append(option);
 		}
 	}
-	// must not be addEventListener - called directly
-	levelSelect.onchange = async () => {
-		const option = levelSelect.options[levelSelect.selectedIndex];
-		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
-		if (levelSelect.value !== "Custom World") {
-			const test = optgroup.value === "Test Cases" && tests.find((test) => test.name === levelSelect.value);
-			const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.${(test && test.levelType === "json") ? "json" : "txt"}`;
-			const game = optgroup ? optgroup.value : "Custom";
-			const folder = {
-				"Junkbot Undercover": "levels/Undercover Exclusive",
-				"Junkbot": "levels",
-				"Test Cases": "levels/test-cases",
-			}[game];
-			try {
-				if (test.levelType === "json") {
-					deserializeJSON(await loadTextFile(`${folder}/${fileName}`));
-				} else {
-					initLevel(await loadLevelFromTextFile(`${folder}/${fileName}`, { game }));
-				}
-				editorLevelState = serializeToJSON(currentLevel);
-			} catch (error) {
-				showMessageBox(`Failed to load level:\n\n${error}`);
-			}
-			if (decodeURIComponent(parseLocationHash().level || "") !== `${game};${currentLevel.title}`) {
-				location.hash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
-			}
-		}
-	};
+	levelSelect.onchange = loadLevelFromLevelSelect;
 
 	// It's important that these do undoable() or save() because that makes it save the editorLevelState
 	// so if you go into play mode and back into editing mode, it doesn't reset these fields.
@@ -3801,7 +3801,7 @@ const runTests = async () => {
 	});
 };
 
-const loadFromHash = () => {
+const loadFromHash = async () => {
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
 	if (hashOptions.level) {
@@ -3818,13 +3818,12 @@ const loadFromHash = () => {
 				showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
 			}
 		} else {
-			const levelSelect = document.getElementById("level-select");
 			levelSelect.value = levelName;
 			if (levelSelect.selectedIndex === -1) {
 				showMessageBox(`Unknown level "${levelName}"`);
 			} else {
 				try {
-					levelSelect.onchange();
+					await loadLevelFromLevelSelect();
 				} catch (error) {
 					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
 				}
@@ -3868,7 +3867,7 @@ const main = async () => {
 	initUI();
 	animate();
 
-	loadFromHash();
+	await loadFromHash();
 };
 
 main();
