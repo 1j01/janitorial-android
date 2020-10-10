@@ -443,6 +443,18 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		levelType: "junkbot",
+		name: "Shallow Steps",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Don't Skate The Crate",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
 		levelType: "json",
 		name: "get bin and electrocuted",
 		expect: "to lose",
