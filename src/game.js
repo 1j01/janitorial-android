@@ -1811,41 +1811,57 @@ addEventListener("keydown", (event) => {
 				} else {
 					undo();
 				}
+			} else {
+				return;
 			}
 			break;
 		case "Y":
 			if (event.ctrlKey) {
 				redo();
+			} else {
+				return;
 			}
 			break;
 		case "X":
-			if (event.ctrlKey) {
+			if (event.ctrlKey && window.getSelection().toString() === "") {
 				cutSelected();
+			} else {
+				return;
 			}
 			break;
 		case "C":
-			if (event.ctrlKey && !event.repeat) {
+			if (event.ctrlKey && !event.repeat && window.getSelection().toString() === "") {
 				copySelected();
+			} else {
+				return;
 			}
 			break;
 		case "V":
 			if (event.ctrlKey) {
 				pasteFromClipboard();
+			} else {
+				return;
 			}
 			break;
 		case "A":
 			if (event.ctrlKey) {
 				selectAll();
+			} else {
+				return;
 			}
 			break;
 		case "S":
 			if (event.ctrlKey) {
 				saveToFile();
+			} else {
+				return;
 			}
 			break;
 		case "O":
 			if (event.ctrlKey) {
 				openFromFileDialog();
+			} else {
+				return;
 			}
 			break;
 		default:
@@ -2181,6 +2197,7 @@ canvas.addEventListener("pointermove", (event) => {
 canvas.addEventListener("pointerdown", (event) => {
 	pointerEventCache.push(event);
 	canvas.focus(); // for keyboard shortcuts, after interacting with dropdown
+	window.getSelection().removeAllRanges(); // for keyboard shortcuts for copy and paste after selecting text
 	updateMouse(event);
 	mouse.atDragStart = {
 		x: mouse.x,
