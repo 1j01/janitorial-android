@@ -640,12 +640,15 @@ const loadLevelFromText = (levelData, game) => {
 		});
 	}
 	if (sections.background) {
-		const parseDecals = (value) => (
-			value.split(",").map((str) => {
+		const parseDecals = (value) => {
+			if (value.indexOf(",") === -1) {
+				return [];
+			}
+			return value.split(",").map((str) => {
 				const [x, y, name] = str.split(";");
 				return { x: Number(x), y: Number(y), name };
-			})
-		);
+			});
+		};
 		sections.background.forEach(([key, value]) => {
 			if (key.match(/^bgdecals$/i)) {
 				level.backgroundDecals = level.backgroundDecals.concat(parseDecals(value));

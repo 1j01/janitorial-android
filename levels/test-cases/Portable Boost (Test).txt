@@ -11,7 +11,7 @@ scale=1
 [background]
 backdrop=bkg2
 decals=109;304;arrowur,103;232;arrowul,111;152;arrowur,429;119;arrowrd,408;78;word_danger
-bgdecals=0;null;undefined
+bgdecals=
 
 [partslist]
 types=brick_08,haz_slickfire,brick_01,brick_slickjump,flag,brick_04,brick_02,minifig
