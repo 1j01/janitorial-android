@@ -466,6 +466,18 @@ const tests = [
 		expect: "to draw",
 		timeSteps: 1000,
 	},
+	{
+		levelType: "junkbot",
+		name: "Perpetual Motion Machine (Test)",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Portable Boost (Test)",
+		expect: "to win",
+		timeSteps: 1000,
+	},
 ];
 
 let resources;
