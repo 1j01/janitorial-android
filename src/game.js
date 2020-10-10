@@ -1415,7 +1415,7 @@ const loadLevelFromLevelSelect = async () => {
 		} catch (error) {
 			showMessageBox(`Failed to load level:\n\n${error}`);
 		}
-		if (decodeURIComponent(parseLocationHash().level || "") !== `${game};${currentLevel.title}`) {
+		if (decodeURIComponent(parseLocationHash().level || "") !== `${game};${levelSelect.value}`) {
 			location.hash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
 		}
 	}
