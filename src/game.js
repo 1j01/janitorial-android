@@ -1393,6 +1393,7 @@ const initLevel = (level) => {
 	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
 	updateEditorUIForLevelChange(currentLevel);
 };
+let disableLoadFromHash = false;
 const loadLevelFromLevelSelect = async () => {
 	const option = levelSelect.options[levelSelect.selectedIndex];
 	const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
@@ -1405,6 +1406,7 @@ const loadLevelFromLevelSelect = async () => {
 			"Junkbot": "levels",
 			"Test Cases": "levels/test-cases",
 		}[game];
+		// console.log("loading:", option.value, { option, optgroup, game });
 		try {
 			if (test.levelType === "json") {
 				deserializeJSON(await loadTextFile(`${folder}/${fileName}`));
@@ -1416,7 +1418,30 @@ const loadLevelFromLevelSelect = async () => {
 			showMessageBox(`Failed to load level:\n\n${error}`);
 		}
 		if (decodeURIComponent(parseLocationHash().level || "") !== `${game};${levelSelect.value}`) {
-			location.hash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
+			await new Promise((resolve, reject) => {
+				// eslint bug?
+				// eslint-disable-next-line prefer-const
+				let tid;
+				const handleHashChange = () => {
+					// console.log("hashchange", location.hash);
+					window.removeEventListener("hashchange", handleHashChange);
+					clearTimeout(tid);
+					// make sure other handlers of hashchange run first
+					setTimeout(() => {
+						disableLoadFromHash = false;
+						resolve();
+					});
+				};
+				window.addEventListener("hashchange", handleHashChange);
+				tid = setTimeout(() => {
+					window.removeEventListener("hashchange", handleHashChange);
+					reject(new Error("timed out waiting for hashchange event"));
+				}, 1000);
+				// console.log("navigate for:", option.value, { option, optgroup, game });
+				// console.log(`gonna set #level=${game};${encodeURIComponent(levelSelect.value)}`);
+				disableLoadFromHash = true;
+				location.hash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
+			});
 		}
 	}
 };
@@ -3805,6 +3830,9 @@ const runTests = async () => {
 };
 
 const loadFromHash = async () => {
+	if (disableLoadFromHash) {
+		return;
+	}
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
 	if (hashOptions.level) {
@@ -3850,6 +3878,34 @@ const loadFromHash = async () => {
 };
 
 window.addEventListener("hashchange", loadFromHash);
+
+// const loadEachLevel = async (asyncFn) => {
+// 	for (const option of levelSelect.options) {
+// 		if (option.value !== "Custom World") {
+// 			levelSelect.value = option.value;
+// 			// eslint-disable-next-line no-await-in-loop
+// 			await loadLevelFromLevelSelect();
+// 			// eslint-disable-next-line no-await-in-loop
+// 			await asyncFn();
+// 		}
+// 	}
+// };
+// const gatherStatistics = async () => {
+// 	const occurancesPerEntityType = {};
+// 	const levelsPerEntityType = {};
+// 	await loadEachLevel(async () => {
+// 		const recordedTypesInThisLevel = [];
+// 		for (const entity of entities) {
+// 			if (recordedTypesInThisLevel.indexOf(entity.type) === -1) {
+// 				recordedTypesInThisLevel.push(entity.type);
+// 				levelsPerEntityType[entity.type] = (levelsPerEntityType[entity.type] || 0) + 1;
+// 			}
+// 			occurancesPerEntityType[entity.type] = (occurancesPerEntityType[entity.type] || 0) + 1;
+// 		}
+// 	});
+// 	console.log("Levels per entity type:", levelsPerEntityType);
+// 	console.log("Occurances per entity type:", occurancesPerEntityType);
+// };
 
 const main = async () => {
 	try {
