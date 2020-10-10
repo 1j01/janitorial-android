@@ -3038,7 +3038,7 @@ window.addEventListener("error", () => {
 const animate = () => {
 	rafid = requestAnimationFrame(animate);
 
-	if (!keys.ControlLeft && !keys.ControlRight) {
+	if (!keys.ControlLeft && !keys.ControlRight && !keys.AltLeft && !keys.AltRight) {
 		if (keys.KeyW || keys.ArrowUp) {
 			viewport.centerY -= 20;
 		}
