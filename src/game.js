@@ -1318,7 +1318,7 @@ const serializeLevel = (level) => {
 				} else {
 					animationName = "R";
 				}
-			} else if ("facing" in entity) {
+			} else if (("facing" in entity) && (entity.type !== "bin" || entity.scaredy)) {
 				animationName = entity.facing > 0 ? "walk_r" : "walk_l";
 			} else if (entity.type === "jump") {
 				animationName = "dormant";
