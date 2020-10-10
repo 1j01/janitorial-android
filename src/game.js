@@ -79,6 +79,13 @@ const showMessageBox = (message) => {
 	closeButton.focus();
 };
 
+const parseLocationHash = (hash = location.hash) => {
+	const keyValuePairs = hash.replace(/^#/, "")
+		.split("&")
+		.map((str) => str.split("="));
+	return Object.fromEntries(keyValuePairs);
+};
+
 const floor = (x, multiple) => Math.floor(x / multiple) * multiple;
 
 const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
@@ -1362,12 +1369,13 @@ const save = () => {
 	if (editing) {
 		editorLevelState = serializeToJSON(currentLevel);
 		try {
-			if (!location.hash.match(/level=local;/)) {
+			// if (location.hash.indexOf(`level=local;${encodeURIComponent(currentLevel.title)}`) === -1) {
+			if (parseLocationHash().level !== `local;${encodeURIComponent(currentLevel.title)}`) {
 				const originalTitle = currentLevel.title;
 				for (let n = 1; n < 100 && localStorage[`level:${currentLevel.title}`]; n++) {
 					currentLevel.title = `${originalTitle} (${n})`;
 				}
-				location.hash = `level=local;${currentLevel.title}`;
+				location.hash = `level=local;${encodeURIComponent(currentLevel.title)}`;
 			}
 			localStorage[`level:${currentLevel.title}`] = editorLevelState;
 		} catch (error) {
@@ -1490,17 +1498,20 @@ const saveToFile = () => {
 };
 
 const openFromFile = (file) => {
+	if (!editing) {
+		toggleEditing();
+	}
 	const reader = new FileReader();
 	reader.onload = (readerEvent) => {
 		const content = readerEvent.target.result;
 		try {
 			if (content.match(/^\s*{/)) {
 				deserializeJSON(content);
-				editorLevelState = content;
 			} else {
 				initLevel(loadLevelFromText(content));
 			}
-			editorLevelState = serializeToJSON(currentLevel);
+			currentLevel.title = currentLevel.title || file.name.replace(/\.(json|txt)$/, "");
+			save();
 		} catch (error) {
 			showMessageBox(`Failed to load from file:\n\n${error}`);
 		}
@@ -3536,9 +3547,12 @@ const initUI = () => {
 			} catch (error) {
 				showMessageBox(`Failed to load level:\n\n${error}`);
 			}
-			const newHash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
-			if (location.hash.indexOf(newHash) === -1) {
-				location.hash = newHash;
+			// const newHash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
+			// if (location.hash.indexOf(newHash) === -1) {
+			// 	location.hash = newHash;
+			// }
+			if (parseLocationHash().level !== `${game};${encodeURIComponent(levelSelect.value)}`) {
+				location.hash = `level=${game};${encodeURIComponent(levelSelect.value)}`;
 			}
 		}
 	};
@@ -3739,12 +3753,8 @@ const runTests = async () => {
 };
 
 const loadFromHash = () => {
-	const keyValuePairs = location.hash.replace(/^#/, "")
-		.split("&")
-		.map((str) => str.split("="));
-	const hashOptions = Object.fromEntries(keyValuePairs);
+	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
-
 	if (hashOptions.level) {
 		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
 		if (game === "local") {
