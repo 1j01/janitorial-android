@@ -3135,7 +3135,7 @@ const animate = () => {
 	ctx.save(); // world viewport
 	ctx.translate(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2));
 	ctx.scale(viewport.scale, viewport.scale);
-	ctx.translate(-viewport.centerX, -viewport.centerY);
+	ctx.translate(-Math.floor(viewport.centerX), -Math.floor(viewport.centerY));
 	ctx.imageSmoothingEnabled = false;
 
 	drawDecal(ctx, -6, -25, currentLevel.backdropName || "bkg1", currentLevel.game);
