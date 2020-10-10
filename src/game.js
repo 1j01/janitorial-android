@@ -1,6 +1,5 @@
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
-ctx.imageSmoothingEnabled = false;
 
 canvas.tabIndex = 0;
 canvas.style.touchAction = "none";
