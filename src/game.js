@@ -1440,12 +1440,15 @@ const undoable = (fn) => {
 	}
 };
 const undoOrRedo = (undos, redos) => {
+	const originalTitle = currentLevel.title;
 	if (undos.length === 0) {
 		return false;
 	}
 	redos.push(serializeToJSON(currentLevel));
 	editorLevelState = undos.pop();
 	deserializeJSON(editorLevelState);
+	currentLevel.title = originalTitle; // this is to avoid creating many autosave slots - don't allow undoing title change
+	updateEditorUIForLevelChange(currentLevel); // for title update
 	save();
 	return true;
 };
@@ -3573,8 +3576,8 @@ const initUI = () => {
 		}
 	};
 
-	// It's important that these do undoable() because that makes it save the editorLevelState
-	// so if you go into play mode and back into editing mode, it doesn't reset these.
+	// It's important that these do undoable() or save() because that makes it save the editorLevelState
+	// so if you go into play mode and back into editing mode, it doesn't reset these fields.
 	levelBoundsCheckbox.onchange = () => {
 		undoable(() => {
 			if (levelBoundsCheckbox.checked) {
@@ -3590,9 +3593,12 @@ const initUI = () => {
 		});
 	};
 	levelTitleInput.onchange = () => {
-		undoable(() => {
-			currentLevel.title = levelTitleInput.value;
-		});
+		// not undoable to avoid churning thru autosave slots
+		// undoable(() => {
+		currentLevel.title = levelTitleInput.value;
+		// });
+		// editorLevelState = serializeToJSON(currentLevel);
+		save();
 	};
 	levelHintInput.onchange = () => {
 		undoable(() => {
