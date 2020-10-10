@@ -1392,6 +1392,9 @@ const initLevel = (level) => {
 const save = () => {
 	if (editing) {
 		editorLevelState = serializeToJSON(currentLevel);
+		if (!currentLevel.title) {
+			currentLevel.title = "Custom Level";
+		}
 		try {
 			if (decodeURIComponent(parseLocationHash().level || "") !== `local;${currentLevel.title}`) {
 				const originalTitle = currentLevel.title.replace(/\s\(\d+\)$/, "");
