@@ -3138,7 +3138,11 @@ const animate = () => {
 			paused = true;
 			if (!testing) {
 				const timeSinceCollectBin = Date.now() - collectBinTime;
+				const levelAtWin = currentLevel;
 				setTimeout(() => {
+					if (currentLevel !== levelAtWin) {
+						return; // especially for while runing tests and clicking on a test to go to
+					}
 					playSound("ohYeah");
 					try {
 						if (currentLevel.title) {
@@ -3154,6 +3158,9 @@ const animate = () => {
 						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
 					}
 					setTimeout(async () => {
+						if (currentLevel !== levelAtWin) {
+							return; // especially for while runing tests and clicking on a test to go to
+						}
 						if (location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/)) {
 							if (levelSelect.selectedIndex === 0) {
 								levelSelect.selectedIndex += 1;
