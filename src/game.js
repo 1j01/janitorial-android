@@ -3818,7 +3818,7 @@ const runTests = async () => {
 				if (lost) {
 					test.message += ", but lost instead";
 				} else {
-					test.message += ", but it was a draw (neither win nor lose)";
+					test.message += ", but neither won nor lost";
 				}
 			}
 		} else if (test.expect === "to lose") {
@@ -3830,7 +3830,7 @@ const runTests = async () => {
 				if (won) {
 					test.message += ", but won instead";
 				} else {
-					test.message += ", but it was a draw (neither win nor lose)";
+					test.message += ", but neither won nor lost";
 				}
 			}
 		} else if (test.expect === "to draw") {
