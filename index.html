@@ -87,6 +87,21 @@
 			overflow-y: auto;
 		}
 
+		#tests-ui:not([hidden]) {
+			position: fixed;
+			right: 0px;
+			top: 0px;
+			bottom: 0px;
+			background-color: white;
+			color: black;
+			display: flex;
+			flex-direction: column;
+		}
+		#tests {
+			overflow: auto;
+			flex: 1;
+		}
+
 		#editor-ui:not([hidden]) {
 			position: fixed;
 			left: 0px;
@@ -216,6 +231,15 @@
 				<td>Open a saved world file</td>
 			</tr>
 		</table>
+	</div>
+	<div id="tests-ui">
+		<div class="label-input-row">
+			<label for="test-speed">Simulation Speed:</label>
+			<input type="range" min="1" max="100" step="1" id="test-speed">
+		</div>
+		<!-- <button id="start-tests">Start/Restart Tests</button> -->
+		<div id="tests-info"></div>
+		<ul id="tests"></ul>
 	</div>
 	<div id="editor-ui">
 		<!-- wrapper to make layout consistent regardless of scrollbar, without using overflow: auto -->

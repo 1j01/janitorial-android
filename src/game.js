@@ -3773,9 +3773,43 @@ const runTests = async () => {
 		toggleEditing();
 	}
 
+	const testsUL = document.getElementById("tests");
+	const testsInfo = document.getElementById("tests-info");
+	const testSpeedInput = document.getElementById("test-speed");
+	// const startButton = document.getElementById("start-tests");
+
+	const render = () => {
+		const passedTests = tests.filter((test) => test.state === "passed");
+		const failedTests = tests.filter((test) => test.state === "failed");
+		// const remainingTests = tests.filter((test) => test.state !== "failed" && test.state !== "passed");
+
+		testsInfo.innerHTML = `
+			<p>Passed: ${passedTests.length} / ${tests.length}</p>
+			<p>Failed: ${failedTests.length} / ${tests.length}</p>
+		`;
+		testsUL.innerHTML = "";
+		for (const test of tests) {
+			const li = document.createElement("li");
+			const emoji = {
+				"passed": "✅",
+				"failed": "❌", // ⚠️
+				"pending": "🌙", // 🛏️😴💤🧍🔜
+				"running": "🏃", // 🦿🤖🚧🔛
+			}[test.state];
+			li.innerHTML = `
+			<h3>
+				<span class="icon">${emoji}</span>
+				<a href="#level=Test Cases;${encodeURIComponent(test.name)}">${test.name}</a>
+			</h3>
+			<div>${test.message || ""}</div>`; // || test.state
+			testsUL.append(li);
+		}
+	};
 	for (const test of tests) {
 		test.state = "pending";
+		test.message = "";
 	}
+	render();
 
 	/* eslint-disable no-await-in-loop */
 	for (const test of tests) {
@@ -3789,29 +3823,23 @@ const runTests = async () => {
 		}
 		editorLevelState = serializeToJSON(currentLevel);
 
+		test.state = "running";
+		render();
+
 		let won = false;
 		let lost = false;
 		for (let timeStep = 0; timeStep < test.timeSteps; timeStep++) {
-			if (realTime) {
-				// eslint-disable-next-line no-await-in-loop
-				await new Promise((resolve) => {
-					requestAnimationFrame(resolve);
-				});
-			} else {
-				// TODO: maybe figure out why simulating syncronously doesn't work (tests fail that shouldn't)
-				// simulate(entities);
-				// eslint-disable-next-line no-await-in-loop, no-loop-func
-				await new Promise((resolve) => {
-					requestAnimationFrame(resolve);
-					for (let i = 0; i < 100; i++) {
-						simulate(entities);
-						timeStep += 1;
-						if (paused) {
-							break;
-						}
+			// eslint-disable-next-line no-await-in-loop, no-loop-func
+			await new Promise((resolve) => {
+				requestAnimationFrame(resolve); // accounts for one time step, with `++` above and `- 1` below (assuming animation loop is running)
+				for (let i = 0; i < testSpeedInput.valueAsNumber - 1; i++) {
+					simulate(entities);
+					timeStep += 1;
+					if (paused) {
+						break;
 					}
-				});
-			}
+				}
+			});
 			if (winOrLose() === "win") {
 				won = true;
 			}
@@ -3820,6 +3848,7 @@ const runTests = async () => {
 			}
 			if (paused) {
 				if (editing) {
+					// eslint-disable-next-line require-atomic-updates
 					testing = false;
 					muted = wasMuted;
 					location.hash = `level=Test Cases;${test.name}`;
@@ -3872,26 +3901,9 @@ const runTests = async () => {
 			test.state = "failed";
 			test.message = `Unknown test type "${test.expect}"`;
 		}
+		render();
 	}
 	/* eslint-enable no-await-in-loop */
-
-	if (testing) {
-		if (tests.every((test) => test.state === "passed")) {
-			showMessageBox("All tests passed!");
-		} else {
-			const failuresList = document.createElement("ul");
-			const message = document.createElement("div");
-			const failedTests = tests.filter((test) => test.state === "failed");
-			message.innerHTML = `<h2>${failedTests.length} Test${failedTests.length === 1 ? "" : "s"} Failed!</h2>`;
-			for (const test of failedTests) {
-				const li = document.createElement("li");
-				li.innerHTML = `<h3><a href="#level=Test Cases;${encodeURIComponent(test.name)}">${test.name}</a></h3><div>${test.message}</div>`;
-				failuresList.append(li);
-			}
-			message.append(failuresList);
-			showMessageBox(message);
-		}
-	}
 
 	muted = wasMuted;
 	setTimeout(() => {
