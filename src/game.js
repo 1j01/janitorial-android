@@ -3819,6 +3819,12 @@ const runTests = async () => {
 				lost = true;
 			}
 			if (paused) {
+				if (editing) {
+					testing = false;
+					muted = wasMuted;
+					location.hash = `level=Test Cases;${test.name}`;
+					return;
+				}
 				paused = false;
 				break;
 			}
