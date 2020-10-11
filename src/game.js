@@ -32,7 +32,8 @@ let paused = false;
 let editing = false;
 let testing = false;
 let hideInfoBox = false;
-let sidebar;
+let editorUI;
+let testsUI;
 let levelSelect;
 let infoBox;
 let toggleInfoButton;
@@ -1538,7 +1539,7 @@ const togglePause = () => {
 };
 const toggleEditing = () => {
 	editing = !editing;
-	sidebar.hidden = !editing;
+	editorUI.hidden = !editing;
 	if (editing) {
 		deserializeJSON(editorLevelState);
 	}
@@ -3108,10 +3109,10 @@ const animate = () => {
 		if (mouse.y > canvas.height - panMarginSize) {
 			viewport.centerY += panFromMarginSpeed;
 		}
-		if (mouse.x < panMarginSize + (sidebar.hidden ? 0 : sidebar.offsetWidth * window.devicePixelRatio)) {
+		if (mouse.x < panMarginSize + (editorUI.hidden ? 0 : editorUI.offsetWidth * window.devicePixelRatio)) {
 			viewport.centerX -= panFromMarginSpeed;
 		}
-		if (mouse.x > canvas.width - panMarginSize) {
+		if (mouse.x > canvas.width - panMarginSize - (testsUI.hidden ? 0 : testsUI.offsetWidth * window.devicePixelRatio)) {
 			viewport.centerX += panFromMarginSpeed;
 		}
 	}
@@ -3376,7 +3377,7 @@ const animate = () => {
 	}
 
 	if (showDebug) {
-		const x = 1 + sidebar.offsetWidth;
+		const x = 1 + editorUI.offsetWidth;
 		drawText(ctx, fontChars, x, 1, "white");
 		const debugInfo = `ENTITIES: ${entities.length}
 VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
@@ -3406,7 +3407,8 @@ const wrapContents = (target, wrapper) => {
 
 const initUI = () => {
 
-	sidebar = document.getElementById("editor-ui");
+	testsUI = document.getElementById("tests-ui");
+	editorUI = document.getElementById("editor-ui");
 	levelSelect = document.getElementById("level-select");
 	const entitiesPalette = document.getElementById("entities-palette");
 	const entitiesScrollContainer = document.getElementById("entities-scroll-container");
@@ -3417,7 +3419,7 @@ const initUI = () => {
 	const saveButton = document.getElementById("save-world");
 	const openButton = document.getElementById("open-world");
 
-	sidebar.hidden = !editing;
+	editorUI.hidden = !editing;
 
 	let hilitButton;
 	const makeInsertEntityButton = (protoEntity) => {
@@ -3439,7 +3441,7 @@ const initUI = () => {
 			}
 			const entity = getEntityCopy();
 			pasteEntities([entity]);
-			sidebar.style.cursor = "url(\"images/cursors/cursor-insert.png\") 0 0, default";
+			editorUI.style.cursor = "url(\"images/cursors/cursor-insert.png\") 0 0, default";
 			if (hilitButton) {
 				hilitButton.style.borderColor = "transparent";
 			}
@@ -3448,8 +3450,8 @@ const initUI = () => {
 			playSound("insert");
 			canvas.focus(); // for keyboard shortcuts
 		});
-		sidebar.addEventListener("mouseleave", () => {
-			sidebar.style.cursor = "";
+		editorUI.addEventListener("mouseleave", () => {
+			editorUI.style.cursor = "";
 		});
 		let previewEntity = getEntityCopy();
 		buttonCanvas.width = previewEntity.width + 15 * 1;
@@ -3767,8 +3769,6 @@ const initUI = () => {
 
 const stopTests = () => {
 	testing = false;
-
-	const testsUI = document.getElementById("tests-ui");
 	testsUI.hidden = true;
 };
 
@@ -3787,7 +3787,6 @@ const runTests = async () => {
 		toggleEditing();
 	}
 
-	const testsUI = document.getElementById("tests-ui");
 	const testsUL = document.getElementById("tests");
 	const testsInfo = document.getElementById("tests-info");
 	const testSpeedInput = document.getElementById("test-speed");
