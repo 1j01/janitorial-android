@@ -626,6 +626,46 @@ const loadAtlasJSON = async (path) => {
 
 // const animations = new Set();
 
+// brick_01:
+// brick_01:0
+// brick_02:
+// brick_02:0
+// brick_03:
+// brick_03:0
+// brick_04:
+// brick_04:0
+// brick_06:0
+// brick_08:
+// brick_08:0
+// brick_slickjump:dormant
+// brick_slickshield:on
+// flag:
+// flag:0
+// flag:none
+// haz_climber:walk_r
+// haz_dumbfloat:l
+// haz_float:inactive
+// haz_slickcrate:norm
+// haz_slickfan:none
+// haz_slickfan:off
+// haz_slickfan:on
+// haz_slickfire:off
+// haz_slickfire:on
+// haz_slickjump:dormant
+// haz_slicklaser_l:off
+// haz_slicklaser_l:on
+// haz_slicklaser_r:off
+// haz_slicklaser_r:on
+// haz_slickpipe:dry
+// haz_slickshield:on
+// haz_slickswitch:off
+// haz_slickswitch:on
+// haz_slickteleport:on
+// haz_walker:walk_l
+// minifig:walk_l
+// minifig:walk_r
+// scaredy:rest
+
 const loadLevelFromText = (levelData, game) => {
 	const sections = {};
 	let sectionName = "";
@@ -734,10 +774,6 @@ const loadLevelFromText = (levelData, game) => {
 				}
 				const brickMatch = typeName.match(/brick_(\d+)/i);
 				// animations.add(`${typeName}:${animationName}`);
-				// if (`${typeName}:${animationName}` === "flag:walk_r") {
-				// 	// console.log(typeName, animationName, "\n", levelData, level);
-				// 	console.log(level.title, entityDef, "replace with", entityDef.replace("walk_r", ""));
-				// }
 				if (brickMatch) {
 					entities.push(makeBrick({
 						x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
