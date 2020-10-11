@@ -3842,6 +3842,8 @@ const runTests = async () => {
 		test.state = "running";
 		render();
 
+		paused = false;
+
 		let won = false;
 		let lost = false;
 		for (let timeStep = 0; timeStep < test.timeSteps; timeStep++) {
