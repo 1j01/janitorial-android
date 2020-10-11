@@ -1436,7 +1436,7 @@ spacing=15,18
 scale=1
 
 [background]
-backdrop=${level.backdropName || ""}
+backdrop=${level.backdropName || "bkg1"}
 decals=${stringifyDecals(level.decals)}
 bgdecals=${stringifyDecals(level.backgroundDecals)}
 

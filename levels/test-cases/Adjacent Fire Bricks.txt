@@ -9,7 +9,7 @@ spacing=15,18
 scale=1
 
 [background]
-backdrop=
+backdrop=bkg1
 decals=
 bgdecals=
 
