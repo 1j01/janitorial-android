@@ -3782,7 +3782,6 @@ const runTests = async () => {
 		if (!testing) {
 			break;
 		}
-		paused = false;
 		if (test.levelType === "json") {
 			deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
 		} else {
@@ -3808,6 +3807,7 @@ const runTests = async () => {
 				lost = true;
 			}
 			if (paused) {
+				paused = false;
 				break;
 			}
 		}
