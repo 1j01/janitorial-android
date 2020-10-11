@@ -626,6 +626,7 @@ const loadAtlasJSON = async (path) => {
 
 // const animations = new Set();
 
+// All entity name animation name pairs in the original Junkbot games' levels, normalized to lowercase
 // brick_01:
 // brick_01:0
 // brick_02:
@@ -774,6 +775,9 @@ const loadLevelFromText = (levelData, game) => {
 				}
 				const brickMatch = typeName.match(/brick_(\d+)/i);
 				// animations.add(`${typeName}:${animationName}`);
+				// if (typeName === "haz_slickcrate" && animationName !== "norm") {
+				// 	console.log(level.title, entityDef);
+				// }
 				if (brickMatch) {
 					entities.push(makeBrick({
 						x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
@@ -1407,6 +1411,8 @@ const serializeLevel = (level) => {
 				animationName = "dormant";
 			} else if (entity.type === "pipe") {
 				animationName = "dry";
+			} else if (entity.type === "crate") {
+				animationName = "norm";
 			} else {
 				animationName = "";
 			}
@@ -4022,33 +4028,34 @@ const loadFromHash = async () => {
 
 window.addEventListener("hashchange", loadFromHash);
 
-// const loadEachLevel = async (asyncFn, originalOnly) => {
-// 	for (const option of levelSelect.options) {
-// 		if (option.value !== "Custom World" && (!originalOnly || option.parentNode.label.match(/^Junkbot( Undercover)?$/))) {
-// 			levelSelect.value = option.value;
-// 			// eslint-disable-next-line no-await-in-loop
-// 			await loadLevelFromLevelSelect();
-// 			// eslint-disable-next-line no-await-in-loop
-// 			await asyncFn();
-// 		}
-// 	}
-// };
-// const gatherStatistics = async () => {
-// 	const occurancesPerEntityType = {};
-// 	const levelsPerEntityType = {};
-// 	await loadEachLevel(async () => {
-// 		const recordedTypesInThisLevel = [];
-// 		for (const entity of entities) {
-// 			if (recordedTypesInThisLevel.indexOf(entity.type) === -1) {
-// 				recordedTypesInThisLevel.push(entity.type);
-// 				levelsPerEntityType[entity.type] = (levelsPerEntityType[entity.type] || 0) + 1;
-// 			}
-// 			occurancesPerEntityType[entity.type] = (occurancesPerEntityType[entity.type] || 0) + 1;
-// 		}
-// 	});
-// 	console.log("Levels per entity type:", levelsPerEntityType);
-// 	console.log("Occurances per entity type:", occurancesPerEntityType);
-// };
+// eslint-disable-next-line no-unused-vars
+const loadEachLevel = async (asyncFn, originalOnly) => {
+	for (const option of levelSelect.options) {
+		if (option.value !== "Custom World" && (!originalOnly || option.parentNode.label.match(/^Junkbot( Undercover)?$/))) {
+			levelSelect.value = option.value;
+			// eslint-disable-next-line no-await-in-loop
+			await loadLevelFromLevelSelect();
+			// eslint-disable-next-line no-await-in-loop
+			await asyncFn();
+		}
+	}
+};
+// eslint-disable-next-line no-unused-vars
+const gatherStatistics = async () => {
+	const occurancesPerEntityType = {};
+	const levelsPerEntityType = {};
+	await loadEachLevel(async () => {
+		const recordedTypesInThisLevel = [];
+		for (const entity of entities) {
+			if (recordedTypesInThisLevel.indexOf(entity.type) === -1) {
+				recordedTypesInThisLevel.push(entity.type);
+				levelsPerEntityType[entity.type] = (levelsPerEntityType[entity.type] || 0) + 1;
+			}
+			occurancesPerEntityType[entity.type] = (occurancesPerEntityType[entity.type] || 0) + 1;
+		}
+	});
+	return { levelsPerEntityType, occurancesPerEntityType };
+};
 
 const main = async () => {
 	try {
