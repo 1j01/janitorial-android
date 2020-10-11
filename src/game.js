@@ -64,11 +64,14 @@ const showMessageBox = (message) => {
 	messageBoxContainer.className = "dialog-container";
 	messageBox = document.createElement("div");
 	messageBox.className = "dialog";
+	const messageContentEl = document.createElement("div");
+	messageContentEl.className = "message-content";
 	if (typeof message === "string") {
-		messageBox.textContent = message;
+		messageContentEl.textContent = message;
 	} else {
-		messageBox.append(message);
+		messageContentEl.append(message);
 	}
+	messageBox.append(messageContentEl);
 	const closeButton = document.createElement("button");
 	closeButton.onclick = () => {
 		messageBoxContainer.remove();
