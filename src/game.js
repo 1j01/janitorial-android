@@ -3863,13 +3863,12 @@ const runTests = async () => {
 		} else {
 			const failuresList = document.createElement("ul");
 			const message = document.createElement("div");
-			message.innerHTML = "<h2>Some tests Failed!</h2>";
-			for (const test of tests) {
-				if (test.state === "failed") {
-					const li = document.createElement("li");
-					li.innerHTML = `<h3><a href="#level=Test Cases;${encodeURIComponent(test.name)}">${test.name}</a></h3><div>${test.message}</div>`;
-					failuresList.append(li);
-				}
+			const failedTests = tests.filter((test) => test.state === "failed");
+			message.innerHTML = `<h2>${failedTests.length} Test${failedTests.length === 1 ? "" : "s"} Failed!</h2>`;
+			for (const test of failedTests) {
+				const li = document.createElement("li");
+				li.innerHTML = `<h3><a href="#level=Test Cases;${encodeURIComponent(test.name)}">${test.name}</a></h3><div>${test.message}</div>`;
+				failuresList.append(li);
 			}
 			message.append(failuresList);
 			showMessageBox(message);
