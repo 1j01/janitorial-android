@@ -624,6 +624,8 @@ const loadAtlasJSON = async (path) => {
 	return result;
 };
 
+// const animations = new Set();
+
 const loadLevelFromText = (levelData, game) => {
 	const sections = {};
 	let sectionName = "";
@@ -731,6 +733,11 @@ const loadLevelFromText = (levelData, game) => {
 					facingY = 1;
 				}
 				const brickMatch = typeName.match(/brick_(\d+)/i);
+				// animations.add(`${typeName}:${animationName}`);
+				// if (`${typeName}:${animationName}` === "flag:walk_r") {
+				// 	// console.log(typeName, animationName, "\n", levelData, level);
+				// 	console.log(level.title, entityDef, "replace with", entityDef.replace("walk_r", ""));
+				// }
 				if (brickMatch) {
 					entities.push(makeBrick({
 						x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
@@ -3979,9 +3986,9 @@ const loadFromHash = async () => {
 
 window.addEventListener("hashchange", loadFromHash);
 
-// const loadEachLevel = async (asyncFn) => {
+// const loadEachLevel = async (asyncFn, originalOnly) => {
 // 	for (const option of levelSelect.options) {
-// 		if (option.value !== "Custom World") {
+// 		if (option.value !== "Custom World" && (!originalOnly || option.parentNode.label.match(/^Junkbot( Undercover)?$/))) {
 // 			levelSelect.value = option.value;
 // 			// eslint-disable-next-line no-await-in-loop
 // 			await loadLevelFromLevelSelect();

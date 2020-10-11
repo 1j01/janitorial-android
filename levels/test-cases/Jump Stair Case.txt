@@ -16,5 +16,5 @@ bgdecals=
 [partslist]
 types=brick_03,minifig,brick_04,haz_slickjump,flag
 colors=white,red,green,blue,yellow,gray
-parts=1;21;1;6;;1;,1;20;2;2;walk_r;1;,4;21;3;6;;1;,8;21;4;2;dormant;1;,12;19;4;2;dormant;1;,16;17;4;2;dormant;1;,20;15;4;2;dormant;1;,24;13;3;6;;1;,26;12;5;2;walk_r;1;
+parts=1;21;1;6;;1;,1;20;2;2;walk_r;1;,4;21;3;6;;1;,8;21;4;2;dormant;1;,12;19;4;2;dormant;1;,16;17;4;2;dormant;1;,20;15;4;2;dormant;1;,24;13;3;6;;1;,26;12;5;2;;1;
 
