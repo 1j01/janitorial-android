@@ -505,6 +505,12 @@ const tests = [
 		expect: "to win",
 		timeSteps: 1000,
 	},
+	{
+		levelType: "junkbot",
+		name: "Ally",
+		expect: "to win",
+		timeSteps: 1000,
+	},
 ];
 
 let resources;
