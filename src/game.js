@@ -464,6 +464,12 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		levelType: "junkbot",
+		name: "Once You Win, You Won",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
 		levelType: "json",
 		name: "get bin and electrocuted",
 		expect: "to lose",
@@ -3093,9 +3099,12 @@ const animate = () => {
 
 	if (winOrLose() !== winLoseState) {
 		winLoseState = winOrLose();
+		if (winLoseState === "lose" && !paused) {
+			paused = true;
+		}
 		if (winLoseState === "win" && !paused) {
+			paused = true;
 			if (!testing) {
-				paused = true;
 				const timeSinceCollectBin = Date.now() - collectBinTime;
 				setTimeout(() => {
 					playSound("ohYeah");
@@ -3741,6 +3750,7 @@ const runTests = async () => {
 		if (!testing) {
 			break;
 		}
+		paused = false;
 		if (test.levelType === "json") {
 			deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
 		} else {
@@ -3764,6 +3774,9 @@ const runTests = async () => {
 			}
 			if (winOrLose() === "lose") {
 				lost = true;
+			}
+			if (paused) {
+				break;
 			}
 		}
 		if (won && lost) {
