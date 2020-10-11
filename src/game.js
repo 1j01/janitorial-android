@@ -507,6 +507,24 @@ const tests = [
 	},
 	{
 		levelType: "junkbot",
+		name: "Don't Step Up Onto Gearbot",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Don't Walk Over Gearbot",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Don't Step Down Onto Gearbot",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
 		name: "Ally",
 		expect: "to win",
 		timeSteps: 1000,
