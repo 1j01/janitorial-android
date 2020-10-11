@@ -3798,7 +3798,19 @@ const runTests = async () => {
 					requestAnimationFrame(resolve);
 				});
 			} else {
-				simulate(entities);
+				// TODO: maybe figure out why simulating syncronously doesn't work (tests fail that shouldn't)
+				// simulate(entities);
+				// eslint-disable-next-line no-await-in-loop, no-loop-func
+				await new Promise((resolve) => {
+					requestAnimationFrame(resolve);
+					for (let i = 0; i < 100; i++) {
+						simulate(entities);
+						timeStep += 1;
+						if (paused) {
+							break;
+						}
+					}
+				});
 			}
 			if (winOrLose() === "win") {
 				won = true;
