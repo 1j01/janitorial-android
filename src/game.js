@@ -3765,6 +3765,13 @@ const initUI = () => {
 	});
 };
 
+const stopTests = () => {
+	testing = false;
+
+	const testsUI = document.getElementById("tests-ui");
+	testsUI.hidden = true;
+};
+
 const runTests = async () => {
 	testing = true;
 
@@ -3780,10 +3787,13 @@ const runTests = async () => {
 		toggleEditing();
 	}
 
+	const testsUI = document.getElementById("tests-ui");
 	const testsUL = document.getElementById("tests");
 	const testsInfo = document.getElementById("tests-info");
 	const testSpeedInput = document.getElementById("test-speed");
 	// const startButton = document.getElementById("start-tests");
+
+	testsUI.hidden = false;
 
 	const render = () => {
 		const passedTests = tests.filter((test) => test.state === "passed");
@@ -3856,7 +3866,7 @@ const runTests = async () => {
 			if (paused) {
 				if (editing) {
 					// eslint-disable-next-line require-atomic-updates
-					testing = false;
+					stopTests();
 					muted = wasMuted;
 					location.hash = `level=Test Cases;${test.name}`;
 					return;
@@ -3962,7 +3972,7 @@ const loadFromHash = async () => {
 	if (location.hash.match(/run-tests/)) {
 		runTests();
 	} else {
-		testing = false; // stop tests
+		stopTests();
 	}
 };
 
