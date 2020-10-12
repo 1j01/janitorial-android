@@ -3331,7 +3331,7 @@ const simulateJunkbot = (junkbot) => {
 	if (bin) {
 		junkbot.animationFrame = 0;
 		junkbot.collectingBin = true;
-		remove(entities, bin);
+		bin.removeBeforeRender = true; // it's important not to remove entities while iterating over them
 		playSound("collectBin");
 		playSound("collectBin2");
 		collectBinTime = Date.now();
@@ -3388,9 +3388,13 @@ const simulateScaredy = (bin) => {
 };
 
 const simulateFlybot = (flybot) => {
+	// doEyebotMovement(flybot);
+	// return;
+
 	flybot.animationFrame += 1;
-	if (flybot.animationFrame > 2) {
-		flybot.animationFrame = 0;
+	// if (flybot.animationFrame > 2) {
+	if (flybot.animationFrame % 2 === 0) {
+		// flybot.animationFrame = 0;
 		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y };
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, flybot, (otherEntity) => otherEntity.type !== "droplet");
 		if (ahead) {
@@ -3406,7 +3410,7 @@ const simulateFlybot = (flybot) => {
 	}
 };
 
-const simulateEyebot = (eyebot) => {
+const doEyebotTargeting = (eyebot) => {
 	for (const [directionX, directionY] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
 		const offsets = directionY !== 0 ? [[0, 0], [15, 0]] : [[0, 0], [0, 18]];
 		for (const [offsetX, offsetY] of offsets) {
@@ -3426,7 +3430,9 @@ const simulateEyebot = (eyebot) => {
 			}
 		}
 	}
+};
 
+const doEyebotMovement = (eyebot) => {
 	eyebot.activeTimer -= 1;
 	eyebot.animationFrame += 1;
 	if (eyebot.animationFrame % ((eyebot.activeTimer > 0) ? 1 : 2) === 0) {
@@ -3444,9 +3450,9 @@ const simulateEyebot = (eyebot) => {
 			entityMoved(eyebot);
 		}
 	}
-	if (eyebot.animationFrame > 2) {
-		eyebot.animationFrame = 0;
-	}
+	// if (eyebot.animationFrame > 2) {
+	// 	eyebot.animationFrame = 0;
+	// }
 };
 
 const simulateClimbbot = (climbbot) => {
@@ -3541,7 +3547,7 @@ const simulateDroplet = (droplet) => {
 	if (droplet.splashing) {
 		droplet.animationFrame += 1;
 		if (droplet.animationFrame > 4) {
-			remove(entities, droplet);
+			droplet.removeBeforeRender = true; // it's important not to remove entities while iterating over them
 		}
 	} else {
 		for (let i = 0; i < 18; i++) {
@@ -3668,7 +3674,7 @@ const simulate = (entities) => {
 			} else if (entity.type === "flybot") {
 				simulateFlybot(entity);
 			} else if (entity.type === "eyebot") {
-				simulateEyebot(entity);
+				doEyebotMovement(entity);
 			} else if (entity.type === "jump") {
 				simulateJump(entity);
 			} else if (entity.type === "teleport") {
@@ -3684,11 +3690,31 @@ const simulate = (entities) => {
 			}
 		}
 	}
+	// Remove entities with flag removeBeforeRender.
+	// It's important not to remove entities while iterating over them,
+	// as this can lead to entities not being simulated in a frame,
+	// which can lead to entities offset from each other, which is problematic e.g. for "Ally" test level.
+	{
+		let iOut = 0;
+		for (let i = 0; i < entities.length; i++) {
+			if (!entities[i].removeBeforeRender) {
+				entities[iOut] = entities[i];
+				iOut += 1;
+			}
+		}
+		entities.length = iOut;
+	}
 
 	for (const entity of entities) {
 		if ("floating" in entity) {
 			entity.wasFloating = entity.floating;
 			delete entity.floating;
+		}
+
+		// eyebot targeting is done separately from movement, so that it can support
+		// a flybot continuously blocking an eyebot's line of sight ("Ally" test case)
+		if (entity.type === "eyebot") {
+			doEyebotTargeting(entity);
 		}
 	}
 	// wind and laser beams
