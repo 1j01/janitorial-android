@@ -481,6 +481,12 @@ const tests = [
 	},
 	{
 		levelType: "junkbot",
+		name: "All-Off Offal",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
 		name: "Jump Stair Case",
 		expect: "to win",
 		timeSteps: 1000,
@@ -3080,9 +3086,9 @@ const simulate = (entities) => {
 			delete entity.floating;
 		}
 	}
-	wind.length = [];
+	wind.length = 0;
 	for (const entity of entities) {
-		if (entity.type === "fan") {
+		if (entity.type === "fan" && entity.on) {
 			const fan = entity;
 			const extents = [];
 			for (let x = fan.x + 15; x < fan.x + fan.width - 15; x += 15) {
