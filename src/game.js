@@ -3784,6 +3784,7 @@ const initUI = () => {
 		levelTitleInput.value = level.title || "";
 		levelHintInput.value = level.hint || "";
 		levelParInput.valueAsNumber = level.par;
+		document.title = level.title ? `${level.title} - Junkbot` : "Junkbot";
 	};
 	updateEditorUIForLevelChange(currentLevel);
 
