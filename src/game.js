@@ -24,14 +24,14 @@ let currentLevel = {
 let moves = 0;
 
 const snapX = 15;
-const snapY = 18;//6;
+const snapY = 18; // or 6 for thin brick heights
 
-const desiredFPS = 15;
+const targetFPS = 15;
 let lastSimulateTime = 0;
 // The higher this value, the less the fps display will reflect temporary variations
 // A value of 1 will only keep the last value
-var fpsSmoothing = 20;
-var smoothedFrameTime = 0;
+const fpsSmoothing = 20;
+let smoothedFrameTime = 0;
 
 let showDebug = false;
 let muted = false;
@@ -47,14 +47,13 @@ let toggleInfoButton;
 // eslint-disable-next-line no-empty-function, no-unused-vars
 let updateEditorUIForLevelChange = (level) => { };
 
-let debugInfoForFrame = "";
-let debugInfoForJunkbot = "";
+let frameStartTime = 0;
+const debugs = {};
 const debugWorldSpaceRects = [];
-const debug = (...texts) => {
-	debugInfoForFrame += `${texts.join(" ")}\n`;
-};
-const debugJunkbot = (...texts) => {
-	debugInfoForJunkbot += `${texts.join(" ")}\n`;
+const debug = (subject, ...texts) => {
+	debugs[subject] = debugs[subject] || {};
+	debugs[subject].time = frameStartTime;
+	debugs[subject].text = texts.join(" ");
 };
 const debugWorldSpaceRect = (x, y, width, height) => {
 	if (showDebug) {
@@ -2554,7 +2553,7 @@ const walk = (junkbot) => {
 			posStepUp.y - junkbot.y < 0 &&
 			!entityCollisionTest(posStepUp.x, posStepUp.y, junkbot, notBinOrDrop)
 		) {
-			debugJunkbot("STEP UP");
+			debug("JUNKBOT", "STEP UP");
 			junkbot.x = posStepUp.x;
 			junkbot.y = posStepUp.y;
 			entityMoved(junkbot);
@@ -2567,7 +2566,7 @@ const walk = (junkbot) => {
 		ground &&
 		!entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDrop)
 	) {
-		debugJunkbot("WALK");
+		debug("JUNKBOT", "WALK");
 		junkbot.x = posInFront.x;
 		junkbot.y = posInFront.y;
 		entityMoved(junkbot);
@@ -2576,24 +2575,24 @@ const walk = (junkbot) => {
 	let step = entityCollisionAll(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropOrEnemyBot).sort((a, b) => a.y - b.y)[0];
 	if (step) {
 		// can we step down?
-		// debugJunkbot(`step: ${JSON.stringify(step, null, "\t")}`);
+		// debug("JUNKBOT", `step: ${JSON.stringify(step, null, "\t")}`);
 		const posStepDown = { x: posInFront.x, y: step.y - junkbot.height };
 		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropOrEnemyBot).sort((a, b) => a.y - b.y)[0];
-		// debugJunkbot(`step: ${JSON.stringify(step, null, "\t")}`);
+		// debug("JUNKBOT", `step: ${JSON.stringify(step, null, "\t")}`);
 		if (
 			posStepDown.y - junkbot.y <= 18 &&
 			posStepDown.y - junkbot.y > 0 &&
 			step &&
 			!entityCollisionTest(posStepDown.x, posStepDown.y, junkbot, notBinOrDrop)
 		) {
-			debugJunkbot("STEP DOWN");
+			debug("JUNKBOT", "STEP DOWN");
 			junkbot.x = posStepDown.x;
 			junkbot.y = posStepDown.y;
 			entityMoved(junkbot);
 			return;
 		}
 	}
-	debugJunkbot("CLIFF/WALL/BOT - TURN AROUND");
+	debug("JUNKBOT", "CLIFF/WALL/BOT - TURN AROUND");
 	junkbot.facing *= -1;
 	playSound("turn");
 };
@@ -2641,9 +2640,8 @@ const simulateJunkbot = (junkbot) => {
 	}
 	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notBinOrDrop);
 	if (inside) {
-		debugInfoForJunkbot = "";
-		debugJunkbot("STUCK IN WALL");
-		// debugJunkbot("STUCK IN WALL - GO UP");
+		debug("JUNKBOT", "STUCK IN WALL");
+		// debug("JUNKBOT", "STUCK IN WALL - GO UP");
 		// junkbot.y = inside.y - junkbot.height;
 		// entityMoved(junkbot);
 		return;
@@ -2651,11 +2649,10 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.floating) {
 		const abovePos = { x: junkbot.x, y: junkbot.y - 18 };
 		const aboveHead = entityCollisionTest(abovePos.x, abovePos.y, junkbot, notBinOrDrop);
-		debugInfoForJunkbot = "";
 		if (aboveHead) {
-			debugJunkbot("FLOATING - CAN'T GO UP");
+			debug("JUNKBOT", "FLOATING - CAN'T GO UP");
 		} else {
-			debugJunkbot("FLOATING - GO UP");
+			debug("JUNKBOT", "FLOATING - GO UP");
 			junkbot.x = abovePos.x;
 			junkbot.y = abovePos.y;
 			entityMoved(junkbot);
@@ -2674,17 +2671,16 @@ const simulateJunkbot = (junkbot) => {
 	const unaligned = junkbot.x % 15 !== 0;
 	const jumpStarting = junkbot.velocityY < 0;
 	if (inAir || jumpStarting || unaligned) {
-		debugInfoForJunkbot = "";
 		if (inAir) {
-			debugJunkbot("IN AIR - DO BALLISTIC MOTION (AND SNAPPING ON COLLISION WITH GROUND)");
+			debug("JUNKBOT", "IN AIR - DO BALLISTIC MOTION (AND SNAPPING ON COLLISION WITH GROUND)");
 		} else if (jumpStarting) {
-			debugJunkbot("JUMP - DO BALLISTIC MOTION (AND SNAPPING ON COLLISION WITH GROUND)");
+			debug("JUNKBOT", "JUMP - DO BALLISTIC MOTION (AND SNAPPING ON COLLISION WITH GROUND)");
 		} else if (unaligned) {
-			debugJunkbot("UNALIGNED - DO (BALLISTIC MOTION AND) SNAPPING TO GROUND");
+			debug("JUNKBOT", "UNALIGNED - DO (BALLISTIC MOTION AND) SNAPPING TO GROUND");
 		}
 
-		debugJunkbot("velocity x:", junkbot.velocityX);
-		debugJunkbot("velocity y:", junkbot.velocityY);
+		debug("JUNKBOT", "velocity x:", junkbot.velocityX);
+		debug("JUNKBOT", "velocity y:", junkbot.velocityY);
 		let toGoX = junkbot.velocityX;
 		let toGoY = junkbot.velocityY;
 		const dirX = Math.sign(toGoX);
@@ -2693,7 +2689,7 @@ const simulateJunkbot = (junkbot) => {
 			toGoY -= dirY;
 			const newPos = { x: junkbot.x, y: junkbot.y + dirY };
 			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
-				debugJunkbot(`collision in y direction (with ${toGoX} to go)`);
+				debug("JUNKBOT", `collision in y direction (with ${toGoX} to go)`);
 				junkbot.velocityY = 0;
 				if (dirX === 1) {
 					toGoX = 15 - junkbot.x + floor(junkbot.x, 15);
@@ -2702,7 +2698,7 @@ const simulateJunkbot = (junkbot) => {
 				}
 				break;
 			} else {
-				debugJunkbot("move y");
+				debug("JUNKBOT", "move y");
 				junkbot.x = newPos.x;
 				junkbot.y = newPos.y;
 				if (
@@ -2721,11 +2717,11 @@ const simulateJunkbot = (junkbot) => {
 			toGoX -= dirX;
 			const newPos = { x: junkbot.x + dirX, y: junkbot.y };
 			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
-				debugJunkbot(`collision in x direction (with ${toGoY} to go)`);
+				debug("JUNKBOT", `collision in x direction (with ${toGoY} to go)`);
 				junkbot.velocityX = dirX;
 				break;
 			} else {
-				debugJunkbot("move x");
+				debug("JUNKBOT", "move x");
 				junkbot.x = newPos.x;
 				junkbot.y = newPos.y;
 			}
@@ -2735,7 +2731,6 @@ const simulateJunkbot = (junkbot) => {
 		return;
 	}
 	if (junkbot.animationFrame % 5 === 3) {
-		debugInfoForJunkbot = "";
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
 		const cratesInFront = rectangleCollisionAll(posInFront.x, posInFront.y, junkbot.width, junkbot.height + 1, (otherEntity) => (
 			otherEntity.type === "crate" && (
@@ -3134,6 +3129,82 @@ const simulate = (entities) => {
 	}
 };
 
+const detectProblems = () => {
+	// active validity checking of the world
+
+	const maxEntityHeight = 100;
+	const reportedCollisions = new Map();
+	const isNum = (value) => typeof value === "number" && isFinite(value);
+	const problems = [];
+	for (const entity of entities) {
+		/* eslint-disable no-continue */
+		if (!isNum(entity.x) || !isNum(entity.y)) {
+			problems.push({ message: `Invalid position (x/y) for entity ${JSON.stringify(entity, null, "\t")}\n` });
+			continue;
+		}
+		if (entity.x % 15 !== 0) {
+			problems.push({ message: `x position not aligned to grid for entity ${JSON.stringify(entity, null, "\t")}\n` });
+			continue;
+		}
+		if (!isNum(entity.width) || !isNum(entity.height)) {
+			problems.push({ message: `Invalid size (width/height) for entity ${JSON.stringify(entity, null, "\t")}\n` });
+			continue;
+		}
+		if (entity.type === "brick" && !isNum(entity.widthInStuds)) {
+			problems.push({ message: `Invalid widthInStuds for entity ${JSON.stringify(entity, null, "\t")}\n` });
+			continue;
+		}
+		if (entity.type === "brick" && entity.width !== 15 * entity.widthInStuds) {
+			problems.push({ message: `width doesn't match widthInStuds * 15 for entity ${JSON.stringify(entity, null, "\t")}\n` });
+			continue;
+		}
+		// eslint-disable-next-line indent
+		/* eslint-enable no-continue */
+		for (const topY of Object.keys(entitiesByTopY).map(Number)) {
+			if (
+				topY < entity.y + entity.height &&
+				topY + maxEntityHeight > entity.y
+			) {
+				for (const otherEntity of entitiesByTopY[topY]) {
+					if (
+						otherEntity !== entity &&
+						(reportedCollisions.get(entity) || []).indexOf(otherEntity) === -1 &&
+						(reportedCollisions.get(otherEntity) || []).indexOf(entity) === -1
+					) {
+						if (
+							rectanglesIntersect(
+								entity.x,
+								entity.y,
+								entity.width,
+								entity.height,
+								otherEntity.x,
+								otherEntity.y,
+								otherEntity.width,
+								otherEntity.height,
+							)
+						) {
+							const worldX = (entity.x + otherEntity.x + (entity.width + otherEntity.width) / 2) / 2;
+							const worldY = (entity.y + otherEntity.y + (entity.height + otherEntity.height) / 2) / 2;
+							problems.push({ message: `${entity.type} to ${otherEntity.type} collision`, worldX, worldY });
+							if (reportedCollisions.has(entity)) {
+								reportedCollisions.get(entity).push(otherEntity);
+							} else {
+								reportedCollisions.set(entity, [otherEntity]);
+							}
+							if (reportedCollisions.has(otherEntity)) {
+								reportedCollisions.get(otherEntity).push(entity);
+							} else {
+								reportedCollisions.set(otherEntity, [entity]);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return problems;
+};
+
 let rafid;
 window.addEventListener("error", () => {
 	// so my computer doesn't freeze up from the console logging messages about repeated errors
@@ -3142,6 +3213,8 @@ window.addEventListener("error", () => {
 
 const animate = () => {
 	rafid = requestAnimationFrame(animate);
+
+	frameStartTime = Date.now();
 
 	if (!keys.ControlLeft && !keys.ControlRight && !keys.AltLeft && !keys.AltRight) {
 		if (keys.KeyW || keys.ArrowUp) {
@@ -3184,14 +3257,16 @@ const animate = () => {
 	if (!paused) {
 		const now = performance.now();
 		const timeSinceLastSimulate = now - lastSimulateTime;
-		debug("timeSinceLastSimulate", timeSinceLastSimulate);
-		if (timeSinceLastSimulate >= 1000 / desiredFPS) {
+		debug("TIME SINCE LAST SIMULATE", timeSinceLastSimulate);
+		if (timeSinceLastSimulate >= 1000 / targetFPS) {
+			debug("REMAINDER MILLISECONDS", timeSinceLastSimulate - 1000 / targetFPS);
 			simulate(entities);
 			smoothedFrameTime += (timeSinceLastSimulate - smoothedFrameTime) / fpsSmoothing;
 			lastSimulateTime = now;
 		}
 		const smoothedFPS = 1000 / smoothedFrameTime;
-		debug(`SIMULATION FPS: ${smoothedFPS.toFixed(0)} (TARGET FPS: ${desiredFPS})`);
+		debug("SIMULATION FPS", smoothedFPS.toFixed(0));
+		debug("TARGET FPS", targetFPS);
 	} else {
 		updateAccelerationStructures(); // also within simulate()
 	}
@@ -3352,107 +3427,53 @@ const animate = () => {
 
 	ctx.restore(); // world viewport
 
-	// active validity checking of the world
 	if (showDebug) {
-		const maxEntityHeight = 100;
-		const reportedCollisions = new Map();
-		const isNum = (value) => typeof value === "number" && isFinite(value);
-		for (const entity of entities) {
-			/* eslint-disable no-continue */
-			if (!isNum(entity.x) || !isNum(entity.y)) {
-				debug(`Invalid position (x/y) for entity ${JSON.stringify(entity, null, "\t")}\n`);
-				continue;
-			}
-			if (entity.x % 15 !== 0) {
-				debug(`x position not aligned to grid for entity ${JSON.stringify(entity, null, "\t")}\n`);
-				continue;
-			}
-			if (!isNum(entity.width) || !isNum(entity.height)) {
-				debug(`Invalid size (width/height) for entity ${JSON.stringify(entity, null, "\t")}\n`);
-				continue;
-			}
-			if (entity.type === "brick" && !isNum(entity.widthInStuds)) {
-				debug(`Invalid widthInStuds for entity ${JSON.stringify(entity, null, "\t")}\n`);
-				continue;
-			}
-			if (entity.type === "brick" && entity.width !== 15 * entity.widthInStuds) {
-				debug(`width doesn't match widthInStuds * 15 for entity ${JSON.stringify(entity, null, "\t")}\n`);
-				continue;
-			}
-			// eslint-disable-next-line indent
-		/* eslint-enable no-continue */
-			for (const topY of Object.keys(entitiesByTopY).map(Number)) {
-				if (
-					topY < entity.y + entity.height &&
-					topY + maxEntityHeight > entity.y
-				) {
-					for (const otherEntity of entitiesByTopY[topY]) {
-						if (
-							otherEntity !== entity &&
-							(reportedCollisions.get(entity) || []).indexOf(otherEntity) === -1 &&
-							(reportedCollisions.get(otherEntity) || []).indexOf(entity) === -1
-						) {
-							if (
-								rectanglesIntersect(
-									entity.x,
-									entity.y,
-									entity.width,
-									entity.height,
-									otherEntity.x,
-									otherEntity.y,
-									otherEntity.width,
-									otherEntity.height,
-								)
-							) {
-								let { x, y } = worldToCanvas(
-									(entity.x + otherEntity.x + (entity.width + otherEntity.width) / 2) / 2,
-									(entity.y + otherEntity.y + (entity.height + otherEntity.height) / 2) / 2,
-								);
-								x = Math.floor(x);
-								y = Math.floor(y);
-								y -= 5;
-								if (x < 0) {
-									x = 0;
-								}
-								if (y < 0) {
-									y = 0;
-								}
-								if (x > canvas.width - 150) {
-									x = canvas.width - 150;
-								}
-								if (y > canvas.height - 10) {
-									y = canvas.height - 10;
-								}
-								drawText(ctx, `${entity.type} to ${otherEntity.type} collision`, x, y, "white");
-								if (reportedCollisions.has(entity)) {
-									reportedCollisions.get(entity).push(otherEntity);
-								} else {
-									reportedCollisions.set(entity, [otherEntity]);
-								}
-								if (reportedCollisions.has(otherEntity)) {
-									reportedCollisions.get(otherEntity).push(entity);
-								} else {
-									reportedCollisions.set(otherEntity, [entity]);
-								}
-							}
-						}
-					}
-				}
+
+		debug("FONT CHARACTERS", fontChars);
+		debug("TOTAL ENTITIES", entities.length);
+		debug("VIEWPORT POSITION", `${viewport.centerX}, ${viewport.centerY}`);
+		debug("VIEWPORT SCALE", `${viewport.scale}X`);
+
+		const problems = detectProblems();
+		debug("TOTAL PROBLEMS", problems.length);
+		for (const key of Object.keys(debugs)) {
+			if (key.match(/^PROBLEM/i)) {
+				delete debugs[key];
 			}
 		}
-	}
+		for (const { worldX, worldY, message } of problems) {
+			if (worldX !== undefined) {
+				let { x, y } = worldToCanvas(worldX, worldY);
+				x = Math.floor(x);
+				y = Math.floor(y);
+				y -= 5;
+				if (x < 0) {
+					x = 0;
+				}
+				if (y < 0) {
+					y = 0;
+				}
+				if (x > canvas.width - 150) {
+					x = canvas.width - 150;
+				}
+				if (y > canvas.height - 10) {
+					y = canvas.height - 10;
+				}
+				drawText(ctx, message, x, y, "white");
+			} else {
+				debug(`PROBLEM - ${message}`);
+			}
+		}
 
-	if (showDebug) {
+		let debugText = `Toggle debug with grave accent \` / tilde ~ key.
+Lines marked with [?] may be outdated for this frame.
+
+`;
+		for (const [subject, { text, time }] of Object.entries(debugs)) {
+			debugText += `[${time === frameStartTime ? " " : "?"}] ${subject}${text ? `: ${text}` : ""}\n`;
+		}
 		const x = 1 + editorUI.offsetWidth;
-		drawText(ctx, fontChars, x, 1, "white");
-		const debugInfo = `ENTITIES: ${entities.length}
-VIEWPORT: ${viewport.centerX}, ${viewport.centerY}
-AT SCALE: ${viewport.scale}X
-
-${debugInfoForJunkbot}
-
-${debugInfoForFrame}`;
-		drawText(ctx, debugInfo, x, 50, "white");
+		drawText(ctx, debugText, x, 1, "white");
 		const hoveredBrick = brickUnderMouse(true);
 		if (dragging.length) {
 			drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
@@ -3461,7 +3482,6 @@ ${debugInfoForFrame}`;
 		} else if (hoveredBrick) {
 			drawText(ctx, `HOVERED: ${JSON.stringify(hoveredBrick, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
 		}
-		debugInfoForFrame = "";
 	}
 };
 
