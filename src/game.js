@@ -26,6 +26,13 @@ let moves = 0;
 const snapX = 15;
 const snapY = 18;//6;
 
+const desiredFPS = 15;
+let lastSimulateTime = 0;
+// The higher this value, the less the fps display will reflect temporary variations
+// A value of 1 will only keep the last value
+var fpsSmoothing = 20;
+var smoothedFrameTime = 0;
+
 let showDebug = false;
 let muted = false;
 let paused = false;
@@ -257,7 +264,6 @@ const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 		height: 4 * 18,
 		facing,
 		armored,
-		timer: 0,
 		animationFrame: 0,
 		headLoaded: false,
 	};
@@ -2495,7 +2501,7 @@ const simulateGravity = () => {
 				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot" || entity.type === "crate" || entity.type === "bin") ? 1 : 0 })
 			) {
 				// entity.y += 1;
-				entity.y += 6;
+				entity.y += 18;
 				entityMoved(entity);
 			}
 		}
@@ -2593,7 +2599,6 @@ const walk = (junkbot) => {
 };
 
 const simulateJunkbot = (junkbot) => {
-	junkbot.timer += 1;
 	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notBinOrDrop);
 	const headLoaded = aboveHead && (
 		junkbot.floating || (
@@ -2609,9 +2614,6 @@ const simulateJunkbot = (junkbot) => {
 	} else if (headLoaded && !junkbot.headLoaded && !junkbot.grabbed) {
 		junkbot.headLoaded = true;
 		playSound("headBonk");
-	}
-	if (junkbot.timer % 3 > 0) {
-		return;
 	}
 	junkbot.animationFrame += 1;
 	if (junkbot.collectingBin) {
@@ -2794,7 +2796,7 @@ const simulateJunkbot = (junkbot) => {
 };
 
 const simulateGearbot = (gearbot) => {
-	gearbot.animationFrame += 0.25;
+	gearbot.animationFrame += 1;
 	if (gearbot.animationFrame > 2) {
 		gearbot.animationFrame = 0;
 		const aheadPos = { x: gearbot.x + gearbot.facing * 15, y: gearbot.y };
@@ -2816,7 +2818,7 @@ const simulateGearbot = (gearbot) => {
 };
 
 const simulateFlybot = (flybot) => {
-	flybot.animationFrame += 0.25;
+	flybot.animationFrame += 1;
 	if (flybot.animationFrame > 2) {
 		flybot.animationFrame = 0;
 		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y };
@@ -2856,7 +2858,7 @@ const simulateEyebot = (eyebot) => {
 	}
 
 	eyebot.activeTimer -= 1;
-	eyebot.animationFrame += 0.25;
+	eyebot.animationFrame += 1;
 	if (eyebot.animationFrame % ((eyebot.activeTimer > 0) ? 1 : 2) === 0) {
 		const aheadPos = { x: eyebot.x + eyebot.facing * 15, y: eyebot.y + (eyebot.facingY || 0) * 18 };
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, eyebot, (otherEntity) => otherEntity.type !== "drop");
@@ -2878,7 +2880,7 @@ const simulateEyebot = (eyebot) => {
 };
 
 const simulateClimbbot = (climbbot) => {
-	climbbot.animationFrame += 0.25;
+	climbbot.animationFrame += 1;
 	if (climbbot.animationFrame > 6) {
 		climbbot.animationFrame = 0;
 		const asidePos = { x: climbbot.x + climbbot.facing * 15, y: climbbot.y };
@@ -2967,12 +2969,12 @@ const simulateClimbbot = (climbbot) => {
 
 const simulateDrop = (drop) => {
 	if (drop.splashing) {
-		drop.animationFrame += 0.25;
+		drop.animationFrame += 1;
 		if (drop.animationFrame > 4) {
 			remove(entities, drop);
 		}
 	} else {
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 18; i++) {
 			const underneath = entitiesByTopY[drop.y + drop.height] || [];
 			drop.y += 1;
 			entityMoved(drop);
@@ -3000,7 +3002,7 @@ const simulateDrop = (drop) => {
 };
 
 const simulatePipe = (pipe) => {
-	pipe.timer += 0.25;
+	pipe.timer += 1;
 	if (pipe.timer > 60) {
 		pipe.timer = 0;
 		entities.push(makeDrop({
@@ -3011,7 +3013,7 @@ const simulatePipe = (pipe) => {
 };
 
 const simulateJump = (jump) => {
-	jump.animationFrame += 0.5;
+	jump.animationFrame += 2;
 	if (jump.animationFrame >= 5) {
 		jump.animationFrame = 0;
 		jump.active = false;
@@ -3075,7 +3077,7 @@ const simulate = (entities) => {
 			} else if (entity.type === "drop") {
 				simulateDrop(entity);
 			} else if ("animationFrame" in entity) {
-				entity.animationFrame += 0.25;
+				entity.animationFrame += 1;
 			}
 		}
 	}
@@ -3180,7 +3182,16 @@ const animate = () => {
 	updateMouseWorldPosition();
 
 	if (!paused) {
-		simulate(entities);
+		const now = performance.now();
+		const timeSinceLastSimulate = now - lastSimulateTime;
+		debug("timeSinceLastSimulate", timeSinceLastSimulate);
+		if (timeSinceLastSimulate >= 1000 / desiredFPS) {
+			simulate(entities);
+			smoothedFrameTime += (timeSinceLastSimulate - smoothedFrameTime) / fpsSmoothing;
+			lastSimulateTime = now;
+		}
+		const smoothedFPS = 1000 / smoothedFrameTime;
+		debug(`SIMULATION FPS: ${smoothedFPS.toFixed(0)} (TARGET FPS: ${desiredFPS})`);
 	} else {
 		updateAccelerationStructures(); // also within simulate()
 	}
