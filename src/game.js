@@ -1182,7 +1182,7 @@ const drawJunkbot = (ctx, junkbot) => {
 		const t = Math.floor(junkbot.animationFrame % animLength);
 		const keyFrame = animation[t];
 		offset.x = -keyFrame.offset.x;
-		offset.y = -keyFrame.offset.y - 9;
+		offset.y = -keyFrame.offset.y;
 		frameName = keyFrame.sprite;
 	} else {
 		const t = Math.floor(junkbot.animationFrame % animLength);
@@ -1191,12 +1191,22 @@ const drawJunkbot = (ctx, junkbot) => {
 	const frame = resources.spritesAtlas[frameName];
 	const [left, top, width, height] = frame.bounds;
 	// const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
-	const alignRight = !(animName.match(/dead|die|eat/) || junkbot.facing === -1);
-	if (alignRight) {
-		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x - width + 41 + offset.x, junkbot.y + junkbot.height - 1 - height + offset.y, width, height);
-	} else {
-		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x + offset.x, junkbot.y + junkbot.height - 1 - height + offset.y, width, height);
-	}
+	// const alignRight = !(animName.match(/dead|die|eat/) || junkbot.facing === -1);
+	// if (alignRight) {
+		// ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x - width + 41 + offset.x, junkbot.y + junkbot.height - 1 - height + offset.y, width, height);
+	// } else {
+	ctx.drawImage(
+		resources.sprites,
+		left,
+		top,
+		width,
+		height,
+		junkbot.x + offset.x,
+		junkbot.y + junkbot.height - 1 - height + offset.y,
+		width,
+		height
+	);
+	// }
 };
 
 const selectionHilightCanvases = {};
