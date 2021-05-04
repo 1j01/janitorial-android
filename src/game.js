@@ -1173,20 +1173,32 @@ const drawJunkbot = (ctx, junkbot) => {
 			animName = `shield_${animName}`;
 		}
 	}
-	const t = Math.floor(junkbot.animationFrame % animLength);
-	let frame = 0;
-	const animation = resources.junkbotAnimations.
-	for (let i = 0; i < a
-	const frameName = animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`;
+	// let frame = 0;
+	const animation = resources.junkbotAnimations[animName];
+	let frameName;
+	let offset = { x: 0, y: 0 };
+	if (animation) {
+		const t = Math.floor(junkbot.animationFrame % animLength);
+		let i = 0;
+		let keyFrame;
+		while (i < animation.length && i <= t) {
+			keyFrame = animation[i];
+			offset = keyFrame.offset;
+			i += keyFrame.ticks;
+		}
+		frameName = keyFrame.sprite;
+	} else {
+		const t = Math.floor(junkbot.animationFrame % animLength);
+		frameName = animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + t}`;
+	}
 	const frame = resources.spritesAtlas[frameName];
 	const [left, top, width, height] = frame.bounds;
-	const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
+	// const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
 	const alignRight = !(animName.match(/dead|die|eat/) || junkbot.facing === -1);
 	if (alignRight) {
-		left += resources.junkbotAnimations["junkbot-walk-left"]
-		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
+		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x - width + 41 + offset.x, junkbot.y + junkbot.height - 1 - height + offset.y, width, height);
 	} else {
-		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
+		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x + offset.x, junkbot.y + junkbot.height - 1 - height + offset.y, width, height);
 	}
 };
 
