@@ -1186,7 +1186,7 @@ const drawJunkbot = (ctx, junkbot) => {
 		animLength = animation.length;
 		const t = Math.floor(junkbot.animationFrame % animLength);
 		const keyFrame = animation[t];
-		offset.x = -keyFrame.offset.x;
+		offset.x = -keyFrame.offset.x * junkbot.facing;
 		offset.y = -keyFrame.offset.y;
 		frameName = keyFrame.sprite;
 	} else {
@@ -2754,7 +2754,7 @@ const simulateJunkbot = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	if (junkbot.animationFrame % 7 === 0) {
+	if (junkbot.animationFrame % 7 === 6) {
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
 		const cratesInFront = rectangleCollisionAll(posInFront.x, posInFront.y, junkbot.width, junkbot.height + 1, (otherEntity) => (
 			otherEntity.type === "crate" && (
