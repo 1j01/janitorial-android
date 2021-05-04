@@ -560,6 +560,7 @@ const resourcePaths = {
 	backgroundsUndercoverAtlas: "images/spritesheets/Undercover Exclusive/backgrounds.json",
 	// menusUndercover: "images/spritesheets/Undercover Exclusive/menus.png",
 	// menusUndercoverAtlas: "images/spritesheets/Undercover Exclusive/menus.json",
+	junkbotAnimations: "junkbot-animations.json",
 	font: "images/font.png",
 	turn: "audio/sound-effects/turn1.ogg",
 	blockPickUp: "audio/sound-effects/blockpickup.ogg",
@@ -866,8 +867,8 @@ const loadResources = async (resourcePathsByID) => {
 		if (path.match(/spritesheets\/.*\.json$/i)) {
 			return loadAtlasJSON(path).then((atlas) => [id, atlas]);
 		} else if (path.match(/\.json$/i)) {
-			// return loadJSON(path).then((data) => [id, data]);
-			return loadTextFile(path).then((json) => [id, json]);
+			return loadJSON(path).then((data) => [id, data]);
+			// return loadTextFile(path).then((json) => [id, json]);
 		} else if (path.match(/level.listing\.txt$/i)) {
 			return loadTextFile(path).then((text) => [id, text.trim().split(/\r?\n/g)]);
 		} else if (path.match(/levels\/.*\.txt$/i)) {
@@ -1149,7 +1150,7 @@ const drawEyebot = (ctx, entity) => {
 
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
-	let animLength = 10;
+	let animLength = 14;
 	if (junkbot.dead) {
 		animName = "dead";
 	} else if (junkbot.dyingFromWater) {
@@ -1172,15 +1173,34 @@ const drawJunkbot = (ctx, junkbot) => {
 			animName = `shield_${animName}`;
 		}
 	}
-	const frameIndex = Math.floor(junkbot.animationFrame % animLength);
-	const frame = resources.spritesAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
+	// let frame = 0;
+	const animation = resources.junkbotAnimations[animName];
+	let frameName;
+	let offset = { x: 0, y: 0 };
+	if (animation) {
+		const t = Math.floor(junkbot.animationFrame % animLength);
+		let i = 0;
+		let keyFrame;
+		while (i < animation.length && i <= t) {
+			keyFrame = animation[i];
+			// offset = keyFrame.offset;
+			offset.x = keyFrame.offset.x;
+			offset.y = keyFrame.offset.y + 9;
+			i += keyFrame.ticks;
+		}
+		frameName = keyFrame.sprite;
+	} else {
+		const t = Math.floor(junkbot.animationFrame % animLength);
+		frameName = animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + t}`;
+	}
+	const frame = resources.spritesAtlas[frameName];
 	const [left, top, width, height] = frame.bounds;
-	const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
+	// const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
 	const alignRight = !(animName.match(/dead|die|eat/) || junkbot.facing === -1);
 	if (alignRight) {
-		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
+		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x - width + 41 + offset.x, junkbot.y + junkbot.height - 1 - height + offset.y, width, height);
 	} else {
-		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
+		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x + offset.x, junkbot.y + junkbot.height - 1 - height + offset.y, width, height);
 	}
 };
 
