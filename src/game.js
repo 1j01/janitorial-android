@@ -2745,7 +2745,7 @@ const simulateJunkbot = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	if (junkbot.animationFrame % 5 === 3) {
+	if (junkbot.animationFrame % 7 === 0) {
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
 		const cratesInFront = rectangleCollisionAll(posInFront.x, posInFront.y, junkbot.width, junkbot.height + 1, (otherEntity) => (
 			otherEntity.type === "crate" && (
