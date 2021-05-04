@@ -1150,7 +1150,7 @@ const drawEyebot = (ctx, entity) => {
 
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
-	let animLength = 10;
+	let animLength = 14;
 	if (junkbot.dead) {
 		animName = "dead";
 	} else if (junkbot.dyingFromWater) {
@@ -1183,7 +1183,9 @@ const drawJunkbot = (ctx, junkbot) => {
 		let keyFrame;
 		while (i < animation.length && i <= t) {
 			keyFrame = animation[i];
-			offset = keyFrame.offset;
+			// offset = keyFrame.offset;
+			offset.x = keyFrame.offset.x;
+			offset.y = keyFrame.offset.y + 9;
 			i += keyFrame.ticks;
 		}
 		frameName = keyFrame.sprite;
