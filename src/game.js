@@ -27,7 +27,12 @@ let moves = 0;
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
 
-const targetFPS = 15;
+// const targetFPS = 15;
+let targetFPS = 15;
+addEventListener("mousemove", (event) => {
+	targetFPS = event.clientX / window.innerWidth * 15;
+});
+
 let lastSimulateTime = 0;
 // The higher this value, the less the fps display will reflect temporary variations
 // A value of 1 will only keep the last value
