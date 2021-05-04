@@ -14,6 +14,7 @@ const viewport = { centerX: 0, centerY: 0, scale: 1 };
 let keys = {};
 let pointerEventCache = [];
 let prevPointerDist = -1;
+const enableMarginPanning = false;
 
 let entities = [];
 let wind = [];
@@ -3248,7 +3249,7 @@ const animate = () => {
 			viewport.centerX += 20;
 		}
 	}
-	if (pointerEventCache.length < 2) {
+	if (pointerEventCache.length < 2 && enableMarginPanning) {
 		const panMarginSize = Math.min(innerWidth, innerHeight) * 0.07;
 		const panFromMarginSpeed = 10 * document.hasFocus();
 		if (mouse.y < panMarginSize) {
