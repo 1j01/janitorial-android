@@ -2,7 +2,20 @@
 	"walk_l": [
 		{
 			"sprite": "minifig_walk_l_1",
-			"ticks": 3,
+			"offset": {
+				"x": 0,
+				"y": -9
+			}
+		},
+		{
+			"sprite": "minifig_walk_l_1",
+			"offset": {
+				"x": 0,
+				"y": -9
+			}
+		},
+		{
+			"sprite": "minifig_walk_l_1",
 			"offset": {
 				"x": 0,
 				"y": -9
@@ -10,7 +23,6 @@
 		},
 		{
 			"sprite": "minifig_walk_l_2",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -9
@@ -18,7 +30,6 @@
 		},
 		{
 			"sprite": "minifig_walk_l_3",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -9
@@ -26,7 +37,6 @@
 		},
 		{
 			"sprite": "minifig_walk_l_4",
-			"ticks": 1,
 			"offset": {
 				"x": -6,
 				"y": -11
@@ -35,7 +45,6 @@
 		{
 			"emit_event": true,
 			"sprite": "minifig_walk_l_5",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -9
@@ -43,7 +52,20 @@
 		},
 		{
 			"sprite": "minifig_walk_l_6",
-			"ticks": 3,
+			"offset": {
+				"x": 0,
+				"y": -9
+			}
+		},
+		{
+			"sprite": "minifig_walk_l_6",
+			"offset": {
+				"x": 0,
+				"y": -9
+			}
+		},
+		{
+			"sprite": "minifig_walk_l_6",
 			"offset": {
 				"x": 0,
 				"y": -9
@@ -51,7 +73,6 @@
 		},
 		{
 			"sprite": "minifig_walk_l_7",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -9
@@ -59,7 +80,6 @@
 		},
 		{
 			"sprite": "minifig_walk_l_8",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -9
@@ -67,7 +87,6 @@
 		},
 		{
 			"sprite": "minifig_walk_l_9",
-			"ticks": 1,
 			"offset": {
 				"x": -5,
 				"y": -11
@@ -76,7 +95,6 @@
 		{
 			"emit_event": true,
 			"sprite": "minifig_walk_l_10",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -9
@@ -86,7 +104,20 @@
 	"walk_r": [
 		{
 			"sprite": "minifig_walk_r_1",
-			"ticks": 3,
+			"offset": {
+				"x": 0,
+				"y": -7
+			}
+		},
+		{
+			"sprite": "minifig_walk_r_1",
+			"offset": {
+				"x": 0,
+				"y": -7
+			}
+		},
+		{
+			"sprite": "minifig_walk_r_1",
 			"offset": {
 				"x": 0,
 				"y": -7
@@ -94,7 +125,6 @@
 		},
 		{
 			"sprite": "minifig_walk_r_2",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -7
@@ -102,7 +132,6 @@
 		},
 		{
 			"sprite": "minifig_walk_r_3",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -8
@@ -110,7 +139,6 @@
 		},
 		{
 			"sprite": "minifig_walk_r_4",
-			"ticks": 1,
 			"offset": {
 				"x": -3,
 				"y": -10
@@ -119,7 +147,6 @@
 		{
 			"emit_event": true,
 			"sprite": "minifig_walk_r_5",
-			"ticks": 1,
 			"offset": {
 				"x": -8,
 				"y": -7
@@ -127,7 +154,20 @@
 		},
 		{
 			"sprite": "minifig_walk_r_6",
-			"ticks": 3,
+			"offset": {
+				"x": 0,
+				"y": -7
+			}
+		},
+		{
+			"sprite": "minifig_walk_r_6",
+			"offset": {
+				"x": 0,
+				"y": -7
+			}
+		},
+		{
+			"sprite": "minifig_walk_r_6",
 			"offset": {
 				"x": 0,
 				"y": -7
@@ -135,7 +175,6 @@
 		},
 		{
 			"sprite": "minifig_walk_r_7",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -7
@@ -143,7 +182,6 @@
 		},
 		{
 			"sprite": "minifig_walk_r_8",
-			"ticks": 1,
 			"offset": {
 				"x": 0,
 				"y": -8
@@ -151,7 +189,6 @@
 		},
 		{
 			"sprite": "minifig_walk_r_9",
-			"ticks": 1,
 			"offset": {
 				"x": -7,
 				"y": -8
@@ -160,7 +197,6 @@
 		{
 			"emit_event": true,
 			"sprite": "minifig_walk_r_10",
-			"ticks": 1,
 			"offset": {
 				"x": -11,
 				"y": -7

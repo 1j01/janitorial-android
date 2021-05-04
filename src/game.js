@@ -1176,18 +1176,13 @@ const drawJunkbot = (ctx, junkbot) => {
 	// let frame = 0;
 	const animation = resources.junkbotAnimations[animName];
 	let frameName;
-	let offset = { x: 0, y: 0 };
+	const offset = { x: 0, y: 0 };
 	if (animation) {
+		animLength = animation.length;
 		const t = Math.floor(junkbot.animationFrame % animLength);
-		let i = 0;
-		let keyFrame;
-		while (i < animation.length && i <= t) {
-			keyFrame = animation[i];
-			// offset = keyFrame.offset;
-			offset.x = keyFrame.offset.x;
-			offset.y = keyFrame.offset.y + 9;
-			i += keyFrame.ticks;
-		}
+		const keyFrame = animation[t];
+		offset.x = -keyFrame.offset.x;
+		offset.y = -keyFrame.offset.y - 9;
 		frameName = keyFrame.sprite;
 	} else {
 		const t = Math.floor(junkbot.animationFrame % animLength);
