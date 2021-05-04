@@ -560,6 +560,7 @@ const resourcePaths = {
 	backgroundsUndercoverAtlas: "images/spritesheets/Undercover Exclusive/backgrounds.json",
 	// menusUndercover: "images/spritesheets/Undercover Exclusive/menus.png",
 	// menusUndercoverAtlas: "images/spritesheets/Undercover Exclusive/menus.json",
+	junkbotAnimations: "junkbot-animations.json",
 	font: "images/font.png",
 	turn: "audio/sound-effects/turn1.ogg",
 	blockPickUp: "audio/sound-effects/blockpickup.ogg",
@@ -866,8 +867,8 @@ const loadResources = async (resourcePathsByID) => {
 		if (path.match(/spritesheets\/.*\.json$/i)) {
 			return loadAtlasJSON(path).then((atlas) => [id, atlas]);
 		} else if (path.match(/\.json$/i)) {
-			// return loadJSON(path).then((data) => [id, data]);
-			return loadTextFile(path).then((json) => [id, json]);
+			return loadJSON(path).then((data) => [id, data]);
+			// return loadTextFile(path).then((json) => [id, json]);
 		} else if (path.match(/level.listing\.txt$/i)) {
 			return loadTextFile(path).then((text) => [id, text.trim().split(/\r?\n/g)]);
 		} else if (path.match(/levels\/.*\.txt$/i)) {
@@ -1172,12 +1173,17 @@ const drawJunkbot = (ctx, junkbot) => {
 			animName = `shield_${animName}`;
 		}
 	}
-	const frameIndex = Math.floor(junkbot.animationFrame % animLength);
-	const frame = resources.spritesAtlas[animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`];
+	const t = Math.floor(junkbot.animationFrame % animLength);
+	let frame = 0;
+	const animation = resources.junkbotAnimations.
+	for (let i = 0; i < a
+	const frameName = animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + frameIndex}`;
+	const frame = resources.spritesAtlas[frameName];
 	const [left, top, width, height] = frame.bounds;
 	const fwd = (animName.match(/walk/) && frameIndex === 3) * (junkbot.facing === 1 ? 3 : -3);
 	const alignRight = !(animName.match(/dead|die|eat/) || junkbot.facing === -1);
 	if (alignRight) {
+		left += resources.junkbotAnimations["junkbot-walk-left"]
 		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x - width + 41 + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
 	} else {
 		ctx.drawImage(resources.sprites, left, top, width, height, junkbot.x + fwd, junkbot.y + junkbot.height - 1 - height, width, height);
