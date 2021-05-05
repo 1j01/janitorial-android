@@ -3349,10 +3349,12 @@ const animate = () => {
 	const hovered = dragging.length ? [] : possibleGrabs();
 
 	if (dragging.length) {
-		for (const brick of dragging) {
-			brick.x = floor(mouse.worldX, snapX) + brick.grabOffset.x;
-			brick.y = floor(mouse.worldY, snapY) + brick.grabOffset.y;
-			entityMoved(brick);
+		if (isFinite(mouse.worldX) && isFinite(mouse.worldY)) {
+			for (const brick of dragging) {
+				brick.x = floor(mouse.worldX, snapX) + brick.grabOffset.x;
+				brick.y = floor(mouse.worldY, snapY) + brick.grabOffset.y;
+				entityMoved(brick);
+			}
 		}
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
 	} else if (hovered.length >= 2) {
