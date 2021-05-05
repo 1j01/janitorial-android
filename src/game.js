@@ -1186,7 +1186,7 @@ const drawJunkbot = (ctx, junkbot) => {
 		animLength = animation.length;
 		const t = Math.floor(junkbot.animationFrame % animLength);
 		const keyFrame = animation[t];
-		offset.x = -keyFrame.offset.x * junkbot.facing;
+		offset.x = -keyFrame.offset.x;
 		offset.y = -keyFrame.offset.y;
 		frameName = keyFrame.sprite;
 	} else {
