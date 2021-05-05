@@ -1166,7 +1166,7 @@ const drawEyebot = (ctx, entity) => {
 
 const drawJunkbot = (ctx, junkbot) => {
 	let animName;
-	let animLength = 14;
+	let animLength = 10; // should be always set later
 	if (junkbot.dead) {
 		animName = "dead";
 	} else if (junkbot.dyingFromWater) {
@@ -2806,7 +2806,7 @@ const simulateJunkbot = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	if (junkbot.animationFrame % 7 === 6) {
+	if (junkbot.animationFrame % 5 === 4) {
 		const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
 		const cratesInFront = rectangleCollisionAll(posInFront.x, posInFront.y, junkbot.width, junkbot.height + 1, (otherEntity) => (
 			otherEntity.type === "crate" && (
