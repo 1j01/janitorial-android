@@ -67,16 +67,15 @@ const debugWorldSpaceRect = (x, y, width, height) => {
 	}
 };
 // compare junkbot's animations with a video of the original game
-const testVideo = document.createElement("video");
-testVideo.src = "junkbot-test-video.mp4";
-testVideo.loop = true;
-testVideo.muted = true;
-testVideo.currentTime = 2;
-try {
-	testVideo.currentTime = parseFloat(localStorage.comparisonVideoTime);
-} catch (e) { }
-// testVideo.play();
-let aJunkbot;
+// const testVideo = document.createElement("video");
+// testVideo.src = "junkbot-test-video.mp4";
+// testVideo.loop = true;
+// testVideo.muted = true;
+// testVideo.currentTime = 2;
+// try {
+// 	testVideo.currentTime = parseFloat(localStorage.comparisonVideoTime);
+// } catch (e) { }
+// let aJunkbot;
 
 let messageBox;
 let messageBoxContainer;
@@ -1217,9 +1216,9 @@ const drawJunkbot = (ctx, junkbot) => {
 		width,
 		height
 	);
-	if (showDebug) {
-		drawText(ctx, frameName, junkbot.x, junkbot.y + 20, "white");
-	}
+	// if (showDebug) {
+	// 	drawText(ctx, frameName, junkbot.x, junkbot.y + 20, "white");
+	// }
 };
 
 const selectionHilightCanvases = {};
@@ -1280,7 +1279,7 @@ const drawEntity = (ctx, entity, hilight) => {
 			drawBrick(ctx, entity);
 			break;
 		case "junkbot":
-			aJunkbot = entity;
+			// aJunkbot = entity;
 			drawJunkbot(ctx, entity);
 			break;
 		case "gearbot":
@@ -2045,23 +2044,23 @@ addEventListener("keydown", (event) => {
 				toggleShowDebug();
 			}
 			break;
-		case ",":
-			testVideo.currentTime -= 0.02;
-			localStorage.comparisonVideoTime = testVideo.currentTime;
-			break;
-		case ".":
-			testVideo.currentTime += 0.02;
-			localStorage.comparisonVideoTime = testVideo.currentTime;
-			break;
-		case ";":
-			aJunkbot.animationFrame -= 1;
-			if (aJunkbot.animationFrame < 0) {
-				aJunkbot.animationFrame = 0;
-			}
-			break;
-		case "'":
-			aJunkbot.animationFrame += 1;
-			break;
+		// case ",":
+		// 	testVideo.currentTime -= 0.02;
+		// 	localStorage.comparisonVideoTime = testVideo.currentTime;
+		// 	break;
+		// case ".":
+		// 	testVideo.currentTime += 0.02;
+		// 	localStorage.comparisonVideoTime = testVideo.currentTime;
+		// 	break;
+		// case ";":
+		// 	aJunkbot.animationFrame -= 1;
+		// 	if (aJunkbot.animationFrame < 0) {
+		// 		aJunkbot.animationFrame = 0;
+		// 	}
+		// 	break;
+		// case "'":
+		// 	aJunkbot.animationFrame += 1;
+		// 	break;
 		case "F":
 			if (!event.repeat) {
 				flipSelected();
@@ -3462,11 +3461,11 @@ const animate = () => {
 
 	const placeable = canRelease();
 
-	ctx.save();
-	ctx.translate(-6.5, -15);
-	ctx.scale(0.206, 0.206);
-	ctx.drawImage(testVideo, 0, 0);
-	ctx.restore();
+	// ctx.save();
+	// ctx.translate(-6.5, -15);
+	// ctx.scale(0.206, 0.206);
+	// ctx.drawImage(testVideo, 0, 0);
+	// ctx.restore();
 
 	for (const entity of entities) {
 		if (entity.grabbed) {
