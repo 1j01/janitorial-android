@@ -27,7 +27,7 @@ let moves = 0;
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
 
-const targetFPS = 15;
+const targetFPS = 18;
 // let targetFPS = 15;
 // addEventListener("mousemove", (event) => {
 // 	targetFPS = event.clientX / window.innerWidth * 15;
