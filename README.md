@@ -78,6 +78,10 @@ Partially done:
 		<td>Delete selected</td>
 	</tr>
 	<tr>
+		<td><kbd>F</kbd></td>
+		<td>Flip selected horizontally</td>
+	</tr>
+	<tr>
 		<td><kbd>Ctrl+Z</kbd></td>
 		<td>Undo</td>
 	</tr>

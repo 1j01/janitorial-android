@@ -1770,6 +1770,22 @@ const selectAll = () => {
 		entity.selected = true;
 	});
 };
+const flipSelected = () => {
+	if (!editing) {
+		return;
+	}
+	// TODO: flip selection overall? not just facing directions?
+	if (entities.some((entity) => entity.selected && "facing" in entity)) {
+		undoable(() => {
+			for (const entity of entities) {
+				if (entity.selected && "facing" in entity) {
+					entity.facing = -entity.facing;
+				}
+			}
+		});
+		playSound("turn");
+	}
+};
 const deleteSelected = () => {
 	if (!editing) {
 		return;
@@ -2045,6 +2061,11 @@ addEventListener("keydown", (event) => {
 			break;
 		case "'":
 			aJunkbot.animationFrame += 1;
+			break;
+		case "F":
+			if (!event.repeat) {
+				flipSelected();
+			}
 			break;
 		case "DELETE":
 			if (!event.repeat) {
