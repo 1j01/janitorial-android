@@ -1198,6 +1198,9 @@ const drawJunkbot = (ctx, junkbot) => {
 		const keyFrame = animation[t];
 		offset = keyFrame.offset;
 		frameName = keyFrame.sprite;
+		if (junkbot.isPreviewEntity && offset.x >= 5) {
+			offset = { x: 5, y: offset.y };
+		}
 	} else {
 		const t = Math.floor(junkbot.animationFrame % animLength);
 		frameName = animName === "dead" ? "minifig_dead" : `minifig_${animName}_${1 + t}`;
@@ -3623,6 +3626,7 @@ const initUI = () => {
 			editorUI.style.cursor = "";
 		});
 		let previewEntity = getEntityCopy();
+		previewEntity.isPreviewEntity = true;
 		buttonCanvas.width = previewEntity.width + 15 * 1;
 		buttonCanvas.height = previewEntity.height + 18 * 2;
 		const drawPreview = () => {
@@ -3639,10 +3643,9 @@ const initUI = () => {
 			buttonCtx.restore();
 		};
 		drawPreview();
-		let rafid;
+		let previewAnimIntervalID;
 		button.addEventListener("mouseenter", () => {
-			const animate = () => {
-				rafid = requestAnimationFrame(animate);
+			previewAnimIntervalID = setInterval(() => {
 				const prev = {
 					x: previewEntity.x,
 					y: previewEntity.y,
@@ -3677,11 +3680,10 @@ const initUI = () => {
 				previewEntity.x = prev.x;
 				previewEntity.y = prev.y;
 				drawPreview();
-			};
-			animate();
+			}, 1000 / 15);
 		});
 		button.addEventListener("mouseleave", () => {
-			cancelAnimationFrame(rafid);
+			clearInterval(previewAnimIntervalID);
 			previewEntity = getEntityCopy();
 			drawPreview();
 		});
