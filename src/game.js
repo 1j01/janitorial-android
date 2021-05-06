@@ -1206,6 +1206,9 @@ const drawJunkbot = (ctx, junkbot) => {
 		width,
 		height
 	);
+	if (showDebug) {
+		drawText(ctx, frameName, junkbot.x, junkbot.y + 20, "white");
+	}
 };
 
 const selectionHilightCanvases = {};
