@@ -3086,7 +3086,7 @@ const simulatePipe = (pipe) => {
 };
 
 const simulateJump = (jump) => {
-	jump.animationFrame += 2;
+	jump.animationFrame += 1;
 	if (jump.animationFrame >= 5) {
 		jump.animationFrame = 0;
 		jump.active = false;
@@ -3645,6 +3645,7 @@ const initUI = () => {
 		drawPreview();
 		let previewAnimIntervalID;
 		button.addEventListener("mouseenter", () => {
+			previewEntity.active = true; // for jumps
 			previewAnimIntervalID = setInterval(() => {
 				const prev = {
 					x: previewEntity.x,
