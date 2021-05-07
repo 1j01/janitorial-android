@@ -558,6 +558,42 @@ const tests = [
 	},
 	{
 		levelType: "junkbot",
+		name: "Step Down Onto Falling Crate",
+		expect: "to win", // maybe??
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Death From Below",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Flying Death",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Crate Fall Onto Offset Blocks",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Climbbot Fall Onto Offset Blocks",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Hunter-Killer Climbbot (Fall Onto Offset Blocks)",
+		expect: "to lose", // test will probably need updating when implementing this new logic
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
 		name: "Ally",
 		expect: "to win",
 		timeSteps: 1000,
@@ -4000,7 +4036,8 @@ const runTests = async () => {
 			const li = document.createElement("li");
 			const emoji = {
 				"passed": "✅",
-				"failed": "❌", // ⚠️
+				"failed": "❌",
+				"failed-to-load": "⚠️", // ⚠️🗺️❌🌐📶
 				"pending": "🌙", // 🛏️😴💤🧍🔜
 				"running": "🏃", // 🦿🤖🚧🔛
 			}[test.state];
@@ -4024,10 +4061,18 @@ const runTests = async () => {
 		if (!testing) {
 			break;
 		}
-		if (test.levelType === "json") {
-			deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
-		} else {
-			initLevel(await loadLevelFromTextFile(`levels/test-cases/${test.name}.txt`));
+		try {
+			if (test.levelType === "json") {
+				deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
+			} else {
+				initLevel(await loadLevelFromTextFile(`levels/test-cases/${test.name}.txt`));
+			}
+		} catch (error) {
+			test.state = "failed-to-load";
+			test.message = `Failed to load test level: ${error}`;
+			render();
+			// eslint-disable-next-line no-continue
+			continue;
 		}
 		editorLevelState = serializeToJSON(currentLevel);
 
