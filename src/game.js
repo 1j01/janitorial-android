@@ -2623,16 +2623,33 @@ addEventListener("pointerup", () => {
 	}
 });
 
+// #@: simulateCrate, simulateBlock, simulateBrick, falling behavior
 const simulateGravity = () => {
 	for (const entity of entities) {
 		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "junkbot" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
+			// if not settled
 			if (
 				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
 				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot" || entity.type === "crate" || entity.type === "bin") ? 1 : 0 })
 			) {
-				// entity.y += 1;
-				entity.y += 18;
-				entityMoved(entity);
+				// first try a step of 18 (1 grid cell) downwards,
+				// then reign it in if there's a collision
+				const cellDownY = entity.y + 18;
+				const notDrop = (entity) => entity.type !== "drop";
+				// find highest up collision (if any)
+				const step = entityCollisionAll(entity.x, cellDownY + 1, entity, notDrop)
+					.sort((a, b) => a.y - b.y)[0];
+				debug("GRAVITY COLLISION", `step: ${JSON.stringify(step, null, "\t")}`);
+				if (
+					cellDownY - entity.y <= 18 &&
+					cellDownY - entity.y > 0 &&
+					step &&
+					!entityCollisionTest(entity.x, cellDownY, entity, notDrop)
+				) {
+					entity.y = cellDownY;
+					entityMoved(entity);
+					return;
+				}
 			}
 		}
 	}
@@ -2703,12 +2720,14 @@ const walk = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	let step = entityCollisionAll(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropOrEnemyBot).sort((a, b) => a.y - b.y)[0];
+	let step = entityCollisionAll(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropOrEnemyBot)
+		.sort((a, b) => a.y - b.y)[0];
 	if (step) {
 		// can we step down?
 		// debug("JUNKBOT", `step: ${JSON.stringify(step, null, "\t")}`);
 		const posStepDown = { x: posInFront.x, y: step.y - junkbot.height };
-		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropOrEnemyBot).sort((a, b) => a.y - b.y)[0];
+		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropOrEnemyBot)
+			.sort((a, b) => a.y - b.y)[0];
 		// debug("JUNKBOT", `step: ${JSON.stringify(step, null, "\t")}`);
 		if (
 			posStepDown.y - junkbot.y <= 18 &&
