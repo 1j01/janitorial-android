@@ -1368,8 +1368,23 @@ const entityMoved = (entity) => {
 
 let winLoseState = "";
 const winOrLose = () => {
-	if (entities.some((entity) => entity.type === "junkbot" && !entity.dying && !entity.dead)) {
-		if (!entities.some((entity) => entity.type === "bin") && entities.every((entity) => !entity.collectingBin)) {
+	// Cases:
+	// ("while collecting" and "dying" refer to playing the animations)
+	// - Alive while collecting last bin: "" (winING, probably)
+	// - Dying while collecting last bin: "" (losING)
+	// - Dead while collecting last bin: "lose" (shouldn't happen maybe though, if collectingBin is reset)
+	// - Alive after collecting last bin: "win"
+	// - Dying after collecting last bin: (should already be "win" and paused)
+	// - Dead after collecting last bin: "lose"
+	// - Dead, bins left to collect: "lose"
+	// - Dying, bins left to collect: "" (losING)
+	// - Alive, bins left to collect: "" (normal state)
+	if (entities.some((entity) => entity.type === "junkbot" && !entity.dead)) {
+		if (
+			entities.some((entity) => entity.type === "junkbot" && !entity.dead && !entity.dying) &&
+			!entities.some((entity) => entity.type === "bin") &&
+			entities.every((entity) => !entity.collectingBin)
+		) {
 			return "win";
 		} else {
 			return "";
