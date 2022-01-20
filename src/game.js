@@ -979,7 +979,10 @@ const playSound = (soundName, playbackRate = 1, cutOffFromEndRatio = 0) => {
 };
 
 const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}`;
-const fontCharW = "55555555355555555555555555355555555551221113331355353525531155332233".split("").map((digit) => Number(digit));
+const fontCharW = "555555553555555555555555553555555555512211133313553535_255311_55332233"
+	.replace(/_/g, "")
+	.split("")
+	.map((digit) => Number(digit));
 const fontCharX = [];
 for (let x = 0, i = 0; i < fontChars.length; i++) {
 	fontCharX.push(x);
