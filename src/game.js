@@ -1611,8 +1611,7 @@ const loadLevelFromLevelSelect = async () => {
 	const option = levelSelect.options[levelSelect.selectedIndex];
 	const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
 	if (levelSelect.value !== "Custom World") {
-		const test = optgroup.value === "Test Cases" && tests.find((test) => test.name === levelSelect.value);
-		const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.${(test && test.levelType === "json") ? "json" : "txt"}`;
+		const fileName = `${levelSelect.value.replace(/[:?]/g, "")}.txt`;
 		const game = optgroup ? optgroup.value : "Custom";
 		const folder = {
 			"Junkbot Undercover": "levels/Undercover Exclusive",
@@ -1621,11 +1620,7 @@ const loadLevelFromLevelSelect = async () => {
 		}[game];
 		// console.log("loading:", option.value, { option, optgroup, game });
 		try {
-			if (test.levelType === "json") {
-				deserializeJSON(await loadTextFile(`${folder}/${fileName}`));
-			} else {
-				initLevel(await loadLevelFromTextFile(`${folder}/${fileName}`, { game }));
-			}
+			initLevel(await loadLevelFromTextFile(`${folder}/${fileName}`, { game }));
 			editorLevelState = serializeToJSON(currentLevel);
 		} catch (error) {
 			showMessageBox(`Failed to load level:\n\n${error}`);
