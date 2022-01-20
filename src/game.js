@@ -448,9 +448,9 @@ const makePipe = ({ x, y }) => {
 		fixed: true,
 	};
 };
-const makeDrop = ({ x, y }) => {
+const makeDroplet = ({ x, y }) => {
 	return {
-		type: "drop",
+		type: "droplet",
 		x,
 		y,
 		width: 2 * 15,
@@ -890,7 +890,7 @@ const loadLevelFromText = (levelData, game) => {
 				} else if (typeName === "haz_slickpipe") {
 					entities.push(makePipe({ x, y }));
 				} else if (typeName === "haz_droplet") { // made up / unofficial
-					entities.push(makeDrop({ x, y }));
+					entities.push(makeDroplet({ x, y }));
 				} else {
 					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
 				}
@@ -1177,7 +1177,7 @@ const drawPipe = (ctx, entity) => {
 	}
 };
 
-const drawDrop = (ctx, entity) => {
+const drawDroplet = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.splashing ? entity.animationFrame : 0);
 	const frame = resources.spritesAtlas[`drip_${entity.splashing ? "splashing" : "falling"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
@@ -1375,8 +1375,8 @@ const drawEntity = (ctx, entity, hilight) => {
 		case "pipe":
 			drawPipe(ctx, entity);
 			break;
-		case "drop":
-			drawDrop(ctx, entity);
+		case "droplet":
+			drawDroplet(ctx, entity);
 			break;
 		case "shield":
 			drawShield(ctx, entity);
@@ -1494,7 +1494,7 @@ const serializeLevel = (level) => {
 				switch: "haz_slickswitch",
 				teleport: "haz_slickteleport",
 				pipe: "haz_slickpipe",
-				drop: "haz_droplet", // made up / unofficial
+				droplet: "haz_droplet", // made up / unofficial
 			}[entity.type];
 		}
 		if (type) {
@@ -2642,17 +2642,17 @@ addEventListener("pointerup", () => {
 // #@: simulateCrate, simulateBlock, simulateBrick, falling behavior
 const simulateGravity = () => {
 	for (const entity of entities) {
-		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "drop" && entity.type !== "junkbot" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
+		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "droplet" && entity.type !== "junkbot" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
 			// if not settled
 			if (
 				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
 				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot" || entity.type === "crate" || entity.type === "bin") ? 1 : 0 })
 			) {
-				const notDrop = (entity) => entity.type !== "drop";
+				const notDroplet = (entity) => entity.type !== "droplet";
 
 				// just for dinosaur test case level,
 				// where there are some blocks meant to stick inside the ceiling
-				if (entityCollisionTest(entity.x, entity.y, entity, notDrop)) {
+				if (entityCollisionTest(entity.x, entity.y, entity, notDroplet)) {
 					debug("GRAVITY COLLISION", `${entity.type} stuck in ground at ${entity.x}, ${entity.y}`);
 					return;
 				}
@@ -2661,7 +2661,7 @@ const simulateGravity = () => {
 				// then reign it in if there's a collision
 				const cellDownY = entity.y + 18;
 				// find highest up collision (if any)
-				const ground = entityCollisionAll(entity.x, cellDownY + 1, entity, notDrop)
+				const ground = entityCollisionAll(entity.x, cellDownY + 1, entity, notDroplet)
 					.sort((a, b) => a.y - b.y)[0];
 				debug("GRAVITY COLLISION", `ground: ${JSON.stringify(ground, null, "\t")}`);
 				if (ground) {
@@ -2711,13 +2711,13 @@ const hurtJunkbot = (junkbot, cause) => {
 };
 
 // i.e. space generally free
-const notBinOrDrop = (entity) => (
+const notBinOrDroplet = (entity) => (
 	entity.type !== "bin" &&
-	entity.type !== "drop"
+	entity.type !== "droplet"
 );
 // i.e. ground to walk on
-const notBinOrDropOrEnemyBot = (entity) => (
-	notBinOrDrop(entity) &&
+const notBinOrDropletOrEnemyBot = (entity) => (
+	notBinOrDroplet(entity) &&
 	entity.type !== "gearbot" &&
 	entity.type !== "climbbot" &&
 	entity.type !== "flybot" &&
@@ -2726,14 +2726,14 @@ const notBinOrDropOrEnemyBot = (entity) => (
 
 const walk = (junkbot) => {
 	const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-	const stepOrWall = entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDropOrEnemyBot);
+	const stepOrWall = entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDropletOrEnemyBot);
 	if (stepOrWall) {
 		// can we step up?
 		const posStepUp = { x: posInFront.x, y: stepOrWall.y - junkbot.height };
 		if (
 			posStepUp.y - junkbot.y >= -18 &&
 			posStepUp.y - junkbot.y < 0 &&
-			!entityCollisionTest(posStepUp.x, posStepUp.y, junkbot, notBinOrDrop)
+			!entityCollisionTest(posStepUp.x, posStepUp.y, junkbot, notBinOrDroplet)
 		) {
 			debug("JUNKBOT", "STEP UP");
 			junkbot.x = posStepUp.x;
@@ -2743,10 +2743,10 @@ const walk = (junkbot) => {
 		}
 	}
 	// is there solid ground ahead to walk on?
-	const ground = entityCollisionTest(posInFront.x, posInFront.y + 1, junkbot, notBinOrDropOrEnemyBot);
+	const ground = entityCollisionTest(posInFront.x, posInFront.y + 1, junkbot, notBinOrDropletOrEnemyBot);
 	if (
 		ground &&
-		!entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDrop)
+		!entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDroplet)
 	) {
 		debug("JUNKBOT", "WALK");
 		junkbot.x = posInFront.x;
@@ -2754,20 +2754,20 @@ const walk = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	let step = entityCollisionAll(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropOrEnemyBot)
+	let step = entityCollisionAll(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropletOrEnemyBot)
 		.sort((a, b) => a.y - b.y)[0];
 	if (step) {
 		// can we step down?
 		// debug("JUNKBOT", `step: ${JSON.stringify(step, null, "\t")}`);
 		const posStepDown = { x: posInFront.x, y: step.y - junkbot.height };
-		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropOrEnemyBot)
+		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropletOrEnemyBot)
 			.sort((a, b) => a.y - b.y)[0];
 		// debug("JUNKBOT", `step: ${JSON.stringify(step, null, "\t")}`);
 		if (
 			posStepDown.y - junkbot.y <= 18 &&
 			posStepDown.y - junkbot.y > 0 &&
 			step &&
-			!entityCollisionTest(posStepDown.x, posStepDown.y, junkbot, notBinOrDrop)
+			!entityCollisionTest(posStepDown.x, posStepDown.y, junkbot, notBinOrDroplet)
 		) {
 			debug("JUNKBOT", "STEP DOWN");
 			junkbot.x = posStepDown.x;
@@ -2782,7 +2782,7 @@ const walk = (junkbot) => {
 };
 
 const simulateJunkbot = (junkbot) => {
-	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notBinOrDrop);
+	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notBinOrDroplet);
 	const headLoaded = aboveHead && (
 		junkbot.floating || (
 			!aboveHead.fixed &&
@@ -2831,7 +2831,7 @@ const simulateJunkbot = (junkbot) => {
 			return;
 		}
 	}
-	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notBinOrDrop);
+	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notBinOrDroplet);
 	if (inside) {
 		debug("JUNKBOT", "STUCK IN WALL");
 		// debug("JUNKBOT", "STUCK IN WALL - GO UP");
@@ -2841,7 +2841,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 	if (junkbot.floating) {
 		const abovePos = { x: junkbot.x, y: junkbot.y - 18 };
-		const aboveHead = entityCollisionTest(abovePos.x, abovePos.y, junkbot, notBinOrDrop);
+		const aboveHead = entityCollisionTest(abovePos.x, abovePos.y, junkbot, notBinOrDroplet);
 		if (aboveHead) {
 			debug("JUNKBOT", "FLOATING - CAN'T GO UP");
 		} else {
@@ -2860,7 +2860,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 	junkbot.velocityX = Math.min(20, Math.max(-20, junkbot.velocityX));
 	junkbot.velocityY = Math.min(20, Math.max(-20, junkbot.velocityY));
-	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDrop);
+	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDroplet);
 	const unaligned = junkbot.x % 15 !== 0;
 	const jumpStarting = junkbot.velocityY < 0;
 	if (inAir || jumpStarting || unaligned) {
@@ -2881,7 +2881,7 @@ const simulateJunkbot = (junkbot) => {
 		while (Math.abs(toGoY) >= 1) {
 			toGoY -= dirY;
 			const newPos = { x: junkbot.x, y: junkbot.y + dirY };
-			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
+			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDroplet)) {
 				debug("JUNKBOT", `collision in y direction (with ${toGoX} to go)`);
 				junkbot.velocityY = 0;
 				if (dirX === 1) {
@@ -2895,9 +2895,9 @@ const simulateJunkbot = (junkbot) => {
 				junkbot.x = newPos.x;
 				junkbot.y = newPos.y;
 				if (
-					entityCollisionTest(newPos.x + dirX, newPos.y + 1, junkbot, notBinOrDrop) &&
-					!entityCollisionTest(newPos.x, newPos.y + 1, junkbot, notBinOrDrop) &&
-					!entityCollisionTest(newPos.x + dirX, newPos.y, junkbot, notBinOrDrop)
+					entityCollisionTest(newPos.x + dirX, newPos.y + 1, junkbot, notBinOrDroplet) &&
+					!entityCollisionTest(newPos.x, newPos.y + 1, junkbot, notBinOrDroplet) &&
+					!entityCollisionTest(newPos.x + dirX, newPos.y, junkbot, notBinOrDroplet)
 				) {
 					junkbot.velocityX = 0;
 					junkbot.velocityY = 0;
@@ -2909,7 +2909,7 @@ const simulateJunkbot = (junkbot) => {
 		while (Math.abs(toGoX) >= 1) {
 			toGoX -= dirX;
 			const newPos = { x: junkbot.x + dirX, y: junkbot.y };
-			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDrop)) {
+			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDroplet)) {
 				debug("JUNKBOT", `collision in x direction (with ${toGoY} to go)`);
 				junkbot.velocityX = dirX;
 				break;
@@ -2931,7 +2931,7 @@ const simulateJunkbot = (junkbot) => {
 				junkbot.x + junkbot.width <= otherEntity.x
 			)
 		));
-		if (cratesInFront.every((crate) => !entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, (otherEntity) => otherEntity.type !== "drop"))) {
+		if (cratesInFront.every((crate) => !entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, (otherEntity) => otherEntity.type !== "droplet"))) {
 			for (const crate of cratesInFront) {
 				crate.x += junkbot.facing * 15;
 			}
@@ -2991,8 +2991,8 @@ const simulateGearbot = (gearbot) => {
 	if (gearbot.animationFrame > 2) {
 		gearbot.animationFrame = 0;
 		const aheadPos = { x: gearbot.x + gearbot.facing * 15, y: gearbot.y };
-		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, gearbot, (otherEntity) => otherEntity.type !== "drop");
-		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, (otherEntity) => otherEntity.type !== "drop");
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, gearbot, (otherEntity) => otherEntity.type !== "droplet");
+		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, (otherEntity) => otherEntity.type !== "droplet");
 		if (ahead) {
 			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
 				hurtJunkbot(ahead, "bot");
@@ -3013,7 +3013,7 @@ const simulateFlybot = (flybot) => {
 	if (flybot.animationFrame > 2) {
 		flybot.animationFrame = 0;
 		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y };
-		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, flybot, (otherEntity) => otherEntity.type !== "drop");
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, flybot, (otherEntity) => otherEntity.type !== "droplet");
 		if (ahead) {
 			if (ahead.type === "junkbot") {
 				hurtJunkbot(ahead, "bot");
@@ -3038,7 +3038,7 @@ const simulateEyebot = (eyebot) => {
 				height: 18,
 				directionX, directionY,
 				maxSteps: 50,
-				entityFilter: (entity) => entity.type !== "drop" && entity !== eyebot,
+				entityFilter: (entity) => entity.type !== "droplet" && entity !== eyebot,
 			});
 			if (hit && hit.type === "junkbot") {
 				eyebot.facing = directionX;
@@ -3052,7 +3052,7 @@ const simulateEyebot = (eyebot) => {
 	eyebot.animationFrame += 1;
 	if (eyebot.animationFrame % ((eyebot.activeTimer > 0) ? 1 : 2) === 0) {
 		const aheadPos = { x: eyebot.x + eyebot.facing * 15, y: eyebot.y + (eyebot.facingY || 0) * 18 };
-		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, eyebot, (otherEntity) => otherEntity.type !== "drop");
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, eyebot, (otherEntity) => otherEntity.type !== "droplet");
 		if (ahead) {
 			if (ahead.type === "junkbot") {
 				hurtJunkbot(ahead, "bot");
@@ -3079,11 +3079,11 @@ const simulateClimbbot = (climbbot) => {
 		const behindHorizontallyPos = { x: climbbot.x + climbbot.facing * -15, y: climbbot.y };
 		const aheadPos = climbbot.facingY === 0 ? asidePos : { x: climbbot.x, y: climbbot.y + climbbot.facingY * 18 };
 		const belowPos = { x: climbbot.x, y: climbbot.y + 18 };
-		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
-		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, (otherEntity) => otherEntity.type !== "drop" && otherEntity.type !== "bin");
-		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
-		const behindHorizontally = entityCollisionTest(behindHorizontallyPos.x, behindHorizontallyPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
-		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, (otherEntity) => otherEntity.type !== "drop");
+		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet");
+		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet" && otherEntity.type !== "bin");
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet");
+		const behindHorizontally = entityCollisionTest(behindHorizontallyPos.x, behindHorizontallyPos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet");
+		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet");
 
 		if (ahead && ahead.type === "junkbot") {
 			hurtJunkbot(ahead, "bot");
@@ -3158,31 +3158,31 @@ const simulateClimbbot = (climbbot) => {
 	}
 };
 
-const simulateDrop = (drop) => {
-	if (drop.splashing) {
-		drop.animationFrame += 1;
-		if (drop.animationFrame > 4) {
-			remove(entities, drop);
+const simulateDroplet = (droplet) => {
+	if (droplet.splashing) {
+		droplet.animationFrame += 1;
+		if (droplet.animationFrame > 4) {
+			remove(entities, droplet);
 		}
 	} else {
 		for (let i = 0; i < 18; i++) {
-			const underneath = entitiesByTopY[drop.y + drop.height] || [];
-			drop.y += 1;
-			entityMoved(drop);
+			const underneath = entitiesByTopY[droplet.y + droplet.height] || [];
+			droplet.y += 1;
+			entityMoved(droplet);
 			for (const ground of underneath) {
 				if (
 					!ground.grabbed &&
-					drop.x + drop.width > ground.x &&
-					drop.x < ground.x + ground.width &&
+					droplet.x + droplet.width > ground.x &&
+					droplet.x < ground.x + ground.width &&
 					// ground.type !== "pipe" && // actually it should hit pipes, ref: https://youtu.be/Z_PmQhrk5Zw?t=4418
-					ground.type !== "drop"
+					ground.type !== "droplet"
 				) {
 					if (ground.type === "junkbot") {
 						hurtJunkbot(ground, "water");
 					}
 					// ground.colorName = "blue";
-					drop.splashing = true;
-					drop.animationFrame = 0;
+					droplet.splashing = true;
+					droplet.animationFrame = 0;
 
 					playSound(`drip${Math.floor(Math.random() * numDrips)}`);
 					break;
@@ -3201,7 +3201,7 @@ const simulatePipe = (pipe) => {
 	// - timer set to random value between X and Y?
 	// - only initial randomization, consistent interval after that, just offset from other pipes
 	if (pipe.timer === 0) {
-		entities.push(makeDrop({
+		entities.push(makeDroplet({
 			x: pipe.x,
 			y: pipe.y,
 		}));
@@ -3273,8 +3273,8 @@ const simulate = (entities) => {
 				simulateJump(entity);
 			} else if (entity.type === "pipe") {
 				simulatePipe(entity);
-			} else if (entity.type === "drop") {
-				simulateDrop(entity);
+			} else if (entity.type === "droplet") {
+				simulateDroplet(entity);
 			} else if ("animationFrame" in entity) {
 				entity.animationFrame += 1;
 			}
@@ -3312,7 +3312,7 @@ const simulate = (entities) => {
 									playSound("fan");
 								}
 								otherEntity.floating = true;
-							} else if (otherEntity.type !== "drop") {
+							} else if (otherEntity.type !== "droplet") {
 								collision = true;
 								break;
 							}
@@ -3933,7 +3933,7 @@ const initUI = () => {
 		x: 0,
 		y: 0,
 	}));
-	makeInsertEntityButton(makeDrop({
+	makeInsertEntityButton(makeDroplet({
 		x: 0,
 		y: 0,
 	}));
@@ -4060,7 +4060,7 @@ const initUI = () => {
 
 	canvas.addEventListener("dragover", (event) => event.preventDefault());
 	canvas.addEventListener("dragenter", (event) => event.preventDefault());
-	canvas.addEventListener("drop", (event) => {
+	canvas.addEventListener("droplet", (event) => {
 		event.preventDefault();
 		openFromFile(event.dataTransfer.files[0]);
 	});
