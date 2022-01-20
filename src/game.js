@@ -4133,6 +4133,16 @@ const runTests = async () => {
 
 		let won = false;
 		let lost = false;
+		// eslint-disable-next-line no-loop-func
+		const checkTestEnd = () => {
+			if (winOrLose() === "win") {
+				won = true;
+			}
+			if (winOrLose() === "lose") {
+				lost = true;
+			}
+			return won || lost || paused;
+		};
 		for (let timeStep = 0; timeStep < test.timeSteps; timeStep++) {
 			// eslint-disable-next-line no-await-in-loop, no-loop-func
 			await new Promise((resolve) => {
@@ -4140,17 +4150,12 @@ const runTests = async () => {
 				for (let i = 0; i < testSpeedInput.valueAsNumber - 1; i++) {
 					simulate(entities);
 					timeStep += 1;
-					if (paused) {
+					if (checkTestEnd()) {
 						break;
 					}
 				}
 			});
-			if (winOrLose() === "win") {
-				won = true;
-			}
-			if (winOrLose() === "lose") {
-				lost = true;
-			}
+			checkTestEnd();
 			if (paused) {
 				if (editing) {
 					// eslint-disable-next-line require-atomic-updates
