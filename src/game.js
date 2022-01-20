@@ -279,6 +279,8 @@ const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 		height: 4 * 18,
 		facing,
 		armored,
+		losingShield: false,
+		losingShieldTime: 0,
 		animationFrame: 0,
 		headLoaded: false,
 	};
@@ -1236,7 +1238,7 @@ const drawJunkbot = (ctx, junkbot) => {
 	if (junkbot.armored && (!junkbot.losingShield || (junkbot.animationFrame % 4 < 2))) {
 		if (animName === "eat_start") {
 			animName = "shield_eat";
-		} else {
+		} else if (!animName.includes("shield")) {
 			animName = `shield_${animName}`;
 		}
 	}
@@ -2679,6 +2681,9 @@ const hurtJunkbot = (junkbot, cause) => {
 	}
 	if (junkbot.armored) {
 		junkbot.losingShield = true;
+		// don't reset junkbot.losingShieldTime to 0
+		// it wouldn't make sense for multiple hits to extend the shield
+		// (it has to be reset elsewhere)
 	} else {
 		junkbot.animationFrame = 0;
 		junkbot.collectingBin = false;
@@ -2781,6 +2786,14 @@ const simulateJunkbot = (junkbot) => {
 	} else if (headLoaded && !junkbot.headLoaded && !junkbot.grabbed) {
 		junkbot.headLoaded = true;
 		playSound("headBonk");
+	}
+	if (junkbot.losingShield) {
+		junkbot.losingShieldTime += 1;
+		if (junkbot.losingShieldTime > 30) { // @TODO: figure out how long it takes to lose shield
+			junkbot.armored = false;
+			junkbot.losingShield = false;
+			junkbot.losingShieldTime = 0; // important for next damage event
+		}
 	}
 	junkbot.animationFrame += 1;
 	if (junkbot.collectingBin) {
@@ -2928,9 +2941,11 @@ const simulateJunkbot = (junkbot) => {
 					playSound(groundLevelEntity.on ? "switchOn" : "switchOff");
 				} else if (groundLevelEntity.type === "fire" && groundLevelEntity.on) {
 					hurtJunkbot(junkbot, "fire");
-				} else if (groundLevelEntity.type === "shield" && !groundLevelEntity.used && !junkbot.armored) {
+				} else if (groundLevelEntity.type === "shield" && !groundLevelEntity.used && (junkbot.losingShield || !junkbot.armored)) {
 					junkbot.animationFrame = 0;
 					junkbot.gettingShield = true;
+					junkbot.losingShield = false;
+					junkbot.losingShieldTime = 0; // important for next damage event
 					groundLevelEntity.used = true;
 					playSound("getShield");
 				} else if (groundLevelEntity.type === "jump") {
