@@ -1946,14 +1946,14 @@ const sortEntitiesForRendering = (entities) => {
 	// procedure bubbleSort(A : list of sortable items)
 	// 	n := length(A)
 	// 	repeat
-	// 		newn := 0
+	// 		new_n := 0
 	// 		for i := 1 to n - 1 inclusive do
 	// 			if A[i - 1] > A[i] then
 	// 				swap(A[i - 1], A[i])
-	// 				newn := i
+	// 				new_n := i
 	// 			end if
 	// 		end for
-	// 		n := newn
+	// 		n := new_n
 	// 	until n ≤ 1
 	// end procedure
 };
@@ -2351,7 +2351,7 @@ const possibleGrabs = () => {
 				attached.indexOf(entity) === -1
 			) {
 				if (entity.fixed || entity.type !== "brick") {
-					// can't drag in this direction (e.g. the block might be sandwhiched) or
+					// can't drag in this direction (e.g. the block might be sandwiched) or
 					// junkbot or an enemy might be standing on these blocks
 					return false;
 				} else {
@@ -3432,7 +3432,7 @@ const animate = () => {
 				const levelAtWin = currentLevel;
 				setTimeout(() => {
 					if (currentLevel !== levelAtWin) {
-						return; // especially for while runing tests and clicking on a test to go to
+						return; // especially for while running tests and clicking on a test to go to
 					}
 					playSound("ohYeah");
 					try {
@@ -3450,7 +3450,7 @@ const animate = () => {
 					}
 					setTimeout(async () => {
 						if (currentLevel !== levelAtWin) {
-							return; // especially for while runing tests and clicking on a test to go to
+							return; // especially for while running tests and clicking on a test to go to
 						}
 						if (location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/)) {
 							if (levelSelect.selectedIndex === 0) {
@@ -4246,7 +4246,7 @@ const loadEachLevel = async (asyncFn, originalOnly) => {
 };
 // eslint-disable-next-line no-unused-vars
 const gatherStatistics = async () => {
-	const occurancesPerEntityType = {};
+	const occurrencesPerEntityType = {};
 	const levelsPerEntityType = {};
 	await loadEachLevel(async () => {
 		const recordedTypesInThisLevel = [];
@@ -4255,10 +4255,10 @@ const gatherStatistics = async () => {
 				recordedTypesInThisLevel.push(entity.type);
 				levelsPerEntityType[entity.type] = (levelsPerEntityType[entity.type] || 0) + 1;
 			}
-			occurancesPerEntityType[entity.type] = (occurancesPerEntityType[entity.type] || 0) + 1;
+			occurrencesPerEntityType[entity.type] = (occurrencesPerEntityType[entity.type] || 0) + 1;
 		}
 	});
-	return { levelsPerEntityType, occurancesPerEntityType };
+	return { levelsPerEntityType, occurrencesPerEntityType };
 };
 
 const main = async () => {
