@@ -2161,7 +2161,7 @@ addEventListener("keydown", (event) => {
 		case " ": // Spacebar
 		case "P":
 			if (!event.repeat) {
-				// togglePause();
+				togglePause();
 			}
 			break;
 		case "E":
