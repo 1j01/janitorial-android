@@ -510,8 +510,8 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
-		levelType: "json",
-		name: "get bin and electrocuted",
+		levelType: "junkbot",
+		name: "You'll Be Shocked!",
 		expect: "to lose",
 		timeSteps: 1000,
 	},
