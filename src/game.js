@@ -644,6 +644,8 @@ const resourcePaths = {
 	deathByWater: "audio/sound-effects/electricity1.ogg",
 	deathByBot: "audio/sound-effects/robottouch4.ogg",
 	getShield: "audio/sound-effects/shieldon2.ogg",
+	getPowerup: "audio/sound-effects/h_powerup1.ogg",
+	losePowerup: "audio/sound-effects/h_powerdown3.ogg",
 	ohYeah: "audio/sound-effects/voice_ohyeah.ogg",
 	jump: "audio/sound-effects/jump3.ogg",
 	fan: "audio/sound-effects/fan.ogg",
@@ -2682,22 +2684,32 @@ const hurtJunkbot = (junkbot, cause) => {
 	if (junkbot.dying || junkbot.dead || junkbot.grabbed) {
 		return;
 	}
+	// Play sound even if shielded,
+	// but not if losing shield because then it would repeat and sound ugly.
+	// This has to be before junkbot.losingShield is set, so it can play the first time.
+	if (!junkbot.losingShield) {
+		// @TODO: rename sound effects, as they're not just for death
+		if (cause === "fire") {
+			playSound("deathByFire");
+		} else if (cause === "water") {
+			playSound("deathByWater");
+		} else {
+			playSound("deathByBot");
+		}
+	}
 	if (junkbot.armored) {
-		junkbot.losingShield = true;
-		// don't reset junkbot.losingShieldTime to 0
-		// it wouldn't make sense for multiple hits to extend the shield
-		// (it has to be reset elsewhere)
+		if (!junkbot.losingShield) {
+			junkbot.losingShield = true;
+			// don't reset junkbot.losingShieldTime to 0
+			// it wouldn't make sense for multiple hits to extend the shield
+			// (it should be reset elsewhere)
+		}
 	} else {
 		junkbot.animationFrame = 0;
 		junkbot.collectingBin = false;
 		junkbot.dying = true;
-		if (cause === "fire") {
-			playSound("deathByFire");
-		} else if (cause === "water") {
+		if (cause === "water") {
 			junkbot.dyingFromWater = true;
-			playSound("deathByWater");
-		} else {
-			playSound("deathByBot");
 		}
 	}
 };
@@ -2796,6 +2808,7 @@ const simulateJunkbot = (junkbot) => {
 			junkbot.armored = false;
 			junkbot.losingShield = false;
 			junkbot.losingShieldTime = 0; // important for next damage event
+			playSound("losePowerup");
 		}
 	}
 	junkbot.animationFrame += 1;
@@ -2951,6 +2964,7 @@ const simulateJunkbot = (junkbot) => {
 					junkbot.losingShieldTime = 0; // important for next damage event
 					groundLevelEntity.used = true;
 					playSound("getShield");
+					playSound("getPowerup");
 				} else if (groundLevelEntity.type === "jump") {
 					junkbot.animationFrame = 0;
 					junkbot.velocityY = -20;
