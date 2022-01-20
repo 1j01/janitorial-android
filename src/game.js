@@ -575,7 +575,7 @@ const tests = [
 	{
 		levelType: "junkbot",
 		name: "Crate Fall Onto Offset Blocks",
-		expect: "to lose",
+		expect: "to win",
 		timeSteps: 1000,
 	},
 	{
