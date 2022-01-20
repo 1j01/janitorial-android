@@ -3969,9 +3969,9 @@ const initUI = () => {
 
 	updateEditorUIForLevelChange = (level) => {
 		levelBoundsCheckbox.checked = level.bounds;
-		levelTitleInput.value = level.title || "";
-		levelHintInput.value = level.hint || "";
-		levelParInput.valueAsNumber = level.par;
+		levelTitleInput.value = level.title ?? "";
+		levelHintInput.value = level.hint ?? "";
+		levelParInput.value = level.par ?? "";
 		document.title = level.title ? `${level.title} - Junkbot` : "Junkbot";
 	};
 	updateEditorUIForLevelChange(currentLevel);
