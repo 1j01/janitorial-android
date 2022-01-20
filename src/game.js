@@ -899,6 +899,8 @@ const loadLevelFromText = (levelData, game) => {
 					entities.push(makeShield({ x, y, used: animationName === "off", fixed: false }));
 				} else if (typeName === "haz_slickpipe") {
 					entities.push(makePipe({ x, y }));
+				} else if (typeName === "haz_droplet") { // made up / unofficial
+					entities.push(makeDrop({ x, y }));
 				} else {
 					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
 				}
@@ -1502,6 +1504,7 @@ const serializeLevel = (level) => {
 				switch: "haz_slickswitch",
 				teleport: "haz_slickteleport",
 				pipe: "haz_slickpipe",
+				drop: "haz_droplet", // made up / unofficial
 			}[entity.type];
 		}
 		if (type) {
