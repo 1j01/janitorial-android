@@ -456,6 +456,7 @@ const makeDrop = ({ x, y }) => {
 		width: 2 * 15,
 		height: 1 * 18,
 		splashing: false,
+		animationFrame: 0,
 	};
 };
 
@@ -1188,7 +1189,11 @@ const drawDrop = (ctx, entity) => {
 	const frameIndex = Math.floor(entity.splashing ? entity.animationFrame : 0);
 	const frame = resources.spritesAtlas[`drip_${entity.splashing ? "splashing" : "falling"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 15, entity.y, width, height);
+	// ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 15, entity.y, width, height);
+	// @TODO: proper frame offsets (this is an approximation)
+	const offsetX = (-3 - entity.animationFrame) * entity.splashing;
+	const offsetY = (-15) * entity.splashing;
+	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 15 + offsetX, entity.y + offsetY, width, height);
 };
 
 const drawGearbot = (ctx, entity) => {
