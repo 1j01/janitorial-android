@@ -142,13 +142,13 @@ Tomas Clark
 - Metroidvania
 	- Instead of abilities like Jump (like in some Metroidvanias), you collect blocks like Jump Block, that you can then place in any level (or most levels, maybe not some levels, arbitrarily, where it would break a puzzle in an unfun way)
 - Gear systems
-	- Sort of like this [Lego Technic Challege game](http://biomediaproject.com/bmp/files/LEGO/gms/online/Technic/LegoMechanic/) ([video here](https://www.youtube.com/watch?v=vjevgPI6FWs))
+	- Sort of like this [Lego Technic Challenge game](http://biomediaproject.com/bmp/files/LEGO/gms/online/Technic/LegoMechanic/) ([video here](https://www.youtube.com/watch?v=vjevgPI6FWs))
 - Machine that clones Junkbot
 	- You can win as long as one Junkbot remains
 - Ridable giant robots / cars?
 - Liquid simulation?
 - Tetris area where you need to fix machinery that pushes the bottom four rows into trucks
-- Pacman area with wrapping
+- Pac-Man area with wrapping
 - Dunkbot (basketball)
 - Junkbach (piano/organ something something)
 
