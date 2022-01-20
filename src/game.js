@@ -589,8 +589,26 @@ const tests = [
 	},
 	{
 		levelType: "junkbot",
+		name: "Turn Away from Climbbot I",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Turn Away from Climbbot II",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
 		name: "Crate Fall Onto Offset Blocks",
 		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Gearbot Fall Onto Offset Blocks",
+		expect: "to lose",
 		timeSteps: 1000,
 	},
 	{
