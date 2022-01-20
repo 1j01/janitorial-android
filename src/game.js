@@ -444,7 +444,7 @@ const makePipe = ({ x, y }) => {
 		y,
 		width: 2 * 15,
 		height: 1 * 18,
-		timer: 0,
+		timer: -1,
 		fixed: true,
 	};
 };
@@ -1171,8 +1171,11 @@ const drawSwitch = (ctx, entity) => {
 };
 
 const drawPipe = (ctx, entity) => {
-	const wet = entity.timer > 54;
-	const frameIndex = Math.floor(wet ? entity.timer - 54 : 0);
+	const wet = entity.timer < 7 && entity.timer > -1;
+	const frameIndex = Math.floor(wet ? 6 - entity.timer : 0);
+	// if (wet) {
+	// 	console.log("entity.timer", entity.timer, "frameIndex", frameIndex);
+	// }
 	const frame = resources.spritesAtlas[`haz_slickPipe_${wet ? "wet" : "dry"}_${1 + frameIndex}`];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 11, entity.y - 12, width, height);
@@ -3196,14 +3199,22 @@ const simulateDrop = (drop) => {
 	}
 };
 
+const maxDripPeriod = 50;
+const minDripPeriod = 20;
 const simulatePipe = (pipe) => {
-	pipe.timer += 1;
-	if (pipe.timer > 60) {
-		pipe.timer = 0;
+	pipe.timer -= 1;
+	// @TODO: how do pipe drips work in the original game?
+	// - after X time, C% chance every frame? (maybe with a max of Y time?)
+	// - timer set to random value between X and Y?
+	// - only initial randomization, consistent interval after that, just offset from other pipes
+	if (pipe.timer === 0) {
 		entities.push(makeDrop({
 			x: pipe.x,
 			y: pipe.y,
 		}));
+	}
+	if (pipe.timer <= 0) { // includes initial -1 for initial randomization
+		pipe.timer = Math.floor(Math.random() * (maxDripPeriod - minDripPeriod)) + minDripPeriod;
 	}
 };
 
