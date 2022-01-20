@@ -972,7 +972,7 @@ const toggleInfoBox = () => {
 	} catch (error) { }
 };
 
-const playSound = (soundName, playbackRate = 1, cutOffFromEndRatio = 0) => {
+const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	const audioBuffer = resources[soundName];
 	if (!audioBuffer) {
 		throw new Error(`No AudioBuffer loaded for sound '${soundName}'`);
@@ -986,8 +986,8 @@ const playSound = (soundName, playbackRate = 1, cutOffFromEndRatio = 0) => {
 	source.connect(gain);
 	gain.connect(audioCtx.destination);
 	source.playbackRate.value = playbackRate;
-	if (cutOffFromEndRatio) {
-		gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + audioBuffer.duration * (1 - cutOffFromEndRatio));
+	if (cutOffEndFraction) {
+		gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + audioBuffer.duration * (1 - cutOffEndFraction));
 	}
 	source.start(0);
 };
