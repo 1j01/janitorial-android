@@ -1172,7 +1172,7 @@ const drawSwitch = (ctx, entity) => {
 };
 
 const drawPipe = (ctx, entity) => {
-	const wet = entity.timer < 7 && entity.timer > -1;
+	const wet = entity.timer <= 6 && entity.timer > -1; // < 7 would cause error if timer is non-integer
 	const frameIndex = Math.floor(wet ? 6 - entity.timer : 0);
 	// if (wet) {
 	// 	console.log("entity.timer", entity.timer, "frameIndex", frameIndex);
