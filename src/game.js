@@ -27,15 +27,13 @@ let moves = 0;
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
 
-const targetFPS = 15;
+const targetFPS = 18;
 // let targetFPS = 15;
 // addEventListener("mousemove", (event) => {
 // 	targetFPS = event.clientX / window.innerWidth * 15;
 // });
 
 let lastSimulateTime = 0;
-// important for actually reaching the target FPS
-let simulateRemainderMilliseconds = 0;
 // The higher this value, the less the fps display will reflect temporary variations
 // A value of 1 will only keep the last value
 const fpsSmoothing = 20;
@@ -3405,17 +3403,15 @@ const animate = () => {
 		const now = performance.now();
 		const timeSinceLastSimulate = now - lastSimulateTime;
 		debug("TIME SINCE LAST SIMULATE", timeSinceLastSimulate);
-		if (timeSinceLastSimulate >= 1000 / targetFPS - simulateRemainderMilliseconds) {
-			simulateRemainderMilliseconds = timeSinceLastSimulate - 1000 / targetFPS;
-			debug("REMAINDER MILLISECONDS", simulateRemainderMilliseconds);
-			simulateRemainderMilliseconds = Math.min(0, simulateRemainderMilliseconds);
+		if (timeSinceLastSimulate >= 1000 / targetFPS) {
+			debug("REMAINDER MILLISECONDS", timeSinceLastSimulate - 1000 / targetFPS);
 			simulate(entities);
 			smoothedFrameTime += (timeSinceLastSimulate - smoothedFrameTime) / fpsSmoothing;
 			lastSimulateTime = now;
 		}
 		const smoothedFPS = 1000 / smoothedFrameTime;
-		debug("SIMULATION FPS", smoothedFPS.toFixed(1));
-		debug("SIMULATION FPS TARGET", targetFPS);
+		debug("SIMULATION FPS", smoothedFPS.toFixed(0));
+		debug("TARGET FPS", targetFPS);
 	} else {
 		updateAccelerationStructures(); // also within simulate()
 	}
