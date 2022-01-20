@@ -490,6 +490,18 @@ const tests = [
 	},
 	{
 		levelType: "junkbot",
+		name: "Armor Farmer",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
+		name: "Armor Harmer",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		levelType: "junkbot",
 		name: "Once You Win, You Won",
 		expect: "to win",
 		timeSteps: 1000,
