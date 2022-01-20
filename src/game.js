@@ -3186,7 +3186,7 @@ const simulateDrop = (drop) => {
 					!ground.grabbed &&
 					drop.x + drop.width > ground.x &&
 					drop.x < ground.x + ground.width &&
-					ground.type !== "pipe" &&
+					// ground.type !== "pipe" && // actually it should hit pipes, ref: https://youtu.be/Z_PmQhrk5Zw?t=4418
 					ground.type !== "drop"
 				) {
 					if (ground.type === "junkbot") {
