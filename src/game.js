@@ -2633,10 +2633,18 @@ const simulateGravity = () => {
 				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
 				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot" || entity.type === "crate" || entity.type === "bin") ? 1 : 0 })
 			) {
+				const notDrop = (entity) => entity.type !== "drop";
+
+				// just for dinosaur test case level,
+				// where there are some blocks meant to stick inside the ceiling
+				if (entityCollisionTest(entity.x, entity.y, entity, notDrop)) {
+					debug("GRAVITY COLLISION", `${entity.type} stuck in ground at ${entity.x}, ${entity.y}`);
+					return;
+				}
+
 				// first try a step of 18 (1 grid cell) downwards,
 				// then reign it in if there's a collision
 				const cellDownY = entity.y + 18;
-				const notDrop = (entity) => entity.type !== "drop";
 				// find highest up collision (if any)
 				const ground = entityCollisionAll(entity.x, cellDownY + 1, entity, notDrop)
 					.sort((a, b) => a.y - b.y)[0];

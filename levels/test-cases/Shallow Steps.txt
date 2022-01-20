@@ -1,7 +1,7 @@
 [info]
 title=Shallow Steps
 par=0
-hint=Rawr! It's a mechanical dinosaur, like a mechanical bull, but a dinosaur.
+hint=Roar! It's a mechanical dinosaur, like a mechanical bull, but a dinosaur.
 
 [playfield]
 size=35,22
