@@ -2800,7 +2800,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 	if (junkbot.losingShield) {
 		junkbot.losingShieldTime += 1;
-		if (junkbot.losingShieldTime > 30) { // @TODO: figure out how long it takes to lose shield
+		if (junkbot.losingShieldTime > 36) { // already compared to reference video
 			junkbot.armored = false;
 			junkbot.losingShield = false;
 			junkbot.losingShieldTime = 0; // important for next damage event
