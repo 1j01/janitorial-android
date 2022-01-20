@@ -4312,10 +4312,10 @@ const loadEachLevel = async (asyncFn, originalOnly) => {
 	}
 };
 // eslint-disable-next-line no-unused-vars
-const gatherStatistics = async () => {
+const gatherStatistics = async (originalOnly) => {
 	const occurrencesPerEntityType = {};
 	const levelsPerEntityType = {};
-	await loadEachLevel(async () => {
+	await loadEachLevel(() => {
 		const recordedTypesInThisLevel = [];
 		for (const entity of entities) {
 			if (recordedTypesInThisLevel.indexOf(entity.type) === -1) {
@@ -4324,7 +4324,8 @@ const gatherStatistics = async () => {
 			}
 			occurrencesPerEntityType[entity.type] = (occurrencesPerEntityType[entity.type] || 0) + 1;
 		}
-	});
+		return Promise.resolve();
+	}, originalOnly);
 	return { levelsPerEntityType, occurrencesPerEntityType };
 };
 
