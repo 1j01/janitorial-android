@@ -2532,6 +2532,9 @@ canvas.addEventListener("pointermove", (event) => {
 	}
 });
 canvas.addEventListener("pointerdown", (event) => {
+	if (!muted) {
+		audioCtx.resume();
+	}
 	pointerEventCache.push(event);
 	canvas.focus(); // for keyboard shortcuts, after interacting with dropdown
 	window.getSelection().removeAllRanges(); // for keyboard shortcuts for copy and paste after selecting text
