@@ -999,8 +999,8 @@ const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	source.start(0);
 };
 
-const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}`;
-const fontCharW = "555555553555555555555555553555555555512211133313553535_255311_55332233"
+const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}☺�`;
+const fontCharW = "555555553555555555555555553555555555512211133313553535_255311_5533223355"
 	.replace(/_/g, "")
 	.split("")
 	.map((digit) => Number(digit));
@@ -1056,7 +1056,10 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 			}
 		} else {
 			charIndex = fontChars.indexOf(char);
-			// TODO: fallback glyph?
+			// fallback glyph
+			if (charIndex === -1) {
+				charIndex = fontChars.indexOf("�"); // U+FFFD REPLACEMENT CHARACTER
+			}
 		}
 		let advance = w;
 		if (charIndex > -1) {
