@@ -499,7 +499,12 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
-		name: "Out of the Frying Pan And Into The Fire",
+		name: "Out of the Frying Pan And Into The Fire (Murder)",
+		expect: "to draw",
+		timeSteps: 1000,
+	},
+	{
+		name: "Out of the Frying Pan And Into The Fire (Vengeance)",
 		expect: "to lose",
 		timeSteps: 1000,
 	},
