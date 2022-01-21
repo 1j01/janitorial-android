@@ -3641,7 +3641,11 @@ const animate = () => {
 		const hoveredBrick = brickUnderMouse(true);
 		showConnections = hoveredBrick && "switchID" in hoveredBrick;
 	}
-	smoothedSwitchConnectionAlpha += ((showConnections ? 1 : 0) - smoothedSwitchConnectionAlpha) * 0.1;
+	if (showConnections) {
+		smoothedSwitchConnectionAlpha += (1 - smoothedSwitchConnectionAlpha) * 0.6;
+	} else {
+		smoothedSwitchConnectionAlpha += (0 - smoothedSwitchConnectionAlpha) * 0.01;
+	}
 	if (smoothedSwitchConnectionAlpha > 0.01) {
 		ctx.globalAlpha = smoothedSwitchConnectionAlpha * 0.5;
 		for (const entity of entities) {
