@@ -18,6 +18,7 @@ const enableMarginPanning = false;
 
 let entities = [];
 let wind = [];
+let laserBeams = [];
 let currentLevel = {
 	entities,
 	title: "Custom World",
@@ -1148,14 +1149,14 @@ const drawFan = (ctx, entity) => {
 	ctx.drawImage(resources.sprites, left, top, width, height, entity.x + 1, entity.y + entity.height - height - 4, width, height);
 };
 
-const drawWind = (ctx, fan, extents) => {
+const drawWind = (ctx, fan, targetExtents) => {
 	if (!fan.on) {
 		return;
 	}
 	for (let i = 0, x = fan.x + 15; x < fan.x + fan.width - 15; i += 1, x += 15) {
 		let extent = 0;
 		for (let y = fan.y - 18; y > -200; y -= 18) {
-			if (extent >= extents[i]) {
+			if (extent >= targetExtents[i]) {
 				break;
 			}
 			extent += 1;
@@ -1164,6 +1165,23 @@ const drawWind = (ctx, fan, extents) => {
 			const [left, top, width, height] = frame.bounds;
 			ctx.drawImage(resources.sprites, left, top, width, height, x + 4, y - frameIndex * 2 + 8, width, height);
 		}
+	}
+};
+
+const drawLaserBeam = (ctx, laserBrick, targetExtents) => {
+	if (!laserBrick.on) {
+		return;
+	}
+	let extent = 0;
+	for (let x = laserBrick.x - 15; x > -200; x -= 15) {
+		if (extent >= targetExtents[0]) {
+			break;
+		}
+		extent += 1;
+		const frameIndex = Math.floor(laserBrick.animationFrame % 7);
+		const frame = resources.spritesAtlas[`fanAir_1_${1 + frameIndex}`];
+		const [left, top, width, height] = frame.bounds;
+		ctx.drawImage(resources.sprites, left, top, width, height, x + 4, laserBrick.y, width, height);
 	}
 };
 
@@ -1630,6 +1648,7 @@ const deserializeJSON = (json) => {
 	lastKeys = new Map();
 	dragging.length = 0;
 	wind.length = 0;
+	laserBeams.length = 0;
 	moves = 0;
 	entities.forEach((entity) => {
 		delete entity.grabbed;
@@ -1649,6 +1668,7 @@ const initLevel = (level) => {
 	redos.length = 0;
 	dragging = [];
 	wind = [];
+	laserBeams = [];
 	moves = 0;
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
@@ -2809,7 +2829,7 @@ const hurtJunkbot = (junkbot, cause) => {
 		// @TODO: rename sound effects, as they're not just for death
 		if (cause === "fire") {
 			playSound("deathByFire");
-		} else if (cause === "water") {
+		} else if (cause === "water" || cause === "laser") { // @TODO: extract/sample laser sound
 			playSound("deathByWater");
 		} else {
 			playSound("deathByBot");
@@ -3065,10 +3085,13 @@ const simulateJunkbot = (junkbot) => {
 				if (groundLevelEntity.type === "switch") {
 					groundLevelEntity.on = !groundLevelEntity.on;
 					for (const entity of entities) {
-						if (entity.type === "fire" || entity.type === "fan") {
-							if (entity.switchID === groundLevelEntity.switchID) {
-								entity.on = !entity.on;
-							}
+						if (
+							entity.type !== "switch" &&
+							"on" in entity &&
+							"switchID" in entity &&
+							entity.switchID === groundLevelEntity.switchID
+						) {
+							entity.on = !entity.on;
 						}
 					}
 					playSound("switchClick");
@@ -3409,7 +3432,9 @@ const simulate = (entities) => {
 			delete entity.floating;
 		}
 	}
+	// wind and laser beams
 	wind.length = 0;
+	laserBeams.length = 0;
 	for (const entity of entities) {
 		if (entity.type === "fan" && entity.on) {
 			const fan = entity;
@@ -3448,6 +3473,39 @@ const simulate = (entities) => {
 				extents.push(extent);
 			}
 			wind.push({ fan, extents });
+		}
+		if (entity.type === "laser" && entity.on) {
+			const laserBrick = entity;
+			const extents = [];
+			let extent = 0;
+			for (let x = laserBrick.x - 15; x > -200; x -= 15) {
+				let collision = false;
+				for (const otherEntity of entities) {
+					if (!otherEntity.grabbed && rectanglesIntersect(
+						x,
+						laserBrick.y,
+						15,
+						18,
+						otherEntity.x,
+						otherEntity.y,
+						otherEntity.width,
+						otherEntity.height,
+					)) {
+						if (otherEntity.type === "junkbot") {
+							hurtJunkbot(otherEntity, "laser");
+						} else if (otherEntity.type !== "droplet") {
+							collision = true;
+							break;
+						}
+					}
+				}
+				if (collision) {
+					break;
+				}
+				extent += 1;
+			}
+			extents.push(extent);
+			laserBeams.push({ laserBrick, extents });
 		}
 	}
 	for (const entity of entities) {
@@ -3727,6 +3785,9 @@ const animate = () => {
 	for (const { fan, extents } of wind) {
 		drawWind(ctx, fan, extents);
 	}
+	for (const { laserBrick, extents } of laserBeams) {
+		drawLaserBeam(ctx, laserBrick, extents);
+	}
 
 	// draw connections between switches and controlled entities
 	let showConnections = false;
@@ -3912,6 +3973,9 @@ const initUI = () => {
 			if (previewEntity.type === "fan") {
 				drawWind(buttonCtx, previewEntity, [3, 3]);
 			}
+			if (previewEntity.type === "laser") {
+				drawLaserBeam(buttonCtx, previewEntity, [3, 3]);
+			}
 			showDebug = prevShowDebug;
 			buttonCtx.restore();
 		};
@@ -3928,6 +3992,7 @@ const initUI = () => {
 					currentLevel,
 					entities,
 					wind,
+					laserBeams,
 					entitiesByTopY,
 					entitiesByBottomY,
 					lastKeys,
@@ -3937,6 +4002,7 @@ const initUI = () => {
 				entities = [];
 				currentLevel = { entities };
 				wind = [];
+				laserBeams = [];
 				entitiesByTopY = {};
 				entitiesByBottomY = {};
 				lastKeys = new Map();
@@ -3947,6 +4013,7 @@ const initUI = () => {
 					currentLevel,
 					entities,
 					wind,
+					laserBeams,
 					entitiesByTopY,
 					entitiesByBottomY,
 					lastKeys,
