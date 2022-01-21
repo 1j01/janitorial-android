@@ -1871,15 +1871,41 @@ const flipSelected = () => {
 		return;
 	}
 	// TODO: flip selection overall? not just facing directions?
-	if (entities.some((entity) => entity.selected && "facing" in entity)) {
+	if (entities.some((entity) => entity.selected && ("facing" in entity || "on" in entity))) {
+		let turnedSomething = false;
+		let toggledSomethingOn = false;
+		let toggledSomethingOff = false;
+		let toggledASwitch = false;
 		undoable(() => {
 			for (const entity of entities) {
 				if (entity.selected && "facing" in entity) {
 					entity.facing = -entity.facing;
+					turnedSomething = true;
+				}
+				if (entity.selected && "on" in entity) {
+					entity.on = !entity.on;
+					if (entity.type === "switch") {
+						toggledASwitch = true;
+					} else if (entity.on) {
+						toggledSomethingOn = true;
+					} else {
+						toggledSomethingOff = true;
+					}
 				}
 			}
 		});
-		playSound("turn");
+		if (turnedSomething) {
+			playSound("turn");
+		}
+		if (toggledSomethingOn) {
+			playSound("switchOn");
+		}
+		if (toggledSomethingOff) {
+			playSound("switchOff");
+		}
+		if (toggledASwitch) {
+			playSound("switchClick");
+		}
 	}
 };
 const deleteSelected = () => {
