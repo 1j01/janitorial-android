@@ -53,6 +53,8 @@ let toggleInfoButton;
 // eslint-disable-next-line no-empty-function, no-unused-vars
 let updateEditorUIForLevelChange = (level) => { };
 
+let smoothedSwitchConnectionAlpha = 0;
+
 let frameStartTime = 0;
 const debugs = {};
 const debugWorldSpaceRects = [];
@@ -1065,10 +1067,13 @@ const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
 	ctx.beginPath();
 	ctx.moveTo(startX, startY);
 	ctx.quadraticCurveTo(controlPointX, controlPointY, endX, endY);
-	ctx.strokeStyle = "#000000";
+	ctx.lineCap = "round";
+	// ctx.strokeStyle = "#000000";
+	ctx.strokeStyle = controlledEntity.on ? "#005500" : "#550000";
 	ctx.lineWidth = 4;
 	ctx.stroke();
-	ctx.strokeStyle = controlledEntity.on ? "#00cc00" : "#aa0000";
+	// ctx.strokeStyle = controlledEntity.on ? "#00cc00" : "#aa0000";
+	ctx.strokeStyle = controlledEntity.on ? "#00ff00" : "#ff0000";
 	ctx.lineWidth = 3;
 	ctx.stroke();
 };
@@ -3629,9 +3634,17 @@ const animate = () => {
 	for (const { fan, extents } of wind) {
 		drawWind(ctx, fan, extents);
 	}
-	if (editing) {
+
+	// draw connections between switches and controlled entities
+	let showConnections = false;
+	if (editing && (hovered.length || dragging.length)) {
+		const hoveredBrick = brickUnderMouse(true);
+		showConnections = hoveredBrick && "switchID" in hoveredBrick;
+	}
+	smoothedSwitchConnectionAlpha += ((showConnections ? 1 : 0) - smoothedSwitchConnectionAlpha) * 0.1;
+	if (smoothedSwitchConnectionAlpha > 0.01) {
+		ctx.globalAlpha = smoothedSwitchConnectionAlpha * 0.5;
 		for (const entity of entities) {
-			// draw connections between switches and controlled entities
 			if (entity.type === "switch") {
 				for (const otherEntity of entities) {
 					if (otherEntity.type !== "switch" && otherEntity.switchID === entity.switchID) {
@@ -3640,6 +3653,7 @@ const animate = () => {
 				}
 			}
 		}
+		ctx.globalAlpha = 1;
 	}
 
 	if (selectionBox) {
