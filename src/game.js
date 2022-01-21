@@ -1054,6 +1054,25 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 	}
 };
 
+const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
+	const startX = switchEntity.x + switchEntity.width / 2;
+	const startY = switchEntity.y + switchEntity.height * 0.8
+	const endX = controlledEntity.x + controlledEntity.width / 2;
+	const endY = controlledEntity.y + controlledEntity.height * 0.8;
+	const dist = Math.hypot(endX - startX, endY - startY);
+	const controlPointX = (startX + endX) / 2;
+	const controlPointY = (startY + endY) / 2 + 50 + dist * 0.2;
+	ctx.beginPath();
+	ctx.moveTo(startX, startY);
+	ctx.quadraticCurveTo(controlPointX, controlPointY, endX, endY);
+	ctx.strokeStyle = "#000000";
+	ctx.lineWidth = 4;
+	ctx.stroke();
+	ctx.strokeStyle = controlledEntity.on ? "#00cc00" : "#aa0000";
+	ctx.lineWidth = 3;
+	ctx.stroke();
+};
+
 const drawDecal = (ctx, x, y, name, game) => {
 	let atlas = resources[game === "Junkbot Undercover" ? "backgroundsUndercoverAtlas" : "backgroundsAtlas"];
 	let frame = atlas[name];
@@ -3609,6 +3628,18 @@ const animate = () => {
 	}
 	for (const { fan, extents } of wind) {
 		drawWind(ctx, fan, extents);
+	}
+	if (editing) {
+		for (const entity of entities) {
+			// draw connections between switches and controlled entities
+			if (entity.type === "switch") {
+				for (const otherEntity of entities) {
+					if (otherEntity.type !== "switch" && otherEntity.switchID === entity.switchID) {
+						drawSwitchConnection(ctx, entity, otherEntity);
+					}
+				}
+			}
+		}
 	}
 
 	if (selectionBox) {
