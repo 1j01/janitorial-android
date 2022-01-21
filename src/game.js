@@ -497,6 +497,11 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		name: "Out of the Frying Pan And Into The Fire",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
 		name: "Once You Win, You Won",
 		expect: "to win",
 		timeSteps: 1000,
