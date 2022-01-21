@@ -1047,6 +1047,7 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 			w = 6;
 		} else if (char === "\t") {
 			w = 6 * 4;
+			ctx.fillRect(x - 1, y - 2, 2, fontCharHeight + 4);
 		} else if (char === "\n") {
 			x = startX;
 			y += fontCharHeight + 4;
