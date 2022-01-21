@@ -1871,17 +1871,27 @@ const flipSelected = () => {
 		return;
 	}
 	// TODO: flip selection overall? not just facing directions?
-	if (entities.some((entity) => entity.selected && ("facing" in entity || "on" in entity))) {
-		let turnedSomething = false;
+	if (entities.some((entity) => entity.selected && "facing" in entity)) {
+		undoable(() => {
+			for (const entity of entities) {
+				if (entity.selected && "facing" in entity) {
+					entity.facing = -entity.facing;
+				}
+			}
+		});
+		playSound("turn");
+	}
+};
+const toggleSelected = () => {
+	if (!editing) {
+		return;
+	}
+	if (entities.some((entity) => entity.selected && "on" in entity)) {
 		let toggledSomethingOn = false;
 		let toggledSomethingOff = false;
 		let toggledASwitch = false;
 		undoable(() => {
 			for (const entity of entities) {
-				if (entity.selected && "facing" in entity) {
-					entity.facing = -entity.facing;
-					turnedSomething = true;
-				}
 				if (entity.selected && "on" in entity) {
 					entity.on = !entity.on;
 					if (entity.type === "switch") {
@@ -1894,9 +1904,6 @@ const flipSelected = () => {
 				}
 			}
 		});
-		if (turnedSomething) {
-			playSound("turn");
-		}
 		if (toggledSomethingOn) {
 			playSound("switchOn");
 		}
@@ -2187,6 +2194,11 @@ addEventListener("keydown", (event) => {
 		case "F":
 			if (!event.repeat) {
 				flipSelected();
+			}
+			break;
+		case "T":
+			if (!event.repeat) {
+				toggleSelected();
 			}
 			break;
 		case "DELETE":

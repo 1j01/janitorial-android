@@ -82,6 +82,10 @@ Partially done:
 		<td>Flip selected horizontally</td>
 	</tr>
 	<tr>
+		<td><kbd>T</kbd></td>
+		<td>Toggle selected switches/things</td>
+	</tr>
+	<tr>
 		<td><kbd>Ctrl+Z</kbd></td>
 		<td>Undo</td>
 	</tr>
