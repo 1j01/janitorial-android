@@ -1076,7 +1076,7 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 
 const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
 	const startX = switchEntity.x + switchEntity.width / 2;
-	const startY = switchEntity.y + switchEntity.height * 0.8
+	const startY = switchEntity.y + switchEntity.height * 0.8;
 	const endX = controlledEntity.x + controlledEntity.width / 2;
 	const endY = controlledEntity.y + controlledEntity.height * 0.8;
 	const dist = Math.hypot(endX - startX, endY - startY);
@@ -1888,17 +1888,29 @@ const flipSelected = () => {
 	if (!editing) {
 		return;
 	}
-	// TODO: flip selection overall? not just facing directions?
-	if (entities.some((entity) => entity.selected && "facing" in entity)) {
-		undoable(() => {
-			for (const entity of entities) {
-				if (entity.selected && "facing" in entity) {
-					entity.facing = -entity.facing;
-				}
-			}
-		});
-		playSound("turn");
+	// let flipCenterX = 0;
+	let maxX = -Infinity;
+	let minX = Infinity;
+	const selectedEntities = entities.filter((entity) => entity.selected);
+	for (const entity of selectedEntities) {
+		// flipCenterX += entity.x + entity.width / 2;
+		maxX = Math.max(maxX, entity.x + entity.width);
+		minX = Math.min(minX, entity.x);
 	}
+	// flipCenterX /= selectedEntities.length;
+	// flipCenterX = floor(flipCenterX, 15);
+	let flipCenterX = (maxX + minX) / 2;
+	flipCenterX = floor(flipCenterX, 15);
+
+	undoable(() => {
+		for (const entity of selectedEntities) {
+			entity.x = flipCenterX - (entity.x - flipCenterX + entity.width);
+			if ("facing" in entity) {
+				entity.facing = -entity.facing;
+			}
+		}
+	});
+	playSound("turn");
 };
 const toggleSelected = () => {
 	if (!editing) {
