@@ -524,6 +524,11 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		name: "Switch Off At Edge Case",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
 		name: "Jump Stair Case",
 		expect: "to win",
 		timeSteps: 1000,
