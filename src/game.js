@@ -118,6 +118,8 @@ const parseLocationHash = (hash = location.hash) => {
 };
 
 const floor = (x, multiple) => Math.floor(x / multiple) * multiple;
+const round = (x, multiple) => Math.round(x / multiple) * multiple;
+// const ceil = (x, multiple) => Math.ceil(x / multiple) * multiple;
 
 const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 	ax + aw > bx &&
@@ -1888,19 +1890,26 @@ const flipSelected = () => {
 	if (!editing) {
 		return;
 	}
-	// let flipCenterX = 0;
+	// let meanX = 0;
 	let maxX = -Infinity;
 	let minX = Infinity;
 	const selectedEntities = entities.filter((entity) => entity.selected);
 	for (const entity of selectedEntities) {
-		// flipCenterX += entity.x + entity.width / 2;
+		// meanX += entity.x + entity.width / 2;
 		maxX = Math.max(maxX, entity.x + entity.width);
 		minX = Math.min(minX, entity.x);
 	}
-	// flipCenterX /= selectedEntities.length;
-	// flipCenterX = floor(flipCenterX, 15);
+	// meanX /= selectedEntities.length;
+	// let flipCenterX = floor(meanX, 15);
 	let flipCenterX = (maxX + minX) / 2;
-	flipCenterX = floor(flipCenterX, 15);
+	// if (round(flipCenterX, 15) !== flipCenterX) {
+	// 	flipCenterX = floor(flipCenterX, 15);
+	// } else {
+	// 	flipCenterX = round(flipCenterX, 15);
+	// }
+	// Note the divide by two. This handles even and odd numbers of cells wide.
+	// It doesn't however handle sub-grid widths. But I'm not sure what it should do in that case.
+	flipCenterX = round(flipCenterX, 15 / 2);
 
 	undoable(() => {
 		for (const entity of selectedEntities) {
