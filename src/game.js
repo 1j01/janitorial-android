@@ -2562,10 +2562,13 @@ canvas.addEventListener("pointerdown", (event) => {
 	if (!muted) {
 		audioCtx.resume();
 	}
-	pointerEventCache.push(event);
 	canvas.focus(); // for keyboard shortcuts, after interacting with dropdown
 	window.getSelection().removeAllRanges(); // for keyboard shortcuts for copy and paste after selecting text
 	updateMouse(event);
+	if (event.button !== 0) {
+		return; // right click is handled by contextmenu
+	}
+	pointerEventCache.push(event);
 	mouse.atDragStart = {
 		x: mouse.x,
 		y: mouse.y,
@@ -2590,6 +2593,19 @@ canvas.addEventListener("pointerdown", (event) => {
 			selectionBox = { x1: mouse.worldX, y1: mouse.worldY, x2: mouse.worldX, y2: mouse.worldY };
 			playSound("selectStart");
 		}
+	}
+});
+canvas.addEventListener("contextmenu", (event) => {
+	event.preventDefault();
+	const hoveredBrick = brickUnderMouse(true);
+	if (hoveredBrick && "switchID" in hoveredBrick) {
+		undoable(() => {
+			// @TODO: better UI
+			const newID = prompt("Edit switch group ID for this brick", hoveredBrick.switchID);
+			if (newID) {
+				hoveredBrick.switchID = newID;
+			}
+		});
 	}
 });
 
