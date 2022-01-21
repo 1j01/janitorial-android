@@ -1033,16 +1033,19 @@ const fontColors = {
 };
 const fontCanvases = {};
 
-const drawText = (ctx, text, startX, startY, colorName) => {
+const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.5)") => {
 	const fontImage = fontCanvases[colorName];
 	let x = startX;
 	let y = startY;
 	text = text.toUpperCase();
+	ctx.fillStyle = bgColor;
 	for (const char of text) {
+		let w = 0;
+		let charIndex = -1;
 		if (char === " ") {
-			x += 6;
+			w = 6;
 		} else if (char === "\t") {
-			x += 6 * 4;
+			w = 6 * 4;
 		} else if (char === "\n") {
 			x = startX;
 			y += fontCharHeight + 4;
@@ -1050,14 +1053,18 @@ const drawText = (ctx, text, startX, startY, colorName) => {
 				return; // optimization for lazily-implemented debug text
 			}
 		} else {
-			const index = fontChars.indexOf(char);
+			charIndex = fontChars.indexOf(char);
 			// TODO: fallback glyph?
-			if (index > -1) {
-				const w = fontCharW[index];
-				ctx.drawImage(fontImage, fontCharX[index], 0, w, fontCharHeight, x, y, w, fontCharHeight);
-				x += w + 1;
-			}
 		}
+		if (charIndex > -1) {
+			w = fontCharW[charIndex];
+		}
+		ctx.fillRect(x - 1, y - 2, w + 2, fontCharHeight + 4);
+		if (charIndex > -1) {
+			ctx.drawImage(fontImage, fontCharX[charIndex], 0, w, fontCharHeight, x, y, w, fontCharHeight);
+			w += 1;
+		}
+		x += w;
 	}
 };
 
