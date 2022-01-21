@@ -1038,6 +1038,7 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 	let x = startX;
 	let y = startY;
 	text = text.toUpperCase();
+	text = ` ${text} `.replace(/\n/g, " \n ").replace(/\n\s*$/, "");
 	ctx.fillStyle = bgColor;
 	for (const char of text) {
 		let w = 0;
@@ -1056,15 +1057,16 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 			charIndex = fontChars.indexOf(char);
 			// TODO: fallback glyph?
 		}
+		let advance = w;
 		if (charIndex > -1) {
 			w = fontCharW[charIndex];
+			advance = w + 1;
 		}
-		ctx.fillRect(x - 1, y - 2, w + 2, fontCharHeight + 4);
+		ctx.fillRect(x - 1, y - 2, advance, fontCharHeight + 4);
 		if (charIndex > -1) {
 			ctx.drawImage(fontImage, fontCharX[charIndex], 0, w, fontCharHeight, x, y, w, fontCharHeight);
-			w += 1;
 		}
-		x += w;
+		x += advance;
 	}
 };
 
