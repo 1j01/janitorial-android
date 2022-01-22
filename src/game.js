@@ -887,9 +887,9 @@ const loadLevelFromText = (levelData, game) => {
 				} else if (typeName === "haz_slickfan") {
 					entities.push(makeFan({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slicklaser_l") {
-					entities.push(makeLaser({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6], facing: -1 }));
-				} else if (typeName === "haz_slicklaser_r") {
 					entities.push(makeLaser({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6], facing: 1 }));
+				} else if (typeName === "haz_slicklaser_r") {
+					entities.push(makeLaser({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6], facing: -1 }));
 				} else if (typeName === "haz_slickswitch") {
 					entities.push(makeSwitch({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slickteleport") {
@@ -1207,9 +1207,9 @@ const drawShield = (ctx, entity) => {
 };
 
 const drawLaser = (ctx, entity) => {
-	const frame = resources.spritesUndercoverAtlas[`haz_slickLaser_${entity.facing === 1 ? "R" : "L"}_ON_1`];
+	const frame = resources.spritesUndercoverAtlas[`haz_slickLaser_${entity.facing === 1 ? "L" : "R"}_ON_1`];
 	const [left, top, width, height] = frame.bounds;
-	const alignRight = entity.facing === 1;
+	const alignRight = entity.facing === -1;
 	if (alignRight) {
 		ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x + entity.width - width + 11, entity.y + entity.height - 1 - height, width, height);
 	} else {
