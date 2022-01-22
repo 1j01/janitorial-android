@@ -1168,7 +1168,7 @@ const drawWind = (ctx, fan, targetExtents) => {
 	}
 };
 
-const drawLaserBeam = (ctx, laserBrick, targetExtent) => {
+const drawLaserBeam = (ctx, laserBrick, targetExtent, hitWhat) => {
 	if (!laserBrick.on) {
 		return;
 	}
@@ -1183,7 +1183,7 @@ const drawLaserBeam = (ctx, laserBrick, targetExtent) => {
 		const frame = resources.spritesUndercoverAtlas[`laserbeam_1_${1 + frameIndex}`];
 		// eslint-disable-next-line prefer-const
 		let [left, top, width, height] = frame.bounds;
-		if (extent === targetExtent - 1 && laserBrick.facing === 1) {
+		if (extent === targetExtent - 1 && laserBrick.facing === 1 && hitWhat && hitWhat.type !== "bin") {
 			// depth illusion: "go behind" things to the right
 			width -= 5;
 		}
@@ -3484,11 +3484,11 @@ const simulate = (entities) => {
 			const laserBrick = entity;
 			// @TODO: collide with level bounds
 			let extent = 0;
+			let collision;
 			for (; extent < 200; extent += 1) {
 				const x = laserBrick.x +
 					(laserBrick.facing === 1 ? laserBrick.width : -15) +
 					15 * extent * laserBrick.facing;
-				let collision = false;
 				for (const otherEntity of entities) {
 					if (!otherEntity.grabbed && rectanglesIntersect(
 						x,
@@ -3504,7 +3504,7 @@ const simulate = (entities) => {
 							hurtJunkbot(otherEntity, "laser");
 						}
 						if (otherEntity.type !== "droplet") {
-							collision = true;
+							collision = otherEntity;
 							break;
 						}
 					}
@@ -3513,7 +3513,7 @@ const simulate = (entities) => {
 					break;
 				}
 			}
-			laserBeams.push({ laserBrick, extent });
+			laserBeams.push({ laserBrick, extent, hitWhat: collision });
 		}
 	}
 	for (const entity of entities) {
@@ -3793,8 +3793,8 @@ const animate = () => {
 	for (const { fan, extents } of wind) {
 		drawWind(ctx, fan, extents);
 	}
-	for (const { laserBrick, extent } of laserBeams) {
-		drawLaserBeam(ctx, laserBrick, extent);
+	for (const { laserBrick, extent, hitWhat } of laserBeams) {
+		drawLaserBeam(ctx, laserBrick, extent, hitWhat);
 	}
 
 	// draw connections between switches and controlled entities
