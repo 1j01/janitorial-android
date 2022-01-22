@@ -1181,7 +1181,12 @@ const drawLaserBeam = (ctx, laserBrick, targetExtent) => {
 		}
 		const frameIndex = Math.floor(laserBrick.animationFrame % 3);
 		const frame = resources.spritesUndercoverAtlas[`laserbeam_1_${1 + frameIndex}`];
-		const [left, top, width, height] = frame.bounds;
+		// eslint-disable-next-line prefer-const
+		let [left, top, width, height] = frame.bounds;
+		if (extent === targetExtent - 1 && laserBrick.facing === 1) {
+			// depth illusion: "go behind" things to the right
+			width -= 5;
+		}
 		ctx.drawImage(resources.spritesUndercover, left, top, width, height, x + 4, laserBrick.y, width, height);
 	}
 };
