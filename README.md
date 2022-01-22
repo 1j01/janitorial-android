@@ -150,12 +150,35 @@ Tomas Clark
 	- Sort of like this [Lego Technic Challenge game](http://biomediaproject.com/bmp/files/LEGO/gms/online/Technic/LegoMechanic/) ([video here](https://www.youtube.com/watch?v=vjevgPI6FWs))
 - Machine that clones Junkbot
 	- You can win as long as one Junkbot remains
-- Ridable giant robots / cars?
+- Ridable giant robots / cars? maybe that you can build!
 - Liquid simulation?
+	- Flowing water that kills you
+	- Flowing oil that doesn't, because it's not conductive
+	- Grate / Drain (liquid can pass through, but is otherwise solid)
+	- "Dam" / "water lock" / "hydrophobic" / "no water" block (no water can pass, but you can)
 - Tetris area where you need to fix machinery that pushes the bottom four rows into trucks
 - Pac-Man area with wrapping
 - Dunkbot (basketball)
-- Junkbach (piano/organ something something)
+- Music
+	- Junkbach
+	- Crunkbot
+	- Funkbot
+	- Punkbot
+- Slanted bricks that reflect lasers
+- Force field / hard light transparent bricks that can be powered on to make it solid, and can be built with!
+- Speed powerup that makes junkbot go uncomfortably fast
+- Various electrical systems
+	- Turbine generator that can power things when powered by wind
+	- Circuits
+	- although it might be weird to tack on circuits to junkbot when previously everything happens without visible wires
+- Infinite brick source
+	- Could come out of a hole in the ground, for a simple look
+	- Could use LEGO piece 630 Conveyor Belt, for a fancy 3D aesthetic
+- Moving platforms
+	- LEGO vehicle base?
+- An antagonist junkbot that dumps out trash cans on purpose >:D
+	- Skunkbot/Gunkbot/Stunkbot/Slunkbot?
+
 
 ## Development Setup
 
