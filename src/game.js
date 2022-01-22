@@ -343,7 +343,7 @@ const makeEyebot = ({ x, y, facing = 1, facingY = 0 }) => {
 		animationFrame: 0,
 	};
 };
-const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
+const makeBin = ({ x, y, facing = 0, scaredy = false }) => {
 	return {
 		type: "bin",
 		x,
@@ -1143,11 +1143,16 @@ const drawBin = (ctx, bin) => {
 	let frame = resources.spritesAtlas.bin;
 	let spritesheet = resources.sprites;
 	let rotation = 0;
-	if (bin.scaredy && bin.facing !== 0) {
-		const frameIndex = bin.animationFrame % 2;
+	if (bin.scaredy && (bin.facing !== 0 || editing)) {
+		let frameIndex = bin.animationFrame % 2;
+		if (editing) {
+			rotation = 0;
+			frameIndex = 1;
+		} else {
+			rotation = (Math.random() - 0.5) / 4; // covering up the fact that I don't have animation offset data (@TODO)
+		}
 		frame = resources.spritesUndercoverAtlas[`SCAREDY_${bin.facing === 1 ? "WALK_R" : "walk_l"}_${1 + frameIndex}_s3`];
 		spritesheet = resources.spritesUndercover;
-		rotation = (Math.random() - 0.5) / 4; // covering up the fact that I don't have animation offset data (@TODO)
 	}
 	const [left, top, width, height] = frame.bounds;
 	ctx.save();
