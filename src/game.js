@@ -3497,7 +3497,8 @@ const simulate = (entities) => {
 					)) {
 						if (otherEntity.type === "junkbot") {
 							hurtJunkbot(otherEntity, "laser");
-						} else if (otherEntity.type !== "droplet") {
+						}
+						if (otherEntity.type !== "droplet") {
 							collision = true;
 							break;
 						}
