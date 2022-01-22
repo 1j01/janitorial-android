@@ -1142,13 +1142,20 @@ const drawBrick = (ctx, brick) => {
 const drawBin = (ctx, bin) => {
 	let frame = resources.spritesAtlas.bin;
 	let spritesheet = resources.sprites;
+	let rotation = 0;
 	if (bin.scaredy && bin.facing !== 0) {
 		const frameIndex = bin.animationFrame % 2;
 		frame = resources.spritesUndercoverAtlas[`SCAREDY_${bin.facing === 1 ? "WALK_R" : "walk_l"}_${1 + frameIndex}_s3`];
 		spritesheet = resources.spritesUndercover;
+		rotation = (Math.random() - 0.5) / 4; // covering up the fact that I don't have animation offset data (@TODO)
 	}
 	const [left, top, width, height] = frame.bounds;
+	ctx.save();
+	ctx.translate(bin.x + bin.width / 2, bin.y + bin.height / 2);
+	ctx.rotate(rotation);
+	ctx.translate(-bin.x - bin.width / 2, -bin.y - bin.height / 2);
 	ctx.drawImage(spritesheet, left, top, width, height, bin.x + 4, bin.y + bin.height - height - 5, width, height);
+	ctx.restore();
 };
 
 const drawCrate = (ctx, bin) => {
