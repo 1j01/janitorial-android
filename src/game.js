@@ -3838,10 +3838,10 @@ const animate = () => {
 	}
 
 	ctx.strokeStyle = "black";
-	ctx.lineWidth = 1;
+	ctx.lineWidth = editing ? 1 : 10000;
 	const { bounds } = currentLevel;
 	if (bounds) {
-		ctx.strokeRect(bounds.x - 0.5, bounds.y - 0.5, bounds.width + 1, bounds.height + 1);
+		ctx.strokeRect(bounds.x - ctx.lineWidth / 2, bounds.y - ctx.lineWidth / 2, bounds.width + ctx.lineWidth, bounds.height + ctx.lineWidth);
 	}
 
 	if (showDebug) {
