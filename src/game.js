@@ -9,6 +9,8 @@ document.body.append(canvas);
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
+const mainGain = audioCtx.createGain();
+mainGain.connect(audioCtx.destination);
 
 const viewport = { centerX: 0, centerY: 0, scale: 1 };
 let keys = {};
@@ -54,7 +56,7 @@ let toggleInfoButton;
 let toggleFullscreenButton;
 let toggleMuteButton;
 let toggleEditingButton;
-// let volumeSlider;
+let volumeSlider;
 // eslint-disable-next-line no-empty-function, no-unused-vars
 let updateEditorUIForLevelChange = (level) => { };
 
@@ -1005,7 +1007,7 @@ const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	const source = audioCtx.createBufferSource();
 	source.buffer = audioBuffer;
 	source.connect(gain);
-	gain.connect(audioCtx.destination);
+	gain.connect(mainGain);
 	source.playbackRate.value = playbackRate;
 	if (cutOffEndFraction) {
 		gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + audioBuffer.duration * (1 - cutOffEndFraction));
@@ -1776,6 +1778,16 @@ const toggleMute = () => {
 	toggleMuteButton.ariaPressed = muted;
 	try {
 		localStorage.muteSoundEffects = muted;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
+};
+const setVolume = (volume) => {
+	if (muted) {
+		toggleMute();
+	}
+	mainGain.gain.value = volume;
+	try {
+		localStorage.volume = volume;
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
@@ -4295,12 +4307,21 @@ const initUI = () => {
 
 	toggleFullscreenButton = document.getElementById("toggle-fullscreen");
 	toggleFullscreenButton.addEventListener("click", toggleFullscreen);
+	toggleFullscreenButton.ariaPressed = false; // document.fullscreenElement unlikely to work when loading page
 
 	toggleMuteButton = document.getElementById("toggle-mute");
 	toggleMuteButton.addEventListener("click", toggleMute);
+	toggleMuteButton.ariaPressed = muted;
 
 	toggleEditingButton = document.getElementById("toggle-editing");
 	toggleEditingButton.addEventListener("click", toggleEditing);
+	toggleEditingButton.ariaPressed = editing;
+
+	volumeSlider = document.getElementById("volume-slider");
+	volumeSlider.addEventListener("input", () => {
+		setVolume(volumeSlider.valueAsNumber);
+	});
+	volumeSlider.valueAsNumber = mainGain.gain.value;
 
 	canvas.addEventListener("dragover", (event) => event.preventDefault());
 	canvas.addEventListener("dragenter", (event) => event.preventDefault());
@@ -4570,6 +4591,11 @@ const main = async () => {
 	try {
 		showDebug = localStorage.showDebug === "true";
 		muted = localStorage.muteSoundEffects === "true";
+		let volume = parseFloat(localStorage.volume);
+		if (!isFinite(volume) || volume < 0 || volume > 1) {
+			volume = 0.5;
+		}
+		mainGain.gain.value = volume;
 		editing = localStorage.editing === "true";
 		paused = localStorage.paused === "true";
 		hideInfoBox = localStorage.hideInfoBox === "true";
