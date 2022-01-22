@@ -1178,10 +1178,10 @@ const drawLaserBeam = (ctx, laserBrick, targetExtents) => {
 			break;
 		}
 		extent += 1;
-		const frameIndex = Math.floor(laserBrick.animationFrame % 7);
-		const frame = resources.spritesAtlas[`fanAir_1_${1 + frameIndex}`];
+		const frameIndex = Math.floor(laserBrick.animationFrame % 3);
+		const frame = resources.spritesUndercoverAtlas[`laserbeam_1_${1 + frameIndex}`];
 		const [left, top, width, height] = frame.bounds;
-		ctx.drawImage(resources.sprites, left, top, width, height, x + 4, laserBrick.y, width, height);
+		ctx.drawImage(resources.spritesUndercover, left, top, width, height, x + 4, laserBrick.y, width, height);
 	}
 };
 
