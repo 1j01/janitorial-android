@@ -51,6 +51,10 @@ let testsUI;
 let levelSelect;
 let infoBox;
 let toggleInfoButton;
+let toggleFullscreenButton;
+let toggleMuteButton;
+let toggleEditingButton;
+// let volumeSlider;
 // eslint-disable-next-line no-empty-function, no-unused-vars
 let updateEditorUIForLevelChange = (level) => { };
 
@@ -981,6 +985,13 @@ const toggleInfoBox = () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
+const toggleFullscreen = () => {
+	if (document.fullscreenElement) {
+		document.exitFullscreen();
+	} else {
+		document.documentElement.requestFullscreen();
+	}
+};
 
 const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	const audioBuffer = resources[soundName];
@@ -1762,6 +1773,7 @@ const toggleShowDebug = () => {
 };
 const toggleMute = () => {
 	muted = !muted;
+	toggleMuteButton.ariaPressed = muted;
 	try {
 		localStorage.muteSoundEffects = muted;
 		// eslint-disable-next-line no-empty
@@ -1781,6 +1793,7 @@ const togglePause = () => {
 const toggleEditing = () => {
 	editing = !editing;
 	editorUI.hidden = !editing;
+	toggleEditingButton.ariaPressed = editing;
 	if (editing) {
 		deserializeJSON(editorLevelState);
 	}
@@ -4279,6 +4292,15 @@ const initUI = () => {
 	toggleInfoButton.addEventListener("click", toggleInfoBox);
 
 	updateInfoBoxHidden();
+
+	toggleFullscreenButton = document.getElementById("toggle-fullscreen");
+	toggleFullscreenButton.addEventListener("click", toggleFullscreen);
+
+	toggleMuteButton = document.getElementById("toggle-mute");
+	toggleMuteButton.addEventListener("click", toggleMute);
+
+	toggleEditingButton = document.getElementById("toggle-editing");
+	toggleEditingButton.addEventListener("click", toggleEditing);
 
 	canvas.addEventListener("dragover", (event) => event.preventDefault());
 	canvas.addEventListener("dragenter", (event) => event.preventDefault());
