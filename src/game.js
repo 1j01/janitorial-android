@@ -425,6 +425,7 @@ const makeTeleport = ({ x, y, teleportID }) => {
 		height: 1 * 18,
 		teleportID,
 		fixed: true,
+		timer: 0,
 	};
 };
 const makeJump = ({ x, y, fixed }) => {
@@ -667,6 +668,8 @@ const resourcePaths = {
 	drip2: "audio/sound-effects/drip3.ogg",
 	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
 	selectEnd: "audio/sound-effects/custom/select2.wav",
+	teleport: "audio/sound-effects/custom/cool-mystery-less.wav", // @TODO: get the real teleport sound (or something custom but specific)
+	teleport2: "audio/sound-effects/custom/choppa.wav", // @TODO: get the real teleport sound (or something custom but specific)
 	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
 	copyPaste: "audio/sound-effects/lego-creator/copy-I0510.wav",
 	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
@@ -853,7 +856,7 @@ const loadLevelFromText = (levelData, game) => {
 				// [3] - color index (in the colors array)
 				// [4] - starting animation name (0 for objects that don't animate)
 				// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
-				// [6] - object relation ID, either a teleporter or a switch; two teleporters can reference each other with the same ID
+				// [6] - object relation ID, either a teleport or a switch; two teleports can reference each other with the same ID
 				const x = (e[0] - 1) * spacing[0];
 				const y = (e[1] - 1) * spacing[1];
 				const typeName = types[e[2] - 1].toLowerCase();
@@ -1258,10 +1261,23 @@ const drawLaser = (ctx, entity) => {
 };
 
 const drawTeleport = (ctx, entity) => {
-	// const frameIndex = Math.floor(entity.animationFrame % 2 : 0);
-	const frame = resources.spritesUndercoverAtlas[`haz_slickTeleport_${entity.on ? "on" : "off"}_1`];
+	const on = entity.timer === 0 && !entity.blocked;
+	let frameName = `haz_slickTeleport_${on ? "on" : "off"}_1`;
+	if (entity.timer > 30) {
+		frameName = `haz_slickTeleport_active_${1 + (entity.timer % 2)}`;
+	}
+	const frame = resources.spritesUndercoverAtlas[frameName];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
+	if (entity.timer > 30) {
+		const effectFrameName = `transEfx_${1 + (entity.timer % 3)}`;
+		const effectFrame = resources.spritesUndercoverAtlas[effectFrameName];
+		const [left, top, width, height] = effectFrame.bounds;
+		const offsetX = 5;
+		const offsetY = 2;
+		ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x + 15 + offsetX, entity.y - height + offsetY, width, height);
+		// @TODO: check timings and frame offsets; also it should go over top of junkbot, and be transparent, and the animation should start before junkbot teleports
+	}
 };
 
 const drawSwitch = (ctx, entity) => {
@@ -1616,7 +1632,7 @@ const serializeLevel = (level) => {
 			// [3] - color index (in the colors array)
 			// [4] - starting animation name (0 for objects that don't animate)
 			// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
-			// [6] - object relation ID, either a teleporter or a switch; two teleporters can reference each other with the same ID
+			// [6] - object relation ID, either a teleport or a switch; two teleports can reference each other with the same ID
 			const gridX = entity.x / 15 + 1;
 			const gridY = (entity.y + entity.height) / 18;
 			const typeIndex = types.indexOf(type);
@@ -3169,6 +3185,21 @@ const simulateJunkbot = (junkbot) => {
 					playSound("jump");
 					groundLevelEntity.active = true;
 					groundLevelEntity.animationFrame = 0;
+				} else if (
+					groundLevelEntity.type === "teleport" &&
+					groundLevelEntity.timer === 0 &&
+					junkbot.x === groundLevelEntity.x + 15
+				) {
+					const linkedTeleport = entities.find((entity) => entity.type === "teleport" && entity.teleportID === groundLevelEntity.teleportID && entity !== groundLevelEntity);
+					if (linkedTeleport) {
+						junkbot.x = linkedTeleport.x + 15;
+						junkbot.y = linkedTeleport.y - junkbot.height;
+						linkedTeleport.timer = 50;
+						groundLevelEntity.timer = 50;
+						entityMoved(junkbot);
+						playSound("teleport", 1, 0.7);
+						playSound("teleport2", 1 + Math.random() * 0.5, 0.6);
+					}
 				}
 			}
 		}
@@ -3447,6 +3478,13 @@ const simulateJump = (jump) => {
 	}
 };
 
+const simulateTeleport = (teleport) => {
+	if (teleport.timer > 0) {
+		teleport.timer -= 1;
+	}
+	teleport.blocked = rectangleCollisionTest(teleport.x + 15, teleport.y - 18 * 4, 15 * 2, 18 * 4, (entity) => entity.type !== "droplet" && entity.type !== "junkbot");
+};
+
 const updateAccelerationStructures = () => {
 	// add new entities to acceleration structures
 	for (const entity of entities) {
@@ -3499,6 +3537,8 @@ const simulate = (entities) => {
 				simulateEyebot(entity);
 			} else if (entity.type === "jump") {
 				simulateJump(entity);
+			} else if (entity.type === "teleport") {
+				simulateTeleport(entity);
 			} else if (entity.type === "pipe") {
 				simulatePipe(entity);
 			} else if (entity.type === "droplet") {
@@ -4198,6 +4238,7 @@ const initUI = () => {
 		x: 0,
 		y: 0,
 		teleportID: "tele1",
+		timer: 0,
 	}));
 
 	makeInsertEntityButton(makeJump({
