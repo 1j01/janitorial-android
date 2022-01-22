@@ -1140,9 +1140,15 @@ const drawBrick = (ctx, brick) => {
 };
 
 const drawBin = (ctx, bin) => {
-	const frame = resources.spritesAtlas.bin;
+	let frame = resources.spritesAtlas.bin;
+	let spritesheet = resources.sprites;
+	if (bin.scaredy && bin.facing !== 0) {
+		const frameIndex = bin.animationFrame % 2;
+		frame = resources.spritesUndercoverAtlas[`SCAREDY_${bin.facing === 1 ? "WALK_R" : "walk_l"}_${1 + frameIndex}_s3`];
+		spritesheet = resources.spritesUndercover;
+	}
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.sprites, left, top, width, height, bin.x + 4, bin.y + bin.height - height - 5, width, height);
+	ctx.drawImage(spritesheet, left, top, width, height, bin.x + 4, bin.y + bin.height - height - 5, width, height);
 };
 
 const drawCrate = (ctx, bin) => {
@@ -3191,6 +3197,7 @@ const simulateGearbot = (gearbot) => {
 	}
 };
 
+// #@: simulateBin
 const simulateScaredy = (bin) => {
 	bin.animationFrame += 1;
 	if (bin.animationFrame > 2) {
@@ -3204,11 +3211,15 @@ const simulateScaredy = (bin) => {
 			bin.facing = junkbot.x > bin.x ? -1 : 1;
 			const aheadPos = { x: bin.x + bin.facing * 15, y: bin.y };
 			const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, bin, (otherEntity) => otherEntity.type !== "droplet");
-			if (!ahead) {
+			if (ahead) {
+				bin.facing = 0;
+			} else {
 				bin.x = aheadPos.x;
 				bin.y = aheadPos.y;
 				entityMoved(bin);
 			}
+		} else {
+			bin.facing = 0;
 		}
 	}
 };
