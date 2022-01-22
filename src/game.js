@@ -352,6 +352,7 @@ const makeBin = ({ x, y, facing = 1, scaredy = false }) => {
 		height: 3 * 18,
 		facing,
 		scaredy,
+		animationFrame: 0,
 	};
 };
 const makeCrate = ({ x, y }) => {
@@ -886,6 +887,8 @@ const loadLevelFromText = (levelData, game) => {
 					entities.push(makeEyebot({ x, y: y - 18 * 1, facing }));
 				} else if (typeName === "flag") {
 					entities.push(makeBin({ x, y: y - 18 * 2, facing }));
+				} else if (typeName === "scaredy") {
+					entities.push(makeBin({ x, y: y - 18 * 2, facing, scaredy: true }));
 				} else if (typeName === "haz_slickcrate") {
 					entities.push(makeCrate({ x, y: y - 18 }));
 				} else if (typeName === "haz_slickfire") {
@@ -1566,6 +1569,8 @@ const serializeLevel = (level) => {
 			type = `${entity.fixed ? "haz" : "brick"}_slickshield`;
 		} else if (entity.type === "laser") {
 			type = `haz_slicklaser_${entity.facing === 1 ? "r" : "l"}`;
+		} else if (entity.type === "bin" && entity.scaredy) {
+			type = "scaredy";
 		} else {
 			type = {
 				junkbot: "minifig",
@@ -1613,7 +1618,9 @@ const serializeLevel = (level) => {
 				} else {
 					animationName = "R";
 				}
-			} else if (("facing" in entity) && (entity.type !== "bin" || entity.scaredy)) {
+			} else if (entity.type === "bin" && entity.scaredy) {
+				animationName = "rest";
+			} else if (("facing" in entity) && entity.type !== "bin") {
 				animationName = entity.facing > 0 ? "walk_r" : "walk_l";
 			} else if (entity.type === "jump") {
 				animationName = "dormant";
@@ -3184,6 +3191,28 @@ const simulateGearbot = (gearbot) => {
 	}
 };
 
+const simulateScaredy = (bin) => {
+	bin.animationFrame += 1;
+	if (bin.animationFrame > 2) {
+		bin.animationFrame = 0;
+		const searchDist = 15 * 4; // AKA scare distance
+		// @TODO: don't become scared through walls
+		const searchRect = [bin.x - searchDist, bin.y, bin.width + searchDist * 2, bin.height];
+		debugWorldSpaceRect(...searchRect);
+		const junkbot = rectangleCollisionTest(...searchRect, (otherEntity) => otherEntity.type === "junkbot");
+		if (junkbot) {
+			bin.facing = junkbot.x > bin.x ? -1 : 1;
+			const aheadPos = { x: bin.x + bin.facing * 15, y: bin.y };
+			const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, bin, (otherEntity) => otherEntity.type !== "droplet");
+			if (!ahead) {
+				bin.x = aheadPos.x;
+				bin.y = aheadPos.y;
+				entityMoved(bin);
+			}
+		}
+	}
+};
+
 const simulateFlybot = (flybot) => {
 	flybot.animationFrame += 1;
 	if (flybot.animationFrame > 2) {
@@ -3451,6 +3480,8 @@ const simulate = (entities) => {
 				simulatePipe(entity);
 			} else if (entity.type === "droplet") {
 				simulateDroplet(entity);
+			} else if (entity.type === "bin" && entity.scaredy) {
+				simulateScaredy(entity);
 			} else if ("animationFrame" in entity) {
 				entity.animationFrame += 1;
 			}
@@ -4087,6 +4118,11 @@ const initUI = () => {
 	makeInsertEntityButton(makeBin({
 		x: 0,
 		y: 0,
+	}));
+	makeInsertEntityButton(makeBin({
+		x: 0,
+		y: 0,
+		scaredy: true,
 	}));
 
 	makeInsertEntityButton(makeCrate({
