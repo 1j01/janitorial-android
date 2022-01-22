@@ -1168,16 +1168,17 @@ const drawWind = (ctx, fan, targetExtents) => {
 	}
 };
 
-const drawLaserBeam = (ctx, laserBrick, targetExtents) => {
+const drawLaserBeam = (ctx, laserBrick, targetExtent) => {
 	if (!laserBrick.on) {
 		return;
 	}
-	let extent = 0;
-	for (let x = laserBrick.x - 15; x > -200; x -= 15) {
-		if (extent >= targetExtents[0]) {
+	for (let extent = 0; extent < targetExtent; extent += 1) {
+		const x = laserBrick.x +
+			(laserBrick.facing === 1 ? laserBrick.width : -15) +
+			15 * extent * laserBrick.facing;
+		if (extent >= targetExtent) {
 			break;
 		}
-		extent += 1;
 		const frameIndex = Math.floor(laserBrick.animationFrame % 3);
 		const frame = resources.spritesUndercoverAtlas[`laserbeam_1_${1 + frameIndex}`];
 		const [left, top, width, height] = frame.bounds;
@@ -3476,9 +3477,12 @@ const simulate = (entities) => {
 		}
 		if (entity.type === "laser" && entity.on) {
 			const laserBrick = entity;
-			const extents = [];
+			// @TODO: collide with level bounds
 			let extent = 0;
-			for (let x = laserBrick.x - 15; x > -200; x -= 15) {
+			for (; extent < 200; extent += 1) {
+				const x = laserBrick.x +
+					(laserBrick.facing === 1 ? laserBrick.width : -15) +
+					15 * extent * laserBrick.facing;
 				let collision = false;
 				for (const otherEntity of entities) {
 					if (!otherEntity.grabbed && rectanglesIntersect(
@@ -3502,10 +3506,8 @@ const simulate = (entities) => {
 				if (collision) {
 					break;
 				}
-				extent += 1;
 			}
-			extents.push(extent);
-			laserBeams.push({ laserBrick, extents });
+			laserBeams.push({ laserBrick, extent });
 		}
 	}
 	for (const entity of entities) {
@@ -3785,8 +3787,8 @@ const animate = () => {
 	for (const { fan, extents } of wind) {
 		drawWind(ctx, fan, extents);
 	}
-	for (const { laserBrick, extents } of laserBeams) {
-		drawLaserBeam(ctx, laserBrick, extents);
+	for (const { laserBrick, extent } of laserBeams) {
+		drawLaserBeam(ctx, laserBrick, extent);
 	}
 
 	// draw connections between switches and controlled entities
