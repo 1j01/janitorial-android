@@ -19,6 +19,7 @@ Done so far:
 - Shield powerups
 - Gearbots, climbbots, flybots, and eyebots (aside from exact timings and some edge cases)
 - Crates (upside-down white bricks that you can push)
+- Laser beams
 - Complete level editing functionality (not present in the original games)
 	- Rectangular selection, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette
 	- With sound effects taken from Lego Creator
