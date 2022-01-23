@@ -1006,7 +1006,7 @@ const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	if (!audioBuffer) {
 		throw new Error(`No AudioBuffer loaded for sound '${soundName}'`);
 	}
-	if (muted) {
+	if (muted || audioCtx.state !== "running") {
 		return;
 	}
 	const gain = audioCtx.createGain();
