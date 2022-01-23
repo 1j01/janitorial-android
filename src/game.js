@@ -21,6 +21,7 @@ const enableMarginPanning = false;
 let entities = [];
 let wind = [];
 let laserBeams = [];
+let teleportEffects = [];
 let currentLevel = {
 	entities,
 	title: "Custom World",
@@ -1228,6 +1229,19 @@ const drawLaserBeam = (ctx, laserBrick, targetExtent, hitWhat) => {
 	}
 };
 
+const drawTeleportEffect = (ctx, leftX, bottomY, frameIndex) => {
+	const frameName = `transEfx_${1 + frameIndex}`;
+	const frame = resources.spritesUndercoverAtlas[frameName];
+	const [left, top, width, height] = frame.bounds;
+	const offsetX = 5;
+	const offsetY = 2;
+	ctx.globalAlpha = 0.5;
+	ctx.drawImage(resources.spritesUndercover, left, top, width, height, leftX + offsetX, bottomY - height + offsetY, width, height);
+	ctx.globalAlpha = 1;
+	// @TODO: check timings and frame offsets, and the animation should start before junkbot teleports
+};
+
+
 const drawJump = (ctx, entity) => {
 	let animName = "dormant";
 	let animLength = 1;
@@ -1269,15 +1283,6 @@ const drawTeleport = (ctx, entity) => {
 	const frame = resources.spritesUndercoverAtlas[frameName];
 	const [left, top, width, height] = frame.bounds;
 	ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x, entity.y + entity.height - height - 1, width, height);
-	if (entity.timer > 30) {
-		const effectFrameName = `transEfx_${1 + (entity.timer % 3)}`;
-		const effectFrame = resources.spritesUndercoverAtlas[effectFrameName];
-		const [left, top, width, height] = effectFrame.bounds;
-		const offsetX = 5;
-		const offsetY = 2;
-		ctx.drawImage(resources.spritesUndercover, left, top, width, height, entity.x + 15 + offsetX, entity.y - height + offsetY, width, height);
-		// @TODO: check timings and frame offsets; also it should go over top of junkbot, and be transparent, and the animation should start before junkbot teleports
-	}
 };
 
 const drawSwitch = (ctx, entity) => {
@@ -1709,6 +1714,7 @@ const deserializeJSON = (json) => {
 	dragging.length = 0;
 	wind.length = 0;
 	laserBeams.length = 0;
+	teleportEffects.length = 0;
 	moves = 0;
 	entities.forEach((entity) => {
 		delete entity.grabbed;
@@ -1729,6 +1735,7 @@ const initLevel = (level) => {
 	dragging = [];
 	wind = [];
 	laserBeams = [];
+	teleportEffects = [];
 	moves = 0;
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
@@ -3488,6 +3495,14 @@ const simulateTeleport = (teleport) => {
 		teleport.timer -= 1;
 	}
 	teleport.blocked = rectangleCollisionTest(teleport.x + 15, teleport.y - 18 * 4, 15 * 2, 18 * 4, (entity) => entity.type !== "droplet" && entity.type !== "junkbot");
+
+	if (teleport.timer > 30) {
+		teleportEffects.push({
+			x: teleport.x + 15,
+			y: teleport.y, // - 18 * 4,
+			frameIndex: (teleport.timer % 3),
+		});
+	}
 };
 
 const updateAccelerationStructures = () => {
@@ -3527,6 +3542,8 @@ const simulate = (entities) => {
 	entities.sort((a, b) => b.y - a.y);
 
 	simulateGravity();
+
+	teleportEffects.length = 0;
 
 	for (const entity of entities) {
 		if (!entity.grabbed) {
@@ -3920,6 +3937,9 @@ const animate = () => {
 	for (const { laserBrick, extent, hitWhat } of laserBeams) {
 		drawLaserBeam(ctx, laserBrick, extent, hitWhat);
 	}
+	for (const { x, y, frameIndex } of teleportEffects) {
+		drawTeleportEffect(ctx, x, y, frameIndex);
+	}
 
 	// draw connections between switches and controlled entities
 	let showConnections = false;
@@ -4125,6 +4145,7 @@ const initUI = () => {
 					entities,
 					wind,
 					laserBeams,
+					teleportEffects,
 					entitiesByTopY,
 					entitiesByBottomY,
 					lastKeys,
@@ -4135,6 +4156,7 @@ const initUI = () => {
 				currentLevel = { entities };
 				wind = [];
 				laserBeams = [];
+				teleportEffects = [];
 				entitiesByTopY = {};
 				entitiesByBottomY = {};
 				lastKeys = new Map();
@@ -4146,6 +4168,7 @@ const initUI = () => {
 					entities,
 					wind,
 					laserBeams,
+					teleportEffects,
 					entitiesByTopY,
 					entitiesByBottomY,
 					lastKeys,
