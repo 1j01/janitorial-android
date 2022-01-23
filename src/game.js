@@ -31,6 +31,9 @@ let moves = 0;
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
 
+const TELEPORT_COOLDOWN = 50;
+const TELEPORT_EFFECT_PERIOD = 20;
+
 const targetFPS = 18;
 // let targetFPS = 15;
 // addEventListener("mousemove", (event) => {
@@ -3206,8 +3209,8 @@ const simulateJunkbot = (junkbot) => {
 					if (linkedTeleport) {
 						junkbot.x = linkedTeleport.x + 15;
 						junkbot.y = linkedTeleport.y - junkbot.height;
-						linkedTeleport.timer = 50;
-						groundLevelEntity.timer = 50;
+						linkedTeleport.timer = TELEPORT_COOLDOWN;
+						groundLevelEntity.timer = TELEPORT_COOLDOWN;
 						entityMoved(junkbot);
 						playSound("teleport", 1, 0.7);
 						playSound("teleport2", 1 + Math.random() * 0.5, 0.6);
@@ -3496,7 +3499,7 @@ const simulateTeleport = (teleport) => {
 	}
 	teleport.blocked = rectangleCollisionTest(teleport.x + 15, teleport.y - 18 * 4, 15 * 2, 18 * 4, (entity) => entity.type !== "droplet" && entity.type !== "junkbot");
 
-	if (teleport.timer > 30) {
+	if (teleport.timer > TELEPORT_COOLDOWN - TELEPORT_EFFECT_PERIOD) {
 		teleportEffects.push({
 			x: teleport.x + 15,
 			y: teleport.y, // - 18 * 4,
@@ -4128,13 +4131,23 @@ const initUI = () => {
 			if (previewEntity.type === "laser") {
 				drawLaserBeam(buttonCtx, previewEntity, [3, 3]);
 			}
+			if (previewEntity.type === "teleport") {
+				if (previewEntity.timer > TELEPORT_COOLDOWN - TELEPORT_EFFECT_PERIOD) {
+					drawTeleportEffect(buttonCtx, previewEntity.x + 15, previewEntity.y, previewEntity.timer % 3);
+				}
+			}
 			showDebug = prevShowDebug;
 			buttonCtx.restore();
 		};
 		drawPreview();
 		let previewAnimIntervalID;
 		button.addEventListener("mouseenter", () => {
-			previewEntity.active = true; // for jumps
+			if (previewEntity.type === "jump") {
+				previewEntity.active = true;
+			}
+			if (previewEntity.type === "teleport") {
+				previewEntity.timer = TELEPORT_COOLDOWN;
+			}
 			previewAnimIntervalID = setInterval(() => {
 				const prev = {
 					x: previewEntity.x,
