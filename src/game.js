@@ -1821,6 +1821,11 @@ const toggleMute = () => {
 		localStorage.muteSoundEffects = muted;
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
+	if (muted) {
+		audioCtx.suspend();
+	} else {
+		audioCtx.resume();
+	}
 };
 const setVolume = (volume) => {
 	if (muted) {
