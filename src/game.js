@@ -539,6 +539,21 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		name: "Switch Off At Edge Case",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		name: "Scared Off",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		name: "Scared Off II Junkbot's Jowls",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
 		name: "Jump Stair Case",
 		expect: "to win",
 		timeSteps: 1000,
@@ -560,6 +575,21 @@ const tests = [
 	},
 	{
 		name: "Portable Boost (Test)",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		name: "Blocked Teleport",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		name: "Lasers Not Blocked By Water",
+		expect: "to lose",
+		timeSteps: 1000,
+	},
+	{
+		name: "Lasers Blocked By Gearbots",
 		expect: "to win",
 		timeSteps: 1000,
 	},
