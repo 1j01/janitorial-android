@@ -1963,7 +1963,7 @@ const toggleEditing = () => {
 
 const undoable = (fn) => {
 	if (!editing) {
-		return; // TODO: allow undos during gameplay again, but handle it well
+		return; // @TODO: allow undos during gameplay again, but handle it well, maybe make it a rewind system like Braid
 	}
 	editorLevelState = serializeToJSON(currentLevel);
 	undos.push(editorLevelState);
@@ -2974,6 +2974,24 @@ addEventListener("pointerup", () => {
 	}
 });
 
+// i.e. space generally free; filter for tangible entities
+const notDroplet = (entity) => (
+	entity.type !== "droplet"
+);
+// i.e. space generally free for junkbot walking
+const notBinOrDroplet = (entity) => (
+	entity.type !== "bin" &&
+	entity.type !== "droplet"
+);
+// i.e. ground to walk on
+const notBinOrDropletOrEnemyBot = (entity) => (
+	notBinOrDroplet(entity) &&
+	entity.type !== "gearbot" &&
+	entity.type !== "climbbot" &&
+	entity.type !== "flybot" &&
+	entity.type !== "eyebot"
+);
+
 // #@: simulateCrate, simulateBlock, simulateBrick, falling behavior
 const simulateGravity = () => {
 	for (const entity of entities) {
@@ -3042,24 +3060,6 @@ const hurtJunkbot = (junkbot, cause) => {
 		}
 	}
 };
-
-// i.e. space generally free; filter for tangible entities
-const notDroplet = (entity) => (
-	entity.type !== "droplet"
-);
-// i.e. space generally free for junkbot walking
-const notBinOrDroplet = (entity) => (
-	entity.type !== "bin" &&
-	entity.type !== "droplet"
-);
-// i.e. ground to walk on
-const notBinOrDropletOrEnemyBot = (entity) => (
-	notBinOrDroplet(entity) &&
-	entity.type !== "gearbot" &&
-	entity.type !== "climbbot" &&
-	entity.type !== "flybot" &&
-	entity.type !== "eyebot"
-);
 
 const walk = (junkbot) => {
 	const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
@@ -3246,7 +3246,7 @@ const simulateJunkbot = (junkbot) => {
 		}
 		junkbot.momentumY += 1;
 
-		const jumpBrick = entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, brick => brick.type === "jump");
+		const jumpBrick = entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, (brick) => brick.type === "jump");
 		if (jumpBrick && jumpBrick.x <= junkbot.x && jumpBrick.x + jumpBrick.width >= junkbot.x + junkbot.width) {
 			// @TODO: DRY with other jump code
 			// Might also want to trigger related behavior like dying on fire bricks here
