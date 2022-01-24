@@ -1851,6 +1851,7 @@ const toggleShowDebug = () => {
 const toggleMute = () => {
 	muted = !muted;
 	toggleMuteButton.ariaPressed = muted;
+	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
 	try {
 		localStorage.muteSoundEffects = muted;
 		// eslint-disable-next-line no-empty
@@ -4503,6 +4504,7 @@ const initUI = () => {
 	toggleMuteButton = document.getElementById("toggle-mute");
 	toggleMuteButton.addEventListener("click", toggleMute);
 	toggleMuteButton.ariaPressed = muted;
+	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
 
 	toggleEditingButton = document.getElementById("toggle-editing");
 	toggleEditingButton.addEventListener("click", toggleEditing);
