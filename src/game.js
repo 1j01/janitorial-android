@@ -2449,6 +2449,16 @@ addEventListener("keyup", (event) => {
 	}
 });
 
+addEventListener("drop", (event) => {
+	event.preventDefault();
+	if (event.dataTransfer.files.length > 0) {
+		openFromFile(event.dataTransfer.files[0]);
+	}
+});
+addEventListener("dragover", (event) => {
+	event.preventDefault();
+});
+
 addEventListener("blur", () => {
 	// prevent stuck keys
 	keys = {};
