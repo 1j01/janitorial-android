@@ -1488,7 +1488,9 @@ const drawJunkbot = (ctx, junkbot) => {
 	);
 	if (showDebug) {
 		// drawText(ctx, frameName, junkbot.x, junkbot.y + 20, "white");
-		drawText(ctx, `momentum:\n${junkbot.momentumX}, ${junkbot.momentumY}`, junkbot.x, junkbot.y + 20, "white");
+		if (!editing) {
+			drawText(ctx, `momentum:\n${junkbot.momentumX}, ${junkbot.momentumY}`, junkbot.x, junkbot.y + 20, "white");
+		}
 	}
 };
 
@@ -2981,8 +2983,6 @@ const simulateGravity = () => {
 				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
 				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot" || entity.type === "crate" || entity.type === "bin") ? 1 : 0 })
 			) {
-				const notDroplet = (entity) => entity.type !== "droplet";
-
 				// just for dinosaur test case level,
 				// where there are some blocks meant to stick inside the ceiling
 				if (entityCollisionTest(entity.x, entity.y, entity, notDroplet)) {
@@ -3043,7 +3043,11 @@ const hurtJunkbot = (junkbot, cause) => {
 	}
 };
 
-// i.e. space generally free
+// i.e. space generally free; filter for tangible entities
+const notDroplet = (entity) => (
+	entity.type !== "droplet"
+);
+// i.e. space generally free for junkbot walking
 const notBinOrDroplet = (entity) => (
 	entity.type !== "bin" &&
 	entity.type !== "droplet"
@@ -3115,7 +3119,7 @@ const walk = (junkbot) => {
 };
 
 const simulateJunkbot = (junkbot) => {
-	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notBinOrDroplet);
+	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notDroplet);
 	const headLoaded = aboveHead && (
 		junkbot.floating || (
 			!aboveHead.fixed &&
@@ -3164,7 +3168,7 @@ const simulateJunkbot = (junkbot) => {
 			return;
 		}
 	}
-	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notBinOrDroplet);
+	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notDroplet);
 	if (inside) {
 		debug("JUNKBOT", "STUCK IN WALL");
 		// debug("JUNKBOT", "STUCK IN WALL - GO UP");
@@ -3174,7 +3178,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 	if (junkbot.floating) {
 		const abovePos = { x: junkbot.x, y: junkbot.y - 18 };
-		const aboveHead = entityCollisionTest(abovePos.x, abovePos.y, junkbot, notBinOrDroplet);
+		const aboveHead = entityCollisionTest(abovePos.x, abovePos.y, junkbot, notDroplet);
 		if (aboveHead) {
 			debug("JUNKBOT", "FLOATING - CAN'T GO UP");
 		} else {
@@ -3193,7 +3197,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 	junkbot.momentumX = Math.min(5, Math.max(-5, junkbot.momentumX));
 	junkbot.momentumY = Math.min(5, Math.max(-5, junkbot.momentumY));
-	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDroplet);
+	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notDroplet);
 	const unaligned = junkbot.x % 15 !== 0;
 	const jumpStarting = junkbot.momentumY < 0;
 	if (inAir || jumpStarting || unaligned) {
@@ -3206,18 +3210,18 @@ const simulateJunkbot = (junkbot) => {
 			// @TODO: handle this case again, snap junkbot to grid
 		}
 
-		// debugText("JUNKBOT", "momentum:", `${junkbot.momentumX}, ${junkbot.momentumY}`);
+		// To debug momentum, uncomment drawText in drawJunkbot.
 		const dirX = junkbot.momentumY < -2 ? 0 : Math.sign(junkbot.momentumX);
 		const dirY = Math.sign(junkbot.momentumY);
 		const newX = junkbot.x + dirX * 15;
 		const newY = junkbot.y + dirY * 18;
-		if (entityCollisionTest(newX, newY, junkbot, notBinOrDroplet)) {
+		if (entityCollisionTest(newX, newY, junkbot, notDroplet)) {
 			// debug("JUNKBOT", `collision at ${newX}, ${newY}`);
-			if (!entityCollisionTest(junkbot.x, newY, junkbot, notBinOrDroplet)) {
+			if (!entityCollisionTest(junkbot.x, newY, junkbot, notDroplet)) {
 				// moving Y only is not a collision
 				junkbot.momentumX = 0;
 				junkbot.y = newY;
-			} else if (!entityCollisionTest(newX, junkbot.y, junkbot, notBinOrDroplet)) {
+			} else if (!entityCollisionTest(newX, junkbot.y, junkbot, notDroplet)) {
 				// moving X only is not a collision
 				junkbot.momentumY = 0;
 				junkbot.x = newX;
@@ -3232,9 +3236,9 @@ const simulateJunkbot = (junkbot) => {
 			junkbot.y = newY;
 			junkbot.momentumX -= dirX; // -= Math.sign(junkbot.momentumX) would be different
 			// if (
-			// 	entityCollisionTest(newX + dirX, newY + 1, junkbot, notBinOrDroplet) &&
-			// 	!entityCollisionTest(newX, newY + 1, junkbot, notBinOrDroplet) &&
-			// 	!entityCollisionTest(newX + dirX, newY, junkbot, notBinOrDroplet)
+			// 	entityCollisionTest(newX + dirX, newY + 1, junkbot, notDroplet) &&
+			// 	!entityCollisionTest(newX, newY + 1, junkbot, notDroplet) &&
+			// 	!entityCollisionTest(newX + dirX, newY, junkbot, notDroplet)
 			// ) {
 			// 	junkbot.momentumX = 0;
 			// 	junkbot.momentumY = 0;
@@ -3245,6 +3249,7 @@ const simulateJunkbot = (junkbot) => {
 		const jumpBrick = entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, brick => brick.type === "jump");
 		if (jumpBrick && jumpBrick.x <= junkbot.x && jumpBrick.x + jumpBrick.width >= junkbot.x + junkbot.width) {
 			// @TODO: DRY with other jump code
+			// Might also want to trigger related behavior like dying on fire bricks here
 			// Note this must be after junkbot.momentumY += 1;
 			junkbot.animationFrame = 0;
 			junkbot.momentumY = -3;
