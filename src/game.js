@@ -903,8 +903,10 @@ const loadLevelFromText = (levelData, game) => {
 				} else if (typeName === "haz_slickfan") {
 					entities.push(makeFan({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
 				} else if (typeName === "haz_slicklaser_l") {
+					// entity name is confusing in regard to direction, haz_slicklaser_l points right in the game
 					entities.push(makeLaser({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6], facing: 1 }));
 				} else if (typeName === "haz_slicklaser_r") {
+					// entity name is confusing in regard to direction, haz_slicklaser_r points left in the game
 					entities.push(makeLaser({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6], facing: -1 }));
 				} else if (typeName === "haz_slickswitch") {
 					entities.push(makeSwitch({ x, y, on: animationName === "on" || animationName === "none", switchID: e[6] }));
@@ -1291,6 +1293,7 @@ const drawShield = (ctx, entity) => {
 };
 
 const drawLaser = (ctx, entity) => {
+	// entity name and sprite name are confusing in regard to direction
 	const frame = resources.spritesUndercoverAtlas[`haz_slickLaser_${entity.facing === 1 ? "L" : "R"}_ON_1`];
 	const [left, top, width, height] = frame.bounds;
 	const alignRight = entity.facing === -1;
@@ -1634,7 +1637,8 @@ const serializeLevel = (level) => {
 		} else if (entity.type === "shield") {
 			type = `${entity.fixed ? "haz" : "brick"}_slickshield`;
 		} else if (entity.type === "laser") {
-			type = `haz_slicklaser_${entity.facing === 1 ? "r" : "l"}`;
+			// entity name is confusing in regard to direction
+			type = `haz_slicklaser_${entity.facing === -1 ? "r" : "l"}`;
 		} else if (entity.type === "bin" && entity.scaredy) {
 			type = "scaredy";
 		} else {
