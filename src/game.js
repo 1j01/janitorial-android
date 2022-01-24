@@ -574,6 +574,11 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		name: "Jump Up Just To Edge",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
 		name: "Portable Boost (Test)",
 		expect: "to win",
 		timeSteps: 1000,
