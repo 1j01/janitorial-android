@@ -1122,6 +1122,39 @@ const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
 	ctx.stroke();
 };
 
+const drawTeleportConnection = (ctx, teleportA, teleportB) => {
+	// ctx.beginPath();
+	// ctx.moveTo(teleportA.x + 15, teleportA.y);
+	// ctx.lineTo(teleportB.x + 15, teleportB.y);
+	// ctx.lineTo(teleportB.x + 15 * 3, teleportB.y);
+	// ctx.lineTo(teleportA.x + 15 * 3, teleportA.y);
+	// ctx.closePath();
+	// ctx.fillStyle = "rgba(255, 255, 0, 0.5)";
+	// ctx.fill();
+	// ctx.lineWidth = 2;
+	// ctx.strokeStyle = "#ffff00";
+	// ctx.stroke();
+
+	const startX = teleportA.x + teleportA.width / 2 + 4;
+	const startY = teleportA.y - 4;
+	const endX = teleportB.x + teleportB.width / 2 + 4;
+	const endY = teleportB.y - 4;
+	const dist = Math.hypot(endX - startX, endY - startY);
+	const controlPointX = (startX + endX) / 2;
+	const controlPointY = (startY + endY) / 2 - 50 - dist * 0.2;
+	ctx.beginPath();
+	ctx.moveTo(startX, startY);
+	ctx.quadraticCurveTo(controlPointX, controlPointY, endX, endY);
+	ctx.lineCap = "round";
+	ctx.strokeStyle = "rgba(255, 255, 100, 0.2)";
+	ctx.lineWidth = 10;
+	ctx.stroke();
+	ctx.lineWidth = 20;
+	ctx.stroke();
+	ctx.lineWidth = 30;
+	ctx.stroke();
+};
+
 const drawDecal = (ctx, x, y, name, game) => {
 	let atlas = resources[game === "Junkbot Undercover" ? "backgroundsUndercoverAtlas" : "backgroundsAtlas"];
 	let frame = atlas[name];
@@ -2791,6 +2824,15 @@ canvas.addEventListener("contextmenu", (event) => {
 			}
 		});
 	}
+	if (hoveredBrick && "teleportID" in hoveredBrick) {
+		undoable(() => {
+			// @TODO: better UI
+			const newID = prompt("Edit teleport group ID for this brick", hoveredBrick.teleportID);
+			if (newID) {
+				hoveredBrick.teleportID = newID;
+			}
+		});
+	}
 });
 
 const canRelease = () => {
@@ -3948,7 +3990,7 @@ const animate = () => {
 	let showConnections = false;
 	if (editing && (hovered.length || dragging.length)) {
 		const hoveredBrick = brickUnderMouse(true);
-		showConnections = hoveredBrick && "switchID" in hoveredBrick;
+		showConnections = hoveredBrick && ("switchID" in hoveredBrick || "teleportID" in hoveredBrick);
 	}
 	if (showConnections) {
 		smoothedSwitchConnectionAlpha += (1 - smoothedSwitchConnectionAlpha) * 0.6;
@@ -3962,6 +4004,13 @@ const animate = () => {
 				for (const otherEntity of entities) {
 					if (otherEntity.type !== "switch" && otherEntity.switchID === entity.switchID) {
 						drawSwitchConnection(ctx, entity, otherEntity);
+					}
+				}
+			}
+			if (entity.type === "teleport") {
+				for (const otherEntity of entities) {
+					if (otherEntity !== entity && otherEntity.teleportID === entity.teleportID) {
+						drawTeleportConnection(ctx, entity, otherEntity);
 					}
 				}
 			}
