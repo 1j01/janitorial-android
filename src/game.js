@@ -1123,28 +1123,19 @@ const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
 };
 
 const drawTeleportConnection = (ctx, teleportA, teleportB) => {
-	// ctx.beginPath();
-	// ctx.moveTo(teleportA.x + 15, teleportA.y);
-	// ctx.lineTo(teleportB.x + 15, teleportB.y);
-	// ctx.lineTo(teleportB.x + 15 * 3, teleportB.y);
-	// ctx.lineTo(teleportA.x + 15 * 3, teleportA.y);
-	// ctx.closePath();
-	// ctx.fillStyle = "rgba(255, 255, 0, 0.5)";
-	// ctx.fill();
-	// ctx.lineWidth = 2;
-	// ctx.strokeStyle = "#ffff00";
-	// ctx.stroke();
-
 	const startX = teleportA.x + teleportA.width / 2 + 4;
 	const startY = teleportA.y - 4;
 	const endX = teleportB.x + teleportB.width / 2 + 4;
 	const endY = teleportB.y - 4;
 	const dist = Math.hypot(endX - startX, endY - startY);
-	const controlPointX = (startX + endX) / 2;
-	const controlPointY = (startY + endY) / 2 - 50 - dist * 0.2;
+	const fraction = -0.1;
+	const controlPointX1 = startX + (endX - startX) * fraction;
+	const controlPointY1 = (startY + endY) / 2 - 100 - dist * 0.2;
+	const controlPointX2 = endX - (endX - startX) * fraction;
+	const controlPointY2 = (startY + endY) / 2 - 100 - dist * 0.2;
 	ctx.beginPath();
 	ctx.moveTo(startX, startY);
-	ctx.quadraticCurveTo(controlPointX, controlPointY, endX, endY);
+	ctx.bezierCurveTo(controlPointX1, controlPointY1, controlPointX2, controlPointY2, endX, endY);
 	ctx.lineCap = "round";
 	ctx.strokeStyle = "rgba(255, 255, 100, 0.2)";
 	ctx.lineWidth = 10;
