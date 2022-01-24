@@ -3221,6 +3221,18 @@ const simulateJunkbot = (junkbot) => {
 			// }
 		}
 		junkbot.momentumY += 1;
+
+		const jumpBrick = entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, brick => brick.type === "jump");
+		if (jumpBrick && jumpBrick.x <= junkbot.x && jumpBrick.x + jumpBrick.width >= junkbot.x + junkbot.width) {
+			// @TODO: DRY with other jump code
+			// Note this must be after junkbot.momentumY += 1;
+			junkbot.animationFrame = 0;
+			junkbot.momentumY = -3;
+			junkbot.momentumX = junkbot.facing * 5;
+			playSound("jump");
+			jumpBrick.active = true;
+			jumpBrick.animationFrame = 0;
+		}
 		entityMoved(junkbot);
 		return;
 	}
@@ -3266,6 +3278,7 @@ const simulateJunkbot = (junkbot) => {
 					playSound("getShield");
 					playSound("getPowerup");
 				} else if (groundLevelEntity.type === "jump") {
+					// @TODO: DRY with copied jump code
 					junkbot.animationFrame = 0;
 					junkbot.momentumY = -3;
 					junkbot.momentumX = junkbot.facing * 5;
