@@ -579,6 +579,16 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		name: "Collide With Bins In Midair",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		name: "Don't Get Stuck On Jump",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
 		name: "Portable Boost (Test)",
 		expect: "to win",
 		timeSteps: 1000,
