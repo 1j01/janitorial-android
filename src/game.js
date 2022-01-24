@@ -4125,9 +4125,9 @@ const initUI = () => {
 	const entitiesPalette = document.getElementById("entities-palette");
 	const entitiesScrollContainer = document.getElementById("entities-scroll-container");
 	const levelBoundsCheckbox = document.getElementById("level-bounds-checkbox");
-	const levelTitleInput = document.getElementById("level-title");
-	const levelHintInput = document.getElementById("level-hint");
-	const levelParInput = document.getElementById("level-par");
+	const levelTitleInput = document.getElementById("level-title-input");
+	const levelHintInput = document.getElementById("level-hint-input");
+	const levelParInput = document.getElementById("level-par-input");
 	const saveButton = document.getElementById("save-world");
 	const openButton = document.getElementById("open-world");
 
