@@ -629,6 +629,16 @@ const tests = [
 		timeSteps: 1000,
 	},
 	{
+		name: "Don't Walk Over Bins",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
+		name: "Don't Step Down Onto Bins",
+		expect: "to win",
+		timeSteps: 1000,
+	},
+	{
 		name: "Death From Below",
 		expect: "to lose",
 		timeSteps: 1000,
