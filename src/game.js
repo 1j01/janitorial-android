@@ -1461,9 +1461,10 @@ const drawJunkbot = (ctx, junkbot) => {
 		width,
 		height
 	);
-	// if (showDebug) {
-	// 	drawText(ctx, frameName, junkbot.x, junkbot.y + 20, "white");
-	// }
+	if (showDebug) {
+		// drawText(ctx, frameName, junkbot.x, junkbot.y + 20, "white");
+		drawText(ctx, `momentum:\n${junkbot.momentumX}, ${junkbot.momentumY}`, junkbot.x, junkbot.y + 20, "white");
+	}
 };
 
 const selectionHilightCanvases = {};
@@ -3165,68 +3166,56 @@ const simulateJunkbot = (junkbot) => {
 	if (junkbot.momentumY === undefined) {
 		junkbot.momentumY = 0;
 	}
-	junkbot.momentumX = Math.min(20, Math.max(-20, junkbot.momentumX));
-	junkbot.momentumY = Math.min(20, Math.max(-20, junkbot.momentumY));
+	junkbot.momentumX = Math.min(5, Math.max(-5, junkbot.momentumX));
+	junkbot.momentumY = Math.min(5, Math.max(-5, junkbot.momentumY));
 	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notBinOrDroplet);
 	const unaligned = junkbot.x % 15 !== 0;
 	const jumpStarting = junkbot.momentumY < 0;
 	if (inAir || jumpStarting || unaligned) {
 		if (inAir) {
-			debug("JUNKBOT", "IN AIR - DO BALLISTIC MOTION (AND SNAPPING ON COLLISION WITH GROUND)");
+			debug("JUNKBOT", "IN AIR - DO GRID-BASED BALLISTIC MOTION");
 		} else if (jumpStarting) {
-			debug("JUNKBOT", "JUMP - DO BALLISTIC MOTION (AND SNAPPING ON COLLISION WITH GROUND)");
+			debug("JUNKBOT", "JUMP - DO GRID-BASED BALLISTIC MOTION");
 		} else if (unaligned) {
 			debug("JUNKBOT", "UNALIGNED - DO (BALLISTIC MOTION AND) SNAPPING TO GROUND");
+			// @TODO: handle this case again, snap junkbot to grid
 		}
 
-		debug("JUNKBOT", "momentum x:", junkbot.momentumX);
-		debug("JUNKBOT", "momentum y:", junkbot.momentumY);
-		let toGoX = junkbot.momentumX;
-		let toGoY = junkbot.momentumY;
-		const dirX = Math.sign(toGoX);
-		const dirY = Math.sign(toGoY);
-		while (Math.abs(toGoY) >= 1) {
-			toGoY -= dirY;
-			const newPos = { x: junkbot.x, y: junkbot.y + dirY };
-			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDroplet)) {
-				debug("JUNKBOT", `collision in y direction (with ${toGoX} to go)`);
+		// debugText("JUNKBOT", "momentum:", `${junkbot.momentumX}, ${junkbot.momentumY}`);
+		const dirX = junkbot.momentumY < -2 ? 0 : Math.sign(junkbot.momentumX);
+		const dirY = Math.sign(junkbot.momentumY);
+		const newX = junkbot.x + dirX * 15;
+		const newY = junkbot.y + dirY * 18;
+		if (entityCollisionTest(newX, newY, junkbot, notBinOrDroplet)) {
+			// debug("JUNKBOT", `collision at ${newX}, ${newY}`);
+			if (!entityCollisionTest(junkbot.x, newY, junkbot, notBinOrDroplet)) {
+				// moving Y only is not a collision
+				junkbot.momentumX = 0;
+				junkbot.y = newY;
+			} else if (!entityCollisionTest(newX, junkbot.y, junkbot, notBinOrDroplet)) {
+				// moving X only is not a collision
 				junkbot.momentumY = 0;
-				if (dirX === 1) {
-					toGoX = 15 - junkbot.x + floor(junkbot.x, 15);
-				} else {
-					toGoX = floor(junkbot.x, 15) - junkbot.x;
-				}
-				break;
+				junkbot.x = newX;
 			} else {
-				debug("JUNKBOT", "move y");
-				junkbot.x = newPos.x;
-				junkbot.y = newPos.y;
-				if (
-					entityCollisionTest(newPos.x + dirX, newPos.y + 1, junkbot, notBinOrDroplet) &&
-					!entityCollisionTest(newPos.x, newPos.y + 1, junkbot, notBinOrDroplet) &&
-					!entityCollisionTest(newPos.x + dirX, newPos.y, junkbot, notBinOrDroplet)
-				) {
-					junkbot.momentumX = 0;
-					junkbot.momentumY = 0;
-					toGoX = 15 * dirX;
-					break;
-				}
+				debug("JUNKBOT", "collision in both X and Y directions");
+				junkbot.momentumX = 0;
+				junkbot.momentumY = 0;
 			}
+		} else {
+			// debug("JUNKBOT", "move to", newX, newY);
+			junkbot.x = newX;
+			junkbot.y = newY;
+			junkbot.momentumX -= dirX; // -= Math.sign(junkbot.momentumX) would be different
+			// if (
+			// 	entityCollisionTest(newX + dirX, newY + 1, junkbot, notBinOrDroplet) &&
+			// 	!entityCollisionTest(newX, newY + 1, junkbot, notBinOrDroplet) &&
+			// 	!entityCollisionTest(newX + dirX, newY, junkbot, notBinOrDroplet)
+			// ) {
+			// 	junkbot.momentumX = 0;
+			// 	junkbot.momentumY = 0;
+			// }
 		}
-		while (Math.abs(toGoX) >= 1) {
-			toGoX -= dirX;
-			const newPos = { x: junkbot.x + dirX, y: junkbot.y };
-			if (entityCollisionTest(newPos.x, newPos.y, junkbot, notBinOrDroplet)) {
-				debug("JUNKBOT", `collision in x direction (with ${toGoY} to go)`);
-				junkbot.momentumX = dirX;
-				break;
-			} else {
-				debug("JUNKBOT", "move x");
-				junkbot.x = newPos.x;
-				junkbot.y = newPos.y;
-			}
-		}
-		junkbot.momentumY += 3;
+		junkbot.momentumY += 1;
 		entityMoved(junkbot);
 		return;
 	}
@@ -3273,8 +3262,8 @@ const simulateJunkbot = (junkbot) => {
 					playSound("getPowerup");
 				} else if (groundLevelEntity.type === "jump") {
 					junkbot.animationFrame = 0;
-					junkbot.momentumY = -20;
-					junkbot.momentumX = junkbot.facing * 10;
+					junkbot.momentumY = -3;
+					junkbot.momentumX = junkbot.facing * 5;
 					playSound("jump");
 					groundLevelEntity.active = true;
 					groundLevelEntity.animationFrame = 0;
