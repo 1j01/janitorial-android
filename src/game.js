@@ -2964,7 +2964,16 @@ const notBinOrDropletOrEnemyBot = (entity) => (
 // #@: simulateCrate, simulateBlock, simulateBrick, falling behavior
 const simulateGravity = () => {
 	for (const entity of entities) {
-		if (!entity.fixed && !entity.grabbed && !entity.floating && entity.type !== "droplet" && entity.type !== "junkbot" && entity.type !== "climbbot" && entity.type !== "flybot" && entity.type !== "eyebot") {
+		if (
+			!entity.fixed &&
+			!entity.grabbed &&
+			!entity.floating &&
+			entity.type !== "droplet" &&
+			entity.type !== "junkbot" &&
+			entity.type !== "climbbot" &&
+			entity.type !== "flybot" &&
+			entity.type !== "eyebot"
+		) {
 			// if not settled
 			if (
 				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
@@ -3088,12 +3097,13 @@ const walk = (junkbot) => {
 	return "turned";
 };
 
-const findLinkedTeleport = (teleport) =>
-	entities.find((entity) =>
+const findLinkedTeleport = (teleport) => (
+	entities.find((entity) => (
 		entity.type === "teleport" &&
 		entity.teleportID === teleport.teleportID &&
 		entity !== teleport
-	);
+	))
+);
 
 const simulateJunkbot = (junkbot) => {
 	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notDroplet);
