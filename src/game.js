@@ -250,15 +250,12 @@ const entitiesWithinSelection = (selectionBox) => {
 	);
 };
 
-const remove = (array, value) => {
-	if (!array) {
-		if (window.console) {
-			// eslint-disable-next-line no-console
-			console.warn(array, value);
-		}
+const arrayRemove = (array, value) => {
+	if (array === entities) {
+		window.console?.warn("arrayRemove on entities array is unsafe if iterating over entities. Set flag entity.removeBeforeRender instead.");
 	}
 	const index = array.indexOf(value);
-	if (value !== -1) {
+	if (index !== -1) {
 		array.splice(index, 1);
 	}
 };
@@ -1590,10 +1587,10 @@ const entityMoved = (entity) => {
 	entitiesByTopY[entity.y] = entitiesByTopY[entity.y] || [];
 	entitiesByBottomY[entity.y + entity.height] = entitiesByBottomY[entity.y + entity.height] || [];
 	if (yKeys.topY) {
-		remove(entitiesByTopY[yKeys.topY], entity);
+		arrayRemove(entitiesByTopY[yKeys.topY], entity);
 	}
 	if (yKeys.bottomY) {
-		remove(entitiesByBottomY[yKeys.bottomY], entity);
+		arrayRemove(entitiesByBottomY[yKeys.bottomY], entity);
 	}
 	yKeys.topY = entity.y;
 	yKeys.bottomY = entity.y + entity.height;
@@ -3634,10 +3631,10 @@ const updateAccelerationStructures = () => {
 	lastKeys.forEach((yKeys, entity) => {
 		if (entities.indexOf(entity) === -1) {
 			if (yKeys.topY) {
-				remove(entitiesByTopY[yKeys.topY], entity);
+				arrayRemove(entitiesByTopY[yKeys.topY], entity);
 			}
 			if (yKeys.bottomY) {
-				remove(entitiesByBottomY[yKeys.bottomY], entity);
+				arrayRemove(entitiesByBottomY[yKeys.bottomY], entity);
 			}
 			lastKeys.delete(entity);
 		}
