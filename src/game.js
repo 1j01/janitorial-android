@@ -3083,6 +3083,7 @@ const walk = (junkbot) => {
 	debug("JUNKBOT", "CLIFF/WALL/BOT - TURN AROUND");
 	junkbot.facing *= -1;
 	playSound("turn");
+	return "turned";
 };
 
 const simulateJunkbot = (junkbot) => {
@@ -3241,10 +3242,14 @@ const simulateJunkbot = (junkbot) => {
 				crate.x += junkbot.facing * 15;
 			}
 		}
-		walk(junkbot);
+		const turnedAround = walk(junkbot) === "turned";
 		const groundLevelEntities = entitiesByTopY[junkbot.y + junkbot.height] || [];
 		for (const groundLevelEntity of groundLevelEntities) {
-			if (groundLevelEntity.x <= junkbot.x && groundLevelEntity.x + groundLevelEntity.width >= junkbot.x + junkbot.width) {
+			if (
+				groundLevelEntity.x <= junkbot.x &&
+				groundLevelEntity.x + groundLevelEntity.width >= junkbot.x + junkbot.width &&
+				!turnedAround // @TODO: what about for fire and shield bricks? I confirmed this applies to jump bricks and switches
+			) {
 				if (groundLevelEntity.type === "switch") {
 					groundLevelEntity.on = !groundLevelEntity.on;
 					for (const entity of entities) {
