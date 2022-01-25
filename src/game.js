@@ -3260,7 +3260,7 @@ const simulateJunkbot = (junkbot) => {
 				junkbot.x + junkbot.width <= otherEntity.x
 			)
 		));
-		if (cratesInFront.every((crate) => !entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, (otherEntity) => otherEntity.type !== "droplet"))) {
+		if (cratesInFront.every((crate) => !entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, notDroplet))) {
 			for (const crate of cratesInFront) {
 				crate.x += junkbot.facing * 15;
 			}
@@ -3343,8 +3343,8 @@ const simulateGearbot = (gearbot) => {
 	if (gearbot.animationFrame > 2) {
 		gearbot.animationFrame = 0;
 		const aheadPos = { x: gearbot.x + gearbot.facing * 15, y: gearbot.y };
-		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, gearbot, (otherEntity) => otherEntity.type !== "droplet");
-		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, (otherEntity) => otherEntity.type !== "droplet");
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, gearbot, notDroplet);
+		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, notDroplet);
 		if (ahead) {
 			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
 				hurtJunkbot(ahead, "bot");
@@ -3373,7 +3373,7 @@ const simulateScaredy = (bin) => {
 		if (junkbot) {
 			bin.facing = junkbot.x > bin.x ? -1 : 1;
 			const aheadPos = { x: bin.x + bin.facing * 15, y: bin.y };
-			const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, bin, (otherEntity) => otherEntity.type !== "droplet");
+			const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, bin, notDroplet);
 			if (ahead) {
 				bin.facing = 0;
 			} else {
@@ -3458,11 +3458,11 @@ const simulateClimbbot = (climbbot) => {
 		const behindHorizontallyPos = { x: climbbot.x + climbbot.facing * -15, y: climbbot.y };
 		const aheadPos = climbbot.facingY === 0 ? asidePos : { x: climbbot.x, y: climbbot.y + climbbot.facingY * 18 };
 		const belowPos = { x: climbbot.x, y: climbbot.y + 18 };
-		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet");
-		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet" && otherEntity.type !== "bin");
-		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet");
-		const behindHorizontally = entityCollisionTest(behindHorizontallyPos.x, behindHorizontallyPos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet");
-		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, (otherEntity) => otherEntity.type !== "droplet");
+		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, notDroplet);
+		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, notBinOrDroplet);
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, notDroplet);
+		const behindHorizontally = entityCollisionTest(behindHorizontallyPos.x, behindHorizontallyPos.y, climbbot, notDroplet);
+		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, notDroplet);
 
 		if (ahead && ahead.type === "junkbot") {
 			hurtJunkbot(ahead, "bot");
