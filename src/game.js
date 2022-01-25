@@ -481,207 +481,166 @@ const tests = [
 	{
 		name: "Tippy Toast",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Tight Squeeze Stairs",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Shallow Steps",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Don't Skate The Crate",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Twixt Crates",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Armor Farmer",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Armor Harmer",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Out of the Frying Pan And Into The Fire (Murder)",
 		expect: "to draw",
-		timeSteps: 1000,
 	},
 	{
 		name: "Out of the Frying Pan And Into The Fire (Vengeance)",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Once You Win, You Won",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "You'll Be Shocked!",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "All-Off Offal",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Switch Off At Edge Case",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Scared Off",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Scared Off II Junkbot's Jowls",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Jump Stair Case",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Jump Around (bricks in place)",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Jump Around (bricks out of place)",
 		expect: "to draw",
-		timeSteps: 1000,
 	},
 	{
 		name: "Perpetual Motion Machine (Test)",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Jump Up Just To Edge",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Collide With Bins In Midair",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Don't Get Stuck On Jump",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Portable Boost (Test)",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Blocked Teleport",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Lasers Not Blocked By Water",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Lasers Blocked By Gearbots",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Don't Step Up Onto Gearbot",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Don't Walk Over Gearbot",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Don't Step Down Onto Gearbot",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Step Down Onto Falling Crate",
 		expect: "to win", // maybe??
-		timeSteps: 1000,
 	},
 	{
 		name: "Don't Walk Over Bins",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Don't Step Down Onto Bins",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Death From Below",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Flying Death",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Turn Away from Climbbot I",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Turn Away from Climbbot II",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Crate Fall Onto Offset Blocks",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 	{
 		name: "Gearbot Fall Onto Offset Blocks",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Climbbot Fall Onto Offset Blocks",
 		expect: "to lose",
-		timeSteps: 1000,
 	},
 	{
 		name: "Hunter-Killer Climbbot (Fall Onto Offset Blocks)",
 		expect: "to lose", // test will probably need updating when implementing this new logic
-		timeSteps: 1000,
 	},
 	{
 		name: "Ally",
 		expect: "to win",
-		timeSteps: 1000,
 	},
 ];
 
@@ -4648,6 +4607,7 @@ const runTests = async () => {
 	for (const test of tests) {
 		test.state = "pending";
 		test.message = "";
+		test.timeSteps ??= 1000;
 	}
 	render();
 
