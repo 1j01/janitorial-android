@@ -3086,6 +3086,13 @@ const walk = (junkbot) => {
 	return "turned";
 };
 
+const findLinkedTeleport = (teleport) =>
+	entities.find((entity) =>
+		entity.type === "teleport" &&
+		entity.teleportID === teleport.teleportID &&
+		entity !== teleport
+	);
+
 const simulateJunkbot = (junkbot) => {
 	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notDroplet);
 	const headLoaded = aboveHead && (
@@ -3287,8 +3294,8 @@ const simulateJunkbot = (junkbot) => {
 					groundLevelEntity.timer === 0 &&
 					junkbot.x === groundLevelEntity.x + 15
 				) {
-					const linkedTeleport = entities.find((entity) => entity.type === "teleport" && entity.teleportID === groundLevelEntity.teleportID && entity !== groundLevelEntity);
-					if (linkedTeleport) {
+					const linkedTeleport = findLinkedTeleport(groundLevelEntity);
+					if (linkedTeleport && !linkedTeleport.blocked) {
 						junkbot.x = linkedTeleport.x + 15;
 						junkbot.y = linkedTeleport.y - junkbot.height;
 						linkedTeleport.timer = TELEPORT_COOLDOWN;
@@ -3575,12 +3582,16 @@ const simulateJump = (jump) => {
 	}
 };
 
+const notDropletOrJunkbot = (entity) => entity.type !== "droplet" && entity.type !== "junkbot";
 const simulateTeleport = (teleport) => {
 	if (teleport.timer > 0) {
 		teleport.timer -= 1;
 	}
-	teleport.blocked = rectangleCollisionTest(teleport.x + 15, teleport.y - 18 * 4, 15 * 2, 18 * 4, (entity) => entity.type !== "droplet" && entity.type !== "junkbot");
-
+	const targetTeleport = findLinkedTeleport(teleport);
+	teleport.blocked =
+		!targetTeleport ||
+		rectangleCollisionTest(teleport.x + 15, teleport.y - 18 * 4, 15 * 2, 18 * 4, notDropletOrJunkbot) ||
+		rectangleCollisionTest(targetTeleport.x + 15, targetTeleport.y - 18 * 4, 15 * 2, 18 * 4, notDropletOrJunkbot);
 	if (teleport.timer > TELEPORT_COOLDOWN - TELEPORT_EFFECT_PERIOD) {
 		teleportEffects.push({
 			x: teleport.x + 15,
