@@ -3207,6 +3207,7 @@ const simulateJunkbot = (junkbot) => {
 				junkbot.momentumX = 0;
 				junkbot.momentumY = 0;
 			}
+			playSound("headBonk");
 		} else {
 			// debug("JUNKBOT", "move to", newX, newY);
 			junkbot.x = newX;
@@ -3222,6 +3223,9 @@ const simulateJunkbot = (junkbot) => {
 			// }
 		}
 		junkbot.momentumY += 1;
+		if (junkbot.momentumY === 5) {
+			playSound("fall");
+		}
 
 		const jumpBrick = entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, (brick) => brick.type === "jump");
 		if (jumpBrick && jumpBrick.x <= junkbot.x && jumpBrick.x + jumpBrick.width >= junkbot.x + junkbot.width) {
