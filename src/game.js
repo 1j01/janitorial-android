@@ -567,6 +567,14 @@ const tests = [
 		expect: "to win",
 	},
 	{
+		name: "Bounce Against Wall",
+		expect: "to win",
+	},
+	{
+		name: "Turning Shouldn't Jump",
+		expect: "to win",
+	},
+	{
 		name: "Portable Boost (Test)",
 		expect: "to win",
 	},
