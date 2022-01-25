@@ -1877,12 +1877,14 @@ const toggleShowDebug = () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
-const toggleMute = () => {
+const toggleMute = ({ savePreference = true } = {}) => {
 	muted = !muted;
 	toggleMuteButton.ariaPressed = muted;
 	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
 	try {
-		localStorage.muteSoundEffects = muted;
+		if (savePreference) {
+			localStorage.muteSoundEffects = muted;
+		}
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 	if (muted) {
@@ -4551,7 +4553,7 @@ const initUI = () => {
 	toggleFullscreenButton.ariaPressed = false; // document.fullscreenElement unlikely to work when loading page
 
 	toggleMuteButton = document.getElementById("toggle-mute");
-	toggleMuteButton.addEventListener("click", toggleMute);
+	toggleMuteButton.addEventListener("click", () => toggleMute());
 	toggleMuteButton.ariaPressed = muted;
 	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
 
@@ -4584,7 +4586,9 @@ const runTests = async () => {
 	const realTime = location.hash.match(/realtime/);
 	const wasMuted = muted;
 	if (!realTime && !muted) {
-		muted = true;
+		// don't want to save the muted state,
+		// but we do want to update the UI, so don't just set muted = true
+		toggleMute({ savePreference: false });
 	}
 	if (realTime && paused) {
 		togglePause();
@@ -4689,7 +4693,9 @@ const runTests = async () => {
 				if (editing) {
 					// eslint-disable-next-line require-atomic-updates
 					stopTests();
-					muted = wasMuted;
+					if (muted !== wasMuted) {
+						toggleMute({ savePreference: false });
+					}
 					location.hash = `level=Test Cases;${test.name}`;
 					return;
 				}
@@ -4744,7 +4750,9 @@ const runTests = async () => {
 	}
 	/* eslint-enable no-await-in-loop */
 
-	muted = wasMuted;
+	if (muted !== wasMuted) {
+		toggleMute({ savePreference: false });
+	}
 	setTimeout(() => {
 		testing = false;
 	});
