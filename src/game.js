@@ -30,6 +30,7 @@ let gestures = []; // records your solution to the current level
 let playbackGestures = []; // could be used for testing or a demo mode or just playing back what you just did
 let moves = 0; // your score (lower is better); only picking up bricks counts, not putting them down.
 let frameCounter = 0; // for precise recording/playback
+let desynchronized = false;
 
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
@@ -1773,6 +1774,7 @@ const deserializeJSON = (json) => {
 	playbackGestures.length = 0;
 	moves = 0;
 	frameCounter = 0;
+	desynchronized = false;
 	entities.forEach((entity) => {
 		delete entity.grabbed;
 		delete entity.grabOffset;
@@ -1797,6 +1799,7 @@ const initLevel = (level) => {
 	playbackGestures.length = 0;
 	moves = 0;
 	frameCounter = 0;
+	desynchronized = false;
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
 	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
@@ -2747,7 +2750,8 @@ const startGrab = (grab, {
 }) => {
 	if (!grab) {
 		if (duringPlayback) {
-			showMessageBox("Grab is not possible. Something must be different from the recording during playback, or some other bug has occurred.");
+			// showMessageBox("Grab is not possible. Something must be different from the recording during playback, or some other bug has occurred.");
+			desynchronized = true;
 		}
 		return;
 	}
@@ -2984,7 +2988,8 @@ const finishDrag = ({
 } = {}) => {
 	if (!canRelease()) {
 		if (duringPlayback) {
-			showMessageBox("Cannot release held block. Something must be different from the recording during playback, or some other bug has occurred.");
+			// showMessageBox("Cannot release held block. Something must be different from the recording during playback, or some other bug has occurred.");
+			desynchronized = true;
 		}
 		return;
 	}
@@ -3744,7 +3749,8 @@ const playback = () => {
 					}
 					// playSound("blockClick");
 				} else {
-					showMessageBox("Something must be different between recording and playback.");
+					// showMessageBox("Something must be different between recording and playback.");
+					desynchronized = true;
 				}
 			} else if (gesture.type === "place") {
 				updateDrag(playbackMouse);
@@ -4255,6 +4261,29 @@ const animate = () => {
 	debugWorldSpaceRects.length = 0;
 
 	ctx.restore(); // world viewport
+
+	if (desynchronized) {
+		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		for (let i = 0, j = 0; i < imageData.data.length; i += 4, j += 4) {
+			if (Math.random() > 0.9999) {
+				j += 4;
+			}
+			if (Math.random() > 0.99999) {
+				j -= 80;
+			}
+			imageData.data[i] = imageData.data[j];
+			imageData.data[i + 1] = imageData.data[j + 1];
+			imageData.data[i + 2] = imageData.data[j + 2];
+			imageData.data[i + 3] = imageData.data[j + 3];
+		}
+		ctx.putImageData(imageData, 0, 0);
+
+		if (Math.random() > 0.7) {
+			playSound("deathByWater");
+		} else {
+			playSound("rustle0");
+		}
+	}
 
 	if (showDebug) {
 
