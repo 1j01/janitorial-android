@@ -4263,7 +4263,12 @@ const animate = () => {
 	ctx.restore(); // world viewport
 
 	if (desynchronized) {
-		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		// VHS effect
+		const topLeft = worldToCanvas(bounds.x, bounds.y);
+		const bottomRight = worldToCanvas(bounds.x + bounds.width, bounds.y + bounds.height);
+		const width = Math.min(bottomRight.x - topLeft.x, canvas.width - topLeft.x);
+		const height = Math.min(bottomRight.y - topLeft.y, canvas.height - topLeft.y);
+		const imageData = ctx.getImageData(topLeft.x, topLeft.y, width, height);
 		for (let i = 0, j = 0; i < imageData.data.length; i += 4, j += 4) {
 			if (Math.random() > 0.9999) {
 				j += 4;
@@ -4276,11 +4281,12 @@ const animate = () => {
 			imageData.data[i + 2] = imageData.data[j + 2];
 			imageData.data[i + 3] = imageData.data[j + 3];
 		}
-		ctx.putImageData(imageData, 0, 0);
+		ctx.putImageData(imageData, topLeft.x, topLeft.y);
 
 		if (Math.random() > 0.7) {
 			playSound("deathByWater");
 		} else {
+			// playSound(`rustle${Math.floor(Math.random() * numRustles)}`);
 			playSound("rustle0");
 		}
 	}
