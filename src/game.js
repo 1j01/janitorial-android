@@ -3827,6 +3827,9 @@ const playback = () => {
 const simulate = (entities) => {
 	frameCounter += 1;
 	playback();
+	if (paused) { // playback() can pause! and it's important for desync comparison debug to stop immediately
+		return;
+	}
 
 	updateAccelerationStructures();
 
@@ -4542,6 +4545,7 @@ const initUI = () => {
 					x: previewEntity.x,
 					y: previewEntity.y,
 					muted,
+					paused,
 					showDebug,
 					currentLevel,
 					entities,
@@ -4556,6 +4560,7 @@ const initUI = () => {
 					frameCounter,
 				};
 				muted = true;
+				paused = false;
 				showDebug = false;
 				entities = [];
 				currentLevel = { entities };
@@ -4571,6 +4576,7 @@ const initUI = () => {
 				simulate([previewEntity]);
 				({
 					muted,
+					paused,
 					showDebug,
 					currentLevel,
 					entities,
