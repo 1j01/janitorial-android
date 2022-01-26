@@ -2545,15 +2545,15 @@ const updateMouse = (event) => {
 		t: frameCounter,
 	});
 };
-const brickUnderMouse = (includeFixed) => {
+const brickAt = ({ worldX, worldY }, { includeFixed = false } = {}) => {
 	for (let i = entities.length - 1; i >= 0; i -= 1) {
 		const entity = entities[i];
 		if (
 			(includeFixed || !entity.fixed) &&
-			entity.x < mouse.worldX &&
-			entity.x + entity.width > mouse.worldX &&
-			entity.y < mouse.worldY &&
-			entity.y + entity.height > mouse.worldY
+			entity.x < worldX &&
+			entity.x + entity.width > worldX &&
+			entity.y < worldY &&
+			entity.y + entity.height > worldY
 		) {
 			return entity;
 		}
@@ -2638,7 +2638,7 @@ const connectsToFixed = (startEntity, { direction = 0, ignoreEntities = [] } = {
 	return search(startEntity);
 };
 
-const possibleGrabs = () => {
+const possibleGrabs = ({ worldX, worldY } = mouse) => {
 	const findAttached = (brick, direction, attached, topLevel) => {
 		const entitiesToCheck1 = [].concat(
 			entitiesByTopY[brick.y + brick.height] || [],
@@ -2699,7 +2699,7 @@ const possibleGrabs = () => {
 		return true;
 	};
 
-	const brick = brickUnderMouse(editing);
+	const brick = brickAt({ worldX, worldY }, { includeFixed: editing });
 	if (!brick) {
 		return [];
 	}
@@ -2740,7 +2740,11 @@ const possibleGrabs = () => {
 };
 
 let pendingGrabs = [];
-const startGrab = (grab, grabType, duringPlayback) => {
+const startGrab = (grab, {
+	grabType,
+	duringPlayback = false,
+	mouse: mouseParam = mouse // using destructuring to default to global mouse for option named mouse
+}) => {
 	if (!grab) {
 		if (duringPlayback) {
 			showMessageBox("Grab is not possible. Something must be different from the recording during playback, or some other bug has occurred.");
@@ -2752,12 +2756,12 @@ const startGrab = (grab, grabType, duringPlayback) => {
 	for (const brick of dragging) {
 		brick.grabbed = true;
 		brick.grabOffset = {
-			// x: brick.x - floor(mouse.worldX, snapX),
-			// y: brick.y - floor(mouse.worldY, snapY),
+			// x: brick.x - floor(mouseParam.worldX, snapX),
+			// y: brick.y - floor(mouseParam.worldY, snapY),
 			// so you can place blocks that were grabbed when they weren't on the grid:
 			// (note: this does lose relative sub-grid positions of bricks)
-			x: floor(brick.x, snapX) - floor(mouse.worldX, snapX),
-			y: floor(brick.y, snapY) - floor(mouse.worldY, snapY),
+			x: floor(brick.x, snapX) - floor(mouseParam.worldX, snapX),
+			y: floor(brick.y, snapY) - floor(mouseParam.worldY, snapY),
 		};
 		if (editing) {
 			brick.selected = true;
@@ -2769,8 +2773,8 @@ const startGrab = (grab, grabType, duringPlayback) => {
 	}
 	gestures.push({
 		type: "pickup",
-		x: mouse.worldX,
-		y: mouse.worldY,
+		x: mouseParam.worldX,
+		y: mouseParam.worldY,
 		// time: performance.now(), // playback would not be reproducible if based on real time
 		t: frameCounter,
 		grabType,
@@ -2797,13 +2801,13 @@ canvas.addEventListener("pointermove", (event) => {
 		if (
 			mouse.y < mouse.atDragStart.y - threshold
 		) {
-			startGrab(pendingGrabs.upward, "upward");
+			startGrab(pendingGrabs.upward, { grabType: "upward" });
 			pendingGrabs = [];
 		}
 		if (
 			mouse.y > mouse.atDragStart.y + threshold
 		) {
-			startGrab(pendingGrabs.downward, "downward");
+			startGrab(pendingGrabs.downward, { grabType: "downward" });
 			pendingGrabs = [];
 		}
 	}
@@ -2859,7 +2863,7 @@ canvas.addEventListener("pointerdown", (event) => {
 			}
 		}
 		if (grabs.length === 1) {
-			startGrab(grabs[0], "single");
+			startGrab(grabs[0], { grabType: "single" });
 			playSound("blockClick");
 		} else if (grabs.length) {
 			pendingGrabs = grabs;
@@ -2872,7 +2876,7 @@ canvas.addEventListener("pointerdown", (event) => {
 });
 canvas.addEventListener("contextmenu", (event) => {
 	event.preventDefault();
-	const hoveredBrick = brickUnderMouse(true);
+	const hoveredBrick = brickAt(mouse, { includeFixed: true });
 	if (hoveredBrick && "switchID" in hoveredBrick) {
 		undoable(() => {
 			// @TODO: better UI
@@ -2956,7 +2960,10 @@ const canRelease = () => {
 	return connectsToCeiling !== connectsToFloor;
 };
 
-const finishDrag = (duringPlayback) => {
+const finishDrag = ({
+	duringPlayback = false,
+	mouse: mouseParam = mouse // using destructuring to default to global mouse for option named mouse
+} = {}) => {
 	if (!canRelease()) {
 		if (duringPlayback) {
 			showMessageBox("Cannot release held block. Something must be different from the recording during playback, or some other bug has occurred.");
@@ -2970,8 +2977,8 @@ const finishDrag = (duringPlayback) => {
 	dragging = [];
 	gestures.push({
 		type: "place",
-		x: mouse.worldX,
-		y: mouse.worldY,
+		x: mouseParam.worldX,
+		y: mouseParam.worldY,
 		t: frameCounter,
 		editing,
 	});
@@ -3720,40 +3727,38 @@ const simulate = (entities) => {
 	for (const gesture of playbackGestures) {
 		if (gesture.t === frameCounter) {
 			// console.log("playback", gesture);
-			// mock mouse for playback
-			// @TODO: pure functions would make this nicer... (but maybe not other things)
-			const oldMouse = mouse;
-			mouse = {
-				get x () {
-					// eslint-disable-next-line no-console
-					console.warn("Shouldn't use mouse.x, right?");
-					return gesture.x;
-				},
-				get y () {
-					// eslint-disable-next-line no-console
-					console.warn("Shouldn't use mouse.y, right?");
-					return gesture.y;
-				},
-				worldX: gesture.x,
-				worldY: gesture.y,
-			};
+			const playbackMouse = { worldX: gesture.x, worldY: gesture.y };
+			const { x, y } = worldToCanvas(playbackMouse.worldX, playbackMouse.worldY);
+			playbackMouse.x = x;
+			playbackMouse.y = y;
+			// @TODO: show mouse in a nice way
+			debugWorldSpaceRect(gesture.x - 5, gesture.y - 5, 10, 10);
 			if (gesture.type === "pickup") {
-				const grabs = possibleGrabs();
+				const grabs = possibleGrabs(playbackMouse);
+				// console.log("grabs", grabs, "playbackMouse", playbackMouse, "brick", brickAt(playbackMouse));
 				if (grabs && !dragging.length) {
 					if (gesture.grabType === "upward") {
-						startGrab(grabs.upward, "upward", true);
+						startGrab(grabs.upward, { grabType: "upward", duringPlayback: true, mouse: playbackMouse });
 					} else if (gesture.grabType === "downward") {
-						startGrab(grabs.downward, "downward", true);
+						startGrab(grabs.downward, { grabType: "downward", duringPlayback: true, mouse: playbackMouse });
 					} else {
-						startGrab(grabs[0], "single", true);
+						startGrab(grabs[0], { grabType: "single", duringPlayback: true, mouse: playbackMouse });
 					}
 					// playSound("blockClick");
+				} else {
+					showMessageBox("Something must be different between recording and playback.");
 				}
 			} else if (gesture.type === "place") {
-				updateDrag(mouse);
-				finishDrag(true);
+				updateDrag(playbackMouse);
+				finishDrag({ duringPlayback: true, mouse: playbackMouse });
+			} else if (gesture.type === "pointer") {
+				updateDrag(playbackMouse);
+				mouse.worldX = playbackMouse.worldX;
+				mouse.worldY = playbackMouse.worldY;
+				mouse.x = playbackMouse.x;
+				mouse.y = playbackMouse.y;
+				gestures.push(gesture); // preserve this information in case of re-saving a recording from playback
 			}
-			mouse = oldMouse;
 		}
 	}
 
@@ -4181,7 +4186,7 @@ const animate = () => {
 	// draw connections between switches and controlled entities
 	let showConnections = false;
 	if (editing && (hovered.length || dragging.length)) {
-		const hoveredBrick = brickUnderMouse(true);
+		const hoveredBrick = brickAt(mouse, { includeFixed: true });
 		showConnections = hoveredBrick && ("switchID" in hoveredBrick || "teleportID" in hoveredBrick);
 	}
 	if (showConnections) {
@@ -4290,7 +4295,7 @@ Lines marked with [?] may be outdated for this frame.
 		}
 		const x = 1 + editorUI.offsetWidth;
 		drawText(ctx, debugText, x, 1, "white");
-		const hoveredBrick = brickUnderMouse(true);
+		const hoveredBrick = brickAt(mouse, { includeFixed: true });
 		if (dragging.length) {
 			drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
 			// } else if (hovered.length) {
