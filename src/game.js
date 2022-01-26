@@ -3183,7 +3183,7 @@ const simulateJunkbot = (junkbot) => {
 	junkbot.momentumY = Math.min(5, Math.max(-5, junkbot.momentumY));
 	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notDroplet);
 	const unaligned = junkbot.x % 15 !== 0;
-	const jumpStarting = junkbot.momentumY < 0;
+	const jumpStarting = junkbot.momentumY < -2;
 	if (inAir || jumpStarting || unaligned) {
 		if (inAir) {
 			debug("JUNKBOT", "IN AIR - DO GRID-BASED BALLISTIC MOTION");
