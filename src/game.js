@@ -4269,20 +4269,21 @@ const animate = () => {
 		const width = Math.min(bottomRight.x - topLeft.x, canvas.width - topLeft.x);
 		const height = Math.min(bottomRight.y - topLeft.y, canvas.height - topLeft.y);
 		const imageData = ctx.getImageData(topLeft.x, topLeft.y, width, height);
-		for (let i = 0, j = 0; i < imageData.data.length; i += 4, j += 4) {
-			if (Math.random() > 0.9999) {
-				j += 4;
+		if (width && height) {
+			for (let i = 0, j = 0; i < imageData.data.length; i += 4, j += 4) {
+				if (Math.random() > 0.9999) {
+					j += 4;
+				}
+				if (Math.random() > 0.99999) {
+					j -= 80;
+				}
+				imageData.data[i] = imageData.data[j];
+				imageData.data[i + 1] = imageData.data[j + 1];
+				imageData.data[i + 2] = imageData.data[j + 2];
+				imageData.data[i + 3] = imageData.data[j + 3];
 			}
-			if (Math.random() > 0.99999) {
-				j -= 80;
-			}
-			imageData.data[i] = imageData.data[j];
-			imageData.data[i + 1] = imageData.data[j + 1];
-			imageData.data[i + 2] = imageData.data[j + 2];
-			imageData.data[i + 3] = imageData.data[j + 3];
+			ctx.putImageData(imageData, topLeft.x, topLeft.y);
 		}
-		ctx.putImageData(imageData, topLeft.x, topLeft.y);
-
 		if (Math.random() > 0.7) {
 			playSound("deathByWater");
 		} else {
