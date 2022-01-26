@@ -3725,7 +3725,7 @@ const simulate = (entities) => {
 	frameCounter += 1;
 
 	for (const gesture of playbackGestures) {
-		if (gesture.t === frameCounter) {
+		if (gesture.t === frameCounter + 2) {
 			// console.log("playback", gesture);
 			const playbackMouse = { worldX: gesture.x, worldY: gesture.y };
 			const { x, y } = worldToCanvas(playbackMouse.worldX, playbackMouse.worldY);
