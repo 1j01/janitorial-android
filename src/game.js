@@ -3767,7 +3767,7 @@ const findMisplaceEntities = (withinEntities, comparedToEntities) => {
 
 const playback = () => {
 	for (const gesture of playbackGestures) {
-		if (gesture.t === frameCounter) {
+		if (gesture.t === frameCounter - 2) {
 			if (gesture.levelBefore) {
 				// compare level state to see if it's desynchronized
 				if (currentLevel.name !== gesture.levelBefore.name) {
@@ -4234,7 +4234,7 @@ const render = () => {
 
 	let playbackGesture;
 	for (const gesture of playbackGestures) {
-		if (gesture.t > frameCounter) {
+		if (gesture.t > frameCounter - 2) {
 			playbackGesture = gesture;
 			break;
 		}
