@@ -3836,6 +3836,18 @@ const simulate = (entities) => {
 	if (paused) { // playback() can pause! and it's important for desync comparison debug to stop immediately
 		return;
 	}
+	// this is some seriously performance-demanding debug
+	// @TODO: do json diffing instead, and support rewind-replay in addition to whole solution replay
+	if (window.recordLevelStateEveryFrame) {
+		gestures.push({
+			type: "step", // objectively not a gesture, @TODO: rename stuff
+			t: frameCounter,
+			x: mouse.worldX,
+			y: mouse.worldY,
+			editing,
+			levelBefore: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
+		});
+	}
 
 	updateAccelerationStructures();
 
