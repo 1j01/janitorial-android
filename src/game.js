@@ -3998,12 +3998,7 @@ window.addEventListener("error", () => {
 	// so my computer doesn't freeze up from the console logging messages about repeated errors
 	cancelAnimationFrame(rafid);
 });
-
-const animate = () => {
-	rafid = requestAnimationFrame(animate);
-
-	frameStartTime = Date.now();
-
+const controlViewport = () => {
 	if (!keys.ControlLeft && !keys.ControlRight && !keys.AltLeft && !keys.AltRight) {
 		if (keys.KeyW || keys.ArrowUp) {
 			viewport.centerY -= 20;
@@ -4034,83 +4029,15 @@ const animate = () => {
 			viewport.centerX += panFromMarginSpeed;
 		}
 	}
+	// limit viewport
 	if (currentLevel.bounds) {
 		viewport.centerY = Math.min((currentLevel.bounds.y + currentLevel.bounds.height - 36) + canvas.height / 2 / viewport.scale, viewport.centerY);
 		viewport.centerY = Math.max((currentLevel.bounds.y + 36) - canvas.height / 2 / viewport.scale, viewport.centerY);
 		viewport.centerX = Math.min((currentLevel.bounds.x + currentLevel.bounds.width - 30) + canvas.width / 2 / viewport.scale, viewport.centerX);
 		viewport.centerX = Math.max((currentLevel.bounds.x + 30) - canvas.width / 2 / viewport.scale, viewport.centerX);
 	}
-	updateMouseWorldPosition();
-
-	if (!paused) {
-		const now = performance.now();
-		const timeSinceLastSimulate = now - lastSimulateTime;
-		debug("TIME SINCE LAST SIMULATE", timeSinceLastSimulate);
-		if (timeSinceLastSimulate >= 1000 / targetFPS) {
-			debug("REMAINDER MILLISECONDS", timeSinceLastSimulate - 1000 / targetFPS);
-			simulate(entities);
-			smoothedFrameTime += (timeSinceLastSimulate - smoothedFrameTime) / fpsSmoothing;
-			lastSimulateTime = now;
-		}
-		const smoothedFPS = 1000 / smoothedFrameTime;
-		debug("SIMULATION FPS", smoothedFPS.toFixed(0));
-		debug("TARGET FPS", targetFPS);
-	} else {
-		updateAccelerationStructures(); // also within simulate()
-	}
-
-	if (winOrLose() !== winLoseState) {
-		winLoseState = winOrLose();
-		if (winLoseState === "lose" && !paused) {
-			paused = true;
-		}
-		if (winLoseState === "win" && !paused) {
-			paused = true;
-			if (!testing) {
-				const timeSinceCollectBin = Date.now() - collectBinTime;
-				const levelAtWin = currentLevel;
-				setTimeout(() => {
-					if (currentLevel !== levelAtWin) {
-						return; // especially for while running tests and clicking on a test to go to
-					}
-					playSound("ohYeah");
-					try {
-						if (currentLevel.title) {
-							const scoreKey = `fewest moves for ${currentLevel.title.toLowerCase()}`;
-							const solutionKey = `best solution for ${currentLevel.title.toLowerCase()}`;
-							const formerFewest = Number(localStorage[scoreKey]);
-							if (!isFinite(formerFewest) || formerFewest >= moves) {
-								localStorage[scoreKey] = moves;
-								// save gestures for playback (for enjoyment and TESTING),
-								// and possible future server-verification
-								// Don't save over if replaying a solution. (Maybe should extend to the score as well...)
-								if (playbackGestures.length === 0) {
-									localStorage[solutionKey] = JSON.stringify(gestures);
-									// eslint-disable-next-line no-console
-									console.log("Saved solution for", currentLevel.title);
-								}
-							}
-						}
-					} catch (error) {
-						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
-					}
-					setTimeout(async () => {
-						if (currentLevel !== levelAtWin) {
-							return; // especially for while running tests and clicking on a test to go to
-						}
-						if (location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/)) {
-							if (levelSelect.selectedIndex === 0) {
-								levelSelect.selectedIndex += 1;
-							}
-							levelSelect.selectedIndex += 1;
-							await loadLevelFromLevelSelect();
-							paused = false;
-						}
-					}, 500);
-				}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000 - timeSinceCollectBin);
-			}
-		}
-	}
+};
+const render = () => {
 
 	sortEntitiesForRendering(entities);
 
@@ -4348,6 +4275,90 @@ Lines marked with [?] may be outdated for this frame.
 			drawText(ctx, `HOVERED: ${JSON.stringify(hoveredBrick, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
 		}
 	}
+};
+const checkLevelEnd = () => {
+	if (winOrLose() !== winLoseState) {
+		winLoseState = winOrLose();
+		if (winLoseState === "lose" && !paused) {
+			paused = true;
+		}
+		if (winLoseState === "win" && !paused) {
+			paused = true;
+			if (!testing) {
+				const timeSinceCollectBin = Date.now() - collectBinTime;
+				const levelAtWin = currentLevel;
+				setTimeout(() => {
+					if (currentLevel !== levelAtWin) {
+						return; // especially for while running tests and clicking on a test to go to
+					}
+					playSound("ohYeah");
+					try {
+						if (currentLevel.title) {
+							const scoreKey = `fewest moves for ${currentLevel.title.toLowerCase()}`;
+							const solutionKey = `best solution for ${currentLevel.title.toLowerCase()}`;
+							const formerFewest = Number(localStorage[scoreKey]);
+							if (!isFinite(formerFewest) || formerFewest >= moves) {
+								localStorage[scoreKey] = moves;
+								// save gestures for playback (for enjoyment and TESTING),
+								// and possible future server-verification
+								// Don't save over if replaying a solution. (Maybe should extend to the score as well...)
+								if (playbackGestures.length === 0) {
+									localStorage[solutionKey] = JSON.stringify(gestures);
+									// eslint-disable-next-line no-console
+									console.log("Saved solution for", currentLevel.title);
+								}
+							}
+						}
+					} catch (error) {
+						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
+					}
+					setTimeout(async () => {
+						if (currentLevel !== levelAtWin) {
+							return; // especially for while running tests and clicking on a test to go to
+						}
+						if (location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/)) {
+							if (levelSelect.selectedIndex === 0) {
+								levelSelect.selectedIndex += 1;
+							}
+							levelSelect.selectedIndex += 1;
+							await loadLevelFromLevelSelect();
+							paused = false;
+						}
+					}, 500);
+				}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000 - timeSinceCollectBin);
+			}
+		}
+	}
+};
+const animate = () => {
+	rafid = requestAnimationFrame(animate);
+
+	frameStartTime = Date.now();
+
+	controlViewport();
+	updateMouseWorldPosition(); // (with new viewport)
+
+	// run the simulation
+	if (!paused) {
+		const now = performance.now();
+		const timeSinceLastSimulate = now - lastSimulateTime;
+		debug("TIME SINCE LAST SIMULATE", timeSinceLastSimulate);
+		if (timeSinceLastSimulate >= 1000 / targetFPS) {
+			debug("REMAINDER MILLISECONDS", timeSinceLastSimulate - 1000 / targetFPS);
+			simulate(entities);
+			smoothedFrameTime += (timeSinceLastSimulate - smoothedFrameTime) / fpsSmoothing;
+			lastSimulateTime = now;
+		}
+		const smoothedFPS = 1000 / smoothedFrameTime;
+		debug("SIMULATION FPS", smoothedFPS.toFixed(0));
+		debug("TARGET FPS", targetFPS);
+	} else {
+		updateAccelerationStructures(); // also within simulate()
+	}
+
+	checkLevelEnd();
+
+	render();
 };
 
 const wrapContents = (target, wrapper) => {
