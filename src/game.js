@@ -2767,6 +2767,19 @@ const startGrab = (grab, {
 		}
 		return;
 	}
+	// record before we start dragging, so during playback we can compare the preconditions
+	// when debugging why a grab is not possible in re-simulation
+	gestures.push({
+		type: "pickup",
+		x: mouseParam.worldX,
+		y: mouseParam.worldY,
+		// time: performance.now(), // playback would not be reproducible if based on real time
+		t: frameCounter,
+		grabType,
+		editing,
+		levelBefore: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
+	});
+
 	undoable();
 	dragging = [...grab];
 	for (const brick of dragging) {
@@ -2787,16 +2800,6 @@ const startGrab = (grab, {
 	if (!editing) {
 		moves += 1;
 	}
-	gestures.push({
-		type: "pickup",
-		x: mouseParam.worldX,
-		y: mouseParam.worldY,
-		// time: performance.now(), // playback would not be reproducible if based on real time
-		t: frameCounter,
-		grabType,
-		editing,
-		level: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
-	});
 };
 
 canvas.addEventListener("wheel", (event) => {
@@ -3006,19 +3009,22 @@ const finishDrag = ({
 		}
 		return;
 	}
-	dragging.forEach((entity) => {
-		delete entity.grabbed;
-		delete entity.grabOffset;
-	});
-	dragging = [];
+	// record before we change the level state, so during playback we can compare the preconditions
+	// when debugging why a release is not possible in re-simulation
 	gestures.push({
 		type: "place",
 		x: mouseParam.worldX,
 		y: mouseParam.worldY,
 		t: frameCounter,
 		editing,
-		level: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
+		levelBefore: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
 	});
+
+	dragging.forEach((entity) => {
+		delete entity.grabbed;
+		delete entity.grabOffset;
+	});
+	dragging = [];
 	playSound("blockDrop");
 	save();
 };
@@ -3743,9 +3749,9 @@ const updateAccelerationStructures = () => {
 const playback = () => {
 	for (const gesture of playbackGestures) {
 		if (gesture.t === frameCounter + 2) {
-			if (gesture.level) {
+			if (gesture.levelBefore) {
 				// compare level state to see if it's desynchronized
-				if (currentLevel.name !== gesture.level.name) {
+				if (currentLevel.name !== gesture.levelBefore.name) {
 					desynchronized = true;
 					paused = true;
 					showMessageBox("Wrong level for playback.");
@@ -3753,7 +3759,7 @@ const playback = () => {
 				}
 				for (const entity of entities) {
 					let found = false;
-					for (const playbackEntity of gesture.level.entities) {
+					for (const playbackEntity of gesture.levelBefore.entities) {
 						if (
 							entity.type === playbackEntity.type &&
 							(
@@ -4156,12 +4162,12 @@ const render = () => {
 	// ctx.restore();
 
 	let entitiesToDraw = entities;
-	if (desynchronized?.level) {
+	if (desynchronized?.levelBefore) {
 		if (Math.sin(Date.now() / 1000) > 0) {
-			entitiesToDraw = desynchronized?.level?.entities;
-			drawText(ctx, "Showing: Recording", 10, 10, "white", "green");
+			entitiesToDraw = desynchronized?.levelBefore?.entities;
+			drawText(ctx, "Showing: Recording (before gesture)", 10, 10, "white", "green");
 		} else {
-			drawText(ctx, "Showing: Simulated Playback", 10, 10, "black", "orange");
+			drawText(ctx, "Showing: Simulated Playback (or current state)", 10, 10, "black", "orange");
 		}
 	}
 
@@ -4267,7 +4273,7 @@ const render = () => {
 
 	ctx.restore(); // world viewport
 
-	if (desynchronized && !desynchronized.level) {
+	if (desynchronized && !desynchronized.levelBefore) {
 
 		// VHS effect
 		const topLeft = worldToCanvas(bounds.x, bounds.y);
