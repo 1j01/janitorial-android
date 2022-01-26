@@ -3721,9 +3721,7 @@ const updateAccelerationStructures = () => {
 	cleanByYObj(entitiesByBottomY);
 };
 
-const simulate = (entities) => {
-	frameCounter += 1;
-
+const playback = () => {
 	for (const gesture of playbackGestures) {
 		if (gesture.t === frameCounter + 2) {
 			// console.log("playback", gesture);
@@ -3761,6 +3759,11 @@ const simulate = (entities) => {
 			}
 		}
 	}
+};
+
+const simulate = (entities) => {
+	frameCounter += 1;
+	playback();
 
 	updateAccelerationStructures();
 
