@@ -2538,12 +2538,12 @@ const updateMouse = (event) => {
 	mouse.x = event.pageX * window.devicePixelRatio;
 	mouse.y = event.pageY * window.devicePixelRatio;
 	updateMouseWorldPosition();
-	// gestures.push({
-	// 	type: "pointer",
-	// 	x: mouse.worldX,
-	// 	y: mouse.worldY,
-	// 	t: frameCounter,
-	// });
+	gestures.push({
+		type: "pointer",
+		x: mouse.worldX,
+		y: mouse.worldY,
+		t: frameCounter,
+	});
 };
 const brickUnderMouse = (includeFixed) => {
 	for (let i = entities.length - 1; i >= 0; i -= 1) {
