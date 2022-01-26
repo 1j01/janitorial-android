@@ -3748,7 +3748,7 @@ const updateAccelerationStructures = () => {
 
 const playback = () => {
 	for (const gesture of playbackGestures) {
-		if (gesture.t === frameCounter + 2) {
+		if (gesture.t === frameCounter) {
 			if (gesture.levelBefore) {
 				// compare level state to see if it's desynchronized
 				if (currentLevel.name !== gesture.levelBefore.name) {
@@ -4222,7 +4222,7 @@ const render = () => {
 
 	let playbackGesture;
 	for (const gesture of playbackGestures) {
-		if (gesture.t > frameCounter + 2) {
+		if (gesture.t > frameCounter) {
 			playbackGesture = gesture;
 			break;
 		}
