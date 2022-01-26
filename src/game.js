@@ -3757,8 +3757,7 @@ const playback = () => {
 					showMessageBox("Wrong level for playback.");
 					return;
 				}
-				for (const entity of entities) {
-					let found = false;
+				const misplaced = entities.filter((entity) => {
 					for (const playbackEntity of gesture.levelBefore.entities) {
 						if (
 							entity.type === playbackEntity.type &&
@@ -3769,17 +3768,21 @@ const playback = () => {
 									entity.y === playbackEntity.y)
 							)
 						) {
-							found = true;
-							break;
+							return false;
 						}
 					}
-					if (!found) {
-						// desynchronized = true;
-						desynchronized = gesture;
-						paused = true;
-						showMessageBox("Desynchronized playback.");
-						return;
+					return true;
+				});
+				if (misplaced.length) {
+					// desynchronized = true;
+					desynchronized = gesture;
+					paused = true;
+					window.misplaced = misplaced;
+					for (const entity of misplaced) {
+						entity.misplaced = true;
 					}
+					showMessageBox("Desynchronized playback.");
+					return;
 				}
 			}
 
@@ -4146,7 +4149,7 @@ const render = () => {
 	}
 
 	const shouldHilight = (entity) => {
-		return editing && entity.selected;
+		return editing ? entity.selected : entity.misplaced;
 		// if (dragging.length) {
 		// 	return dragging.indexOf(entity) > -1;
 		// }
