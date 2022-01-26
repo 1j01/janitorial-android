@@ -2361,6 +2361,18 @@ addEventListener("keydown", (event) => {
 	if (event.code === "Minus" || event.code === "NumpadSubtract") {
 		zoomOut();
 	}
+	if (event.ctrlKey && event.key === "p") {
+		event.preventDefault();
+		// playback saved solution recording
+		const json = localStorage[`best solution for ${currentLevel.title.toLowerCase()}`];
+		if (json) {
+			toggleEditing();
+			if (editing) {
+				toggleEditing();
+			}
+			playbackGestures = JSON.parse(json);
+		}
+	}
 	switch (event.key.toUpperCase()) {
 		case " ": // Spacebar
 		case "P":
