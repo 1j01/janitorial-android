@@ -2897,6 +2897,24 @@ canvas.addEventListener("contextmenu", (event) => {
 	}
 });
 
+// i.e. space generally free; filter for tangible entities
+const notDroplet = (entity) => (
+	entity.type !== "droplet"
+);
+// i.e. space generally free for junkbot walking
+const notBinOrDroplet = (entity) => (
+	entity.type !== "bin" &&
+	entity.type !== "droplet"
+);
+// i.e. ground to walk on
+const notBinOrDropletOrEnemyBot = (entity) => (
+	notBinOrDroplet(entity) &&
+	entity.type !== "gearbot" &&
+	entity.type !== "climbbot" &&
+	entity.type !== "flybot" &&
+	entity.type !== "eyebot"
+);
+
 const updateDrag = (mouse) => {
 	if (isFinite(mouse.worldX) && isFinite(mouse.worldY)) {
 		for (const brick of dragging) {
@@ -2918,7 +2936,7 @@ const canRelease = () => {
 	const connectedToFixed = allConnectedToFixed();
 
 	const someCollision = dragging.some((entity) => (
-		entityCollisionTest(entity.x, entity.y, entity, () => true)
+		entityCollisionTest(entity.x, entity.y, entity, notDroplet)
 	));
 	if (someCollision) {
 		return false;
@@ -3000,24 +3018,6 @@ addEventListener("pointerup", () => {
 		}
 	}
 });
-
-// i.e. space generally free; filter for tangible entities
-const notDroplet = (entity) => (
-	entity.type !== "droplet"
-);
-// i.e. space generally free for junkbot walking
-const notBinOrDroplet = (entity) => (
-	entity.type !== "bin" &&
-	entity.type !== "droplet"
-);
-// i.e. ground to walk on
-const notBinOrDropletOrEnemyBot = (entity) => (
-	notBinOrDroplet(entity) &&
-	entity.type !== "gearbot" &&
-	entity.type !== "climbbot" &&
-	entity.type !== "flybot" &&
-	entity.type !== "eyebot"
-);
 
 // #@: simulateCrate, simulateBlock, simulateBrick, falling behavior
 const simulateGravity = () => {
