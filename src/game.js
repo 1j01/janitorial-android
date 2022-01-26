@@ -4144,8 +4144,13 @@ const render = () => {
 	// ctx.restore();
 
 	let entitiesToDraw = entities;
-	if (desynchronized?.level && Math.sin(Date.now() / 1000) > 0) {
-		entitiesToDraw = desynchronized?.level?.entities;
+	if (desynchronized?.level) {
+		if (Math.sin(Date.now() / 1000) > 0) {
+			entitiesToDraw = desynchronized?.level?.entities;
+			drawText(ctx, "Showing: Recording", 10, 10, "white", "green");
+		} else {
+			drawText(ctx, "Showing: Simulated Playback", 10, 10, "black", "orange");
+		}
 	}
 
 	for (const entity of entitiesToDraw) {
