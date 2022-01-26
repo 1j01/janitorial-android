@@ -4077,7 +4077,10 @@ const animate = () => {
 								localStorage[scoreKey] = moves;
 								// save gestures for playback (for enjoyment and TESTING),
 								// and possible future server-verification
-								localStorage[solutionKey] = JSON.stringify(gestures);
+								// Don't save over if replaying a solution. (Maybe should extend to the score as well...)
+								if (playbackGestures.length === 0) {
+									localStorage[solutionKey] = JSON.stringify(gestures);
+								}
 							}
 						}
 					} catch (error) {
