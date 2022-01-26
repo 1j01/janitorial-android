@@ -2783,6 +2783,7 @@ const startGrab = (grab, {
 		t: frameCounter,
 		grabType,
 		editing,
+		level: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
 	});
 };
 
@@ -3004,6 +3005,7 @@ const finishDrag = ({
 		y: mouseParam.worldY,
 		t: frameCounter,
 		editing,
+		level: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
 	});
 	playSound("blockDrop");
 	save();
@@ -3729,6 +3731,40 @@ const updateAccelerationStructures = () => {
 const playback = () => {
 	for (const gesture of playbackGestures) {
 		if (gesture.t === frameCounter + 2) {
+			if (gesture.level) {
+				// compare level state to see if it's desynchronized
+				if (currentLevel.name !== gesture.level.name) {
+					desynchronized = true;
+					paused = true;
+					showMessageBox("Wrong level for playback.");
+					return;
+				}
+				for (const entity of entities) {
+					let found = false;
+					for (const playbackEntity of gesture.level.entities) {
+						if (
+							entity.type === playbackEntity.type &&
+							(
+								(entity.grabbed &&
+									playbackEntity.grabbed) ||
+								(entity.x === playbackEntity.x &&
+									entity.y === playbackEntity.y)
+							)
+						) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						// desynchronized = true;
+						desynchronized = gesture;
+						paused = true;
+						showMessageBox("Desynchronized playback.");
+						return;
+					}
+				}
+			}
+
 			// console.log("playback", gesture);
 			const playbackMouse = { worldX: gesture.x, worldY: gesture.y };
 			const { x, y } = worldToCanvas(playbackMouse.worldX, playbackMouse.worldY);
@@ -4107,7 +4143,12 @@ const render = () => {
 	// ctx.drawImage(testVideo, 0, 0);
 	// ctx.restore();
 
-	for (const entity of entities) {
+	let entitiesToDraw = entities;
+	if (desynchronized?.level && Math.sin(Date.now() / 1000) > 0) {
+		entitiesToDraw = desynchronized?.level?.entities;
+	}
+
+	for (const entity of entitiesToDraw) {
 		if (entity.grabbed) {
 			ctx.globalAlpha = placeable ? 0.8 : 0.3;
 		}
@@ -4189,7 +4230,8 @@ const render = () => {
 
 	ctx.restore(); // world viewport
 
-	if (desynchronized) {
+	if (desynchronized && !desynchronized.level) {
+
 		// VHS effect
 		const topLeft = worldToCanvas(bounds.x, bounds.y);
 		const bottomRight = worldToCanvas(bounds.x + bounds.width, bounds.y + bounds.height);
