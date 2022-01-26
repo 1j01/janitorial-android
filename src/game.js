@@ -3235,7 +3235,13 @@ const simulateJunkbot = (junkbot) => {
 		}
 
 		const jumpBrick = entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, (brick) => brick.type === "jump");
-		if (jumpBrick && jumpBrick.x <= junkbot.x && jumpBrick.x + jumpBrick.width >= junkbot.x + junkbot.width) {
+		const ahead = entityCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot, notDroplet);
+		if (
+			jumpBrick &&
+			jumpBrick.x <= junkbot.x &&
+			jumpBrick.x + jumpBrick.width >= junkbot.x + junkbot.width &&
+			!ahead // prevent getting stuck bouncing up against a wall
+		) {
 			// @TODO: DRY with other jump code
 			// Might also want to trigger related behavior like dying on fire bricks here
 			// Note this must be after junkbot.momentumY += 1;
