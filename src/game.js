@@ -4197,6 +4197,26 @@ const render = () => {
 		ctx.globalAlpha = 1;
 	}
 
+	let playbackGesture;
+	for (const gesture of playbackGestures) {
+		if (gesture.t > frameCounter + 2) {
+			playbackGesture = gesture;
+			break;
+		}
+	}
+	if (playbackGesture) {
+		ctx.fillStyle = "white";
+		ctx.strokeStyle = "black";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.moveTo(playbackGesture.x, playbackGesture.y);
+		ctx.lineTo(playbackGesture.x, playbackGesture.y + 20);
+		ctx.lineTo(playbackGesture.x + 15, playbackGesture.y + 14);
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+	}
+
 	if (selectionBox) {
 		ctx.save();
 		ctx.beginPath();
