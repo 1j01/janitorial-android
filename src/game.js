@@ -2740,7 +2740,13 @@ const possibleGrabs = () => {
 };
 
 let pendingGrabs = [];
-const startGrab = (grab, grabType) => {
+const startGrab = (grab, grabType, duringPlayback) => {
+	if (!grab) {
+		if (duringPlayback) {
+			showMessageBox("Grab is not possible. Something must be different from the recording during playback, or some other bug has occurred.");
+		}
+		return;
+	}
 	undoable();
 	dragging = [...grab];
 	for (const brick of dragging) {
@@ -2950,8 +2956,11 @@ const canRelease = () => {
 	return connectsToCeiling !== connectsToFloor;
 };
 
-const finishDrag = () => {
+const finishDrag = (duringPlayback) => {
 	if (!canRelease()) {
+		if (duringPlayback) {
+			showMessageBox("Cannot release held block. Something must be different from the recording during playback, or some other bug has occurred.");
+		}
 		return;
 	}
 	dragging.forEach((entity) => {
@@ -3732,17 +3741,17 @@ const simulate = (entities) => {
 				const grabs = possibleGrabs();
 				if (grabs && !dragging.length) {
 					if (gesture.grabType === "upward") {
-						startGrab(grabs.upward, "upward");
+						startGrab(grabs.upward, "upward", true);
 					} else if (gesture.grabType === "downward") {
-						startGrab(grabs.downward, "downward");
+						startGrab(grabs.downward, "downward", true);
 					} else {
-						startGrab(grabs[0], "single");
+						startGrab(grabs[0], "single", true);
 					}
 					// playSound("blockClick");
 				}
 			} else if (gesture.type === "place") {
 				updateDrag(mouse);
-				finishDrag();
+				finishDrag(true);
 			}
 			mouse = oldMouse;
 		}
