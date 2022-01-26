@@ -26,7 +26,10 @@ let currentLevel = {
 	entities,
 	title: "Custom World",
 };
-let moves = 0;
+let gestures = []; // records your solution to the current level
+let playbackGestures = []; // could be used for testing or a demo mode or just playing back what you just did
+let moves = 0; // your score (lower is better); only picking up bricks counts, not putting them down.
+let frameCounter = 0; // for precise recording/playback
 
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
@@ -1629,7 +1632,7 @@ const undos = [];
 const redos = [];
 const clipboard = {};
 
-const mouse = { x: undefined, y: undefined };
+let mouse = { x: undefined, y: undefined, worldX: undefined, worldY: undefined };
 let dragging = [];
 let selectionBox;
 
@@ -1766,7 +1769,10 @@ const deserializeJSON = (json) => {
 	wind.length = 0;
 	laserBeams.length = 0;
 	teleportEffects.length = 0;
+	gestures.length = 0;
+	playbackGestures.length = 0;
 	moves = 0;
+	frameCounter = 0;
 	entities.forEach((entity) => {
 		delete entity.grabbed;
 		delete entity.grabOffset;
@@ -1783,11 +1789,14 @@ const initLevel = (level) => {
 	lastKeys = new Map();
 	undos.length = 0;
 	redos.length = 0;
-	dragging = [];
-	wind = [];
-	laserBeams = [];
-	teleportEffects = [];
+	dragging.length = 0;
+	wind.length = 0;
+	laserBeams.length = 0;
+	teleportEffects.length = 0;
+	gestures.length = 0;
+	playbackGestures.length = 0;
 	moves = 0;
+	frameCounter = 0;
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
 	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
@@ -2529,6 +2538,12 @@ const updateMouse = (event) => {
 	mouse.x = event.pageX * window.devicePixelRatio;
 	mouse.y = event.pageY * window.devicePixelRatio;
 	updateMouseWorldPosition();
+	// gestures.push({
+	// 	type: "pointer",
+	// 	x: mouse.worldX,
+	// 	y: mouse.worldY,
+	// 	t: frameCounter,
+	// });
 };
 const brickUnderMouse = (includeFixed) => {
 	for (let i = entities.length - 1; i >= 0; i -= 1) {
@@ -2725,7 +2740,7 @@ const possibleGrabs = () => {
 };
 
 let pendingGrabs = [];
-const startGrab = (grab) => {
+const startGrab = (grab, grabType) => {
 	undoable();
 	dragging = [...grab];
 	for (const brick of dragging) {
@@ -2746,6 +2761,15 @@ const startGrab = (grab) => {
 	if (!editing) {
 		moves += 1;
 	}
+	gestures.push({
+		type: "pickup",
+		x: mouse.worldX,
+		y: mouse.worldY,
+		// time: performance.now(), // playback would not be reproducible if based on real time
+		t: frameCounter,
+		grabType,
+		editing,
+	});
 };
 
 canvas.addEventListener("wheel", (event) => {
@@ -2767,13 +2791,13 @@ canvas.addEventListener("pointermove", (event) => {
 		if (
 			mouse.y < mouse.atDragStart.y - threshold
 		) {
-			startGrab(pendingGrabs.upward);
+			startGrab(pendingGrabs.upward, "upward");
 			pendingGrabs = [];
 		}
 		if (
 			mouse.y > mouse.atDragStart.y + threshold
 		) {
-			startGrab(pendingGrabs.downward);
+			startGrab(pendingGrabs.downward, "downward");
 			pendingGrabs = [];
 		}
 	}
@@ -2829,7 +2853,7 @@ canvas.addEventListener("pointerdown", (event) => {
 			}
 		}
 		if (grabs.length === 1) {
-			startGrab(grabs[0]);
+			startGrab(grabs[0], "single");
 			playSound("blockClick");
 		} else if (grabs.length) {
 			pendingGrabs = grabs;
@@ -2862,6 +2886,16 @@ canvas.addEventListener("contextmenu", (event) => {
 		});
 	}
 });
+
+const updateDrag = (mouse) => {
+	if (isFinite(mouse.worldX) && isFinite(mouse.worldY)) {
+		for (const brick of dragging) {
+			brick.x = floor(mouse.worldX, snapX) + brick.grabOffset.x;
+			brick.y = floor(mouse.worldY, snapY) + brick.grabOffset.y;
+			entityMoved(brick);
+		}
+	}
+};
 
 const canRelease = () => {
 	if (dragging.length === 0) {
@@ -2915,17 +2949,30 @@ const canRelease = () => {
 	}
 	return connectsToCeiling !== connectsToFloor;
 };
+
+const finishDrag = () => {
+	if (!canRelease()) {
+		return;
+	}
+	dragging.forEach((entity) => {
+		delete entity.grabbed;
+		delete entity.grabOffset;
+	});
+	dragging = [];
+	gestures.push({
+		type: "place",
+		x: mouse.worldX,
+		y: mouse.worldY,
+		t: frameCounter,
+		editing,
+	});
+	playSound("blockDrop");
+	save();
+};
+
 addEventListener("pointerup", () => {
 	if (dragging.length) {
-		if (canRelease()) {
-			dragging.forEach((entity) => {
-				delete entity.grabbed;
-				delete entity.grabOffset;
-			});
-			dragging = [];
-			playSound("blockDrop");
-			save();
-		}
+		finishDrag();
 	} else if (selectionBox) {
 		const toSelect = entitiesWithinSelection(selectionBox);
 		toSelect.forEach((entity) => {
@@ -3659,6 +3706,48 @@ const updateAccelerationStructures = () => {
 };
 
 const simulate = (entities) => {
+	frameCounter += 1;
+
+	for (const gesture of playbackGestures) {
+		if (gesture.t === frameCounter) {
+			// console.log("playback", gesture);
+			// mock mouse for playback
+			// @TODO: pure functions would make this nicer... (but maybe not other things)
+			const oldMouse = mouse;
+			mouse = {
+				get x () {
+					// eslint-disable-next-line no-console
+					console.warn("Shouldn't use mouse.x, right?");
+					return gesture.x;
+				},
+				get y () {
+					// eslint-disable-next-line no-console
+					console.warn("Shouldn't use mouse.y, right?");
+					return gesture.y;
+				},
+				worldX: gesture.x,
+				worldY: gesture.y,
+			};
+			if (gesture.type === "pickup") {
+				const grabs = possibleGrabs();
+				if (grabs && !dragging.length) {
+					if (gesture.grabType === "upward") {
+						startGrab(grabs.upward, "upward");
+					} else if (gesture.grabType === "downward") {
+						startGrab(grabs.downward, "downward");
+					} else {
+						startGrab(grabs[0], "single");
+					}
+					// playSound("blockClick");
+				}
+			} else if (gesture.type === "place") {
+				updateDrag(mouse);
+				finishDrag();
+			}
+			mouse = oldMouse;
+		}
+	}
+
 	updateAccelerationStructures();
 
 	// sort for gravity
@@ -3964,13 +4053,15 @@ const animate = () => {
 					playSound("ohYeah");
 					try {
 						if (currentLevel.title) {
-							const key = `fewest moves for ${currentLevel.title.toLowerCase()}`;
-							const formerFewest = Number(localStorage[key]);
-							let fewest = moves;
-							if (isFinite(formerFewest)) {
-								fewest = Math.min(fewest, formerFewest);
+							const scoreKey = `fewest moves for ${currentLevel.title.toLowerCase()}`;
+							const solutionKey = `best solution for ${currentLevel.title.toLowerCase()}`;
+							const formerFewest = Number(localStorage[scoreKey]);
+							if (!isFinite(formerFewest) || formerFewest >= moves) {
+								localStorage[scoreKey] = moves;
+								// save gestures for playback (for enjoyment and TESTING),
+								// and possible future server-verification
+								localStorage[solutionKey] = JSON.stringify(gestures);
 							}
-							localStorage[key] = fewest;
 						}
 					} catch (error) {
 						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
@@ -3998,13 +4089,7 @@ const animate = () => {
 	const hovered = dragging.length ? [] : possibleGrabs();
 
 	if (dragging.length) {
-		if (isFinite(mouse.worldX) && isFinite(mouse.worldY)) {
-			for (const brick of dragging) {
-				brick.x = floor(mouse.worldX, snapX) + brick.grabOffset.x;
-				brick.y = floor(mouse.worldY, snapY) + brick.grabOffset.y;
-				entityMoved(brick);
-			}
-		}
+		updateDrag(mouse);
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
 	} else if (hovered.length >= 2) {
 		canvas.style.cursor = `url("images/cursors/cursor-grab-either.png") 8 8, grab`;
@@ -4309,6 +4394,8 @@ const initUI = () => {
 					entitiesByTopY,
 					entitiesByBottomY,
 					lastKeys,
+					gestures,
+					playbackGestures,
 				};
 				muted = true;
 				showDebug = false;
@@ -4320,6 +4407,8 @@ const initUI = () => {
 				entitiesByTopY = {};
 				entitiesByBottomY = {};
 				lastKeys = new Map();
+				gestures = [];
+				playbackGestures = [];
 				simulate([previewEntity]);
 				({
 					muted,
@@ -4332,6 +4421,8 @@ const initUI = () => {
 					entitiesByTopY,
 					entitiesByBottomY,
 					lastKeys,
+					gestures,
+					playbackGestures,
 				} = prev);
 				previewEntity.x = prev.x;
 				previewEntity.y = prev.y;
