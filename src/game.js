@@ -3746,6 +3746,25 @@ const updateAccelerationStructures = () => {
 	cleanByYObj(entitiesByBottomY);
 };
 
+const findMisplaceEntities = (withinEntities, comparedToEntities) => {
+	return withinEntities.filter((entity) => {
+		for (const playbackEntity of comparedToEntities) {
+			if (
+				entity.type === playbackEntity.type &&
+				(
+					(entity.grabbed &&
+						playbackEntity.grabbed) ||
+					(entity.x === playbackEntity.x &&
+						entity.y === playbackEntity.y)
+				)
+			) {
+				return false;
+			}
+		}
+		return true;
+	});
+};
+
 const playback = () => {
 	for (const gesture of playbackGestures) {
 		if (gesture.t === frameCounter) {
@@ -3757,28 +3776,15 @@ const playback = () => {
 					showMessageBox("Wrong level for playback.");
 					return;
 				}
-				const misplaced = entities.filter((entity) => {
-					for (const playbackEntity of gesture.levelBefore.entities) {
-						if (
-							entity.type === playbackEntity.type &&
-							(
-								(entity.grabbed &&
-									playbackEntity.grabbed) ||
-								(entity.x === playbackEntity.x &&
-									entity.y === playbackEntity.y)
-							)
-						) {
-							return false;
-						}
-					}
-					return true;
-				});
-				if (misplaced.length) {
+				const misplacedInSimulation = findMisplaceEntities(entities, gesture.levelBefore.entities);
+				const misplacedInRecording = findMisplaceEntities(gesture.levelBefore.entities, entities);
+				if (misplacedInSimulation.length || misplacedInRecording.length) {
 					// desynchronized = true;
 					desynchronized = gesture;
 					paused = true;
-					window.misplaced = misplaced;
-					for (const entity of misplaced) {
+					window.misplacedInSimulation = misplacedInSimulation;
+					window.misplacedInRecording = misplacedInRecording;
+					for (const entity of [...misplacedInSimulation, ...misplacedInRecording]) {
 						entity.misplaced = true;
 					}
 					showMessageBox("Desynchronized playback.");
