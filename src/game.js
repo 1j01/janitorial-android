@@ -1450,12 +1450,10 @@ const drawJunkbot = (ctx, junkbot) => {
 		width,
 		height
 	);
-	if (showDebug) {
-		// drawText(ctx, frameName, junkbot.x, junkbot.y + 20, "white");
-		if (!editing) {
-			drawText(ctx, `momentum:\n${junkbot.momentumX}, ${junkbot.momentumY}`, junkbot.x, junkbot.y + 20, "white");
-		}
-	}
+	// if (showDebug && !editing) {
+	// 	// drawText(ctx, frameName, junkbot.x, junkbot.y + 20, "white");
+	// 	drawText(ctx, `momentum:\n${junkbot.momentumX}, ${junkbot.momentumY}`, junkbot.x, junkbot.y + 20, "white");
+	// }
 };
 
 const selectionHilightCanvases = {};
@@ -3245,12 +3243,14 @@ const simulateJunkbot = (junkbot) => {
 			// @TODO: DRY with other jump code
 			// Might also want to trigger related behavior like dying on fire bricks here
 			// Note this must be after junkbot.momentumY += 1;
-			junkbot.animationFrame = 0;
-			junkbot.momentumY = -3;
-			junkbot.momentumX = junkbot.facing * 5;
-			playSound("jump");
-			jumpBrick.active = true;
-			jumpBrick.animationFrame = 0;
+			if (!jumpBrick.active) {
+				junkbot.animationFrame = 0;
+				junkbot.momentumY = -3;
+				junkbot.momentumX = junkbot.facing * 5;
+				playSound("jump");
+				jumpBrick.active = true;
+				jumpBrick.animationFrame = 0;
+			}
 		}
 		entityMoved(junkbot);
 		return;
@@ -3302,12 +3302,14 @@ const simulateJunkbot = (junkbot) => {
 					playSound("getPowerup");
 				} else if (groundLevelEntity.type === "jump") {
 					// @TODO: DRY with copied jump code
-					junkbot.animationFrame = 0;
-					junkbot.momentumY = -3;
-					junkbot.momentumX = junkbot.facing * 5;
-					playSound("jump");
-					groundLevelEntity.active = true;
-					groundLevelEntity.animationFrame = 0;
+					if (!groundLevelEntity.active) {
+						junkbot.animationFrame = 0;
+						junkbot.momentumY = -3;
+						junkbot.momentumX = junkbot.facing * 5;
+						playSound("jump");
+						groundLevelEntity.active = true;
+						groundLevelEntity.animationFrame = 0;
+					}
 				} else if (
 					groundLevelEntity.type === "teleport" &&
 					groundLevelEntity.timer === 0 &&
