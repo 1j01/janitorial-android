@@ -4080,6 +4080,8 @@ const animate = () => {
 								// Don't save over if replaying a solution. (Maybe should extend to the score as well...)
 								if (playbackGestures.length === 0) {
 									localStorage[solutionKey] = JSON.stringify(gestures);
+									// eslint-disable-next-line no-console
+									console.log("Saved solution for", currentLevel.title);
 								}
 							}
 						}
@@ -4416,6 +4418,7 @@ const initUI = () => {
 					lastKeys,
 					gestures,
 					playbackGestures,
+					frameCounter,
 				};
 				muted = true;
 				showDebug = false;
@@ -4429,6 +4432,7 @@ const initUI = () => {
 				lastKeys = new Map();
 				gestures = [];
 				playbackGestures = [];
+				frameCounter = 0;
 				simulate([previewEntity]);
 				({
 					muted,
@@ -4443,6 +4447,7 @@ const initUI = () => {
 					lastKeys,
 					gestures,
 					playbackGestures,
+					frameCounter,
 				} = prev);
 				previewEntity.x = prev.x;
 				previewEntity.y = prev.y;
