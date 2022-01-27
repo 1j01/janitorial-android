@@ -31,6 +31,11 @@ let playbackGestures = []; // could be used for testing or a demo mode or just p
 let moves = 0; // your score (lower is better); only picking up bricks counts, not putting them down.
 let frameCounter = 0; // for precise recording/playback
 let desynchronized = false;
+let idCounter = 0;
+const getID = () => {
+	idCounter += 1;
+	return idCounter;
+};
 
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
@@ -276,6 +281,7 @@ const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
 
 const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 	return {
+		id: getID(),
 		type: "brick",
 		x,
 		y,
@@ -288,6 +294,7 @@ const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 };
 const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 	return {
+		id: getID(),
 		type: "junkbot",
 		x,
 		y,
@@ -303,6 +310,7 @@ const makeJunkbot = ({ x, y, facing = 1, armored = false }) => {
 };
 const makeGearbot = ({ x, y, facing = 1 }) => {
 	return {
+		id: getID(),
 		type: "gearbot",
 		x,
 		y,
@@ -314,6 +322,7 @@ const makeGearbot = ({ x, y, facing = 1 }) => {
 };
 const makeClimbbot = ({ x, y, facing = 1, facingY = 0 }) => {
 	return {
+		id: getID(),
 		type: "climbbot",
 		x,
 		y,
@@ -327,6 +336,7 @@ const makeClimbbot = ({ x, y, facing = 1, facingY = 0 }) => {
 };
 const makeFlybot = ({ x, y, facing = 1 }) => {
 	return {
+		id: getID(),
 		type: "flybot",
 		x,
 		y,
@@ -338,6 +348,7 @@ const makeFlybot = ({ x, y, facing = 1 }) => {
 };
 const makeEyebot = ({ x, y, facing = 1, facingY = 0 }) => {
 	return {
+		id: getID(),
 		type: "eyebot",
 		x,
 		y,
@@ -350,6 +361,7 @@ const makeEyebot = ({ x, y, facing = 1, facingY = 0 }) => {
 };
 const makeBin = ({ x, y, facing = 0, scaredy = false }) => {
 	return {
+		id: getID(),
 		type: "bin",
 		x,
 		y,
@@ -362,6 +374,7 @@ const makeBin = ({ x, y, facing = 0, scaredy = false }) => {
 };
 const makeCrate = ({ x, y }) => {
 	return {
+		id: getID(),
 		type: "crate",
 		x,
 		y,
@@ -371,6 +384,7 @@ const makeCrate = ({ x, y }) => {
 };
 const makeFire = ({ x, y, on, switchID }) => {
 	return {
+		id: getID(),
 		type: "fire",
 		x,
 		y,
@@ -384,6 +398,7 @@ const makeFire = ({ x, y, on, switchID }) => {
 };
 const makeFan = ({ x, y, on, switchID }) => {
 	return {
+		id: getID(),
 		type: "fan",
 		x,
 		y,
@@ -397,6 +412,7 @@ const makeFan = ({ x, y, on, switchID }) => {
 };
 const makeLaser = ({ x, y, on, switchID, facing }) => {
 	return {
+		id: getID(),
 		type: "laser",
 		x,
 		y,
@@ -411,6 +427,7 @@ const makeLaser = ({ x, y, on, switchID, facing }) => {
 };
 const makeSwitch = ({ x, y, on, switchID }) => {
 	return {
+		id: getID(),
 		type: "switch",
 		x,
 		y,
@@ -423,6 +440,7 @@ const makeSwitch = ({ x, y, on, switchID }) => {
 };
 const makeTeleport = ({ x, y, teleportID }) => {
 	return {
+		id: getID(),
 		type: "teleport",
 		x,
 		y,
@@ -435,6 +453,7 @@ const makeTeleport = ({ x, y, teleportID }) => {
 };
 const makeJump = ({ x, y, fixed }) => {
 	return {
+		id: getID(),
 		type: "jump",
 		x,
 		y,
@@ -446,6 +465,7 @@ const makeJump = ({ x, y, fixed }) => {
 };
 const makeShield = ({ x, y, used = false, fixed = true }) => {
 	return {
+		id: getID(),
 		type: "shield",
 		x,
 		y,
@@ -457,6 +477,7 @@ const makeShield = ({ x, y, used = false, fixed = true }) => {
 };
 const makePipe = ({ x, y }) => {
 	return {
+		id: getID(),
 		type: "pipe",
 		x,
 		y,
@@ -468,6 +489,7 @@ const makePipe = ({ x, y }) => {
 };
 const makeDroplet = ({ x, y }) => {
 	return {
+		id: getID(),
 		type: "droplet",
 		x,
 		y,
@@ -948,7 +970,7 @@ const loadLevelFromText = (levelData, game) => {
 				} else if (typeName === "haz_droplet") { // made up / unofficial
 					entities.push(makeDroplet({ x, y }));
 				} else {
-					entities.push({ type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
+					entities.push({ id: getID(), type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
 				}
 			});
 		}
@@ -1775,9 +1797,17 @@ const deserializeJSON = (json) => {
 	moves = 0;
 	frameCounter = 0;
 	desynchronized = false;
+	idCounter = 0;
 	entities.forEach((entity) => {
 		delete entity.grabbed;
 		delete entity.grabOffset;
+		idCounter = Math.max(idCounter, (entity.id ?? 0) + 1);
+	});
+	entities.forEach((entity) => {
+		// separate from the above to avoid ID collisions
+		if (typeof entity.id !== "number") {
+			entity.id = getID();
+		}
 	});
 	winLoseState = winOrLose();
 	updateEditorUIForLevelChange(currentLevel);
@@ -1800,6 +1830,16 @@ const initLevel = (level) => {
 	moves = 0;
 	frameCounter = 0;
 	desynchronized = false;
+	idCounter = 0;
+	entities.forEach((entity) => {
+		idCounter = Math.max(idCounter, (entity.id ?? 0) + 1);
+	});
+	entities.forEach((entity) => {
+		// separate from the above to avoid ID collisions
+		if (typeof entity.id !== "number") {
+			entity.id = getID();
+		}
+	});
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
 	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
@@ -2164,6 +2204,7 @@ const pasteEntities = (newEntities) => {
 	for (const entity of newEntities) {
 		entity.selected = true;
 		entity.grabbed = true;
+		entity.id = getID();
 		entities.push(entity);
 		dragging.push(entity);
 	}
