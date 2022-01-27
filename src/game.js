@@ -3,7 +3,6 @@ const ctx = canvas.getContext("2d");
 
 canvas.tabIndex = 0;
 canvas.style.touchAction = "none";
-canvas.setAttribute("touch-action", "none"); // for PEP.js
 
 document.body.append(canvas);
 
