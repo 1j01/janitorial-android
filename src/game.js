@@ -4420,10 +4420,15 @@ const checkLevelEnd = () => {
 									// eslint-disable-next-line no-console
 									console.log("Saved solution for", currentLevel.title);
 								}
+							} else {
+								// eslint-disable-next-line no-console
+								console.log("Not saving solution for", currentLevel.title, "since it's not better than", formerFewest, "moves. New solution was:", JSON.stringify(gestures));
 							}
 						}
 					} catch (error) {
 						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
+						// eslint-disable-next-line no-console
+						console.log(error, "New solution was:", JSON.stringify(gestures));
 					}
 					setTimeout(async () => {
 						if (currentLevel !== levelAtWin) {
