@@ -2373,6 +2373,10 @@ addEventListener("keydown", (event) => {
 			playbackGestures = JSON.parse(json);
 		}
 	}
+	if (event.altKey && (event.code === "Enter" || event.code === "NumpadEnter")) {
+		event.preventDefault();
+		toggleFullscreen();
+	}
 	switch (event.key.toUpperCase()) {
 		case " ": // Spacebar
 		case "P":
@@ -4871,6 +4875,9 @@ const initUI = () => {
 	toggleFullscreenButton = document.getElementById("toggle-fullscreen");
 	toggleFullscreenButton.addEventListener("click", toggleFullscreen);
 	toggleFullscreenButton.ariaPressed = false; // document.fullscreenElement unlikely to work when loading page
+	addEventListener("fullscreenchange", () => {
+		toggleFullscreenButton.ariaPressed = Boolean(document.fullscreenElement);
+	});
 
 	toggleMuteButton = document.getElementById("toggle-mute");
 	toggleMuteButton.addEventListener("click", () => toggleMute());
