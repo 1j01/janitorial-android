@@ -3832,7 +3832,7 @@ const findMisplacedEntities = (withinEntities, compareToEntities) => {
 const playback = () => {
 	// console.log("playback at frameCounter =", frameCounter);
 	for (const event of playbackEvents) {
-		if (event.t === frameCounter) {
+		if (event.t === frameCounter + 1) {
 			if (event.levelPatch) {
 				// sort for consistency for level delta patching
 				playbackLevel.entities?.sort((a, b) => a.id - b.id);
@@ -4346,9 +4346,10 @@ const render = () => {
 		ctx.globalAlpha = 1;
 	}
 
+	// draw playback mouse
 	let playbackEvent;
 	for (const event of playbackEvents) {
-		if (event.t > frameCounter) {
+		if (event.t > frameCounter + 1) {
 			playbackEvent = event;
 			break;
 		}
