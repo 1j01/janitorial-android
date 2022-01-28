@@ -3841,21 +3841,18 @@ const playback = () => {
 				// compare level state to see if it's desynchronized
 				if (currentLevel.name !== playbackLevel.name) {
 					desynchronized = true;
-					// paused = true;
+					paused = true;
 					showMessageBox("Wrong level for playback.");
 					return;
 				}
 				const misplacedInSimulation = findMisplacedEntities(entities, playbackLevel.entities);
 				const misplacedInRecording = findMisplacedEntities(playbackLevel.entities, entities);
 				if (misplacedInSimulation.length || misplacedInRecording.length) {
-					// desynchronized = true;
-					desynchronized = event;
-					// paused = true;
-					window.misplacedInSimulation = misplacedInSimulation;
-					window.misplacedInRecording = misplacedInRecording;
+					desynchronized = true;
 					for (const entity of [...misplacedInSimulation, ...misplacedInRecording]) {
 						entity.misplaced = true;
 					}
+					// paused = true;
 					// showMessageBox("Desynchronized playback.");
 					// return;
 				}
@@ -3866,8 +3863,6 @@ const playback = () => {
 			const { x, y } = worldToCanvas(playbackMouse.worldX, playbackMouse.worldY);
 			playbackMouse.x = x;
 			playbackMouse.y = y;
-			// @TODO: show mouse in a nice way
-			debugWorldSpaceRect(event.x - 5, event.y - 5, 10, 10);
 			if (event.type === "pickup") {
 				const grabs = possibleGrabs(playbackMouse);
 				// console.log("grabs", grabs, "playbackMouse", playbackMouse, "brick", brickAt(playbackMouse));
