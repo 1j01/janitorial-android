@@ -1804,7 +1804,7 @@ const deserializeJSON = (json) => {
 	playthroughEvents.push({
 		type: "level",
 		t: 0,
-		levelPatch: diffPatcher.diff(playbackLevel, currentLevel),
+		levelPatch: diffPatcher.clone(diffPatcher.diff(playbackLevel, currentLevel)),
 	});
 	moves = 0;
 	frameCounter = 0;
@@ -1843,7 +1843,7 @@ const initLevel = (level) => {
 	playthroughEvents.push({
 		type: "level",
 		t: 0,
-		levelPatch: diffPatcher.diff(playbackLevel, currentLevel),
+		levelPatch: diffPatcher.clone(diffPatcher.diff(playbackLevel, currentLevel)),
 	});
 	moves = 0;
 	frameCounter = 0;
@@ -4049,7 +4049,7 @@ const simulate = (entities) => {
 		x: mouse.worldX,
 		y: mouse.worldY,
 		editing,
-		levelPatch: diffPatcher.diff(levelBefore, currentLevel),
+		levelPatch: diffPatcher.clone(diffPatcher.diff(levelBefore, currentLevel)),
 	});
 };
 
