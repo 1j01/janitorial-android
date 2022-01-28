@@ -3818,16 +3818,16 @@ const updateAccelerationStructures = () => {
 const findMisplacedEntities = (withinEntities, compareToEntities) => {
 	return withinEntities.filter((entity) => {
 		for (const compareToEntity of compareToEntities) {
-			if (
-				entity.type === compareToEntity.type &&
-				(
+			if (entity.id === compareToEntity.id) {
+				if (
 					(entity.grabbed &&
 						compareToEntity.grabbed) ||
 					(entity.x === compareToEntity.x &&
 						entity.y === compareToEntity.y)
-				)
-			) {
-				return false;
+				) {
+					return false;
+				}
+				return true;
 			}
 		}
 		return true;
