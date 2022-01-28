@@ -1,3 +1,5 @@
+/* global jsondiffpatch */
+
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -27,6 +29,7 @@ let currentLevel = {
 };
 let playthroughEvents = []; // records your solution to the current level
 let playbackEvents = []; // could be used for testing or a demo mode or just playing back what you just did
+let playbackLevel = {}; // level object built from json diff patches; if gameplay behavior changes, a recording can still be played back without simulation using this, and compared to simulation for debugging
 let moves = 0; // your score (lower is better); only picking up bricks counts, not putting them down.
 let frameCounter = 0; // for precise recording/playback
 let desynchronized = false;
@@ -35,6 +38,10 @@ const getID = () => {
 	idCounter += 1;
 	return idCounter;
 };
+const diffPatcher = jsondiffpatch.create({
+	objectHash: (obj) => obj.id,
+});
+
 
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
@@ -1793,6 +1800,12 @@ const deserializeJSON = (json) => {
 	teleportEffects.length = 0;
 	playthroughEvents.length = 0;
 	playbackEvents.length = 0;
+	playbackLevel = {};
+	playthroughEvents.push({
+		type: "level",
+		t: 0,
+		levelPatch: diffPatcher.diff(playbackLevel, currentLevel),
+	});
 	moves = 0;
 	frameCounter = 0;
 	desynchronized = false;
@@ -1826,6 +1839,12 @@ const initLevel = (level) => {
 	teleportEffects.length = 0;
 	playthroughEvents.length = 0;
 	playbackEvents.length = 0;
+	playbackLevel = {};
+	playthroughEvents.push({
+		type: "level",
+		t: 0,
+		levelPatch: diffPatcher.diff(playbackLevel, currentLevel),
+	});
 	moves = 0;
 	frameCounter = 0;
 	desynchronized = false;
@@ -2811,8 +2830,6 @@ const startGrab = (grab, {
 		}
 		return;
 	}
-	// record before we start dragging, so during playback we can compare the preconditions
-	// when debugging why a grab is not possible in re-simulation
 	playthroughEvents.push({
 		type: "pickup",
 		x: mouseParam.worldX,
@@ -2821,7 +2838,6 @@ const startGrab = (grab, {
 		t: frameCounter,
 		grabType,
 		editing,
-		levelBefore: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
 	});
 
 	undoable();
@@ -3053,15 +3069,12 @@ const finishDrag = ({
 		}
 		return;
 	}
-	// record before we change the level state, so during playback we can compare the preconditions
-	// when debugging why a release is not possible in re-simulation
 	playthroughEvents.push({
 		type: "place",
 		x: mouseParam.worldX,
 		y: mouseParam.worldY,
 		t: frameCounter,
 		editing,
-		levelBefore: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
 	});
 
 	dragging.forEach((entity) => {
@@ -3810,18 +3823,21 @@ const findMisplaceEntities = (withinEntities, compareToEntities) => {
 };
 
 const playback = () => {
+	// console.log("playback at frameCounter =", frameCounter);
 	for (const event of playbackEvents) {
-		if (event.t === frameCounter - 2) {
-			if (event.levelBefore) {
+		if (event.t === frameCounter) {
+			if (event.levelPatch) {
+				diffPatcher.patch(playbackLevel, event.levelPatch);
+
 				// compare level state to see if it's desynchronized
-				if (currentLevel.name !== event.levelBefore.name) {
+				if (currentLevel.name !== playbackLevel.name) {
 					desynchronized = true;
 					paused = true;
 					showMessageBox("Wrong level for playback.");
 					return;
 				}
-				const misplacedInSimulation = findMisplaceEntities(entities, event.levelBefore.entities);
-				const misplacedInRecording = findMisplaceEntities(event.levelBefore.entities, entities);
+				const misplacedInSimulation = findMisplaceEntities(entities, playbackLevel.entities);
+				const misplacedInRecording = findMisplaceEntities(playbackLevel.entities, entities);
 				if (misplacedInSimulation.length || misplacedInRecording.length) {
 					// desynchronized = true;
 					desynchronized = event;
@@ -3875,23 +3891,12 @@ const playback = () => {
 };
 
 const simulate = (entities) => {
-	frameCounter += 1;
-	playback();
+	playback(); // before frameCounter += 1; so playback can handle level initialization (for playbackLevel, not the main currentLevel)
 	if (paused) { // playback() can pause! and it's important for desync comparison debug to stop immediately
 		return;
 	}
-	// this is some seriously performance-demanding debug
-	// @TODO: do json diffing instead, and support rewind-replay in addition to whole solution replay
-	if (window.recordLevelStateEveryFrame) {
-		playthroughEvents.push({
-			type: "step",
-			t: frameCounter,
-			x: mouse.worldX,
-			y: mouse.worldY,
-			editing,
-			levelBefore: JSON.parse(JSON.stringify(currentLevel)), // for debugging, to see where exactly it becomes desynchronized
-		});
-	}
+	frameCounter += 1;
+	const levelBefore = diffPatcher.clone(currentLevel);
 
 	updateAccelerationStructures();
 
@@ -4037,6 +4042,15 @@ const simulate = (entities) => {
 	for (const entity of entities) {
 		delete entity.wasFloating;
 	}
+
+	playthroughEvents.push({
+		type: "step",
+		t: frameCounter,
+		x: mouse.worldX,
+		y: mouse.worldY,
+		editing,
+		levelPatch: diffPatcher.diff(levelBefore, currentLevel),
+	});
 };
 
 const detectProblems = () => {
@@ -4230,10 +4244,10 @@ const render = () => {
 	// ctx.restore();
 
 	let entitiesToDraw = entities;
-	if (desynchronized?.levelBefore) {
+	if (desynchronized && playbackLevel) {
 		if (Math.sin(Date.now() / 1000) > 0) {
-			entitiesToDraw = desynchronized?.levelBefore?.entities;
-			drawText(ctx, "Showing: Recording (before an event)", 10, 10, "white", "green");
+			entitiesToDraw = playbackLevel.entities;
+			drawText(ctx, "Showing: Recording", 10, 10, "white", "green");
 		} else {
 			drawText(ctx, "Showing: Simulated Playback (or current state)", 10, 10, "black", "orange");
 		}
@@ -4290,7 +4304,7 @@ const render = () => {
 
 	let playbackEvent;
 	for (const event of playbackEvents) {
-		if (event.t > frameCounter - 2) {
+		if (event.t > frameCounter) {
 			playbackEvent = event;
 			break;
 		}
@@ -4341,7 +4355,7 @@ const render = () => {
 
 	ctx.restore(); // world viewport
 
-	if (desynchronized && !desynchronized.levelBefore) {
+	if (desynchronized && !playbackLevel) {
 
 		// VHS effect
 		const topLeft = worldToCanvas(bounds.x, bounds.y);
