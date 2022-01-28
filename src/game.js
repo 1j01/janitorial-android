@@ -25,8 +25,8 @@ let currentLevel = {
 	entities,
 	title: "Custom World",
 };
-let gestures = []; // records your solution to the current level
-let playbackGestures = []; // could be used for testing or a demo mode or just playing back what you just did
+let playthroughEvents = []; // records your solution to the current level
+let playbackEvents = []; // could be used for testing or a demo mode or just playing back what you just did
 let moves = 0; // your score (lower is better); only picking up bricks counts, not putting them down.
 let frameCounter = 0; // for precise recording/playback
 let desynchronized = false;
@@ -1791,8 +1791,8 @@ const deserializeJSON = (json) => {
 	wind.length = 0;
 	laserBeams.length = 0;
 	teleportEffects.length = 0;
-	gestures.length = 0;
-	playbackGestures.length = 0;
+	playthroughEvents.length = 0;
+	playbackEvents.length = 0;
 	moves = 0;
 	frameCounter = 0;
 	desynchronized = false;
@@ -1824,8 +1824,8 @@ const initLevel = (level) => {
 	wind.length = 0;
 	laserBeams.length = 0;
 	teleportEffects.length = 0;
-	gestures.length = 0;
-	playbackGestures.length = 0;
+	playthroughEvents.length = 0;
+	playbackEvents.length = 0;
 	moves = 0;
 	frameCounter = 0;
 	desynchronized = false;
@@ -2410,7 +2410,7 @@ addEventListener("keydown", (event) => {
 			if (editing) {
 				toggleEditing();
 			}
-			playbackGestures = JSON.parse(json);
+			playbackEvents = JSON.parse(json);
 		}
 	}
 	if (event.altKey && (event.code === "Enter" || event.code === "NumpadEnter")) {
@@ -2597,7 +2597,7 @@ const updateMouse = (event) => {
 	mouse.x = event.pageX * window.devicePixelRatio;
 	mouse.y = event.pageY * window.devicePixelRatio;
 	updateMouseWorldPosition();
-	gestures.push({
+	playthroughEvents.push({
 		type: "pointer",
 		x: mouse.worldX,
 		y: mouse.worldY,
@@ -2813,7 +2813,7 @@ const startGrab = (grab, {
 	}
 	// record before we start dragging, so during playback we can compare the preconditions
 	// when debugging why a grab is not possible in re-simulation
-	gestures.push({
+	playthroughEvents.push({
 		type: "pickup",
 		x: mouseParam.worldX,
 		y: mouseParam.worldY,
@@ -3055,7 +3055,7 @@ const finishDrag = ({
 	}
 	// record before we change the level state, so during playback we can compare the preconditions
 	// when debugging why a release is not possible in re-simulation
-	gestures.push({
+	playthroughEvents.push({
 		type: "place",
 		x: mouseParam.worldX,
 		y: mouseParam.worldY,
@@ -3790,16 +3790,16 @@ const updateAccelerationStructures = () => {
 	cleanByYObj(entitiesByBottomY);
 };
 
-const findMisplaceEntities = (withinEntities, comparedToEntities) => {
+const findMisplaceEntities = (withinEntities, compareToEntities) => {
 	return withinEntities.filter((entity) => {
-		for (const playbackEntity of comparedToEntities) {
+		for (const compareToEntity of compareToEntities) {
 			if (
-				entity.type === playbackEntity.type &&
+				entity.type === compareToEntity.type &&
 				(
 					(entity.grabbed &&
-						playbackEntity.grabbed) ||
-					(entity.x === playbackEntity.x &&
-						entity.y === playbackEntity.y)
+						compareToEntity.grabbed) ||
+					(entity.x === compareToEntity.x &&
+						entity.y === compareToEntity.y)
 				)
 			) {
 				return false;
@@ -3810,21 +3810,21 @@ const findMisplaceEntities = (withinEntities, comparedToEntities) => {
 };
 
 const playback = () => {
-	for (const gesture of playbackGestures) {
-		if (gesture.t === frameCounter - 2) {
-			if (gesture.levelBefore) {
+	for (const event of playbackEvents) {
+		if (event.t === frameCounter - 2) {
+			if (event.levelBefore) {
 				// compare level state to see if it's desynchronized
-				if (currentLevel.name !== gesture.levelBefore.name) {
+				if (currentLevel.name !== event.levelBefore.name) {
 					desynchronized = true;
 					paused = true;
 					showMessageBox("Wrong level for playback.");
 					return;
 				}
-				const misplacedInSimulation = findMisplaceEntities(entities, gesture.levelBefore.entities);
-				const misplacedInRecording = findMisplaceEntities(gesture.levelBefore.entities, entities);
+				const misplacedInSimulation = findMisplaceEntities(entities, event.levelBefore.entities);
+				const misplacedInRecording = findMisplaceEntities(event.levelBefore.entities, entities);
 				if (misplacedInSimulation.length || misplacedInRecording.length) {
 					// desynchronized = true;
-					desynchronized = gesture;
+					desynchronized = event;
 					paused = true;
 					window.misplacedInSimulation = misplacedInSimulation;
 					window.misplacedInRecording = misplacedInRecording;
@@ -3836,20 +3836,20 @@ const playback = () => {
 				}
 			}
 
-			// console.log("playback", gesture);
-			const playbackMouse = { worldX: gesture.x, worldY: gesture.y };
+			// console.log("playback", event);
+			const playbackMouse = { worldX: event.x, worldY: event.y };
 			const { x, y } = worldToCanvas(playbackMouse.worldX, playbackMouse.worldY);
 			playbackMouse.x = x;
 			playbackMouse.y = y;
 			// @TODO: show mouse in a nice way
-			debugWorldSpaceRect(gesture.x - 5, gesture.y - 5, 10, 10);
-			if (gesture.type === "pickup") {
+			debugWorldSpaceRect(event.x - 5, event.y - 5, 10, 10);
+			if (event.type === "pickup") {
 				const grabs = possibleGrabs(playbackMouse);
 				// console.log("grabs", grabs, "playbackMouse", playbackMouse, "brick", brickAt(playbackMouse));
 				if (grabs && !dragging.length) {
-					if (gesture.grabType === "upward") {
+					if (event.grabType === "upward") {
 						startGrab(grabs.upward, { grabType: "upward", duringPlayback: true, mouse: playbackMouse });
-					} else if (gesture.grabType === "downward") {
+					} else if (event.grabType === "downward") {
 						startGrab(grabs.downward, { grabType: "downward", duringPlayback: true, mouse: playbackMouse });
 					} else {
 						startGrab(grabs[0], { grabType: "single", duringPlayback: true, mouse: playbackMouse });
@@ -3859,16 +3859,16 @@ const playback = () => {
 					// showMessageBox("Something must be different between recording and playback.");
 					desynchronized = true;
 				}
-			} else if (gesture.type === "place") {
+			} else if (event.type === "place") {
 				updateDrag(playbackMouse);
 				finishDrag({ duringPlayback: true, mouse: playbackMouse });
-			} else if (gesture.type === "pointer") {
+			} else if (event.type === "pointer") {
 				updateDrag(playbackMouse);
 				mouse.worldX = playbackMouse.worldX;
 				mouse.worldY = playbackMouse.worldY;
 				mouse.x = playbackMouse.x;
 				mouse.y = playbackMouse.y;
-				gestures.push(gesture); // preserve this information in case of re-saving a recording from playback
+				playthroughEvents.push(event); // preserve this information in case of re-saving a recording from playback
 			}
 		}
 	}
@@ -3883,8 +3883,8 @@ const simulate = (entities) => {
 	// this is some seriously performance-demanding debug
 	// @TODO: do json diffing instead, and support rewind-replay in addition to whole solution replay
 	if (window.recordLevelStateEveryFrame) {
-		gestures.push({
-			type: "step", // objectively not a gesture, @TODO: rename stuff
+		playthroughEvents.push({
+			type: "step",
 			t: frameCounter,
 			x: mouse.worldX,
 			y: mouse.worldY,
@@ -4233,7 +4233,7 @@ const render = () => {
 	if (desynchronized?.levelBefore) {
 		if (Math.sin(Date.now() / 1000) > 0) {
 			entitiesToDraw = desynchronized?.levelBefore?.entities;
-			drawText(ctx, "Showing: Recording (before gesture)", 10, 10, "white", "green");
+			drawText(ctx, "Showing: Recording (before an event)", 10, 10, "white", "green");
 		} else {
 			drawText(ctx, "Showing: Simulated Playback (or current state)", 10, 10, "black", "orange");
 		}
@@ -4288,21 +4288,21 @@ const render = () => {
 		ctx.globalAlpha = 1;
 	}
 
-	let playbackGesture;
-	for (const gesture of playbackGestures) {
-		if (gesture.t > frameCounter - 2) {
-			playbackGesture = gesture;
+	let playbackEvent;
+	for (const event of playbackEvents) {
+		if (event.t > frameCounter - 2) {
+			playbackEvent = event;
 			break;
 		}
 	}
-	if (playbackGesture) {
+	if (playbackEvent) {
 		ctx.fillStyle = "white";
 		ctx.strokeStyle = "black";
 		ctx.lineWidth = 2;
 		ctx.beginPath();
-		ctx.moveTo(playbackGesture.x, playbackGesture.y);
-		ctx.lineTo(playbackGesture.x, playbackGesture.y + 20);
-		ctx.lineTo(playbackGesture.x + 15, playbackGesture.y + 14);
+		ctx.moveTo(playbackEvent.x, playbackEvent.y);
+		ctx.lineTo(playbackEvent.x, playbackEvent.y + 20);
+		ctx.lineTo(playbackEvent.x + 15, playbackEvent.y + 14);
 		ctx.closePath();
 		ctx.fill();
 		ctx.stroke();
@@ -4452,23 +4452,23 @@ const checkLevelEnd = () => {
 							const formerFewest = Number(localStorage[scoreKey]);
 							if (!isFinite(formerFewest) || formerFewest >= moves) {
 								localStorage[scoreKey] = moves;
-								// save gestures for playback (for enjoyment and TESTING),
+								// save playthrough for playback (for enjoyment and TESTING),
 								// and possible future server-verification
 								// Don't save over if replaying a solution. (Maybe should extend to the score as well...)
-								if (playbackGestures.length === 0) {
-									localStorage[solutionKey] = JSON.stringify(gestures);
+								if (playbackEvents.length === 0) {
+									localStorage[solutionKey] = JSON.stringify(playthroughEvents);
 									// eslint-disable-next-line no-console
 									console.log("Saved solution for", currentLevel.title);
 								}
 							} else {
 								// eslint-disable-next-line no-console
-								console.log("Not saving solution for", currentLevel.title, "since it's not better than", formerFewest, "moves. New solution was:", JSON.stringify(gestures));
+								console.log("Not saving solution for", currentLevel.title, "since it's not better than", formerFewest, "moves. New solution was:", JSON.stringify(playthroughEvents));
 							}
 						}
 					} catch (error) {
 						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
 						// eslint-disable-next-line no-console
-						console.log(error, "New solution was:", JSON.stringify(gestures));
+						console.log(error, "New solution was:", JSON.stringify(playthroughEvents));
 					}
 					setTimeout(async () => {
 						if (currentLevel !== levelAtWin) {
@@ -4622,8 +4622,8 @@ const initUI = () => {
 					entitiesByTopY,
 					entitiesByBottomY,
 					lastKeys,
-					gestures,
-					playbackGestures,
+					playthroughEvents,
+					playbackEvents,
 					frameCounter,
 				};
 				muted = true;
@@ -4637,8 +4637,8 @@ const initUI = () => {
 				entitiesByTopY = {};
 				entitiesByBottomY = {};
 				lastKeys = new Map();
-				gestures = [];
-				playbackGestures = [];
+				playthroughEvents = [];
+				playbackEvents = [];
 				frameCounter = 0;
 				simulate([previewEntity]);
 				({
@@ -4653,8 +4653,8 @@ const initUI = () => {
 					entitiesByTopY,
 					entitiesByBottomY,
 					lastKeys,
-					gestures,
-					playbackGestures,
+					playthroughEvents,
+					playbackEvents,
 					frameCounter,
 				} = prev);
 				previewEntity.x = prev.x;
