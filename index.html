@@ -185,6 +185,11 @@
 	<script src="lib/jsondiffpatch.umd.js"></script>
 	<script src="src/game.js"></script>
 	<div id="main-controls">
+		<!-- aria-keyshortcuts="Shift" is invalid, but what are you gonna do? -->
+		<button id="rewind" aria-label="Rewind" aria-keyshortcuts="Shift">
+			<!-- @TODO: proper icon, or dynamic control for rewind/fast-forward -->
+			⏪
+		</button>
 		<button id="toggle-editing" aria-label="Edit level" aria-pressed="false" aria-keyshortcuts="E">
 			<!-- @TODO: proper icon; emoji for now -->
 			✏️

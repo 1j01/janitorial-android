@@ -69,6 +69,7 @@ let muted = false;
 let paused = false;
 let editing = false;
 let testing = false;
+let rewindingWithButton = false;
 let hideInfoBox = false;
 let editorUI;
 let testsUI;
@@ -3837,7 +3838,7 @@ let pausedForRewind = false;
 const rewindRate = 2;
 const handleRewind = () => {
 	// rewind, like in Braid etc.
-	if (keys.ShiftLeft || keys.ShiftRight) {
+	if (keys.ShiftLeft || keys.ShiftRight || rewindingWithButton) {
 		if (!paused) {
 			pausedForRewind = true;
 			paused = true;
@@ -4639,6 +4640,7 @@ const initUI = () => {
 	const levelParInput = document.getElementById("level-par-input");
 	const saveButton = document.getElementById("save-world");
 	const openButton = document.getElementById("open-world");
+	const rewindButton = document.getElementById("rewind");
 
 	editorUI.hidden = !editing;
 
@@ -5042,6 +5044,13 @@ const initUI = () => {
 		setVolume(volumeSlider.valueAsNumber);
 	});
 	volumeSlider.valueAsNumber = mainGain.gain.value;
+
+	rewindButton.addEventListener("pointerdown", () => {
+		rewindingWithButton = true;
+	});
+	addEventListener("pointerup", () => {
+		rewindingWithButton = false;
+	});
 
 	canvas.addEventListener("dragover", (event) => event.preventDefault());
 	canvas.addEventListener("dragenter", (event) => event.preventDefault());
