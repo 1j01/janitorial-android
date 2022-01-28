@@ -4162,7 +4162,7 @@ const detectProblems = () => {
 				}
 			}
 			if (!found) {
-				problems.push({ message: `${recordedEntity.type} not found in simulation, but exists in recording\n(ID: ${recordedEntity.id})`, worldX: recordedEntity.x, worldY: recordedEntity.y });
+				problems.push({ message: `${recordedEntity.type} not found in simulation, but exists in recording\n(ID: ${recordedEntity.id})`, worldX: recordedEntity.x, worldY: recordedEntity.y + 8 });
 			}
 		}
 	}
