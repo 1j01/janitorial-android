@@ -30,6 +30,7 @@ let currentLevel = {
 let playthroughEvents = []; // records your solution to the current level
 let playbackEvents = []; // could be used for testing or a demo mode or just playing back what you just did
 let playbackLevel = {}; // level object built from json diff patches; if gameplay behavior changes, a recording can still be played back without simulation using this, and compared to simulation for debugging
+let levelLastFrame = {}; // for generating diff patches for playthrough recording
 let moves = 0; // your score (lower is better); only picking up bricks counts, not putting them down.
 let frameCounter = 0; // for precise recording/playback
 let desynchronized = false;
@@ -1801,6 +1802,7 @@ const deserializeJSON = (json) => {
 	playthroughEvents.length = 0;
 	playbackEvents.length = 0;
 	playbackLevel = {};
+	levelLastFrame = {};
 	// sort for consistency for level delta patching
 	entities.sort((a, b) => a.id - b.id);
 	playthroughEvents.push({
@@ -1842,6 +1844,7 @@ const initLevel = (level) => {
 	playthroughEvents.length = 0;
 	playbackEvents.length = 0;
 	playbackLevel = {};
+	levelLastFrame = {};
 	// sort for consistency for level delta patching
 	entities.sort((a, b) => a.id - b.id);
 	playthroughEvents.push({
@@ -3902,9 +3905,6 @@ const simulate = (entities) => {
 		return;
 	}
 	frameCounter += 1;
-	// sort for consistency for level delta patching
-	entities?.sort((a, b) => a.id - b.id);
-	const levelBefore = diffPatcher.clone(currentLevel);
 
 	updateAccelerationStructures();
 
@@ -4059,8 +4059,9 @@ const simulate = (entities) => {
 		x: mouse.worldX,
 		y: mouse.worldY,
 		editing,
-		levelPatch: diffPatcher.clone(diffPatcher.diff(levelBefore, currentLevel)),
+		levelPatch: diffPatcher.clone(diffPatcher.diff(levelLastFrame, currentLevel)),
 	});
+	levelLastFrame = diffPatcher.clone(currentLevel);
 };
 
 const detectProblems = () => {
@@ -4651,6 +4652,7 @@ const initUI = () => {
 					lastKeys,
 					playthroughEvents,
 					playbackEvents,
+					levelLastFrame,
 					frameCounter,
 				};
 				muted = true;
@@ -4666,6 +4668,7 @@ const initUI = () => {
 				lastKeys = new Map();
 				playthroughEvents = [];
 				playbackEvents = [];
+				levelLastFrame = {};
 				frameCounter = 0;
 				simulate([previewEntity]);
 				({
@@ -4682,6 +4685,7 @@ const initUI = () => {
 					lastKeys,
 					playthroughEvents,
 					playbackEvents,
+					levelLastFrame,
 					frameCounter,
 				} = prev);
 				previewEntity.x = prev.x;
