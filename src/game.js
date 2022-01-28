@@ -40,7 +40,9 @@ const getID = () => {
 	return idCounter;
 };
 const diffPatcher = jsondiffpatch.create({
-	objectHash: (obj) => obj.id,
+	// objectHash allows array operations to work reasonably; it defines the identity of objects
+	// entities have id, but decals don't (for now anyway), so name+x+y is for decals
+	objectHash: (obj) => obj.id ?? (`${obj.name}@${obj.x},${obj.y}`),
 });
 
 
