@@ -1801,6 +1801,8 @@ const deserializeJSON = (json) => {
 	playthroughEvents.length = 0;
 	playbackEvents.length = 0;
 	playbackLevel = {};
+	// sort for consistency for level delta patching
+	entities.sort((a, b) => a.id - b.id);
 	playthroughEvents.push({
 		type: "level",
 		t: 0,
@@ -1840,6 +1842,8 @@ const initLevel = (level) => {
 	playthroughEvents.length = 0;
 	playbackEvents.length = 0;
 	playbackLevel = {};
+	// sort for consistency for level delta patching
+	entities.sort((a, b) => a.id - b.id);
 	playthroughEvents.push({
 		type: "level",
 		t: 0,
@@ -3827,6 +3831,8 @@ const playback = () => {
 	for (const event of playbackEvents) {
 		if (event.t === frameCounter) {
 			if (event.levelPatch) {
+				// sort for consistency for level delta patching
+				playbackLevel.entities?.sort((a, b) => a.id - b.id);
 				diffPatcher.patch(playbackLevel, event.levelPatch);
 
 				// compare level state to see if it's desynchronized
@@ -3896,6 +3902,8 @@ const simulate = (entities) => {
 		return;
 	}
 	frameCounter += 1;
+	// sort for consistency for level delta patching
+	entities?.sort((a, b) => a.id - b.id);
 	const levelBefore = diffPatcher.clone(currentLevel);
 
 	updateAccelerationStructures();
@@ -4043,6 +4051,8 @@ const simulate = (entities) => {
 		delete entity.wasFloating;
 	}
 
+	// sort for consistency for level delta patching
+	entities.sort((a, b) => a.id - b.id);
 	playthroughEvents.push({
 		type: "step",
 		t: frameCounter,
