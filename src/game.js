@@ -1803,6 +1803,7 @@ const deserializeJSON = (json) => {
 	teleportEffects.length = 0;
 	playthroughEvents.length = 0;
 	playbackEvents.length = 0;
+	// playbackEvents = playthroughEvents; // for rewinding with negative rewind speed
 	playbackLevel = {};
 	levelLastFrame = {};
 	// sort for consistency for level delta patching
@@ -1845,6 +1846,7 @@ const initLevel = (level) => {
 	teleportEffects.length = 0;
 	playthroughEvents.length = 0;
 	playbackEvents.length = 0;
+	// playbackEvents = playthroughEvents; // for rewinding with negative rewind speed
 	playbackLevel = {};
 	levelLastFrame = {};
 	// sort for consistency for level delta patching
@@ -3831,6 +3833,42 @@ const findMisplacedEntities = (withinEntities, compareToEntities) => {
 	});
 };
 
+let pausedForRewind = false;
+const rewindRate = 2;
+const handleRewind = () => {
+	// rewind, like in Braid etc.
+	if (keys.ShiftLeft || keys.ShiftRight) {
+		if (!paused) {
+			pausedForRewind = true;
+			paused = true;
+			playbackLevel = diffPatcher.clone(currentLevel); // HACK
+		}
+		// sort for consistency for level delta patching
+		entities.sort((a, b) => a.id - b.id);
+		for (let i = 0; i < rewindRate; i++) {
+			frameCounter -= 1;
+			if (frameCounter < 0) {
+				frameCounter = 0;
+			} else if (frameCounter > 0) { // don't undo level initialization
+				// handle playbackLevel and currentLevel separately, as
+				// they could have their own notions of what's going on
+				for (const event of playthroughEvents) {
+					if (event.t === frameCounter + 1) {
+						diffPatcher.unpatch(currentLevel, event.levelPatch);
+					}
+				}
+				for (const event of playbackEvents) {
+					if (event.t === frameCounter + 1) {
+						diffPatcher.unpatch(playbackLevel, event.levelPatch);
+					}
+				}
+			}
+		}
+	} else if (pausedForRewind) {
+		pausedForRewind = false;
+		paused = false;
+	}
+};
 const playback = () => {
 	// console.log("playback at frameCounter =", frameCounter);
 	for (const event of playbackEvents) {
@@ -4556,6 +4594,8 @@ const animate = () => {
 
 	controlViewport();
 	updateMouseWorldPosition(); // (with new viewport)
+
+	handleRewind();
 
 	// run the simulation
 	if (!paused) {
