@@ -21,7 +21,7 @@
 		#main-controls {
 			position: fixed;
 			top: 0;
-			/* left: 0; @TODO: make sure nothing is occluded, make it a whole bar */
+			left: 0;
 			right: 0;
 			z-index: 2;
 			background-color: #000;
@@ -31,11 +31,23 @@
 			gap: 2px;
 			justify-content: flex-end;
 		}
+		/* prevent occlusion of entities palette */
+		@media screen and (min-width: 400px) {
+			#main-controls {
+				left: unset;
+			}
+		}
+		/* approximate width of editor UI + main controls */
+		@media screen and (max-width: 800px) {
+			#editor-ui {
+				padding-top: 50px;
+			}
+		}
 
 		#main-controls button {
-			font-size: 20px;
-			height: 30px;
-			width: 30px;
+			font-size: 30px;
+			height: 40px;
+			width: 40px;
 			padding: 0;
 			display: inline-flex;
 			align-items: center;
