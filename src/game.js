@@ -3807,7 +3807,7 @@ const updateAccelerationStructures = () => {
 	cleanByYObj(entitiesByBottomY);
 };
 
-const findMisplaceEntities = (withinEntities, compareToEntities) => {
+const findMisplacedEntities = (withinEntities, compareToEntities) => {
 	return withinEntities.filter((entity) => {
 		for (const compareToEntity of compareToEntities) {
 			if (
@@ -3842,8 +3842,8 @@ const playback = () => {
 					showMessageBox("Wrong level for playback.");
 					return;
 				}
-				const misplacedInSimulation = findMisplaceEntities(entities, playbackLevel.entities);
-				const misplacedInRecording = findMisplaceEntities(playbackLevel.entities, entities);
+				const misplacedInSimulation = findMisplacedEntities(entities, playbackLevel.entities);
+				const misplacedInRecording = findMisplacedEntities(playbackLevel.entities, entities);
 				if (misplacedInSimulation.length || misplacedInRecording.length) {
 					// desynchronized = true;
 					desynchronized = event;
