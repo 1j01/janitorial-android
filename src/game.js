@@ -4137,6 +4137,37 @@ const detectProblems = () => {
 			}
 		}
 	}
+	// also detect problems with desynchronization between the recording and playback
+	if (playbackLevel?.entities) {
+		for (const entity of entities) {
+			let found = false;
+			for (const recordedEntity of playbackLevel.entities) {
+				if (entity.id === recordedEntity.id) {
+					found = true;
+					if (entity.x !== recordedEntity.x || entity.y !== recordedEntity.y) {
+						problems.push({ message: `${entity.type} (ID ${entity.id}) desynchronized`, worldX: entity.x, worldY: entity.y });
+					}
+					break;
+				}
+			}
+			if (!found) {
+				problems.push({ message: `${entity.type} (ID ${entity.id}) not found in recording, but exists in simulation.`, worldX: entity.x, worldY: entity.y });
+			}
+		}
+		for (const recordedEntity of playbackLevel.entities) {
+			let found = false;
+			for (const entity of entities) {
+				if (recordedEntity.id === entity.id) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				problems.push({ message: `${recordedEntity.type} (ID ${recordedEntity.id}) not found in simulation, but exists in recording.`, worldX: recordedEntity.x, worldY: recordedEntity.y });
+			}
+		}
+	}
+
 	return problems;
 };
 
