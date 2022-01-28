@@ -3838,7 +3838,7 @@ const playback = () => {
 				// compare level state to see if it's desynchronized
 				if (currentLevel.name !== playbackLevel.name) {
 					desynchronized = true;
-					paused = true;
+					// paused = true;
 					showMessageBox("Wrong level for playback.");
 					return;
 				}
@@ -3847,14 +3847,14 @@ const playback = () => {
 				if (misplacedInSimulation.length || misplacedInRecording.length) {
 					// desynchronized = true;
 					desynchronized = event;
-					paused = true;
+					// paused = true;
 					window.misplacedInSimulation = misplacedInSimulation;
 					window.misplacedInRecording = misplacedInRecording;
 					for (const entity of [...misplacedInSimulation, ...misplacedInRecording]) {
 						entity.misplaced = true;
 					}
-					showMessageBox("Desynchronized playback.");
-					return;
+					// showMessageBox("Desynchronized playback.");
+					// return;
 				}
 			}
 
@@ -4254,8 +4254,10 @@ const render = () => {
 	// ctx.restore();
 
 	let entitiesToDraw = entities;
-	if (desynchronized && playbackLevel) {
-		if (Math.sin(Date.now() / 1000) > 0) {
+	if (playbackLevel?.entities && (desynchronized || window.debugSynchronization)) {
+		const period = window.debugSynchronizationOscPeriod ?? 2;
+		if (frameCounter % period < period / 2) {
+		// if ((frameCounter / period * 2) % 2) {
 			entitiesToDraw = playbackLevel.entities;
 			drawText(ctx, "Showing: Recording", 10, 10, "white", "green");
 		} else {
