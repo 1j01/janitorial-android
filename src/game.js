@@ -3870,7 +3870,7 @@ const handleRewind = () => {
 		paused = false;
 	}
 };
-const playback = () => {
+const handlePlayback = () => {
 	// console.log("playback at frameCounter =", frameCounter);
 	for (const event of playbackEvents) {
 		if (event.t === frameCounter + 1) {
@@ -3936,10 +3936,6 @@ const playback = () => {
 };
 
 const simulate = (entities) => {
-	playback(); // before frameCounter += 1; so playback can handle level initialization (for playbackLevel, not the main currentLevel)
-	if (paused) { // playback() can pause! and it's important for desync comparison debug to stop immediately
-		return;
-	}
 	frameCounter += 1;
 
 	updateAccelerationStructures();
@@ -4597,6 +4593,10 @@ const animate = () => {
 	updateMouseWorldPosition(); // (with new viewport)
 
 	handleRewind();
+	if (!paused) {
+		handlePlayback(); // before frameCounter += 1 in simulate, so playback can handle level initialization (for playbackLevel, not the main currentLevel)
+		// also note that handlePlayback can pause in some cases!
+	}
 
 	// run the simulation
 	if (!paused) {
