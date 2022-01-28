@@ -4253,19 +4253,20 @@ const render = () => {
 	// ctx.drawImage(testVideo, 0, 0);
 	// ctx.restore();
 
-	let entitiesToDraw = entities;
-	if (playbackLevel?.entities && (desynchronized || window.debugSynchronization)) {
-		const period = window.debugSynchronizationOscPeriod ?? 2;
-		if (frameCounter % period < period / 2) {
-		// if ((frameCounter / period * 2) % 2) {
-			entitiesToDraw = playbackLevel.entities;
-			drawText(ctx, "Showing: Recording", 10, 10, "white", "green");
-		} else {
-			drawText(ctx, "Showing: Simulated Playback (or current state)", 10, 10, "black", "orange");
+	if (playbackLevel?.entities && showDebug) {
+		sortEntitiesForRendering(playbackLevel.entities);
+		ctx.save();
+		ctx.translate(12, -12);
+		for (const entity of playbackLevel.entities) {
+			if (entity.grabbed) {
+				ctx.globalAlpha = placeable ? 0.8 : 0.3;
+			}
+			drawEntity(ctx, entity, shouldHilight(entity));
+			ctx.globalAlpha = 1;
 		}
+		ctx.restore();
 	}
-
-	for (const entity of entitiesToDraw) {
+	for (const entity of entities) {
 		if (entity.grabbed) {
 			ctx.globalAlpha = placeable ? 0.8 : 0.3;
 		}
