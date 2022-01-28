@@ -1788,92 +1788,61 @@ parts=${parts.join(",")}
 
 `;
 };
+const resetAndInit = (level) => {
+	currentLevel = level;
+	entities = currentLevel.entities; // shortcut
+
+	entitiesByTopY = {};
+	entitiesByBottomY = {};
+	lastKeys = new Map();
+	dragging.length = 0;
+	wind.length = 0;
+	laserBeams.length = 0;
+	teleportEffects.length = 0;
+	playthroughEvents.length = 0;
+	playbackEvents.length = 0;
+	// playbackEvents = playthroughEvents; // for rewinding with negative rewind speed
+	playbackLevel = {};
+	levelLastFrame = {};
+	// sort for consistency for level delta patching
+	entities.sort((a, b) => a.id - b.id);
+	playthroughEvents.push({
+		type: "level",
+		t: 0,
+		levelPatch: diffPatcher.clone(diffPatcher.diff(playbackLevel, currentLevel)),
+	});
+	moves = 0;
+	frameCounter = 0;
+	desynchronized = false;
+	idCounter = 0;
+	for (const entity of entities) {
+		delete entity.grabbed;
+		delete entity.grabOffset;
+		idCounter = Math.max(idCounter, (entity.id ?? 0) + 1);
+	}
+	for (const entity of entities) {
+		// separate from the above loop to avoid ID collisions
+		if (typeof entity.id !== "number") {
+			entity.id = getID();
+		}
+	}
+	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH; and in case there's no junkbots, don't consider it a lose
+	updateEditorUIForLevelChange(currentLevel);
+};
 const deserializeJSON = (json) => {
 	const state = JSON.parse(json);
 	if ("version" in state && state.version < 0.3) {
 		state.level = { entities: state.entities };
 	}
-	currentLevel = state.level;
-	entities = currentLevel.entities;
-	entitiesByTopY = {};
-	entitiesByBottomY = {};
-	lastKeys = new Map();
-	dragging.length = 0;
-	wind.length = 0;
-	laserBeams.length = 0;
-	teleportEffects.length = 0;
-	playthroughEvents.length = 0;
-	playbackEvents.length = 0;
-	// playbackEvents = playthroughEvents; // for rewinding with negative rewind speed
-	playbackLevel = {};
-	levelLastFrame = {};
-	// sort for consistency for level delta patching
-	entities.sort((a, b) => a.id - b.id);
-	playthroughEvents.push({
-		type: "level",
-		t: 0,
-		levelPatch: diffPatcher.clone(diffPatcher.diff(playbackLevel, currentLevel)),
-	});
-	moves = 0;
-	frameCounter = 0;
-	desynchronized = false;
-	idCounter = 0;
-	entities.forEach((entity) => {
-		delete entity.grabbed;
-		delete entity.grabOffset;
-		idCounter = Math.max(idCounter, (entity.id ?? 0) + 1);
-	});
-	entities.forEach((entity) => {
-		// separate from the above to avoid ID collisions
-		if (typeof entity.id !== "number") {
-			entity.id = getID();
-		}
-	});
-	winLoseState = winOrLose();
-	updateEditorUIForLevelChange(currentLevel);
+	resetAndInit(state.level);
 };
 const initLevel = (level) => {
-	currentLevel = level;
 	editorLevelState = serializeToJSON(level);
-	entities = level.entities;
-	entitiesByTopY = {};
-	entitiesByBottomY = {};
-	lastKeys = new Map();
-	undos.length = 0;
-	redos.length = 0;
-	dragging.length = 0;
-	wind.length = 0;
-	laserBeams.length = 0;
-	teleportEffects.length = 0;
-	playthroughEvents.length = 0;
-	playbackEvents.length = 0;
-	// playbackEvents = playthroughEvents; // for rewinding with negative rewind speed
-	playbackLevel = {};
-	levelLastFrame = {};
-	// sort for consistency for level delta patching
-	entities.sort((a, b) => a.id - b.id);
-	playthroughEvents.push({
-		type: "level",
-		t: 0,
-		levelPatch: diffPatcher.clone(diffPatcher.diff(playbackLevel, currentLevel)),
-	});
-	moves = 0;
-	frameCounter = 0;
-	desynchronized = false;
-	idCounter = 0;
-	entities.forEach((entity) => {
-		idCounter = Math.max(idCounter, (entity.id ?? 0) + 1);
-	});
-	entities.forEach((entity) => {
-		// separate from the above to avoid ID collisions
-		if (typeof entity.id !== "number") {
-			entity.id = getID();
-		}
-	});
+	resetAndInit(level);
 	viewport.centerX = 35 / 2 * 15;
 	viewport.centerY = 24 / 2 * 15;
-	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH
-	updateEditorUIForLevelChange(currentLevel);
+	undos.length = 0;
+	redos.length = 0;
 };
 let disableLoadFromHash = false;
 const loadLevelFromLevelSelect = async () => {
