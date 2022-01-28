@@ -192,12 +192,136 @@
 			width: 50px;
 			align-self: center;
 		}
+
+		#title-screen {
+			background-image: url("images/menus/neo_title.png");
+			width: 650px;
+			height: 420px;
+			z-index: 10000;
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+		#welcome-text {
+			text-align: center;
+			background-image: url("images/menus/loading_bkg_frame.png");
+			width: 398px;
+			height: 86px;
+			position: absolute;
+			left: 41px;
+			top: 206px;
+			color: black;
+		}
+		.image-button {
+			border: 0;
+			background-color: transparent;
+			color: transparent;
+		}
+		#start-game {
+			position: absolute;
+			left: 139px;
+			top: 148px;
+			background-image: url("images/menus/play_default.png");
+			width: 116px;
+			height: 45px;
+		}
+		#start-game:hover {
+			background-image: url("images/menus/play_hover.png");
+		}
+		#show-credits {
+			position: absolute;
+			left: 310px;
+			top: 159px;
+			background-image: url("images/menus/credit_up.png");
+			width: 96px;
+			height: 26px;
+		}
+		#show-credits:hover {
+			background-image: url("images/menus/credit_up_x.png");
+		}
+		#skip-intro,
+		#replay-intro {
+			position: absolute;
+			left: 508px;
+			top: 337px;
+			width: 96px;
+			height: 26px;
+		}
+		#skip-intro {
+			background-image: url("images/menus/skip_intro.png");
+		}
+		#skip-intro:hover {
+			background-image: url("images/menus/skip_intro_x.png");
+		}
+		#replay-intro {
+			background-image: url("images/menus/replay_intro.png");
+		}
+		#replay-intro:hover {
+			background-image: url("images/menus/replay_intro_x.png");
+		}
+		#reset-screen {
+			position: absolute;
+			left: 508px;
+			top: 367px;
+			background-image: url("images/menus/clear_screen.png");
+			width: 96px;
+			height: 26px;
+		}
+		#reset-screen:hover {
+			background-image: url("images/menus/clear_screen_x.png");
+		}
+		#load-status {
+			position: absolute;
+			left: 508px;
+			top: 15px;
+			width: 100px;
+			height: 40px;
+			font-size: 14px;
+			line-height: 19px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			color: #636363;
+		}
+		.title-screen-arrow {
+			position: absolute;
+			top: 152px;
+			background-image: url("images/menus/arrow.png");
+			width: 45px;
+			height: 37px;
+			opacity: 20%;
+		}
+		.title-screen-arrow.pointing-left {
+			transform: scaleX(-1);
+		}
 	</style>
 </head>
 
 <body>
 	<script src="lib/jsondiffpatch.umd.js"></script>
 	<script src="src/game.js"></script>
+	<div id="title-screen">
+		<button class="image-button" id="start-game">Play</button>
+		<button class="image-button" id="show-credits">Credits</button>
+		<button class="image-button" id="replay-intro" hidden>Replay Intro</button>
+		<button class="image-button" id="skip-intro">Skip Intro</button>
+		<button class="image-button" id="reset-screen">Reset Screen</button>
+		<span id="load-status">
+			<span id="load-status-text-loaded" hidden>Ready to play</span>
+			<span id="load-status-text-loading">Loading...</span>
+		</span>
+		<div id="welcome-text">
+			Welcome to the factory<br>
+			<span style="color: white">Try moving the colored bricks<br>
+			with the mouse</span><br>
+			before you play the game
+		</div>
+		<div class="title-screen-arrow" style="left: 34px;"></div>
+		<div class="title-screen-arrow" style="left: 85px;"></div>
+		<div class="title-screen-arrow pointing-left" style="left: 260px;"></div>
+		<div class="title-screen-arrow pointing-left" style="left: 407px;"></div>
+	</div>
 	<div id="main-controls">
 		<!-- aria-keyshortcuts="Shift" is invalid, but what are you gonna do? -->
 		<button id="rewind" aria-label="Rewind" aria-keyshortcuts="Shift">
