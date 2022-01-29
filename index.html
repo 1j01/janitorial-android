@@ -203,7 +203,12 @@
 			left: 50%;
 			transform: translate(-50%, -50%);
 			outline: 5000px solid black; /* covers up a few pixels of the title screen level outside its frame */
+			pointer-events: none; /* allows interaction with the title screen level through the frame's cutout */
 		}
+		#title-screen>*:not([hidden]):not(#welcome-text) {
+			pointer-events: all;
+		}
+
 		#welcome-text {
 			text-align: center;
 			background-image: url("images/menus/loading_bkg_frame.png");
