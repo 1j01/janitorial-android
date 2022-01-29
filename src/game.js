@@ -1,5 +1,48 @@
 /* global jsondiffpatch */
 
+// Title screen elements
+const titleScreen = document.getElementById("title-screen");
+const startGameButton = document.getElementById("start-game");
+// const replayIntroButton = document.getElementById("replay-intro");
+// const skipIntroButton = document.getElementById("skip-intro");
+const resetScreenButton = document.getElementById("reset-screen");
+const showCreditsButton = document.getElementById("show-credits");
+const loadStatusLoaded = document.getElementById("load-status-loaded");
+const loadStatusLoading = document.getElementById("load-status-loading");
+const loadProgress = document.getElementById("load-progress");
+const welcomeText = document.getElementById("welcome-text");
+// Main game controls bar
+const toggleInfoButton = document.getElementById("toggle-info");
+const toggleFullscreenButton = document.getElementById("toggle-fullscreen");
+const toggleMuteButton = document.getElementById("toggle-mute");
+const toggleEditingButton = document.getElementById("toggle-editing");
+const volumeSlider = document.getElementById("volume-slider");
+// const showTitleScreenButton = document.getElementById("show-title-screen");
+// Info screen
+const infoBox = document.getElementById("info");
+const controlsTableRows = document.querySelectorAll("#info table tr");
+// Editor UI
+const editorUI = document.getElementById("editor-ui");
+const levelSelect = document.getElementById("level-select");
+const entitiesPalette = document.getElementById("entities-palette");
+const entitiesScrollContainer = document.getElementById("entities-scroll-container");
+const levelBoundsCheckbox = document.getElementById("level-bounds-checkbox");
+const levelTitleInput = document.getElementById("level-title-input");
+const levelHintInput = document.getElementById("level-hint-input");
+const levelParInput = document.getElementById("level-par-input");
+const saveButton = document.getElementById("save-world");
+const openButton = document.getElementById("open-world");
+const rewindButton = document.getElementById("rewind");
+// Tests UI
+const testsUI = document.getElementById("tests-ui");
+const testsUL = document.getElementById("tests");
+const testsInfo = document.getElementById("tests-info");
+const testSpeedInput = document.getElementById("test-speed");
+// const startButton = document.getElementById("start-tests");
+
+// Now that that's out of the way,
+// let's initialize a million things.
+
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -71,16 +114,7 @@ let editing = false;
 let testing = false;
 let rewindingWithButton = false;
 let hideInfoBox = false;
-let titleScreen;
-let editorUI;
-let testsUI;
-let levelSelect;
-let infoBox;
-let toggleInfoButton;
-let toggleFullscreenButton;
-let toggleMuteButton;
-let toggleEditingButton;
-let volumeSlider;
+
 // eslint-disable-next-line no-empty-function, no-unused-vars
 let updateEditorUIForLevelChange = (level) => { };
 
@@ -1036,7 +1070,6 @@ const loadResource = (path) => {
 	throw new Error(`How should I load this? '${path}'`);
 };
 
-const loadProgress = document.getElementById("load-progress");
 const numProgressBricks = 14;
 const progressBricks = [];
 const loadResources = async (resourcePathsByID) => {
@@ -4307,7 +4340,6 @@ const render = () => {
 		}
 	}
 	if (currentLevel.title === "Title Screen") {
-		const welcomeText = document.getElementById("welcome-text");
 		welcomeText.style.opacity = 0;
 		ctx.save();
 		ctx.translate(-1, -26 + 1); // -1, -26 = offset of level top/left compared to title screen frame image; +1 = unknown
@@ -4662,47 +4694,25 @@ const showTitleScreen = () => {
 };
 
 const initUI = () => {
-	titleScreen = document.getElementById("title-screen");
-	testsUI = document.getElementById("tests-ui");
-	editorUI = document.getElementById("editor-ui");
-	levelSelect = document.getElementById("level-select");
-	const entitiesPalette = document.getElementById("entities-palette");
-	const entitiesScrollContainer = document.getElementById("entities-scroll-container");
-	const levelBoundsCheckbox = document.getElementById("level-bounds-checkbox");
-	const levelTitleInput = document.getElementById("level-title-input");
-	const levelHintInput = document.getElementById("level-hint-input");
-	const levelParInput = document.getElementById("level-par-input");
-	const saveButton = document.getElementById("save-world");
-	const openButton = document.getElementById("open-world");
-	const rewindButton = document.getElementById("rewind");
-	const startGame = document.getElementById("start-game");
-	// const replayIntro = document.getElementById("replay-intro");
-	// const skipIntro = document.getElementById("skip-intro");
-	const resetScreen = document.getElementById("reset-screen");
-	const showCredits = document.getElementById("show-credits");
-	const loadStatusTextLoaded = document.getElementById("load-status-loaded");
-	const loadStatusTextLoading = document.getElementById("load-status-loading");
-	// const showTitleScreen = document.getElementById("show-title-screen");
-
 	// Wait for image to load before showing it to prevent flash of missing text.
 	// Note that this strategy only works if cache is enabled; make sure "Disable cache" is unchecked in devtools.
 	const loadedImg = document.createElement("img");
 	loadedImg.addEventListener("load", () => {
-		loadStatusTextLoaded.hidden = false;
-		loadStatusTextLoading.hidden = true;
+		loadStatusLoaded.hidden = false;
+		loadStatusLoading.hidden = true;
 	});
 	loadedImg.src = "images/menus/ready_to_play.png";
 
-	startGame.addEventListener("click", () => {
+	startGameButton.addEventListener("click", () => {
 		location.hash = "#level=Junkbot;New%20Employee%20Training";
 	});
-	// showTitleScreen.addEventListener("click", () => {
-	// 	showTitleScreen();
+	// showTitleScreenButton.addEventListener("click", () => {
+	// 	showTitleScreenButton();
 	// });
-	showCredits.addEventListener("click", () => {
+	showCreditsButton.addEventListener("click", () => {
 		window.open("https://github.com/1j01/janitorial-android#credits");
 	});
-	resetScreen.addEventListener("click", () => {
+	resetScreenButton.addEventListener("click", () => {
 		showTitleScreen();
 	});
 
@@ -5075,8 +5085,6 @@ const initUI = () => {
 	};
 	updateEditorUIForLevelChange(currentLevel);
 
-	infoBox = document.getElementById("info");
-	const controlsTableRows = document.querySelectorAll("#info table tr");
 	for (const tr of controlsTableRows) {
 		const [controlCell, actionCell] = tr.cells;
 		const kbd = controlCell.querySelector("kbd");
@@ -5097,28 +5105,23 @@ const initUI = () => {
 		}
 	}
 
-	toggleInfoButton = document.getElementById("toggle-info");
 	toggleInfoButton.addEventListener("click", toggleInfoBox);
 
 	updateInfoBoxHidden();
 
-	toggleFullscreenButton = document.getElementById("toggle-fullscreen");
 	toggleFullscreenButton.addEventListener("click", toggleFullscreen);
 	toggleFullscreenButton.ariaPressed = false; // document.fullscreenElement unlikely to work when loading page
 	addEventListener("fullscreenchange", () => {
 		toggleFullscreenButton.ariaPressed = Boolean(document.fullscreenElement);
 	});
 
-	toggleMuteButton = document.getElementById("toggle-mute");
 	toggleMuteButton.addEventListener("click", () => toggleMute());
 	toggleMuteButton.ariaPressed = muted;
 	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
 
-	toggleEditingButton = document.getElementById("toggle-editing");
 	toggleEditingButton.addEventListener("click", toggleEditing);
 	toggleEditingButton.ariaPressed = editing;
 
-	volumeSlider = document.getElementById("volume-slider");
 	volumeSlider.addEventListener("input", () => {
 		setVolume(volumeSlider.valueAsNumber);
 	});
@@ -5160,11 +5163,6 @@ const runTests = async () => {
 	if (editing) {
 		toggleEditing();
 	}
-
-	const testsUL = document.getElementById("tests");
-	const testsInfo = document.getElementById("tests-info");
-	const testSpeedInput = document.getElementById("test-speed");
-	// const startButton = document.getElementById("start-tests");
 
 	testsUI.hidden = false;
 
