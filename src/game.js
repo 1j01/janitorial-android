@@ -5384,6 +5384,7 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveResources);
 		resources = await hotResourcesLoadedPromise;
 		showTitleScreen();
+		titleScreen.classList.add("title-screen-level-loaded");
 
 		// We loaded from the hash!
 		// There's more to load, but we don't want to block showing the title screen level.
