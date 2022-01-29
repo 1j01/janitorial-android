@@ -161,7 +161,11 @@ Tomas Clark
 	- Punkbot
 - Slanted bricks that reflect lasers
 - Force field / hard light transparent bricks that can be powered on to make it solid, and can be built with!
-	- Implies you can create areas where you can't build but can still move through, and or areas you can 
+	- Implies you can create areas where you can't build but can still move through, particularly if it's locked into unmovable ground and ceiling
+	- Variations:
+		- Color per switch, toggles solidity from anywhere; solidity always matches switch
+		- Solid while connected to some sort of pad, while pad is powered; can connect through other bricks
+		- Toggles when connected to a pad, and a button is pressed; can connect through other bricks
 - Speed powerup that makes junkbot go uncomfortably fast
 	- Buildup animation with sound ju-ju-ju-ju...tdtdtdtdtkwhh~!
 - Various electrical systems
@@ -176,6 +180,7 @@ Tomas Clark
 - An antagonist junkbot that dumps out trash cans on purpose >:D
 	- Skunkbot/Gunkbot/Stunkbot/Slunkbot?
 - Wall-crawler gearbot
+	- Interlinking gearbots?? I think they could implicitly fly together like [troll physics](https://i.imgur.com/4NqKmL6.png), anything further than that is probably too complicated, especially with the grid
 - Overworld
 	- Thematic areas like:
 		- Sewers with lots of water hazards
