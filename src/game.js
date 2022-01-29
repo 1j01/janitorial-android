@@ -4604,6 +4604,16 @@ const wrapContents = (target, wrapper) => {
 	return wrapper;
 };
 
+const hideTitleScreen = () => {
+	const titleScreen = document.getElementById("title-screen");
+	titleScreen.hidden = true;
+};
+const showTitleScreen = () => {
+	const titleScreen = document.getElementById("title-screen");
+	titleScreen.hidden = false;
+	initLevel(resources.titleScreenLevel);
+};
+
 const initUI = () => {
 
 	testsUI = document.getElementById("tests-ui");
@@ -4625,25 +4635,22 @@ const initUI = () => {
 	const showCredits = document.getElementById("show-credits");
 	const loadStatusTextLoaded = document.getElementById("load-status-text-loaded");
 	const loadStatusTextLoading = document.getElementById("load-status-text-loading");
-	const titleScreen = document.getElementById("title-screen");
 	// const showTitleScreen = document.getElementById("show-title-screen");
 
 	loadStatusTextLoaded.hidden = false;
 	loadStatusTextLoading.hidden = true;
 
 	startGame.addEventListener("click", () => {
-		titleScreen.hidden = true;
 		location.hash = "#level=Junkbot;New%20Employee%20Training";
 	});
 	// showTitleScreen.addEventListener("click", () => {
-	// 	titleScreen.hidden = false;
-	// 	initLevel(resources.titleScreenLevel);
+	// 	showTitleScreen();
 	// });
 	showCredits.addEventListener("click", () => {
 		window.open("https://github.com/1j01/janitorial-android#credits");
 	});
 	resetScreen.addEventListener("click", () => {
-		initLevel(resources.titleScreenLevel);
+		showTitleScreen();
 	});
 
 	editorUI.hidden = !editing;
@@ -5255,6 +5262,7 @@ const loadFromHash = async () => {
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
 	if (hashOptions.level) {
+		hideTitleScreen();
 		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
 		if (game === "local") {
 			try {
@@ -5280,14 +5288,7 @@ const loadFromHash = async () => {
 			}
 		}
 	} else {
-		try {
-			deserializeJSON(localStorage.JWorld);
-			dragging = entities.filter((entity) => entity.grabbed);
-		} catch (error) {
-			// initTestLevel();
-			initLevel(resources.titleScreenLevel);
-		}
-		editorLevelState = serializeToJSON(currentLevel);
+		showTitleScreen();
 	}
 	if (location.hash.match(/run-tests/)) {
 		runTests();
