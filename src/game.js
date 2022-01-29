@@ -721,11 +721,25 @@ const tests = [
 ];
 
 let resources;
-const resourcePaths = {
+// resources needed for the title screen
+// ideally this could be split more cleanly (sprite sheets are big)
+const hotResourcePaths = {
 	sprites: "images/spritesheets/sprites.png",
 	spritesAtlas: "images/spritesheets/sprites.json",
 	backgrounds: "images/spritesheets/backgrounds.png",
 	backgroundsAtlas: "images/spritesheets/backgrounds.json",
+	junkbotAnimations: "junkbot-animations.json",
+	font: "images/font.png",
+	turn: "audio/sound-effects/turn1.ogg",
+	blockPickUp: "audio/sound-effects/blockpickup.ogg",
+	// blockPickUpFromAir: "audio/sound-effects/custom/pick-up-from-air.wav",
+	blockDrop: "audio/sound-effects/blockdrop.ogg",
+	blockClick: "audio/sound-effects/blockclick.ogg",
+	buttonClick: "audio/sound-effects/h_button1.ogg",
+	titleScreenLevel: "levels/custom/Title Screen.txt",
+	titleScreenWelcomePanel: "images/menus/loading_bkg_frame.png",
+};
+const otherResourcePaths = {
 	// menus: "images/spritesheets/menus.png",
 	// menusAtlas: "images/spritesheets/menus.json",
 	spritesUndercover: "images/spritesheets/Undercover Exclusive/sprites.png",
@@ -734,13 +748,6 @@ const resourcePaths = {
 	backgroundsUndercoverAtlas: "images/spritesheets/Undercover Exclusive/backgrounds.json",
 	// menusUndercover: "images/spritesheets/Undercover Exclusive/menus.png",
 	// menusUndercoverAtlas: "images/spritesheets/Undercover Exclusive/menus.json",
-	junkbotAnimations: "junkbot-animations.json",
-	font: "images/font.png",
-	turn: "audio/sound-effects/turn1.ogg",
-	blockPickUp: "audio/sound-effects/blockpickup.ogg",
-	// blockPickUpFromAir: "audio/sound-effects/custom/pick-up-from-air.wav",
-	blockDrop: "audio/sound-effects/blockdrop.ogg",
-	blockClick: "audio/sound-effects/blockclick.ogg",
 	fall: "audio/sound-effects/fall.ogg",
 	headBonk: "audio/sound-effects/headbonk1.ogg",
 	collectBin: "audio/sound-effects/eat1.ogg",
@@ -775,12 +782,10 @@ const resourcePaths = {
 	rustle3: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML4.WAV",
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
-	buttonClick: "audio/sound-effects/h_button1.ogg",
-	titleScreenLevel: "levels/custom/Title Screen.txt",
-	titleScreenWelcomePanel: "images/menus/loading_bkg_frame.png",
 	levelNames: "levels/_LEVEL_LISTING.txt",
 	levelNamesUndercover: "levels/Undercover Exclusive/_LEVEL_LISTING.txt",
 };
+const allResourcePaths = Object.fromEntries(Object.entries(hotResourcePaths).concat(Object.entries(otherResourcePaths)));
 const numRustles = 6;
 const numDrips = 3;
 let collectBinTime = -1;
@@ -1072,21 +1077,28 @@ const loadResource = (path) => {
 
 const numProgressBricks = 14;
 const progressBricks = [];
+const totalResources = Object.keys(allResourcePaths).length;
+let loadedResources = 0;
+// This function can load all resources or just the hot resource bundle, but progress
+// will be indicated for the total set of resources.
 const loadResources = async (resourcePathsByID) => {
 	const entries = Object.entries(resourcePathsByID);
-	let loaded = 0;
 	return Object.fromEntries(await Promise.all(entries.map(async ([id, path]) => {
 		const resource = await loadResource(path);
-		loaded += 1;
-		if (loaded / entries.length * numProgressBricks > progressBricks.length) {
+		loadedResources += 1;
+		if (loadedResources / totalResources * numProgressBricks > progressBricks.length) {
 			const progressBrick = document.createElement("div");
 			progressBrick.classList.add("load-progress-brick");
 			progressBricks.push(progressBrick);
 			loadProgress.appendChild(progressBrick);
 		}
+		// console.log(`Loaded '${path}'`);
 		return [id, resource];
 	})));
 };
+let hotResourcesLoadedPromise;
+let allResourcesLoadedPromise;
+
 
 const serializeToJSON = (level) => {
 	return JSON.stringify({ version: 0.3, format: "janitorial-android", level }, (name, value) => {
@@ -4695,16 +4707,6 @@ const showTitleScreen = () => {
 
 const initUI = () => {
 	// Title screen
-
-	// Wait for image to load before showing it to prevent flash of missing text.
-	// Note that this strategy only works if cache is enabled; make sure "Disable cache" is unchecked in devtools.
-	const loadedImg = document.createElement("img");
-	loadedImg.addEventListener("load", () => {
-		loadStatusLoaded.hidden = false;
-		loadStatusLoading.hidden = true;
-	});
-	loadedImg.src = "images/menus/ready_to_play.png";
-
 	startGameButton.addEventListener("click", () => {
 		location.hash = "#level=Junkbot;New%20Employee%20Training";
 	});
@@ -4714,7 +4716,6 @@ const initUI = () => {
 	resetScreenButton.addEventListener("click", () => {
 		showTitleScreen();
 	});
-
 	// Event delegation doesn't work because pointer-events is set to none.
 	// titleScreen.addEventListener("pointerdown", (event) => {
 	// 	const button = event.target.closest("button");
@@ -5328,6 +5329,21 @@ const runTests = async () => {
 	});
 };
 
+const deriveResources = (resources) => {
+	// Currently this assumes only hot resources need derivatives.
+
+	// Monkey patch one frame of a sprite atlas (easier than regenerating the spritesheet)
+	// eslint-disable-next-line camelcase
+	resources.spritesAtlas.eyebot_active_1 = resources.spritesAtlas.eyebot_active_1fix;
+
+	// Generate colored font sprites
+	for (const [colorName, color] of Object.entries(fontColors)) {
+		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
+	}
+
+	return resources;
+};
+
 const loadFromHash = async () => {
 	if (disableLoadFromHash) {
 		return;
@@ -5335,6 +5351,12 @@ const loadFromHash = async () => {
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
 	if (hashOptions.level) {
+		// Only load (and derive) resources once
+		allResourcesLoadedPromise ??= loadResources(allResourcePaths).then(deriveResources);
+		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
+		resources = await allResourcesLoadedPromise;
+
+		initEditorUI(); // now that resources are loaded
 		hideTitleScreen();
 		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
 		if (game === "local") {
@@ -5361,7 +5383,30 @@ const loadFromHash = async () => {
 			}
 		}
 	} else {
+		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveResources);
+		resources = await hotResourcesLoadedPromise;
 		showTitleScreen();
+
+		// We loaded from the hash!
+		// There's more to load, but we don't want to block showing the title screen level.
+		(async () => {
+			allResourcesLoadedPromise ??= loadResources(otherResourcePaths).then((restOfResources) => {
+				Object.assign(resources, restOfResources);
+				return resources; // needs to return all resources so that it doesn't unload them when starting the game
+			});
+			resources = await allResourcesLoadedPromise;
+
+			initEditorUI(); // now that all resources are loaded
+
+			// Wait for image to load before showing it to prevent flash of missing text.
+			// Note that this strategy only works if cache is enabled; make sure "Disable cache" is unchecked in devtools.
+			const loadedImg = document.createElement("img");
+			loadedImg.addEventListener("load", () => {
+				loadStatusLoaded.hidden = false;
+				loadStatusLoading.hidden = true;
+			});
+			loadedImg.src = "images/menus/ready_to_play.png";
+		})();
 	}
 	if (location.hash.match(/run-tests/)) {
 		runTests();
@@ -5416,20 +5461,14 @@ const main = async () => {
 		hideInfoBox = localStorage.hideInfoBox === "true";
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
-	resources = await loadResources(resourcePaths);
-	// eslint-disable-next-line camelcase
-	resources.spritesAtlas.eyebot_active_1 = resources.spritesAtlas.eyebot_active_1fix;
 
-	for (const [colorName, color] of Object.entries(fontColors)) {
-		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
-	}
 	initUI();
-	initEditorUI();
 
 	winLoseState = winOrLose(); // prevent pausing in checkLevelEnd before level is loaded
-	animate();
 
 	await loadFromHash();
+
+	animate();
 };
 
 main();
