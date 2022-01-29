@@ -1014,23 +1014,31 @@ const loadSound = async (path) => {
 	}
 };
 
+const loadLevelListing = async (path) => {
+	const text = await loadTextFile(path);
+	return text.trim().split(/\r?\n/g);
+};
+
+const loadResource = (path) => {
+	if (path.match(/spritesheets\/.*\.json$/i)) {
+		return loadAtlasJSON(path);
+	} else if (path.match(/\.json$/i)) {
+		return loadJSON(path);
+	} else if (path.match(/level.listing\.txt$/i)) {
+		return loadLevelListing(path);
+	} else if (path.match(/levels\/.*\.txt$/i)) {
+		return loadLevelFromTextFile(path);
+	} else if (path.match(/\.(ogg|mp3|wav)$/i)) {
+		return loadSound(path);
+	} else if (path.match(/\.(png|jpe?g|gif)$/i)) {
+		return loadImage(path);
+	}
+	throw new Error(`How should I load this? '${path}'`);
+};
+
 const loadResources = async (resourcePathsByID) => {
-	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(([id, path]) => {
-		if (path.match(/spritesheets\/.*\.json$/i)) {
-			return loadAtlasJSON(path).then((atlas) => [id, atlas]);
-		} else if (path.match(/\.json$/i)) {
-			return loadJSON(path).then((data) => [id, data]);
-			// return loadTextFile(path).then((json) => [id, json]);
-		} else if (path.match(/level.listing\.txt$/i)) {
-			return loadTextFile(path).then((text) => [id, text.trim().split(/\r?\n/g)]);
-		} else if (path.match(/levels\/.*\.txt$/i)) {
-			return loadLevelFromTextFile(path).then((level) => [id, level]);
-		} else if (path.match(/\.(ogg|mp3|wav)$/i)) {
-			return loadSound(path).then((audioBuffer) => [id, audioBuffer]);
-		} else if (path.match(/\.(png|jpe?g|gif)$/i)) {
-			return loadImage(path).then((image) => [id, image]);
-		}
-		throw new Error(`How should I load this? '${path}'`);
+	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(async ([id, path]) => {
+		return [id, await loadResource(path)];
 	})));
 };
 
