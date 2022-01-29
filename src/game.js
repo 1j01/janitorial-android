@@ -740,7 +740,7 @@ const resourcePaths = {
 	rustle3: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML4.WAV",
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
-	defaultLevel: "levels/custom/New Employee Training (1j01).txt",
+	titleScreenLevel: "levels/custom/Title Screen.txt",
 	levelNames: "levels/_LEVEL_LISTING.txt",
 	levelNamesUndercover: "levels/Undercover Exclusive/_LEVEL_LISTING.txt",
 };
@@ -1837,6 +1837,7 @@ const deserializeJSON = (json) => {
 	resetAndInit(state.level);
 };
 const initLevel = (level) => {
+	level = diffPatcher.clone(level); // matters for title screen's "reset screen" button
 	editorLevelState = serializeToJSON(level);
 	resetAndInit(level);
 	viewport.centerX = 35 / 2 * 15;
@@ -4241,6 +4242,13 @@ const render = () => {
 		canvas.style.cursor = "default";
 	}
 
+	if (currentLevel.title === "Title Screen") {
+		const titleScreen = document.getElementById("title-screen");
+		viewport.centerX = titleScreen.offsetWidth / 2 - 1;
+		viewport.centerY = titleScreen.offsetHeight / 2 - 26;
+		viewport.scale = window.devicePixelRatio;
+	}
+
 	// Note: while zooming, innerWidth * window.devicePixelRatio often stays the same, while both factors change
 	if (
 		canvas.width !== innerWidth * window.devicePixelRatio ||
@@ -4610,6 +4618,33 @@ const initUI = () => {
 	const saveButton = document.getElementById("save-world");
 	const openButton = document.getElementById("open-world");
 	const rewindButton = document.getElementById("rewind");
+	const startGame = document.getElementById("start-game");
+	// const replayIntro = document.getElementById("replay-intro");
+	// const skipIntro = document.getElementById("skip-intro");
+	const resetScreen = document.getElementById("reset-screen");
+	const showCredits = document.getElementById("show-credits");
+	const loadStatusTextLoaded = document.getElementById("load-status-text-loaded");
+	const loadStatusTextLoading = document.getElementById("load-status-text-loading");
+	const titleScreen = document.getElementById("title-screen");
+	// const showTitleScreen = document.getElementById("show-title-screen");
+
+	loadStatusTextLoaded.hidden = false;
+	loadStatusTextLoading.hidden = true;
+
+	startGame.addEventListener("click", () => {
+		titleScreen.hidden = true;
+		location.hash = "#level=Junkbot;New%20Employee%20Training";
+	});
+	// showTitleScreen.addEventListener("click", () => {
+	// 	titleScreen.hidden = false;
+	// 	initLevel(resources.titleScreenLevel);
+	// });
+	showCredits.addEventListener("click", () => {
+		window.open("https://github.com/1j01/janitorial-android#credits");
+	});
+	resetScreen.addEventListener("click", () => {
+		initLevel(resources.titleScreenLevel);
+	});
 
 	editorUI.hidden = !editing;
 
@@ -4961,7 +4996,8 @@ const initUI = () => {
 		levelTitleInput.value = level.title ?? "";
 		levelHintInput.value = level.hint ?? "";
 		levelParInput.value = level.par ?? "";
-		document.title = level.title ? `${level.title} - Junkbot` : "Junkbot";
+		const showLevelTitle = level.title && (level.title !== "Title Screen" || editing);
+		document.title = showLevelTitle ? `${level.title} - Junkbot` : "Junkbot";
 	};
 	updateEditorUIForLevelChange(currentLevel);
 
@@ -5249,7 +5285,7 @@ const loadFromHash = async () => {
 			dragging = entities.filter((entity) => entity.grabbed);
 		} catch (error) {
 			// initTestLevel();
-			initLevel(resources.defaultLevel);
+			initLevel(resources.titleScreenLevel);
 		}
 		editorLevelState = serializeToJSON(currentLevel);
 	}

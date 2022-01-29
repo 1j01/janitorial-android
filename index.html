@@ -199,8 +199,10 @@
 			height: 420px;
 			z-index: 10000;
 			position: absolute;
-			top: 0;
-			left: 0;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			outline: 5000px solid black; /* covers up a few pixels of the title screen level outside its frame */
 		}
 		#welcome-text {
 			text-align: center;
