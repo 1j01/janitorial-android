@@ -4680,12 +4680,18 @@ const initUI = () => {
 	// const skipIntro = document.getElementById("skip-intro");
 	const resetScreen = document.getElementById("reset-screen");
 	const showCredits = document.getElementById("show-credits");
-	const loadStatusTextLoaded = document.getElementById("load-status-text-loaded");
-	const loadStatusTextLoading = document.getElementById("load-status-text-loading");
+	const loadStatusTextLoaded = document.getElementById("load-status-loaded");
+	const loadStatusTextLoading = document.getElementById("load-status-loading");
 	// const showTitleScreen = document.getElementById("show-title-screen");
 
-	loadStatusTextLoaded.hidden = false;
-	loadStatusTextLoading.hidden = true;
+	// Wait for image to load before showing it to prevent flash of missing text.
+	// Note that this strategy only works if cache is enabled; make sure "Disable cache" is unchecked in devtools.
+	const loadedImg = document.createElement("img");
+	loadedImg.addEventListener("load", () => {
+		loadStatusTextLoaded.hidden = false;
+		loadStatusTextLoading.hidden = true;
+	});
+	loadedImg.src = "images/menus/ready_to_play.png";
 
 	startGame.addEventListener("click", () => {
 		location.hash = "#level=Junkbot;New%20Employee%20Training";

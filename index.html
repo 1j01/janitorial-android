@@ -277,19 +277,23 @@
 		#reset-screen:hover {
 			background-image: url("images/menus/clear_screen_x.png");
 		}
-		#load-status {
+		#load-status-loaded {
 			position: absolute;
-			left: 508px;
-			top: 15px;
-			width: 100px;
-			height: 40px;
-			font-size: 14px;
-			line-height: 19px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			text-align: center;
-			color: #636363;
+			left: 512px;
+			top: 24px;
+			background-image: url("images/menus/ready_to_play.png");
+			width: 92px;
+			height: 25px;
+			color: transparent;
+		}
+		#load-status-loading {
+			position: absolute;
+			left: 496px;
+			top: 24px;
+			background-image: url("images/menus/download_in_progress.png");
+			width: 124px;
+			height: 25px;
+			color: transparent;
 		}
 		#load-progress {
 			position: absolute;
@@ -360,10 +364,8 @@
 		<button class="image-button" id="replay-intro" hidden>Replay Intro</button>
 		<button class="image-button" id="skip-intro" hidden>Skip Intro</button>
 		<button class="image-button" id="reset-screen">Reset Screen</button>
-		<span id="load-status">
-			<span id="load-status-text-loaded" hidden>Ready to play</span>
-			<span id="load-status-text-loading">Loading...</span>
-		</span>
+		<span id="load-status-loaded" hidden>Ready to play</span>
+		<span id="load-status-loading">Download in progress</span>
 		<div id="load-progress"></div>
 		<div id="welcome-text">
 			Welcome to the factory<br>
