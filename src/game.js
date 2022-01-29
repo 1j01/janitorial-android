@@ -1117,12 +1117,14 @@ const fontColors = {
 };
 const fontCanvases = {};
 
-const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.5)") => {
+const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.5)", padding = true) => {
 	const fontImage = fontCanvases[colorName];
 	let x = startX;
 	let y = startY;
 	text = text.toUpperCase();
-	text = ` ${text} `.replace(/\n/g, " \n ").replace(/\n\s*$/, "");
+	if (padding) {
+		text = ` ${text} `.replace(/\n/g, " \n ").replace(/\n\s*$/, "");
+	}
 	ctx.fillStyle = bgColor;
 	for (const char of text) {
 		let w = 0;
@@ -4301,7 +4303,7 @@ const render = () => {
 			ctx.save();
 			ctx.translate(x, y);
 			ctx.scale(2, 2);
-			drawText(ctx, text, 0, 0, color, "transparent");
+			drawText(ctx, text, 0, 0, color, "transparent", false);
 			ctx.restore();
 		}
 		ctx.restore();
