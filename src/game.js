@@ -5360,7 +5360,7 @@ const loadFromHash = async () => {
 		resources = await allResourcesLoadedPromise;
 
 		initEditorUI(); // now that resources are loaded
-		hideTitleScreen();
+
 		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
 		if (game === "local") {
 			try {
@@ -5385,6 +5385,8 @@ const loadFromHash = async () => {
 				}
 			}
 		}
+		// after loading the level so that there's not a flash of the title screen level without the title screen frame
+		hideTitleScreen();
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveResources);
 		resources = await hotResourcesLoadedPromise;
