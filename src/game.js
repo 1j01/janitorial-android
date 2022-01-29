@@ -4694,6 +4694,8 @@ const showTitleScreen = () => {
 };
 
 const initUI = () => {
+	// Title screen
+
 	// Wait for image to load before showing it to prevent flash of missing text.
 	// Note that this strategy only works if cache is enabled; make sure "Disable cache" is unchecked in devtools.
 	const loadedImg = document.createElement("img");
@@ -4706,9 +4708,6 @@ const initUI = () => {
 	startGameButton.addEventListener("click", () => {
 		location.hash = "#level=Junkbot;New%20Employee%20Training";
 	});
-	// showTitleScreenButton.addEventListener("click", () => {
-	// 	showTitleScreenButton();
-	// });
 	showCreditsButton.addEventListener("click", () => {
 		window.open("https://github.com/1j01/janitorial-android#credits");
 	});
@@ -4730,6 +4729,51 @@ const initUI = () => {
 		});
 	}
 
+	// Main game controls bar
+
+	toggleInfoButton.addEventListener("click", toggleInfoBox);
+
+	updateInfoBoxHidden();
+
+	toggleFullscreenButton.addEventListener("click", toggleFullscreen);
+	toggleFullscreenButton.ariaPressed = false; // document.fullscreenElement unlikely to work when loading page
+	addEventListener("fullscreenchange", () => {
+		toggleFullscreenButton.ariaPressed = Boolean(document.fullscreenElement);
+	});
+
+	toggleMuteButton.addEventListener("click", () => toggleMute());
+	toggleMuteButton.ariaPressed = muted;
+	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
+
+	toggleEditingButton.addEventListener("click", toggleEditing);
+	toggleEditingButton.ariaPressed = editing;
+
+	volumeSlider.addEventListener("input", () => {
+		setVolume(volumeSlider.valueAsNumber);
+	});
+	volumeSlider.valueAsNumber = mainGain.gain.value;
+
+	rewindButton.addEventListener("pointerdown", () => {
+		rewindingWithButton = true;
+	});
+	addEventListener("pointerup", () => {
+		rewindingWithButton = false;
+	});
+	// showTitleScreenButton.addEventListener("click", () => {
+	// 	showTitleScreenButton();
+	// });
+
+	// Part of editor UX but not editor GUI.
+	// Should be supported before opening editor UI.
+
+	canvas.addEventListener("dragover", (event) => event.preventDefault());
+	canvas.addEventListener("dragenter", (event) => event.preventDefault());
+	canvas.addEventListener("drop", (event) => {
+		event.preventDefault();
+		openFromFile(event.dataTransfer.files[0]);
+	});
+};
+const initEditorUI = () => {
 	editorUI.hidden = !editing;
 
 	let hilitButton;
@@ -5104,42 +5148,6 @@ const initUI = () => {
 			wrapContents(actionCell, button);
 		}
 	}
-
-	toggleInfoButton.addEventListener("click", toggleInfoBox);
-
-	updateInfoBoxHidden();
-
-	toggleFullscreenButton.addEventListener("click", toggleFullscreen);
-	toggleFullscreenButton.ariaPressed = false; // document.fullscreenElement unlikely to work when loading page
-	addEventListener("fullscreenchange", () => {
-		toggleFullscreenButton.ariaPressed = Boolean(document.fullscreenElement);
-	});
-
-	toggleMuteButton.addEventListener("click", () => toggleMute());
-	toggleMuteButton.ariaPressed = muted;
-	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
-
-	toggleEditingButton.addEventListener("click", toggleEditing);
-	toggleEditingButton.ariaPressed = editing;
-
-	volumeSlider.addEventListener("input", () => {
-		setVolume(volumeSlider.valueAsNumber);
-	});
-	volumeSlider.valueAsNumber = mainGain.gain.value;
-
-	rewindButton.addEventListener("pointerdown", () => {
-		rewindingWithButton = true;
-	});
-	addEventListener("pointerup", () => {
-		rewindingWithButton = false;
-	});
-
-	canvas.addEventListener("dragover", (event) => event.preventDefault());
-	canvas.addEventListener("dragenter", (event) => event.preventDefault());
-	canvas.addEventListener("drop", (event) => {
-		event.preventDefault();
-		openFromFile(event.dataTransfer.files[0]);
-	});
 };
 
 const stopTests = () => {
@@ -5416,6 +5424,7 @@ const main = async () => {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
 	initUI();
+	initEditorUI();
 
 	winLoseState = winOrLose(); // prevent pausing in checkLevelEnd before level is loaded
 	animate();
