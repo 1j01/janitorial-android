@@ -5136,7 +5136,7 @@ const initUI = () => {
 
 	canvas.addEventListener("dragover", (event) => event.preventDefault());
 	canvas.addEventListener("dragenter", (event) => event.preventDefault());
-	canvas.addEventListener("droplet", (event) => {
+	canvas.addEventListener("drop", (event) => {
 		event.preventDefault();
 		openFromFile(event.dataTransfer.files[0]);
 	});
