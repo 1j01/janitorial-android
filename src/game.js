@@ -10,7 +10,6 @@ const showCreditsButton = document.getElementById("show-credits");
 const loadStatusLoaded = document.getElementById("load-status-loaded");
 const loadStatusLoading = document.getElementById("load-status-loading");
 const loadProgress = document.getElementById("load-progress");
-const welcomeText = document.getElementById("welcome-text");
 // Main game controls bar
 const toggleInfoButton = document.getElementById("toggle-info");
 const toggleFullscreenButton = document.getElementById("toggle-fullscreen");
@@ -4352,7 +4351,6 @@ const render = () => {
 		}
 	}
 	if (currentLevel.title === "Title Screen") {
-		welcomeText.style.opacity = 0;
 		ctx.save();
 		ctx.translate(-1, -26 + 1); // -1, -26 = offset of level top/left compared to title screen frame image; +1 = unknown
 		// (offsets of 1 might actually be due to differences in rounding when centering...?)
