@@ -5391,6 +5391,8 @@ const main = async () => {
 		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
 	}
 	initUI();
+
+	winLoseState = winOrLose(); // prevent pausing in checkLevelEnd before level is loaded
 	animate();
 
 	await loadFromHash();
