@@ -71,6 +71,7 @@ let editing = false;
 let testing = false;
 let rewindingWithButton = false;
 let hideInfoBox = false;
+let titleScreen;
 let editorUI;
 let testsUI;
 let levelSelect;
@@ -740,6 +741,7 @@ const resourcePaths = {
 	rustle3: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML4.WAV",
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
+	buttonClick: "audio/sound-effects/h_button1.ogg",
 	titleScreenLevel: "levels/custom/Title Screen.txt",
 	titleScreenWelcomePanel: "images/menus/loading_bkg_frame.png",
 	levelNames: "levels/_LEVEL_LISTING.txt",
@@ -4246,7 +4248,6 @@ const render = () => {
 	}
 
 	if (currentLevel.title === "Title Screen") {
-		const titleScreen = document.getElementById("title-screen");
 		viewport.centerX = titleScreen.offsetWidth / 2 - 1;
 		viewport.centerY = titleScreen.offsetHeight / 2 - 26;
 		viewport.scale = window.devicePixelRatio;
@@ -4632,17 +4633,15 @@ const wrapContents = (target, wrapper) => {
 };
 
 const hideTitleScreen = () => {
-	const titleScreen = document.getElementById("title-screen");
 	titleScreen.hidden = true;
 };
 const showTitleScreen = () => {
-	const titleScreen = document.getElementById("title-screen");
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
 };
 
 const initUI = () => {
-
+	titleScreen = document.getElementById("title-screen");
 	testsUI = document.getElementById("tests-ui");
 	editorUI = document.getElementById("editor-ui");
 	levelSelect = document.getElementById("level-select");
@@ -4679,6 +4678,20 @@ const initUI = () => {
 	resetScreen.addEventListener("click", () => {
 		showTitleScreen();
 	});
+
+	// Event delegation doesn't work because pointer-events is set to none.
+	// titleScreen.addEventListener("pointerdown", (event) => {
+	// 	const button = event.target.closest("button");
+	// 	if (button) {
+	// 		playSound("buttonClick");
+	// 	}
+	// });
+	const buttons = [...titleScreen.querySelectorAll("button")];
+	for (const button of buttons) {
+		button.addEventListener("pointerdown", () => {
+			playSound("buttonClick");
+		});
+	}
 
 	editorUI.hidden = !editing;
 
