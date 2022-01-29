@@ -291,6 +291,40 @@
 			text-align: center;
 			color: #636363;
 		}
+		#load-progress {
+			position: absolute;
+			left: 506px;
+			top: 50px;
+			width: 100px;
+			height: 265px;
+			flex-direction: column-reverse;
+			display: flex;
+			align-items: center;
+		}
+		.load-progress-brick {
+			animation: fall-into-place 0.6s linear forwards;
+			height: 18px;
+		}
+		@keyframes fall-into-place {
+			from {
+				transform: translateY(-500px);
+			}
+			to {
+				transform: translateY(0px);
+			}
+		}
+		.load-progress-brick::after {
+			height: 32px;
+		}
+		.load-progress-brick:nth-child(even)::after {
+			content: url("images/sprites/brick_immobile_2.png");
+			width: 41px;
+		}
+		.load-progress-brick:nth-child(odd)::after {
+			content: url("images/sprites/brick_immobile_4.png");
+			width: 71px;
+		}
+
 		.title-screen-arrow {
 			position: absolute;
 			top: 152px;
@@ -302,12 +336,18 @@
 		.title-screen-arrow.pointing-left {
 			transform: scaleX(-1);
 		}
+
+		#preload {
+			display: none;
+		}
 	</style>
 </head>
 
 <body>
-	<script src="lib/jsondiffpatch.umd.js"></script>
-	<script src="src/game.js"></script>
+	<div id="preload">
+		<img src="images/sprites/brick_immobile_2.png" width="1" height="1" />
+		<img src="images/sprites/brick_immobile_4.png" width="1" height="1" />
+	</div>	 
 	<div id="title-screen">
 		<button class="image-button" id="start-game">Play</button>
 		<button class="image-button" id="show-credits">Credits</button>
@@ -318,6 +358,7 @@
 			<span id="load-status-text-loaded" hidden>Ready to play</span>
 			<span id="load-status-text-loading">Loading...</span>
 		</span>
+		<div id="load-progress"></div>
 		<div id="welcome-text">
 			Welcome to the factory<br>
 			<span style="color: white">Try moving the colored bricks<br>
@@ -498,6 +539,8 @@
 			</label>
 		</div>
 	</div>
+	<script src="lib/jsondiffpatch.umd.js"></script>
+	<script src="src/game.js"></script>
 </body>
 
 </html>

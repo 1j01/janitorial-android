@@ -1036,9 +1036,22 @@ const loadResource = (path) => {
 	throw new Error(`How should I load this? '${path}'`);
 };
 
+const loadProgress = document.getElementById("load-progress");
+const numProgressBricks = 14;
+const progressBricks = [];
 const loadResources = async (resourcePathsByID) => {
-	return Object.fromEntries(await Promise.all(Object.entries(resourcePathsByID).map(async ([id, path]) => {
-		return [id, await loadResource(path)];
+	const entries = Object.entries(resourcePathsByID);
+	let loaded = 0;
+	return Object.fromEntries(await Promise.all(entries.map(async ([id, path]) => {
+		const resource = await loadResource(path);
+		loaded += 1;
+		if (loaded / entries.length * numProgressBricks > progressBricks.length) {
+			const progressBrick = document.createElement("div");
+			progressBrick.classList.add("load-progress-brick");
+			progressBricks.push(progressBrick);
+			loadProgress.appendChild(progressBrick);
+		}
+		return [id, resource];
 	})));
 };
 
