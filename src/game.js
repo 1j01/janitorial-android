@@ -4701,6 +4701,8 @@ const hideTitleScreen = () => {
 const showTitleScreen = () => {
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
+	titleScreen.classList.add("title-screen-level-loaded");
+	resetScreenButton.hidden = false;
 };
 
 const initUI = () => {
@@ -5384,7 +5386,6 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveResources);
 		resources = await hotResourcesLoadedPromise;
 		showTitleScreen();
-		titleScreen.classList.add("title-screen-level-loaded");
 
 		// We loaded from the hash!
 		// There's more to load, but we don't want to block showing the title screen level.
@@ -5397,12 +5398,20 @@ const loadFromHash = async () => {
 
 			initEditorUI(); // now that all resources are loaded
 
-			// Wait for image to load before showing it to prevent flash of missing text.
+			// Wait for "READY TO PLAY" text image to load before showing it to prevent flash of missing text.
+			// I'm also delaying enabling the start game button because it feels weird to do those at different times.
+			// I actually handle loading resources if you were to navigate to a different level while stuff is loading,
+			// but I don't want to show the play button while the title screen is still loading,
+			// because I want you to see the title screen level, and maybe interact with it, before starting the game.
+
 			// Note that this strategy only works if cache is enabled; make sure "Disable cache" is unchecked in devtools.
 			const loadedImg = document.createElement("img");
 			loadedImg.addEventListener("load", () => {
 				loadStatusLoaded.hidden = false;
 				loadStatusLoading.hidden = true;
+
+				startGameButton.hidden = false;
+				showCreditsButton.hidden = false;
 			});
 			loadedImg.src = "images/menus/ready_to_play.png";
 		})();
