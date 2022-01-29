@@ -741,6 +741,7 @@ const resourcePaths = {
 	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
 	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
 	titleScreenLevel: "levels/custom/Title Screen.txt",
+	titleScreenWelcomePanel: "images/menus/loading_bkg_frame.png",
 	levelNames: "levels/_LEVEL_LISTING.txt",
 	levelNamesUndercover: "levels/Undercover Exclusive/_LEVEL_LISTING.txt",
 };
@@ -4280,6 +4281,30 @@ const render = () => {
 		for (const { x, y, name } of currentLevel.decals) {
 			drawDecal(ctx, x - 15 * 2, y - 64, name, currentLevel.game);
 		}
+	}
+	if (currentLevel.title === "Title Screen") {
+		const welcomeText = document.getElementById("welcome-text");
+		welcomeText.style.opacity = 0;
+		ctx.save();
+		ctx.translate(-1, -26 + 1); // -1, -26 = offset of level top/left compared to title screen frame image; +1 = unknown
+		// (offsets of 1 might actually be due to differences in rounding when centering...?)
+		// Now we can position things relative to title screen frame image, which is easier than doing it relative to the obscured level boundary.
+		ctx.drawImage(resources.titleScreenWelcomePanel, 41, 206);
+		const lines = [
+			["Welcome to the factory", "black", 115, 217],
+			["Try moving the colored bricks", "white", 73, 235],
+			["with the mouse", "white", 164, 253],
+			["before you play the game", "black", 104, 271],
+		];
+		for (let i = 0; i < lines.length; i++) {
+			const [text, color, x, y] = lines[i];
+			ctx.save();
+			ctx.translate(x, y);
+			ctx.scale(2, 2);
+			drawText(ctx, text, 0, 0, color, "transparent");
+			ctx.restore();
+		}
+		ctx.restore();
 	}
 
 	const shouldHilight = (entity) => {
