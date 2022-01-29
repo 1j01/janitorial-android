@@ -1,20 +1,21 @@
 # [Janitorial Android][demo]
 
-An HTML5 remake of [Junkbot][] / [Junkbot Undercover][], maybe a sequel / spinoff?
+An HTML5 remake of [Junkbot][] and [Junkbot Undercover][], maybe a sequel / spinoff?
 Not sure what direction this project will take.
 
 [![](images/teaser.png)][demo]
 
 [Try it out here!][demo]
 
-Done so far:
-- Brick dragging mechanics, including when grabs are ambiguous until you drag up or down, with cursors for different drags (up, down, or either)
+All mechanics from the original games are implemented:
+- Dragging bricks, and handling grabs that are ambiguous until you drag up or down, with cursors for different dragging options (up, down, or either)
 - Loading the original level format
 - Junkbot's movement and animations
 - Recycling bins (the level goals)
 - Fire bricks
 - Fans
 - Switches
+- Jump blocks
 - Dripping pipes
 - Shield powerups
 - Gearbots, climbbots, flybots, and eyebots (aside from exact timings and some edge cases)
@@ -22,16 +23,14 @@ Done so far:
 - Laser beams
 - Complete level editing functionality (not present in the original games)
 	- Rectangular selection, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette
-	- With sound effects taken from Lego Creator
+	- With additional sound effects taken from Lego Creator
 
-Partially done:
-- Jump blocks (these are kinda janky in the original games, not sure how junkbot's in-air physics should work, to make the levels playable as intended, but I'd rather it be close to ballistic motion)
 - I've started making a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo]; I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
 
 ## Controls
 
-<p>Drag bricks with the mouse. You don't control Junkbot directly. Junkbot moves on their own.</p>
-<p>Use the arrow keys or <kbd>WASD</kbd> (on QWERTY keyboard, something else on AZERTY), or move the mouse to the edges of screen to pan the view and look around.</p>
+<p>Drag bricks with the mouse. You don't control Junkbot directly. Junkbot moves on his own.</p>
+<p>Use the arrow keys or <kbd>WASD</kbd> (or similar patterns of keys on layouts other than QWERTY) to pan the view.</p>
 <table>
 	<tr>
 		<td><kbd>E</kbd></td>
@@ -116,10 +115,6 @@ Partially done:
 ### Some sounds taken from
 - Lego Creator (editor sounds)
 - Lego Star Wars: Force Awakens (lego rustling sounds)
-	- These sounds are a little too abrupt
-		- These might be better:
-			- https://freesound.org/people/SomeoneCool15/sounds/423782/
-			- https://freesound.org/people/sampson021/sounds/262584/
 - (in addition to Junkbot)
 
 ### Credits for Junkbot & Junkbot Undercover
@@ -166,7 +161,9 @@ Tomas Clark
 	- Punkbot
 - Slanted bricks that reflect lasers
 - Force field / hard light transparent bricks that can be powered on to make it solid, and can be built with!
+	- Implies you can create areas where you can't build but can still move through, and or areas you can 
 - Speed powerup that makes junkbot go uncomfortably fast
+	- Buildup animation with sound ju-ju-ju-ju...tdtdtdtdtkwhh~!
 - Various electrical systems
 	- Turbine generator that can power things when powered by wind
 	- Circuits
@@ -178,7 +175,27 @@ Tomas Clark
 	- LEGO vehicle base?
 - An antagonist junkbot that dumps out trash cans on purpose >:D
 	- Skunkbot/Gunkbot/Stunkbot/Slunkbot?
-
+- Wall-crawler gearbot
+- Overworld
+	- Thematic areas like:
+		- Sewers with lots of water hazards
+		- Vents with claustrophobic puzzles and fans
+		- Shipping warehouse with large amounts of blocks, tetris level, crates
+		- Hedge maze level with maze of green blocks, with an eyebot that chases you
+		- Production line with... conveyor belts? that's the traditional mechanic
+		- Chocolate chip cookie where the chips are teleporters...?
+	- Multiple paths in some areas, which might be specifically chosen to circumvent certain harder levels
+	- Places unlocked by keycards
+	- Gold award doors based on getting par in a particular level; they visibly latch once you go over par
+	- Interludes when entering an area for the first time
+		- Quotes from Robert Frost to make it more dramatic
+		- Kipling, who wrote like the national poem of England, if that's a thing, I don't know if it is but if so he wrote it
+	- Vending machines where you can buy snacks, which Junkbot then opens, throws in the trash, and then eats the trash can
+		- Also maybe a paint job, sunglasses (most expensive), etc.
+		- When Junkbot purchases the final item, he crushes the vending machine and eats it
+- For the level editor, maybe some more rustling sound effects from:
+	- https://freesound.org/people/SomeoneCool15/sounds/423782/
+	- https://freesound.org/people/sampson021/sounds/262584/
 
 ## Development Setup
 
