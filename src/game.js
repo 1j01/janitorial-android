@@ -2032,6 +2032,9 @@ const togglePause = () => {
 	} catch (error) { }
 };
 const toggleEditing = () => {
+	if (!editing && (titleScreen.style.display !== "none" && !titleScreen.hidden)) {
+		return;
+	}
 	editing = !editing;
 	editorUI.hidden = !editing;
 	toggleEditingButton.ariaPressed = editing;
@@ -5386,6 +5389,10 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveResources);
 		resources = await hotResourcesLoadedPromise;
 		showTitleScreen();
+
+		// don't show editor UI on the title screen!
+		editing = false;
+		paused = false;
 
 		// We loaded from the hash!
 		// There's more to load, but we don't want to block showing the title screen level.
