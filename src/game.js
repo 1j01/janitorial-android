@@ -4716,10 +4716,21 @@ const wrapContents = (target, wrapper) => {
 	return wrapper;
 };
 
+let playedIntro = false;
+const ruffle = window.RufflePlayer.newest();
+let rufflePlayer;
+const stopIntro = () => {
+	introContainer.hidden = true;
+	skipIntroButton.hidden = true;
+	resetScreenButton.hidden = false;
+	rufflePlayer?.destroy(); // there is no stop or rewind method
+	rufflePlayer?.remove();
+	rufflePlayer = null;
+};
 const hideTitleScreen = () => {
 	titleScreen.hidden = true;
+	stopIntro();
 };
-let playedIntro = false;
 const showTitleScreen = (showIntro = !playedIntro) => {
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
@@ -4727,10 +4738,13 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 	if (showIntro) {
 		playedIntro = true;
 		replayIntroButton.hidden = false;
-		const ruffle = window.RufflePlayer.newest();
-		const player = ruffle.createPlayer();
-		introContainer.appendChild(player);
-		player.load("flash/junkbot_intro.swf").then(() => {
+		rufflePlayer = ruffle.createPlayer();
+		introContainer.appendChild(rufflePlayer);
+		rufflePlayer.load("flash/junkbot_intro.swf").then(() => {
+			// Note: It may not actually be loaded!
+			// @TODO: handle failing to load the SWF somehow? more monkey-patching?
+			// rufflePlayer.readyState is 0 regardless until later...
+
 			if (!window.monkeyPatchedRuffleLoaded) {
 				showMessageBox("If updating the Ruffle library, note that it was patched before!");
 			}
@@ -4741,11 +4755,7 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 			// We need to intercept it also to handle the timed events.
 			window.monkeyPatchedRuffleLocationAssign = (url) => {
 				if (url === "lingo:glob.download_manager.animDone()") {
-					player.destroy(); // there is no stop or rewind method
-					player.remove();
-					introContainer.hidden = true;
-					skipIntroButton.hidden = true;
-					resetScreenButton.hidden = false;
+					stopIntro();
 				} else if (url === "lingo:glob.jbxtitle_a.show()") {
 					// this is a todo for Junkbot Undercover
 				} else if (url === "lingo:glob.jbxtitle_b.show()") {
@@ -4755,29 +4765,23 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 					console.warn("Prevented Ruffle's location.assign from loading", url);
 				}
 			};
-			player.play();
+			rufflePlayer.play();
 			introContainer.hidden = false;
 			skipIntroButton.hidden = false;
 			resetScreenButton.hidden = true;
 		}, (error) => {
-			introContainer.hidden = true;
-			skipIntroButton.hidden = true;
-			resetScreenButton.hidden = false;
+			// Note: the promise doesn't reject if the Flash file is not found.
+			stopIntro();
 			// eslint-disable-next-line no-console
 			console.error("Failed to load Flash movie with Ruffle:", error);
 		});
 		// Using onclick instead of addEventListener for simpler overwriting of the event handler
 		skipIntroButton.onclick = () => {
-			player.destroy(); // there is no stop or rewind method
-			player.remove();
-			introContainer.hidden = true;
-			skipIntroButton.hidden = true;
-			resetScreenButton.hidden = false;
+			stopIntro();
 		};
 		replayIntroButton.onclick = () => {
 			try {
-				player.destroy();
-				player.remove();
+				stopIntro();
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.error(error);
