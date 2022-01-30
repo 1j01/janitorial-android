@@ -4789,7 +4789,7 @@ const initUI = () => {
 		window.open("https://github.com/1j01/janitorial-android#credits");
 	});
 	resetScreenButton.addEventListener("click", () => {
-		showTitleScreen();
+		showTitleScreen(false);
 	});
 	// Event delegation doesn't work because pointer-events is set to none.
 	// titleScreen.addEventListener("pointerdown", (event) => {
@@ -4836,7 +4836,7 @@ const initUI = () => {
 		rewindingWithButton = false;
 	});
 	// showTitleScreenButton.addEventListener("click", () => {
-	// 	showTitleScreenButton();
+	// 	showTitleScreen(false);
 	// });
 
 	// Part of editor UX but not editor GUI.
