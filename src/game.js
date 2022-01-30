@@ -3,8 +3,9 @@
 // Title screen elements
 const titleScreen = document.getElementById("title-screen");
 const startGameButton = document.getElementById("start-game");
-// const replayIntroButton = document.getElementById("replay-intro");
-// const skipIntroButton = document.getElementById("skip-intro");
+const introContainer = document.getElementById("intro-container");
+const replayIntroButton = document.getElementById("replay-intro");
+const skipIntroButton = document.getElementById("skip-intro");
 const resetScreenButton = document.getElementById("reset-screen");
 const showCreditsButton = document.getElementById("show-credits");
 const loadStatusLoaded = document.getElementById("load-status-loaded");
@@ -4718,11 +4719,59 @@ const wrapContents = (target, wrapper) => {
 const hideTitleScreen = () => {
 	titleScreen.hidden = true;
 };
-const showTitleScreen = () => {
+const showTitleScreen = (showIntro = true) => {
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
 	titleScreen.classList.add("title-screen-level-loaded");
 	resetScreenButton.hidden = false;
+	if (showIntro) {
+		const ruffle = window.RufflePlayer.newest();
+		const player = ruffle.createPlayer();
+		introContainer.appendChild(player);
+		player.load("flash/junkbot_intro.swf").then(() => {
+			if (!window.monkeyPatchedRuffleLoaded) {
+				showMessageBox("If updating the Ruffle library, note that it was patched before!");
+			}
+			// The Junkbot intro Flash animations execute some lingo code via URIs,
+			// which Ruffle by default treats like any URI and does location.assign() here:
+			// https://github.com/ruffle-rs/ruffle/blob/72a811ae2c5aef43144b2a95f0dcf2e72465e005/web/src/navigator.rs#L162
+			// This causes a bewildering permission prompt to run xdg-open (at least for me on XFCE),
+			// We need to intercept it also to handle the timed events.
+			window.monkeyPatchedRuffleLocationAssign = (url) => {
+				if (url === "lingo:glob.download_manager.animDone()") {
+					player.pause();
+					introContainer.hidden = true;
+					skipIntroButton.hidden = true;
+					replayIntroButton.hidden = false;
+				} else if (url === "lingo:glob.jbxtitle_a.show()") {
+					// this is a todo for Junkbot Undercover
+				} else if (url === "lingo:glob.jbxtitle_b.show()") {
+					// this is a todo for Junkbot Undercover
+				} else {
+					// eslint-disable-next-line no-console
+					console.warn("Prevented Ruffle's location.assign from loading", url);
+				}
+			};
+			player.play();
+		});
+		introContainer.hidden = false;
+		skipIntroButton.hidden = false;
+		replayIntroButton.hidden = true;
+		// Using onclick instead of addEventListener for simpler overwriting of the event handler
+		// @TODO: init RufflePlayer only once
+		skipIntroButton.onclick = () => {
+			player.pause(); // @TODO: be kind, rewind
+			introContainer.hidden = true;
+			skipIntroButton.hidden = true;
+			replayIntroButton.hidden = false;
+		};
+		replayIntroButton.onclick = () => {
+			player.play();
+			introContainer.hidden = false;
+			skipIntroButton.hidden = false;
+			replayIntroButton.hidden = true;
+		};
+	}
 };
 
 const initUI = () => {

@@ -46,6 +46,7 @@
 		"horiz",
 		"Intercep",
 		"janky",
+		"jbxtitle",
 		"jsondiffpatch",
 		"Junkbach",
 		"Junkbot",
@@ -116,6 +117,7 @@
 		"unfun",
 		"unmute",
 		"unpatch",
-		"WASD"
+		"WASD",
+		"XFCE"
 	]
 }

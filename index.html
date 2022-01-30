@@ -336,6 +336,19 @@
 			transform: scaleX(-1);
 		}
 
+		#intro-container ruffle-player {
+			position: absolute;
+			--border-size: 30px;
+			left: calc(62px - var(--border-size));
+			top: calc(25px - var(--border-size));
+			width: 369px;
+			height: 369px;
+			z-index: 4;
+			border: var(--border-size) solid black;
+			box-sizing: content-box;
+		}
+
+
 		#preload {
 			display: none;
 		}
@@ -360,6 +373,7 @@
 		<img src="images/menus/clear_screen.png" width="1" height="1" />
 	</div>
 	<div id="title-screen">
+		<div id="intro-container"></div>
 		<button class="image-button" id="start-game" hidden>Play</button>
 		<button class="image-button" id="show-credits" hidden>Credits</button>
 		<button class="image-button" id="replay-intro" hidden>Replay Intro</button>
@@ -543,6 +557,7 @@
 		</div>
 	</div>
 	<script src="lib/jsondiffpatch.umd.js"></script>
+	<script src="lib/ruffle-nightly-2022_01_30/ruffle.js"></script>
 	<script src="src/game.js"></script>
 </body>
 
