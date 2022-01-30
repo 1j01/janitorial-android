@@ -4723,8 +4723,8 @@ const showTitleScreen = (showIntro = true) => {
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
 	titleScreen.classList.add("title-screen-level-loaded");
-	resetScreenButton.hidden = false;
 	if (showIntro) {
+		replayIntroButton.hidden = false;
 		const ruffle = window.RufflePlayer.newest();
 		const player = ruffle.createPlayer();
 		introContainer.appendChild(player);
@@ -4743,7 +4743,7 @@ const showTitleScreen = (showIntro = true) => {
 					player.remove();
 					introContainer.hidden = true;
 					skipIntroButton.hidden = true;
-					replayIntroButton.hidden = false;
+					resetScreenButton.hidden = false;
 				} else if (url === "lingo:glob.jbxtitle_a.show()") {
 					// this is a todo for Junkbot Undercover
 				} else if (url === "lingo:glob.jbxtitle_b.show()") {
@@ -4757,14 +4757,14 @@ const showTitleScreen = (showIntro = true) => {
 		});
 		introContainer.hidden = false;
 		skipIntroButton.hidden = false;
-		replayIntroButton.hidden = true;
+		resetScreenButton.hidden = true;
 		// Using onclick instead of addEventListener for simpler overwriting of the event handler
 		skipIntroButton.onclick = () => {
 			player.destroy(); // there is no stop or rewind method
 			player.remove();
 			introContainer.hidden = true;
 			skipIntroButton.hidden = true;
-			replayIntroButton.hidden = false;
+			resetScreenButton.hidden = false;
 		};
 		replayIntroButton.onclick = () => {
 			try {
@@ -4776,6 +4776,8 @@ const showTitleScreen = (showIntro = true) => {
 			}
 			showTitleScreen(true);
 		};
+	} else {
+		resetScreenButton.hidden = false;
 	}
 };
 
