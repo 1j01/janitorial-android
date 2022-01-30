@@ -762,6 +762,7 @@ const otherResourcePaths = {
 	getShield: "audio/sound-effects/shieldon2.ogg",
 	getPowerup: "audio/sound-effects/h_powerup1.ogg",
 	losePowerup: "audio/sound-effects/h_powerdown3.ogg",
+	teleport: "audio/sound-effects/undercover/teleport.wav",
 	ohYeah: "audio/sound-effects/voice_ohyeah.ogg",
 	jump: "audio/sound-effects/jump3.ogg",
 	fan: "audio/sound-effects/fan.ogg",
@@ -770,8 +771,6 @@ const otherResourcePaths = {
 	drip2: "audio/sound-effects/drip3.ogg",
 	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
 	selectEnd: "audio/sound-effects/custom/select2.wav",
-	teleport: "audio/sound-effects/custom/cool-mystery-less.wav", // @TODO: get the real teleport sound (or something custom but specific)
-	teleport2: "audio/sound-effects/custom/choppa.wav", // @TODO: get the real teleport sound (or something custom but specific)
 	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
 	copyPaste: "audio/sound-effects/lego-creator/copy-I0510.wav",
 	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
@@ -3542,8 +3541,7 @@ const simulateJunkbot = (junkbot) => {
 						linkedTeleport.timer = TELEPORT_COOLDOWN;
 						groundLevelEntity.timer = TELEPORT_COOLDOWN;
 						entityMoved(junkbot);
-						playSound("teleport", 1, 0.7);
-						playSound("teleport2", 1 + Math.random() * 0.5, 0.6);
+						playSound("teleport");
 					}
 				}
 			}
