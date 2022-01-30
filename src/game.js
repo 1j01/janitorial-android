@@ -757,6 +757,7 @@ const otherResourcePaths = {
 	switchOff: "audio/sound-effects/switch_off.ogg",
 	deathByFire: "audio/sound-effects/fire.ogg",
 	deathByWater: "audio/sound-effects/electricity1.ogg",
+	deathByLaser: "audio/sound-effects/undercover/laser_hit.wav",
 	deathByBot: "audio/sound-effects/robottouch4.ogg",
 	getShield: "audio/sound-effects/shieldon2.ogg",
 	getPowerup: "audio/sound-effects/h_powerup1.ogg",
@@ -2070,7 +2071,7 @@ const toggleEditing = () => {
 
 const undoable = (fn) => {
 	if (!editing) {
-		return; // @TODO: allow undos during gameplay again, but handle it well, maybe make it a rewind system like Braid
+		return; // @TODO: allow undoing during gameplay again, but using rewind system
 	}
 	editorLevelState = serializeToJSON(currentLevel);
 	undos.push(editorLevelState);
@@ -2108,8 +2109,7 @@ const undo = () => {
 			recentUndoSound -= 1;
 		}, 400);
 	}
-	// eslint-disable-next-line
-	// TODO: undo view too
+	// @TODO: undo view too
 };
 const redo = () => {
 	if (!editing) {
@@ -3229,8 +3229,10 @@ const hurtJunkbot = (junkbot, cause) => {
 		// @TODO: rename sound effects, as they're not just for death
 		if (cause === "fire") {
 			playSound("deathByFire");
-		} else if (cause === "water" || cause === "laser") { // @TODO: extract/sample laser sound
+		} else if (cause === "water") {
 			playSound("deathByWater");
+		} else if (cause === "laser") {
+			playSound("deathByLaser");
 		} else {
 			playSound("deathByBot");
 		}
