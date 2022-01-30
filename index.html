@@ -207,23 +207,13 @@
 			outline: 5000px solid black; /* covers up a few pixels of the title screen level outside its frame */
 			pointer-events: none; /* allows interaction with the title screen level through the frame's cutout */
 		}
-		#title-screen>*:not([hidden]):not(#welcome-text) {
+		#title-screen>*:not([hidden]) {
 			pointer-events: all;
 		}
 		#title-screen:not(.title-screen-level-loaded) {
 			background-color: #7c857c;
 		}
 
-		#welcome-text {
-			text-align: center;
-			background-image: url("images/menus/loading_bkg_frame.png");
-			width: 398px;
-			height: 86px;
-			position: absolute;
-			left: 41px;
-			top: 206px;
-			color: black;
-		}
 		.image-button {
 			border: 0;
 			background-color: transparent;
