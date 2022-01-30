@@ -4739,7 +4739,8 @@ const showTitleScreen = (showIntro = true) => {
 			// We need to intercept it also to handle the timed events.
 			window.monkeyPatchedRuffleLocationAssign = (url) => {
 				if (url === "lingo:glob.download_manager.animDone()") {
-					player.pause();
+					player.destroy(); // there is no stop or rewind method
+					player.remove();
 					introContainer.hidden = true;
 					skipIntroButton.hidden = true;
 					replayIntroButton.hidden = false;
@@ -4758,18 +4759,22 @@ const showTitleScreen = (showIntro = true) => {
 		skipIntroButton.hidden = false;
 		replayIntroButton.hidden = true;
 		// Using onclick instead of addEventListener for simpler overwriting of the event handler
-		// @TODO: init RufflePlayer only once
 		skipIntroButton.onclick = () => {
-			player.pause(); // @TODO: be kind, rewind
+			player.destroy(); // there is no stop or rewind method
+			player.remove();
 			introContainer.hidden = true;
 			skipIntroButton.hidden = true;
 			replayIntroButton.hidden = false;
 		};
 		replayIntroButton.onclick = () => {
-			player.play();
-			introContainer.hidden = false;
-			skipIntroButton.hidden = false;
-			replayIntroButton.hidden = true;
+			try {
+				player.destroy();
+				player.remove();
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.error(error);
+			}
+			showTitleScreen(true);
 		};
 	}
 };
