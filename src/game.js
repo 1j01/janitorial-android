@@ -4775,19 +4775,6 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 			// eslint-disable-next-line no-console
 			console.error("Failed to load Flash movie with Ruffle:", error);
 		});
-		// Using onclick instead of addEventListener for simpler overwriting of the event handler
-		skipIntroButton.onclick = () => {
-			stopIntro();
-		};
-		replayIntroButton.onclick = () => {
-			try {
-				stopIntro();
-			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.error(error);
-			}
-			showTitleScreen(true);
-		};
 	} else {
 		resetScreenButton.hidden = false;
 	}
@@ -4801,6 +4788,18 @@ const initUI = () => {
 	});
 	showCreditsButton.addEventListener("click", () => {
 		window.open("https://github.com/1j01/janitorial-android#credits");
+	});
+	skipIntroButton.addEventListener("click", () => {
+		stopIntro();
+	});
+	replayIntroButton.addEventListener("click", () => {
+		try {
+			stopIntro();
+		} catch (error) {
+			// eslint-disable-next-line no-console
+			console.error(error);
+		}
+		showTitleScreen(true);
 	});
 	resetScreenButton.addEventListener("click", () => {
 		showTitleScreen(false);
