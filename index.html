@@ -100,6 +100,7 @@
 
 		.dialog-container {
 			position: fixed;
+		    z-index: 100;
 			left: 0;
 			top: 0;
 			right: 0;
@@ -118,6 +119,7 @@
 			background: white;
 			color: black;
 			pointer-events: all;
+			user-select: text;
 		}
 
 		.message-content {
@@ -197,7 +199,7 @@
 			background-image: url("images/menus/neo_title.png");
 			width: 650px;
 			height: 420px;
-			z-index: 10000;
+			z-index: 3;
 			position: absolute;
 			top: 50%;
 			left: 50%;
