@@ -1941,7 +1941,7 @@ const loadLevelFromLevelSelect = async ({ fromHash = false } = {}) => {
 			const level = await loadLevelFromTextFile(`${folder}/${fileName}`, { game });
 			if (fromHash && !hashMatches()) {
 				console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
-				return;
+				return false;
 			}
 			initLevel(level);
 			editorLevelState = serializeToJSON(currentLevel);
@@ -1976,6 +1976,7 @@ const loadLevelFromLevelSelect = async ({ fromHash = false } = {}) => {
 			});
 		}
 	}
+	return true;
 };
 const save = () => {
 	if (editing) {
@@ -5408,13 +5409,25 @@ const loadFromHash = async () => {
 				showMessageBox(`Unknown level "${levelName}"`);
 			} else {
 				try {
-					await loadLevelFromLevelSelect({ fromHash: true });
+					const loaded = await loadLevelFromLevelSelect({ fromHash: true });
+					if (!loaded) {
+						// The URL was changed. The load should be silently aborted.
+
+						// This fixes a race condition where it could hide the title screen UI,
+						// and leave you with just the title screen level, navigating back to the title screen.
+
+						// To test: Open the title screen, click Start, go back (Alt+Left),
+						// then hold Alt and press Right and then Left quickly together,
+						// almost as if they're one key, but in that order specifically.
+						// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
+						return;
+					}
 				} catch (error) {
 					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
 				}
 			}
 		}
-		// after loading the level so that there's not a flash of the title screen level without the title screen frame
+		// Hide title screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
 		hideTitleScreen();
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveResources);
