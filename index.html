@@ -338,16 +338,23 @@
 
 		#intro-container ruffle-player {
 			position: absolute;
-			--border-size: 30px;
-			left: calc(62px - var(--border-size));
-			top: calc(25px - var(--border-size));
+			left: 41px;
+			top: 5px;
 			width: 369px;
 			height: 369px;
-			z-index: 4;
-			border: var(--border-size) solid black;
 			box-sizing: content-box;
+			z-index: 4;
+			border-style: solid;
+			border-image-slice: 20 22 22 21;
+			border-top-width: 20px;
+			border-right-width: 22px;
+			border-bottom-width: 22px;
+			border-left-width: 21px;
+			border-image-width: 20px 22px 22px 21px;
+			border-image-repeat: stretch stretch;
+			border-image-source: url("images/menus/dBox_sm.png");
+			box-shadow: #000 -1px 0 0 12px;
 		}
-
 
 		#preload {
 			display: none;
