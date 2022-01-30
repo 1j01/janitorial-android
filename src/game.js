@@ -4719,11 +4719,13 @@ const wrapContents = (target, wrapper) => {
 const hideTitleScreen = () => {
 	titleScreen.hidden = true;
 };
-const showTitleScreen = (showIntro = true) => {
+let playedIntro = false;
+const showTitleScreen = (showIntro = !playedIntro) => {
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
 	titleScreen.classList.add("title-screen-level-loaded");
 	if (showIntro) {
+		playedIntro = true;
 		replayIntroButton.hidden = false;
 		const ruffle = window.RufflePlayer.newest();
 		const player = ruffle.createPlayer();
@@ -4754,10 +4756,16 @@ const showTitleScreen = (showIntro = true) => {
 				}
 			};
 			player.play();
+			introContainer.hidden = false;
+			skipIntroButton.hidden = false;
+			resetScreenButton.hidden = true;
+		}, (error) => {
+			introContainer.hidden = true;
+			skipIntroButton.hidden = true;
+			resetScreenButton.hidden = false;
+			// eslint-disable-next-line no-console
+			console.error("Failed to load Flash movie with Ruffle:", error);
 		});
-		introContainer.hidden = false;
-		skipIntroButton.hidden = false;
-		resetScreenButton.hidden = true;
 		// Using onclick instead of addEventListener for simpler overwriting of the event handler
 		skipIntroButton.onclick = () => {
 			player.destroy(); // there is no stop or rewind method
