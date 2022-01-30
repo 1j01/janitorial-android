@@ -2036,6 +2036,7 @@ const toggleEditing = () => {
 		return;
 	}
 	editing = !editing;
+	initEditorUI();
 	editorUI.hidden = !editing;
 	toggleEditingButton.ariaPressed = editing;
 	if (editing) {
@@ -4777,7 +4778,33 @@ const initUI = () => {
 		openFromFile(event.dataTransfer.files[0]);
 	});
 };
+const initLevelSelect = () => {
+	// The level select is part of the editor UI, but it's also used for navigating to the next level, currently,
+	// via loadLevelFromLevelSelect().
+	const option = document.createElement("option");
+	option.textContent = "Custom World";
+	option.defaultSelected = true;
+	levelSelect.append(option);
+	for (const game of ["Junkbot", "Junkbot Undercover", "Test Cases"]) {
+		const optgroup = document.createElement("optgroup");
+		optgroup.label = game;
+		optgroup.value = game;
+		levelSelect.append(optgroup);
+		for (const levelName of game === "Test Cases" ? tests.map((test) => test.name) : resources[game === "Junkbot Undercover" ? "levelNamesUndercover" : "levelNames"]) {
+			const option = document.createElement("option");
+			option.textContent = levelName;
+			optgroup.append(option);
+		}
+	}
+	levelSelect.onchange = loadLevelFromLevelSelect;
+};
+let initializedEditorUI = false;
 const initEditorUI = () => {
+	if (initializedEditorUI) {
+		return;
+	}
+	initializedEditorUI = true;
+
 	editorUI.hidden = !editing;
 
 	let hilitButton;
@@ -5071,23 +5098,6 @@ const initEditorUI = () => {
 
 	openButton.onclick = openFromFileDialog;
 
-	const option = document.createElement("option");
-	option.textContent = "Custom World";
-	option.defaultSelected = true;
-	levelSelect.append(option);
-	for (const game of ["Junkbot", "Junkbot Undercover", "Test Cases"]) {
-		const optgroup = document.createElement("optgroup");
-		optgroup.label = game;
-		optgroup.value = game;
-		levelSelect.append(optgroup);
-		for (const levelName of game === "Test Cases" ? tests.map((test) => test.name) : resources[game === "Junkbot Undercover" ? "levelNamesUndercover" : "levelNames"]) {
-			const option = document.createElement("option");
-			option.textContent = levelName;
-			optgroup.append(option);
-		}
-	}
-	levelSelect.onchange = loadLevelFromLevelSelect;
-
 	// It's important that these do undoable() or save() because that makes it save the editorLevelState
 	// so if you go into play mode and back into editing mode, it doesn't reset these fields.
 	levelBoundsCheckbox.onchange = () => {
@@ -5359,7 +5369,10 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
 		resources = await allResourcesLoadedPromise;
 
-		initEditorUI(); // now that resources are loaded
+		initLevelSelect(); // now that level listing is loaded
+		if (editing) {
+			initEditorUI();
+		}
 
 		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
 		if (game === "local") {
@@ -5405,7 +5418,7 @@ const loadFromHash = async () => {
 			});
 			resources = await allResourcesLoadedPromise;
 
-			initEditorUI(); // now that all resources are loaded
+			initLevelSelect(); // now that level listing is loaded
 
 			// Wait for "READY TO PLAY" text image to load before showing it to prevent flash of missing text.
 			// I'm also delaying enabling the start game button because it feels weird to do those at different times.
