@@ -1923,13 +1923,17 @@ const loadLevelFromLevelSelect = async ({ fromHash = false } = {}) => {
 	const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
 	const levelName = levelSelect.value;
 	if (levelName !== "Custom World") {
-		const fileName = `${levelName.replace(/[:?]/g, "")}.txt`;
+		let fileName = `${levelName.replace(/[:?]/g, "")}.txt`;
 		const game = optgroup ? optgroup.value : "Custom";
-		const folder = {
+		let folder = {
 			"Junkbot Undercover": "levels/Undercover Exclusive",
 			"Junkbot": "levels",
 			"Test Cases": "levels/test-cases",
 		}[game];
+		if (levelName === "New Employee Training") {
+			folder = "levels/custom";
+			fileName = "New Employee Training (1j01).txt";
+		}
 		// console.log("loading:", option.value, { option, optgroup, game });
 		const hashMatches = () => decodeURIComponent(parseLocationHash().level || "") === `${game};${levelName}`;
 
@@ -4723,6 +4727,7 @@ const showTitleScreen = () => {
 const initUI = () => {
 	// Title screen
 	startGameButton.addEventListener("click", () => {
+		// Load the first level, New Employee Training
 		location.hash = "#level=Junkbot;New%20Employee%20Training";
 	});
 	showCreditsButton.addEventListener("click", () => {
