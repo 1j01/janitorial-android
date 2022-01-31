@@ -5653,8 +5653,8 @@ const gatherStatistics = async (originalOnly) => {
 // eslint-disable-next-line no-unused-vars
 const renderCodeHeader = (text) => {
 	const canvas = document.createElement("canvas");
-	canvas.width = 100;
-	canvas.height = 5;
+	canvas.width = 80;
+	canvas.height = fontCharHeight;
 	const ctx = canvas.getContext("2d");
 	drawText(ctx, text, 0, 0, "white", "transparent", false);
 	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -5667,6 +5667,72 @@ const renderCodeHeader = (text) => {
 	}
 	return `/*\n${textArt.replace(/\s+$/gm, "")}\n\nSECTION: ${text}\n*/`;
 };
+// eslint-disable-next-line no-unused-vars
+const renderFIGletFont = () => {
+	// Generate a FIGlet font (.flf) from the Junkbot font.
+	const canvas = document.createElement("canvas");
+	const ctx = canvas.getContext("2d");
+	const requiredCodes = [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 196, 214, 220, 223, 228, 246, 252];
+	const nonRequiredCodes = []; // not supported in this generator code
+	// for (const char of fontChars) {
+	// 	const code = char.charCodeAt(0);
+	// 	if (requiredCodes.indexOf(code) === -1) {
+	// 		console.log("Non-required code:", code, char);
+	// 		nonRequiredCodes.push(code);
+	// 	}
+	// }
+	const hardblank = "$";
+	// const fillChar = "█"; doesn't work, it gives "ERROR- Inconsistent character width", apparently considering bytes to equal spaces?
+	// const fillCharByteLength = (new TextEncoder().encode(fillChar)).length;
+	const fillChar = "#";
+	const fillCharByteLength = 1;
+	const baseline = fontCharHeight;
+	const maxCharWidth = Math.max(...fontCharW);
+	const headroom = 5;
+	const maxLineLength = (maxCharWidth + headroom) * fillCharByteLength + 2; // +2 for "@@"
+	const oldLayout = 15; // http://www.jave.de/figlet/figfont.html#interpretlayout
+	const comment = "Font from Junkbot & Junkbot Undercover games, extended by Isaiah Odhner.";
+	const commentLineCount = comment.split("\n").length;
+	const printDirection = 0; // 0 = left to right, 1 = right to left
+	const fullLayout = 143; // http://www.jave.de/figlet/figfont.html#interpretlayout
+	const codetagCount = nonRequiredCodes.length;
+	let flf = `flf2a${hardblank} ${fontCharHeight} ${baseline} ${maxLineLength} ${oldLayout} ${commentLineCount} ${printDirection} ${fullLayout} ${codetagCount}`;
+	flf += `\n${comment}\n`;
+	for (const code of requiredCodes) {
+		const char = String.fromCharCode(code).toUpperCase();
+		const charIndex = fontCharToIndex[char];
+		const charWidth = charIndex === -1 ? 0 : fontCharW[charIndex];
+		canvas.width = charWidth;
+		canvas.height = fontCharHeight;
+		drawText(ctx, char, 0, 0, "white", "transparent", false);
+		const imageData = charWidth && ctx.getImageData(0, 0, canvas.width, canvas.height);
+		for (let y = 0; y < canvas.height; y++) {
+			if (char === " ") {
+				flf += hardblank;
+				flf += hardblank;
+				flf += hardblank;
+			} else if (imageData) {
+				flf += " ";
+				for (let x = 0; x < canvas.width; x++) {
+					flf += imageData.data[(y * canvas.width + x) * 4 + 3] ? fillChar : " ";
+				}
+				flf += hardblank;
+			}
+			flf += "@";
+			if (y === baseline - 1) {
+				flf += "@";
+			}
+			flf += "\n";
+		}
+	}
+	flf += "\n";
+	return flf;
+};
+// addEventListener("load", () => {
+// 	hotResourcesLoadedPromise.then(() => {
+// 		console.log(renderFIGletFont());
+// 	});
+// });
 
 /*
 █   █ █████ ███ █   █
