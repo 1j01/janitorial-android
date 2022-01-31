@@ -116,10 +116,33 @@
 			max-width: 90vw;
 			z-index: 100;
 			padding: 20px;
-			background: white;
+			background: #a0a0a4;
 			color: black;
 			pointer-events: all;
 			user-select: text;
+		}
+		.metal-border {
+			border-style: solid;
+			border-image-slice: 20 22 22 21;
+			border-top-width: 20px;
+			border-right-width: 22px;
+			border-bottom-width: 22px;
+			border-left-width: 21px;
+			border-image-width: 20px 22px 22px 21px;
+			border-image-repeat: stretch stretch;
+			border-image-source: url("images/menus/dBox_sm.png");
+		}
+		.generic-button {
+			border-image-slice: 6 17 8 9 fill;
+			border-image-width: 6px 17px 8px 9px;
+			border-image-outset: 0px 5px 5px 0px;
+			border-image-repeat: repeat repeat;
+			border-image-source: url("images/menus/generic_button_default.png");
+			background: none;
+			padding: 2px 10px;
+		}
+		.generic-button:hover {
+			border-image-source: url("images/menus/generic_button_hover.png");
 		}
 
 		.message-content {
@@ -346,15 +369,6 @@
 			height: 369px;
 			box-sizing: content-box;
 			z-index: 4;
-			border-style: solid;
-			border-image-slice: 20 22 22 21;
-			border-top-width: 20px;
-			border-right-width: 22px;
-			border-bottom-width: 22px;
-			border-left-width: 21px;
-			border-image-width: 20px 22px 22px 21px;
-			border-image-repeat: stretch stretch;
-			border-image-source: url("images/menus/dBox_sm.png");
 			box-shadow: #000 -1px 0 0 12px;
 		}
 

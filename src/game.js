@@ -153,7 +153,7 @@ const showMessageBox = (message) => {
 	messageBoxContainer = document.createElement("div");
 	messageBoxContainer.className = "dialog-container";
 	messageBox = document.createElement("div");
-	messageBox.className = "dialog";
+	messageBox.className = "dialog metal-border";
 	const messageContentEl = document.createElement("div");
 	messageContentEl.className = "message-content";
 	if (typeof message === "string") {
@@ -163,6 +163,7 @@ const showMessageBox = (message) => {
 	}
 	messageBox.append(messageContentEl);
 	const closeButton = document.createElement("button");
+	closeButton.className = "generic-button";
 	closeButton.onclick = () => {
 		messageBoxContainer.remove();
 	};
@@ -4739,6 +4740,7 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 		playedIntro = true;
 		replayIntroButton.hidden = false;
 		rufflePlayer = ruffle.createPlayer();
+		rufflePlayer.classList.add("metal-border");
 		introContainer.appendChild(rufflePlayer);
 		rufflePlayer.load("flash/junkbot_intro.swf").then(() => {
 			// Note: It may not actually be loaded!
