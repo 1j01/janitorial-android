@@ -1216,6 +1216,10 @@ for (let x = 0, i = 0; i < fontChars.length; i++) {
 	x += fontCharW[i] + 1;
 }
 const fontCharHeight = 5;
+const fontCharToIndex = {};
+for (const char of fontChars) {
+	fontCharToIndex[char] = fontChars.indexOf(char);
+}
 
 const colorizeWhiteAlphaImage = (image, color) => {
 	const canvas = document.createElement("canvas");
@@ -1263,10 +1267,10 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 				return; // optimization for lazily-implemented debug text
 			}
 		} else {
-			charIndex = fontChars.indexOf(char);
+			charIndex = fontCharToIndex[char];
 			// fallback glyph
 			if (charIndex === -1) {
-				charIndex = fontChars.indexOf("�"); // U+FFFD REPLACEMENT CHARACTER
+				charIndex = fontCharToIndex["�"]; // U+FFFD REPLACEMENT CHARACTER
 			}
 		}
 		let advance = w;
