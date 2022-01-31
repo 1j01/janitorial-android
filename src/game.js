@@ -5661,7 +5661,7 @@ const renderCodeHeader = (text) => {
 		}
 		textArt += "\n";
 	}
-	return `/*\n${textArt.replace(/\s+$/gm, "")}\n*/`;
+	return `/*\n${textArt.replace(/\s+$/gm, "")}\n\nSECTION: ${text}\n*/`;
 };
 
 /*
