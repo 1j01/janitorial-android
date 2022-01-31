@@ -1,5 +1,12 @@
 /* global jsondiffpatch */
 
+/*
+█████ █████ █████       █████ █     █████ █   █ █████ █   █ █████ █████
+█     █       █         █     █     █     ██ ██ █     ██  █   █   █
+█ ███ █████   █         █████ █     █████ █ █ █ █████ █ █ █   █   █████
+█   █ █       █         █     █     █     █   █ █     █  ██   █       █
+█████ █████   █         █████ █████ █████ █   █ █████ █   █   █   █████
+*/
 // Title screen elements
 const titleScreen = document.getElementById("title-screen");
 const startGameButton = document.getElementById("start-game");
@@ -40,8 +47,13 @@ const testsInfo = document.getElementById("tests-info");
 const testSpeedInput = document.getElementById("test-speed");
 // const startButton = document.getElementById("start-tests");
 
-// Now that that's out of the way,
-// let's initialize a million things.
+/*
+███ █   █ ███ █████ ███ █████ █     ███ █████ █████ █████ ███ █████ █   █
+ █  ██  █  █    █    █  █   █ █      █     █  █   █   █    █  █   █ ██  █
+ █  █ █ █  █    █    █  █████ █      █    █   █████   █    █  █   █ █ █ █
+ █  █  ██  █    █    █  █   █ █      █   █    █   █   █    █  █   █ █  ██
+███ █   █ ███   █   ███ █   █ █████ ███ █████ █   █   █   ███ █████ █   █
+*/
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -66,6 +78,7 @@ let entities = [];
 let wind = [];
 let laserBeams = [];
 let teleportEffects = [];
+let collectBinTime = -1;
 let currentLevel = {
 	entities,
 	title: "Custom World",
@@ -187,6 +200,13 @@ const floor = (x, multiple) => Math.floor(x / multiple) * multiple;
 const round = (x, multiple) => Math.round(x / multiple) * multiple;
 // const ceil = (x, multiple) => Math.ceil(x / multiple) * multiple;
 
+/*
+█████ █████ █     █     ███ █████ ███ █████ █   █       █████ █████ █████ █████ █████
+█     █   █ █     █      █  █      █  █   █ ██  █         █   █     █       █   █
+█     █   █ █     █      █  █████  █  █   █ █ █ █         █   █████ █████   █   █████
+█     █   █ █     █      █      █  █  █   █ █  ██         █   █         █   █       █
+█████ █████ █████ █████ ███ █████ ███ █████ █   █         █   █████ █████   █   █████
+*/
 const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 	ax + aw > bx &&
 	ax < bx + bw &&
@@ -324,6 +344,14 @@ const brickColorNames = [
 	"gray",
 ];
 const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
+
+/*
+█████ █   █ █████ ███ █████ █   █       █████ █████ █████ █████ █████ █████ ███ █████ █████
+█     ██  █   █    █    █   █   █       █     █   █ █       █   █   █ █   █  █  █     █
+█████ █ █ █   █    █    █    █ █        █████ █████ █       █   █   █ █████  █  █████ █████
+█     █  ██   █    █    █     █         █     █   █ █       █   █   █ █  █   █  █         █
+█████ █   █   █   ███   █     █         █     █   █ █████   █   █████ █  ██ ███ █████ █████
+*/
 
 const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 	return {
@@ -546,6 +574,14 @@ const makeDroplet = ({ x, y }) => {
 	};
 };
 
+/*
+█████ █████ █████ █████ █████
+  █   █     █       █   █
+  █   █████ █████   █   █████
+  █   █         █   █       █
+  █   █████ █████   █   █████
+*/
+
 const tests = [
 	{
 		name: "Tippy Toast",
@@ -721,6 +757,14 @@ const tests = [
 	},
 ];
 
+/*
+█     █████ █████ ████  ███ █   █ █████
+█     █   █ █   █ █   █  █  ██  █ █
+█     █   █ █████ █   █  █  █ █ █ █ ███
+█     █   █ █   █ █   █  █  █  ██ █   █
+█████ █████ █   █ ████  ███ █   █ █████
+*/
+
 let resources;
 // resources needed for the title screen
 // ideally this could be split more cleanly (sprite sheets are big)
@@ -791,7 +835,6 @@ const otherResourcePaths = {
 const allResourcePaths = Object.fromEntries(Object.entries(hotResourcePaths).concat(Object.entries(otherResourcePaths)));
 const numRustles = 6;
 const numDrips = 3;
-let collectBinTime = -1;
 
 const loadImage = (imagePath) => {
 	const image = new Image();
@@ -1154,6 +1197,14 @@ const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	source.start(0);
 };
 
+/*
+████  █████ █████ █ █ █ ███ █   █ █████
+█   █ █   █ █   █ █ █ █  █  ██  █ █
+█   █ █████ █████ █ █ █  █  █ █ █ █ ███
+█   █ █  █  █   █ █ █ █  █  █  ██ █   █
+████  █  ██ █   █  █ █  ███ █   █ █████
+*/
+
 const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}☺�`;
 const fontCharW = "555555553555555555555555553555555555512211133313553535_255311_5533223355"
 	.replace(/_/g, "")
@@ -1230,6 +1281,14 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 		x += advance;
 	}
 };
+
+/*
+█████ █   █ █████ ███ █████ █   █       ████  █████ █████ █ █ █ ███ █   █ █████
+█     ██  █   █    █    █   █   █       █   █ █   █ █   █ █ █ █  █  ██  █ █
+█████ █ █ █   █    █    █    █ █        █   █ █████ █████ █ █ █  █  █ █ █ █ ███
+█     █  ██   █    █    █     █         █   █ █  █  █   █ █ █ █  █  █  ██ █   █
+█████ █   █   █   ███   █     █         ████  █  ██ █   █  █ █  ███ █   █ █████
+*/
 
 const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
 	const startX = switchEntity.x + switchEntity.width / 2;
@@ -5550,6 +5609,14 @@ const loadFromHash = async () => {
 
 window.addEventListener("hashchange", loadFromHash);
 
+/*
+█   █ █████ █████ █████
+██ ██ █       █   █   █
+█ █ █ █████   █   █████
+█   █ █       █   █   █
+█   █ █████   █   █   █
+*/
+
 // eslint-disable-next-line no-unused-vars
 const loadEachLevel = async (asyncFn, originalOnly) => {
 	for (const option of levelSelect.options) {
@@ -5579,6 +5646,31 @@ const gatherStatistics = async (originalOnly) => {
 	}, originalOnly);
 	return { levelsPerEntityType, occurrencesPerEntityType };
 };
+// eslint-disable-next-line no-unused-vars
+const renderCodeHeader = (text) => {
+	const canvas = document.createElement("canvas");
+	canvas.width = 100;
+	canvas.height = 5;
+	const ctx = canvas.getContext("2d");
+	drawText(ctx, text, 0, 0, "white", "transparent", false);
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	let textArt = "";
+	for (let y = 0; y < canvas.height; y++) {
+		for (let x = 0; x < canvas.width; x++) {
+			textArt += imageData.data[(y * canvas.width + x) * 4 + 3] ? "█" : " ";
+		}
+		textArt += "\n";
+	}
+	return `/*\n${textArt.replace(/\s+$/gm, "")}\n*/`;
+};
+
+/*
+█   █ █████ ███ █   █
+██ ██ █   █  █  ██  █
+█ █ █ █████  █  █ █ █
+█   █ █   █  █  █  ██
+█   █ █   █ ███ █   █
+*/
 
 const main = async () => {
 	try {
