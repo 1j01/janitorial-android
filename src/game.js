@@ -1205,8 +1205,8 @@ const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 ████  █  ██ █   █  █ █  ███ █   █ █████
 */
 
-const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}☺�`;
-const fontCharW = "555555553555555555555555553555555555512211133313553535_255311_5533223355"
+const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}☺�ÄÖÜẞ`;
+const fontCharW = "555555553555555555555555553555555555512211133313553535_255311_55332233555555"
 	.replace(/_/g, "")
 	.split("")
 	.map((digit) => Number(digit));
@@ -4625,7 +4625,7 @@ const render = () => {
 
 	if (showDebug) {
 
-		debug("FONT CHARACTERS", fontChars);
+		debug("FONT CHARACTERS", `${fontChars}\n${fontChars.split("").join("  ")}`);
 		debug("TOTAL ENTITIES", entities.length);
 		debug("VIEWPORT POSITION", `${viewport.centerX}, ${viewport.centerY}`);
 		debug("VIEWPORT SCALE", `${viewport.scale}X`);
@@ -5699,8 +5699,19 @@ const renderFIGletFont = () => {
 	let flf = `flf2a${hardblank} ${fontCharHeight} ${baseline} ${maxLineLength} ${oldLayout} ${commentLineCount} ${printDirection} ${fullLayout} ${codetagCount}`;
 	flf += `\n${comment}\n`;
 	for (const code of requiredCodes) {
-		const char = String.fromCharCode(code).toUpperCase();
-		const charIndex = fontCharToIndex[char];
+		let char = String.fromCharCode(code);
+		let charIndex = fontCharToIndex[char];
+		if (charIndex === -1 || charIndex === undefined) {
+			char = char.toUpperCase();
+			charIndex = fontCharToIndex[char];
+		}
+		// Note: "ß".toUpperCase() === "SS", and similarly
+		// "ß".toLocaleUpperCase() === "SS".
+		// Preferring matching letter-case isn't enough if it's defined in the font as uppercase ẞ.
+		if (char === "SS") {
+			char = "ẞ";
+			charIndex = fontCharToIndex[char];
+		}
 		const charWidth = charIndex === -1 ? 0 : fontCharW[charIndex];
 		canvas.width = charWidth;
 		canvas.height = fontCharHeight;
@@ -5717,6 +5728,9 @@ const renderFIGletFont = () => {
 					flf += imageData.data[(y * canvas.width + x) * 4 + 3] ? fillChar : " ";
 				}
 				flf += hardblank;
+			} else {
+				// eslint-disable-next-line no-console
+				console.warn("Missing char:", char, "(not necessarily a problem)");
 			}
 			flf += "@";
 			if (y === baseline - 1) {
