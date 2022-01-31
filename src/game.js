@@ -765,6 +765,8 @@ const otherResourcePaths = {
 	losePowerup: "audio/sound-effects/h_powerdown3.ogg",
 	teleport: "audio/sound-effects/undercover/teleport.wav",
 	ohYeah: "audio/sound-effects/voice_ohyeah.ogg",
+	ouch: "audio/sound-effects/voice_ouch.ogg",
+	uhoh: "audio/sound-effects/voice_uhoh.ogg",
 	jump: "audio/sound-effects/jump3.ogg",
 	fan: "audio/sound-effects/fan.ogg",
 	drip0: "audio/sound-effects/drip1.ogg",
@@ -4620,6 +4622,9 @@ const checkLevelEnd = () => {
 		winLoseState = winOrLose();
 		if (winLoseState === "lose" && !paused) {
 			paused = true;
+			setTimeout(() => {
+				playSound(Math.random() < 0.5 ? "ouch" : "uhoh");
+			}, 1000);
 		}
 		if (winLoseState === "win" && !paused) {
 			paused = true;
