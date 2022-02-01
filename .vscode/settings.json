@@ -124,5 +124,24 @@
 		"unpatch",
 		"WASD",
 		"XFCE"
-	]
+	],
+	"cSpell.enableFiletypes": [
+		"postcss"
+	],
+	"banner-comments-plus.customFonts": [
+		"junkbot-font.flf"
+	],
+	"banner-comments-plus.configs": {
+		"Junkbot": {
+			"font": "junkbot-font",
+			"horizontalLayout": "default",
+			"verticalLayout": "default",
+			"trimTrailingWhitespace": true,
+			"trimEmptyLines": false,
+			"prefix": "",
+			"suffix": "",
+			"perLinePrefix": "//",
+			"commentStyle": "Block"
+		}
+	},
 }
