@@ -146,4 +146,15 @@
 			"commentStyle": "Block"
 		}
 	},
+	// Codel theme is nice, but italic comments don't work with my banner comments.
+	"editor.tokenColorCustomizations": {
+		"textMateRules": [
+			{
+				"scope": "comment",
+				"settings": {
+					"fontStyle": ""
+				}
+			}
+		]
+	}
 }
