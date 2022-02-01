@@ -5856,21 +5856,26 @@ const gatherStatistics = async (originalOnly) => {
 	return { levelsPerEntityType, occurrencesPerEntityType };
 };
 // eslint-disable-next-line no-unused-vars
-const renderCodeHeader = (text) => {
+const renderBannerComment = (sectionName, sectionDescription = "") => {
+	// This generates a code heading comment, using the game's pixel font.
+	// You can use `console.log(renderBannerComment("META", "some description"))`
+	// to generate a comment, but I use a VS Code extension Banner Comment + to do it quicker.
+	// I made the font into a figlet font in order to be compatible; see below FIGlet font generation.
 	const canvas = document.createElement("canvas");
 	canvas.width = 80;
 	canvas.height = fontCharHeight;
 	const ctx = canvas.getContext("2d");
-	drawText(ctx, text, 0, 0, "white", "transparent", false);
+	drawText(ctx, sectionName, 0, 0, "white", "transparent", false);
 	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	let textArt = "";
 	for (let y = 0; y < canvas.height; y++) {
+		textArt += "// ";
 		for (let x = 0; x < canvas.width; x++) {
 			textArt += imageData.data[(y * canvas.width + x) * 4 + 3] ? "█" : " ";
 		}
 		textArt += "\n";
 	}
-	return `/*\n${textArt.replace(/\s+$/gm, "")}\n\nSECTION: ${text}\n*/`;
+	return `//\n${textArt.replace(/\s+$/gm, "")}\n//\n//SECTION: ${sectionName} - ${sectionDescription}\n//`;
 };
 // eslint-disable-next-line no-unused-vars
 const renderFIGletFont = () => {
