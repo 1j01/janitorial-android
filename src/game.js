@@ -58,6 +58,7 @@
 // █   █ █       █      █     █     █     █   █ █     █  ██   █       █
 // █████ █████   █      █████ █████ █████ █   █ █████ █   █   █   █████
 //
+// #region Get Elements
 
 // Title screen elements
 const titleScreen = document.getElementById("title-screen");
@@ -99,6 +100,7 @@ const testsInfo = document.getElementById("tests-info");
 const testSpeedInput = document.getElementById("test-speed");
 // const startButton = document.getElementById("start-tests");
 
+// #endregion
 //
 // ███ █   █ ███ █████ ███ █████ █     ███ █████ █████ █████ ███ █████ █   █
 //  █  ██  █  █    █    █  █   █ █      █     █  █   █   █    █  █   █ ██  █
@@ -106,6 +108,7 @@ const testSpeedInput = document.getElementById("test-speed");
 //  █  █  ██  █    █    █  █   █ █      █   █    █   █   █    █  █   █ █  ██
 // ███ █   █ ███   █   ███ █   █ █████ ███ █████ █   █   █   ███ █████ █   █
 //
+// #region Initialization
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -195,6 +198,7 @@ const brickColorNames = [
 ];
 const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
 
+// #endregion
 //
 // █   █ █████ █     █████ █████ █████ █████
 // █   █ █     █     █   █ █     █   █ █
@@ -202,6 +206,7 @@ const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
 // █   █ █     █     █     █     █  █      █
 // █   █ █████ █████ █     █████ █  ██ █████
 //
+// #region Helpers
 
 let frameStartTime = 0;
 const debugs = {};
@@ -280,13 +285,16 @@ const arrayRemove = (array, value) => {
 	}
 };
 
-/*
-█████ █████ █     █     ███ █████ ███ █████ █   █       █████ █████ █████ █████ █████
-█     █   █ █     █      █  █      █  █   █ ██  █         █   █     █       █   █
-█     █   █ █     █      █  █████  █  █   █ █ █ █         █   █████ █████   █   █████
-█     █   █ █     █      █      █  █  █   █ █  ██         █   █         █   █       █
-█████ █████ █████ █████ ███ █████ ███ █████ █   █         █   █████ █████   █   █████
-*/
+// #endregion
+//
+// █████ █████ █     █     ███ █████ ███ █████ █   █    █████ █████ █████ █████ █████
+// █     █   █ █     █      █  █      █  █   █ ██  █      █   █     █       █   █
+// █     █   █ █     █      █  █████  █  █   █ █ █ █      █   █████ █████   █   █████
+// █     █   █ █     █      █      █  █  █   █ █  ██      █   █         █   █       █
+// █████ █████ █████ █████ ███ █████ ███ █████ █   █      █   █████ █████   █   █████
+//
+// #region Collision Tests
+
 const rectanglesIntersect = (ax, ay, aw, ah, bx, by, bw, bh) => (
 	ax + aw > bx &&
 	ax < bx + bw &&
@@ -405,6 +413,7 @@ const entitiesWithinSelection = (selectionBox) => {
 	);
 };
 
+// #endregion
 //
 // █████ █   █ █████ ███ █████ █   █    █████ █████ █████ █████ █████ █████ ███ █████ █████
 // █     ██  █   █    █    █   █   █    █     █   █ █       █   █   █ █   █  █  █     █
@@ -412,6 +421,7 @@ const entitiesWithinSelection = (selectionBox) => {
 // █     █  ██   █    █    █     █      █     █   █ █       █   █   █ █  █   █  █         █
 // █████ █   █   █   ███   █     █      █     █   █ █████   █   █████ █  ██ ███ █████ █████
 //
+// #region Entity Factories
 
 const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 	return {
@@ -634,6 +644,7 @@ const makeDroplet = ({ x, y }) => {
 	};
 };
 
+// #endregion
 //
 // █████ █████ █████ █████    █████ █████ █████ █████ █████
 //   █   █     █       █      █     █   █ █     █     █
@@ -641,6 +652,7 @@ const makeDroplet = ({ x, y }) => {
 //   █   █         █   █      █     █   █     █ █         █
 //   █   █████ █████   █      █████ █   █ █████ █████ █████
 //
+// #region Test Cases
 
 const tests = [
 	{
@@ -817,6 +829,7 @@ const tests = [
 	},
 ];
 
+// #endregion
 //
 // █     █████ █████ ████  ███ █   █ █████
 // █     █   █ █   █ █   █  █  ██  █ █
@@ -824,6 +837,7 @@ const tests = [
 // █     █   █ █   █ █   █  █  █  ██ █   █
 // █████ █████ █   █ ████  ███ █   █ █████
 //
+// #region Loading
 
 let resources;
 // resources needed for the title screen
@@ -1205,10 +1219,11 @@ const loadResources = async (resourcePathsByID) => {
 let hotResourcesLoadedPromise;
 let allResourcesLoadedPromise;
 
+// #endregion
 //
 // ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███
 //
-
+// #region Uncategorized... @TODO
 
 const serializeToJSON = (level) => {
 	return JSON.stringify({ version: 0.3, format: "janitorial-android", level }, (name, value) => {
@@ -1261,6 +1276,7 @@ const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	source.start(0);
 };
 
+// #endregion
 //
 // █████ █████ █   █ █████    █████ █████ █   █ ████  █████ █████ ███ █   █ █████
 //   █   █      █ █    █      █   █ █     ██  █ █   █ █     █   █  █  ██  █ █
@@ -1268,6 +1284,7 @@ const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 //   █   █      █ █    █      █  █  █     █  ██ █   █ █     █  █   █  █  ██ █   █
 //   █   █████ █   █   █      █  ██ █████ █   █ ████  █████ █  ██ ███ █   █ █████
 //
+// #region Text Rendering
 
 const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}☺�ÄÖÜẞ`;
 const fontCharW = "555555553555555555555555553555555555512211133313553535_255311_55332233555555"
@@ -1350,6 +1367,7 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 	}
 };
 
+// #endregion
 //
 // █████ █   █ █████ ███ █████ █   █    █████ █████ █   █ ████  █████ █████ ███ █   █ █████
 // █     ██  █   █    █    █   █   █    █   █ █     ██  █ █   █ █     █   █  █  ██  █ █
@@ -1364,6 +1382,7 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 //  █     █   █ █     █     █   █ █         █     █     █     █     █     █     █       █       █
 //        ████  █████ █████ █   █ █████ █████           █████ █     █     █████ █████   █   █████
 //
+// #region Entity Rendering + Decals + Effects
 
 const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
 	const startX = switchEntity.x + switchEntity.width / 2;
@@ -1819,6 +1838,7 @@ const drawEntity = (ctx, entity, hilight) => {
 	}
 };
 
+// #endregion
 //
 // █████ █████ █████ █████ █     █████ █████ █████ █████ ███ █████ █   █ ------ --- -
 // █   █ █     █     █     █     █     █   █ █   █   █    █  █   █ ██  █ ------
@@ -1826,8 +1846,8 @@ const drawEntity = (ctx, entity, hilight) => {
 // █   █ █     █     █     █     █     █  █  █   █   █    █  █   █ █  ██ ----
 // █   █ █████ █████ █████ █████ █████ █  ██ █   █   █   ███ █████ █   █ -------
 //
+// #region Acceleration Structures
 
-// acceleration structures
 let entitiesByTopY = {}; // y to array of entities with that y as their top
 let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
 let lastKeys = new Map(); // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
@@ -1849,6 +1869,7 @@ const entityMoved = (entity) => {
 	lastKeys.set(entity, yKeys);
 };
 
+// #endregion
 //
 //  █ █  █ █ █ ███ █   █ █   █ ███ █   █ █████
 // █████ █ █ █  █  ██  █ ██  █  █  ██  █ █
@@ -1856,6 +1877,7 @@ const entityMoved = (entity) => {
 // █████ █ █ █  █  █  ██ █  ██  █  █  ██ █   █
 //  █ █   █ █  ███ █   █ █   █ ███ █   █ █████
 //
+// #region Win/Lose (#winning)
 
 let winLoseState = "";
 const winOrLose = () => {
@@ -1885,6 +1907,7 @@ const winOrLose = () => {
 	}
 };
 
+// #endregion
 //
 // █████ ████  ███ █████ █████ █████    █████ █   █ █   █ █████ █████ ███ █████ █   █ █████
 // █     █   █  █    █   █   █ █   █    █     █   █ ██  █ █       █    █  █   █ ██  █ █
@@ -1899,6 +1922,7 @@ const winOrLose = () => {
 // █   █ █   █     █   █   █       █
 // █   █ █████ █████   █   █████   █
 //
+// #region Editor Functions, Mostly
 
 const undos = [];
 const redos = [];
@@ -2505,6 +2529,7 @@ const pasteFromClipboard = async () => {
 	playSound("copyPaste");
 };
 
+// #endregion
 //
 // █   █ █   █ █████ █████ █████ █████ █████ █████ █████ ███ █████ █████ ████
 // █   █ ██  █ █     █   █   █   █     █     █   █ █   █  █     █  █     █   █
@@ -2512,6 +2537,7 @@ const pasteFromClipboard = async () => {
 // █   █ █  ██ █     █   █   █   █     █   █ █   █ █  █   █   █    █     █   █
 // █████ █   █ █████ █   █   █   █████ █████ █████ █  ██ ███ █████ █████ ████
 //
+// #region Uncategorized (@TODO)
 
 const sortEntitiesForRendering = (entities) => {
 	entities.sort((a, b) => b.y - a.y);
@@ -2607,6 +2633,7 @@ const sortEntitiesForRendering = (entities) => {
 // 	}, 200);
 // };
 
+// #endregion
 //
 // █████ █████ █   █ █████ █████ █████
 // █     █   █ ██ ██ █     █   █ █   █
@@ -2614,6 +2641,7 @@ const sortEntitiesForRendering = (entities) => {
 // █     █   █ █   █ █     █  █  █   █
 // █████ █   █ █   █ █████ █  ██ █   █
 //
+// #region Camera
 
 const worldToCanvas = (worldX, worldY) => ({
 	x: (worldX - viewport.centerX) * viewport.scale + Math.floor(canvas.width / 2),
@@ -2656,6 +2684,7 @@ const zoomOut = (focalPointOnCanvas) => {
 	zoomTo(scales[Math.max(getScaleIndex() - 1, 0)], focalPointOnCanvas);
 };
 
+// #endregion
 //
 // █   █ █████ █   █ ████  █████ █████ █████ ████
 // █  █  █     █   █ █   █ █   █ █   █ █   █ █   █
@@ -2663,6 +2692,7 @@ const zoomOut = (focalPointOnCanvas) => {
 // █  █  █       █   █   █ █   █ █   █ █  █  █   █
 // █   █ █████   █   ████  █████ █   █ █  ██ ████
 //
+// #region Keyboard
 
 addEventListener("keydown", (event) => {
 	if (event.defaultPrevented) {
@@ -2827,6 +2857,7 @@ addEventListener("keyup", (event) => {
 	}
 });
 
+// #endregion
 //
 // █   █ █████ █   █ █████ █████
 // ██ ██ █   █ █   █ █     █
@@ -2834,6 +2865,7 @@ addEventListener("keyup", (event) => {
 // █   █ █   █ █   █     █ █
 // █   █ █████ █████ █████ █████
 //
+// #region Mouse
 
 addEventListener("drop", (event) => {
 	event.preventDefault();
@@ -3373,6 +3405,7 @@ addEventListener("pointerup", () => {
 	}
 });
 
+// #endregion
 //
 // █████ ███ █   █ █   █ █     █████ █████ ███ █████ █   █
 // █      █  ██ ██ █   █ █     █   █   █    █  █   █ ██  █
@@ -3380,6 +3413,7 @@ addEventListener("pointerup", () => {
 //     █  █  █   █ █   █ █     █   █   █    █  █   █ █  ██
 // █████ ███ █   █ █████ █████ █   █   █   ███ █████ █   █
 //
+// #region Simulation
 
 // #@: simulateCrate, simulateBlock, simulateBrick, falling behavior
 const simulateGravity = () => {
@@ -3841,6 +3875,7 @@ const simulateFlybot = (flybot) => {
 	}
 };
 
+// #@: simulateEyebot
 const doEyebotTargeting = (eyebot) => {
 	for (const [directionX, directionY] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
 		const offsets = directionY !== 0 ? [[0, 0], [15, 0]] : [[0, 0], [0, 18]];
@@ -4054,6 +4089,16 @@ const simulateTeleport = (teleport) => {
 	}
 };
 
+// #endregion
+//
+// █   █ ███ █████ █████ █████ █████ █████ █████ █████ █████ ███ █████ █████ ████
+// ██ ██  █  █     █     █   █   █   █     █     █   █ █   █  █     █  █     █   █
+// █ █ █  █  █████ █     █████   █   █████ █ ███ █   █ █████  █    █   █████ █   █
+// █   █  █      █ █     █   █   █   █     █   █ █   █ █  █   █   █    █     █   █
+// █   █ ███ █████ █████ █   █   █   █████ █████ █████ █  ██ ███ █████ █████ ████
+//
+// #region Mis-categorized / Miscellaneous (@TODO)
+
 const updateAccelerationStructures = () => {
 	// add new entities to acceleration structures
 	for (const entity of entities) {
@@ -4103,6 +4148,7 @@ const findMisplacedEntities = (withinEntities, compareToEntities) => {
 	});
 };
 
+// #endregion
 //
 // █████ █████ █ █ █ ███ █   █ ████            █████ █     █████ █   █ ████  █████ █████ █   █
 // █   █ █     █ █ █  █  ██  █ █   █     █     █   █ █     █   █ █   █ █   █ █   █ █     █  █
@@ -4117,6 +4163,7 @@ const findMisplacedEntities = (withinEntities, compareToEntities) => {
 // ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █
 //  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █
 //
+// #region Rewind + Playback
 
 let pausedForRewind = false;
 const rewindRate = 2;
@@ -4219,6 +4266,7 @@ const handlePlayback = () => {
 	}
 };
 
+// #endregion
 //
 // █████ ███ █   █ █   █ █     █████ █████ █████ █
 // █      █  ██ ██ █   █ █     █   █   █   █     █
@@ -4226,6 +4274,7 @@ const handlePlayback = () => {
 //     █  █  █   █ █   █ █     █   █   █   █
 // █████ ███ █   █ █████ █████ █   █   █   █████ █
 //
+// #region Simulate! (simulation main)
 
 const simulate = (entities) => {
 	frameCounter += 1;
@@ -4388,6 +4437,7 @@ const simulate = (entities) => {
 	levelLastFrame = diffPatcher.clone(currentLevel);
 };
 
+// #endregion
 //
 // █████ █████ █████ ████  █     █████ █   █    █████ █     █████ █   █ █████ █   █
 // █   █ █   █ █   █ █   █ █     █     ██ ██    █     █     █     █   █   █   █   █
@@ -4395,6 +4445,7 @@ const simulate = (entities) => {
 // █     █  █  █   █ █   █ █     █     █   █        █ █     █     █   █   █   █   █
 // █     █  ██ █████ ████  █████ █████ █   █    █████ █████ █████ █████   █   █   █
 //
+// #region Problem Sleuth (issue detection)
 
 const detectProblems = () => {
 	// active validity checking of the world
@@ -4507,6 +4558,7 @@ const detectProblems = () => {
 	return problems;
 };
 
+// #endregion
 //
 // █████ █   █ ███ █   █ █████ █████ ███ █████ █   █
 // █   █ ██  █  █  ██ ██ █   █   █    █  █   █ ██  █
@@ -4514,6 +4566,7 @@ const detectProblems = () => {
 // █   █ █  ██  █  █   █ █   █   █    █  █   █ █  ██
 // █   █ █   █ ███ █   █ █   █   █   ███ █████ █   █
 //
+// #region Animation
 
 let rafid;
 window.addEventListener("error", () => {
@@ -4960,6 +5013,7 @@ const animate = () => {
 	render();
 };
 
+// #endregion
 //
 // █████ █   █ ███
 // █     █   █  █
@@ -4967,6 +5021,7 @@ const animate = () => {
 // █   █ █   █  █
 // █████ █████ ███
 //
+// #region GUI (Graphical User Interface)
 
 const wrapContents = (target, wrapper) => {
 	[...target.childNodes].forEach((child) => wrapper.appendChild(child));
@@ -5507,6 +5562,7 @@ const initEditorUI = () => {
 	}
 };
 
+// #endregion
 //
 // █████ █████ █████ █████    █████ █   █ █   █ █   █ █████ █████
 //   █   █     █       █      █   █ █   █ ██  █ ██  █ █     █   █
@@ -5514,6 +5570,7 @@ const initEditorUI = () => {
 //   █   █         █   █      █  █  █   █ █  ██ █  ██ █     █  █
 //   █   █████ █████   █      █  ██ █████ █   █ █   █ █████ █  ██
 //
+// #region Test Runner
 
 const stopTests = () => {
 	testing = false;
@@ -5693,6 +5750,7 @@ const runTests = async () => {
 	});
 };
 
+// #endregion
 //
 // █████ █████ █   █ █████    █   █ █████ █████ █████    █     █████ █████ ████  ███ █   █ █████
 // █     █   █ ██ ██ █        ██ ██ █   █ █   █ █        █     █   █ █   █ █   █  █  ██  █ █
@@ -5700,6 +5758,7 @@ const runTests = async () => {
 //     █ █   █ █   █ █        █   █ █   █ █  █  █        █     █   █ █   █ █   █  █  █  ██ █   █
 // █████ █████ █   █ █████    █   █ █████ █  ██ █████    █████ █████ █   █ ████  ███ █   █ █████
 //
+// #region Some More Loading (@TODO: reorder/reorganize)
 
 const deriveResources = (resources) => {
 	// Currently this assumes only hot resources need derivatives.
@@ -5818,6 +5877,7 @@ const loadFromHash = async () => {
 
 window.addEventListener("hashchange", loadFromHash);
 
+// #endregion
 //
 // █   █ █████ █████ █████
 // ██ ██ █       █   █   █
@@ -5825,6 +5885,7 @@ window.addEventListener("hashchange", loadFromHash);
 // █   █ █       █   █   █
 // █   █ █████   █   █   █
 //
+// #region Meta
 
 // eslint-disable-next-line no-unused-vars
 const loadEachLevel = async (asyncFn, originalOnly) => {
@@ -5958,6 +6019,7 @@ const renderFIGletFont = () => {
 // 	});
 // });
 
+// #endregion
 //
 // █   █ █████ ███ █   █
 // ██ ██ █   █  █  ██  █
@@ -5965,6 +6027,7 @@ const renderFIGletFont = () => {
 // █   █ █   █  █  █  ██
 // █   █ █   █ ███ █   █
 //
+// #region Main
 
 const main = async () => {
 	try {
@@ -5991,3 +6054,5 @@ const main = async () => {
 };
 
 main();
+
+// #endregion
