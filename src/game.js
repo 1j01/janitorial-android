@@ -102,13 +102,13 @@ const testSpeedInput = document.getElementById("test-speed");
 
 // #endregion
 //
-// ███ █   █ ███ █████ ███ █████ █     ███ █████ █████ █████ ███ █████ █   █
-//  █  ██  █  █    █    █  █   █ █      █     █  █   █   █    █  █   █ ██  █
-//  █  █ █ █  █    █    █  █████ █      █    █   █████   █    █  █   █ █ █ █
-//  █  █  ██  █    █    █  █   █ █      █   █    █   █   █    █  █   █ █  ██
-// ███ █   █ ███   █   ███ █   █ █████ ███ █████ █   █   █   ███ █████ █   █
+// █████ █     █████ ████  █████ █     █████
+// █     █     █   █ █   █ █   █ █     █
+// █ ███ █     █   █ █████ █████ █     █████
+// █   █ █     █   █ █   █ █   █ █         █
+// █████ █████ █████ ████  █   █ █████ █████
 //
-// #region Initialization
+// #region Globals (declarations and basic initialization)
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
