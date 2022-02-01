@@ -99,13 +99,13 @@ const testsInfo = document.getElementById("tests-info");
 const testSpeedInput = document.getElementById("test-speed");
 // const startButton = document.getElementById("start-tests");
 
-/*
-███ █   █ ███ █████ ███ █████ █     ███ █████ █████ █████ ███ █████ █   █
- █  ██  █  █    █    █  █   █ █      █     █  █   █   █    █  █   █ ██  █
- █  █ █ █  █    █    █  █████ █      █    █   █████   █    █  █   █ █ █ █
- █  █  ██  █    █    █  █   █ █      █   █    █   █   █    █  █   █ █  ██
-███ █   █ ███   █   ███ █   █ █████ ███ █████ █   █   █   ███ █████ █   █
-*/
+//
+// ███ █   █ ███ █████ ███ █████ █     ███ █████ █████ █████ ███ █████ █   █
+//  █  ██  █  █    █    █  █   █ █      █     █  █   █   █    █  █   █ ██  █
+//  █  █ █ █  █    █    █  █████ █      █    █   █████   █    █  █   █ █ █ █
+//  █  █  ██  █    █    █  █   █ █      █   █    █   █   █    █  █   █ █  ██
+// ███ █   █ ███   █   ███ █   █ █████ ███ █████ █   █   █   ███ █████ █   █
+//
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -185,6 +185,24 @@ let updateEditorUIForLevelChange = (level) => { };
 
 let smoothedSwitchConnectionAlpha = 0;
 
+const brickColorNames = [
+	"white",
+	"red",
+	"green",
+	"blue",
+	"yellow",
+	"gray",
+];
+const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
+
+//
+// █   █ █████ █     █████ █████ █████ █████
+// █   █ █     █     █   █ █     █   █ █
+// █████ █████ █     █████ █████ █████ █████
+// █   █ █     █     █     █     █  █      █
+// █   █ █████ █████ █     █████ █  ██ █████
+//
+
 let frameStartTime = 0;
 const debugs = {};
 const debugWorldSpaceRects = [];
@@ -251,6 +269,16 @@ const parseLocationHash = (hash = location.hash) => {
 const floor = (x, multiple) => Math.floor(x / multiple) * multiple;
 const round = (x, multiple) => Math.round(x / multiple) * multiple;
 // const ceil = (x, multiple) => Math.ceil(x / multiple) * multiple;
+
+const arrayRemove = (array, value) => {
+	if (array === entities) {
+		window.console?.warn("arrayRemove on entities array is unsafe if iterating over entities. Set flag entity.removeBeforeRender instead.");
+	}
+	const index = array.indexOf(value);
+	if (index !== -1) {
+		array.splice(index, 1);
+	}
+};
 
 /*
 █████ █████ █     █     ███ █████ ███ █████ █   █       █████ █████ █████ █████ █████
@@ -377,33 +405,13 @@ const entitiesWithinSelection = (selectionBox) => {
 	);
 };
 
-const arrayRemove = (array, value) => {
-	if (array === entities) {
-		window.console?.warn("arrayRemove on entities array is unsafe if iterating over entities. Set flag entity.removeBeforeRender instead.");
-	}
-	const index = array.indexOf(value);
-	if (index !== -1) {
-		array.splice(index, 1);
-	}
-};
-
-const brickColorNames = [
-	"white",
-	"red",
-	"green",
-	"blue",
-	"yellow",
-	"gray",
-];
-const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
-
-/*
-█████ █   █ █████ ███ █████ █   █       █████ █████ █████ █████ █████ █████ ███ █████ █████
-█     ██  █   █    █    █   █   █       █     █   █ █       █   █   █ █   █  █  █     █
-█████ █ █ █   █    █    █    █ █        █████ █████ █       █   █   █ █████  █  █████ █████
-█     █  ██   █    █    █     █         █     █   █ █       █   █   █ █  █   █  █         █
-█████ █   █   █   ███   █     █         █     █   █ █████   █   █████ █  ██ ███ █████ █████
-*/
+//
+// █████ █   █ █████ ███ █████ █   █    █████ █████ █████ █████ █████ █████ ███ █████ █████
+// █     ██  █   █    █    █   █   █    █     █   █ █       █   █   █ █   █  █  █     █
+// █████ █ █ █   █    █    █    █ █     █████ █████ █       █   █   █ █████  █  █████ █████
+// █     █  ██   █    █    █     █      █     █   █ █       █   █   █ █  █   █  █         █
+// █████ █   █   █   ███   █     █      █     █   █ █████   █   █████ █  ██ ███ █████ █████
+//
 
 const makeBrick = ({ x, y, widthInStuds, colorName, fixed = false }) => {
 	return {
@@ -626,13 +634,13 @@ const makeDroplet = ({ x, y }) => {
 	};
 };
 
-/*
-█████ █████ █████ █████ █████
-  █   █     █       █   █
-  █   █████ █████   █   █████
-  █   █         █   █       █
-  █   █████ █████   █   █████
-*/
+//
+// █████ █████ █████ █████    █████ █████ █████ █████ █████
+//   █   █     █       █      █     █   █ █     █     █
+//   █   █████ █████   █      █     █████ █████ █████ █████
+//   █   █         █   █      █     █   █     █ █         █
+//   █   █████ █████   █      █████ █   █ █████ █████ █████
+//
 
 const tests = [
 	{
@@ -809,13 +817,13 @@ const tests = [
 	},
 ];
 
-/*
-█     █████ █████ ████  ███ █   █ █████
-█     █   █ █   █ █   █  █  ██  █ █
-█     █   █ █████ █   █  █  █ █ █ █ ███
-█     █   █ █   █ █   █  █  █  ██ █   █
-█████ █████ █   █ ████  ███ █   █ █████
-*/
+//
+// █     █████ █████ ████  ███ █   █ █████
+// █     █   █ █   █ █   █  █  ██  █ █
+// █     █   █ █████ █   █  █  █ █ █ █ ███
+// █     █   █ █   █ █   █  █  █  ██ █   █
+// █████ █████ █   █ ████  ███ █   █ █████
+//
 
 let resources;
 // resources needed for the title screen
@@ -1197,6 +1205,10 @@ const loadResources = async (resourcePathsByID) => {
 let hotResourcesLoadedPromise;
 let allResourcesLoadedPromise;
 
+//
+// ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███
+//
+
 
 const serializeToJSON = (level) => {
 	return JSON.stringify({ version: 0.3, format: "janitorial-android", level }, (name, value) => {
@@ -1249,13 +1261,13 @@ const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	source.start(0);
 };
 
-/*
-████  █████ █████ █ █ █ ███ █   █ █████
-█   █ █   █ █   █ █ █ █  █  ██  █ █
-█   █ █████ █████ █ █ █  █  █ █ █ █ ███
-█   █ █  █  █   █ █ █ █  █  █  ██ █   █
-████  █  ██ █   █  █ █  ███ █   █ █████
-*/
+//
+// █████ █████ █   █ █████    █████ █████ █   █ ████  █████ █████ ███ █   █ █████
+//   █   █      █ █    █      █   █ █     ██  █ █   █ █     █   █  █  ██  █ █
+//   █   █████   █     █      █████ █████ █ █ █ █   █ █████ █████  █  █ █ █ █ ███
+//   █   █      █ █    █      █  █  █     █  ██ █   █ █     █  █   █  █  ██ █   █
+//   █   █████ █   █   █      █  ██ █████ █   █ ████  █████ █  ██ ███ █   █ █████
+//
 
 const fontChars = `ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?!(),':"-+.^@#$%*~\`&_=;|\\/<>[]{}☺�ÄÖÜẞ`;
 const fontCharW = "555555553555555555555555553555555555512211133313553535_255311_55332233555555"
@@ -1338,13 +1350,20 @@ const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.
 	}
 };
 
-/*
-█████ █   █ █████ ███ █████ █   █       ████  █████ █████ █ █ █ ███ █   █ █████
-█     ██  █   █    █    █   █   █       █   █ █   █ █   █ █ █ █  █  ██  █ █
-█████ █ █ █   █    █    █    █ █        █   █ █████ █████ █ █ █  █  █ █ █ █ ███
-█     █  ██   █    █    █     █         █   █ █  █  █   █ █ █ █  █  █  ██ █   █
-█████ █   █   █   ███   █     █         ████  █  ██ █   █  █ █  ███ █   █ █████
-*/
+//
+// █████ █   █ █████ ███ █████ █   █    █████ █████ █   █ ████  █████ █████ ███ █   █ █████
+// █     ██  █   █    █    █   █   █    █   █ █     ██  █ █   █ █     █   █  █  ██  █ █
+// █████ █ █ █   █    █    █    █ █     █████ █████ █ █ █ █   █ █████ █████  █  █ █ █ █ ███
+// █     █  ██   █    █    █     █      █  █  █     █  ██ █   █ █     █  █   █  █  ██ █   █
+// █████ █   █   █   ███   █     █      █  ██ █████ █   █ ████  █████ █  ██ ███ █   █ █████
+//
+//
+//        ████  █████ █████ █████ █     █████           █████ █████ █████ █████ █████ █████ █████
+//  █     █   █ █     █     █   █ █     █         █     █     █     █     █     █       █   █
+// ███    █   █ █████ █     █████ █     █████    ███    █████ █████ █████ █████ █       █   █████
+//  █     █   █ █     █     █   █ █         █     █     █     █     █     █     █       █       █
+//        ████  █████ █████ █   █ █████ █████           █████ █     █     █████ █████   █   █████
+//
 
 const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
 	const startX = switchEntity.x + switchEntity.width / 2;
@@ -1800,6 +1819,14 @@ const drawEntity = (ctx, entity, hilight) => {
 	}
 };
 
+//
+// █████ █████ █████ █████ █     █████ █████ █████ █████ ███ █████ █   █ ------ --- -
+// █   █ █     █     █     █     █     █   █ █   █   █    █  █   █ ██  █ ------
+// █████ █     █     █████ █     █████ █████ █████   █    █  █   █ █ █ █ ---- -----
+// █   █ █     █     █     █     █     █  █  █   █   █    █  █   █ █  ██ ----
+// █   █ █████ █████ █████ █████ █████ █  ██ █   █   █   ███ █████ █   █ -------
+//
+
 // acceleration structures
 let entitiesByTopY = {}; // y to array of entities with that y as their top
 let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
@@ -1821,6 +1848,14 @@ const entityMoved = (entity) => {
 	entitiesByBottomY[yKeys.bottomY].push(entity);
 	lastKeys.set(entity, yKeys);
 };
+
+//
+//  █ █  █ █ █ ███ █   █ █   █ ███ █   █ █████
+// █████ █ █ █  █  ██  █ ██  █  █  ██  █ █
+//  █ █  █ █ █  █  █ █ █ █ █ █  █  █ █ █ █ ███
+// █████ █ █ █  █  █  ██ █  ██  █  █  ██ █   █
+//  █ █   █ █  ███ █   █ █   █ ███ █   █ █████
+//
 
 let winLoseState = "";
 const winOrLose = () => {
@@ -1849,6 +1884,21 @@ const winOrLose = () => {
 		return "lose";
 	}
 };
+
+//
+// █████ ████  ███ █████ █████ █████    █████ █   █ █   █ █████ █████ ███ █████ █   █ █████
+// █     █   █  █    █   █   █ █   █    █     █   █ ██  █ █       █    █  █   █ ██  █ █
+// █████ █   █  █    █   █   █ █████    █████ █   █ █ █ █ █       █    █  █   █ █ █ █ █████
+// █     █   █  █    █   █   █ █  █     █     █   █ █  ██ █       █    █  █   █ █  ██     █ █
+// █████ ████  ███   █   █████ █  ██    █     █████ █   █ █████   █   ███ █████ █   █ █████ █
+//
+//
+// █   █ █████ █████ █████ █     █   █
+// ██ ██ █   █ █       █   █     █   █
+// █ █ █ █   █ █████   █   █      █ █
+// █   █ █   █     █   █   █       █
+// █   █ █████ █████   █   █████   █
+//
 
 const undos = [];
 const redos = [];
@@ -2059,7 +2109,7 @@ const loadLevelFromLevelSelect = async ({ fromHash = false } = {}) => {
 		try {
 			const level = await loadLevelFromTextFile(`${folder}/${fileName}`, { game });
 			if (fromHash && !hashMatches()) {
-				console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
+				// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
 				return false;
 			}
 			initLevel(level);
@@ -2455,6 +2505,14 @@ const pasteFromClipboard = async () => {
 	playSound("copyPaste");
 };
 
+//
+// █   █ █   █ █████ █████ █████ █████ █████ █████ █████ ███ █████ █████ ████
+// █   █ ██  █ █     █   █   █   █     █     █   █ █   █  █     █  █     █   █
+// █   █ █ █ █ █     █████   █   █████ █ ███ █   █ █████  █    █   █████ █   █
+// █   █ █  ██ █     █   █   █   █     █   █ █   █ █  █   █   █    █     █   █
+// █████ █   █ █████ █   █   █   █████ █████ █████ █  ██ ███ █████ █████ ████
+//
+
 const sortEntitiesForRendering = (entities) => {
 	entities.sort((a, b) => b.y - a.y);
 
@@ -2549,6 +2607,14 @@ const sortEntitiesForRendering = (entities) => {
 // 	}, 200);
 // };
 
+//
+// █████ █████ █   █ █████ █████ █████
+// █     █   █ ██ ██ █     █   █ █   █
+// █     █████ █ █ █ █████ █████ █████
+// █     █   █ █   █ █     █  █  █   █
+// █████ █   █ █   █ █████ █  ██ █   █
+//
+
 const worldToCanvas = (worldX, worldY) => ({
 	x: (worldX - viewport.centerX) * viewport.scale + Math.floor(canvas.width / 2),
 	y: (worldY - viewport.centerY) * viewport.scale + Math.floor(canvas.height / 2),
@@ -2589,6 +2655,14 @@ const zoomIn = (focalPointOnCanvas) => {
 const zoomOut = (focalPointOnCanvas) => {
 	zoomTo(scales[Math.max(getScaleIndex() - 1, 0)], focalPointOnCanvas);
 };
+
+//
+// █   █ █████ █   █ ████  █████ █████ █████ ████
+// █  █  █     █   █ █   █ █   █ █   █ █   █ █   █
+// ███   █████  █ █  █████ █   █ █████ █████ █   █
+// █  █  █       █   █   █ █   █ █   █ █  █  █   █
+// █   █ █████   █   ████  █████ █   █ █  ██ ████
+//
 
 addEventListener("keydown", (event) => {
 	if (event.defaultPrevented) {
