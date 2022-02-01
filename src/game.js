@@ -5682,10 +5682,10 @@ const renderFIGletFont = () => {
 	// 	}
 	// }
 	const hardblank = "$";
-	// const fillChar = "█"; doesn't work, it gives "ERROR- Inconsistent character width", apparently considering bytes to equal spaces?
-	// const fillCharByteLength = (new TextEncoder().encode(fillChar)).length;
-	const fillChar = "#";
-	const fillCharByteLength = 1;
+	const fillChar = "█"; // chkfont gives "ERROR- Inconsistent character width", apparently considering bytes to equal spaces?
+	const fillCharByteLength = (new TextEncoder().encode(fillChar)).length;
+	// const fillChar = "#"; // if you want a font that passes chkfont
+	// const fillCharByteLength = 1;
 	const baseline = fontCharHeight;
 	const maxCharWidth = Math.max(...fontCharW);
 	const headroom = 5;
