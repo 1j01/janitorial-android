@@ -238,6 +238,14 @@ const wrapContents = (target, wrapper) => {
 	return wrapper;
 };
 
+const toggleFullscreen = () => {
+	if (document.fullscreenElement) {
+		document.exitFullscreen();
+	} else {
+		document.documentElement.requestFullscreen();
+	}
+};
+
 let messageBox;
 let messageBoxContainer;
 const showMessageBox = (message) => {
@@ -1227,9 +1235,13 @@ let allResourcesLoadedPromise;
 
 // #endregion
 //
-// ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███ ███
+// █████ █████ █████ ███ █████ █     ███ █████ █████ █████ ███ █████ █   █
+// █     █     █   █  █  █   █ █      █     █  █   █   █    █  █   █ ██  █
+// █████ █████ █████  █  █████ █      █    █   █████   █    █  █   █ █ █ █
+//     █ █     █  █   █  █   █ █      █   █    █   █   █    █  █   █ █  ██
+// █████ █████ █  ██ ███ █   █ █████ ███ █████ █   █   █   ███ █████ █   █
 //
-// #region Uncategorized... @TODO
+// #region Serialization (@TODO: bring deserialization together with serialization)
 
 const serializeToJSON = (level) => {
 	return JSON.stringify({ version: 0.3, format: "janitorial-android", level }, (name, value) => {
@@ -1242,25 +1254,15 @@ const serializeToJSON = (level) => {
 
 let editorLevelState = serializeToJSON(currentLevel);
 
-const updateInfoBoxHidden = () => {
-	infoBox.hidden = hideInfoBox;
-	toggleInfoButton.setAttribute("aria-expanded", hideInfoBox ? "false" : "true");
-};
-const toggleInfoBox = () => {
-	hideInfoBox = !hideInfoBox;
-	updateInfoBoxHidden();
-	try {
-		localStorage.hideInfoBox = hideInfoBox;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
-};
-const toggleFullscreen = () => {
-	if (document.fullscreenElement) {
-		document.exitFullscreen();
-	} else {
-		document.documentElement.requestFullscreen();
-	}
-};
+// #endregion
+//
+// █████ █   █ ████  ███ █████
+// █   █ █   █ █   █  █  █   █
+// █████ █   █ █   █  █  █   █
+// █   █ █   █ █   █  █  █   █
+// █   █ █████ ████  ███ █████
+//
+// #region Audio
 
 const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
 	const audioBuffer = resources[soundName];
@@ -2128,6 +2130,7 @@ const resetAndInit = (level) => {
 	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH; and in case there's no junkbots, don't consider it a lose
 	updateEditorUIForLevelChange(currentLevel);
 };
+// @TODO: make this pure, and use initLevel in cases where loading from a file, so undos/etc. are reset
 const deserializeJSON = (json) => {
 	const state = JSON.parse(json);
 	if ("version" in state && state.version < 0.3) {
@@ -5021,6 +5024,19 @@ const animate = () => {
 // █████ █████ ███
 //
 // #region GUI (Graphical User Interface)
+
+const updateInfoBoxHidden = () => {
+	infoBox.hidden = hideInfoBox;
+	toggleInfoButton.setAttribute("aria-expanded", hideInfoBox ? "false" : "true");
+};
+const toggleInfoBox = () => {
+	hideInfoBox = !hideInfoBox;
+	updateInfoBoxHidden();
+	try {
+		localStorage.hideInfoBox = hideInfoBox;
+		// eslint-disable-next-line no-empty
+	} catch (error) { }
+};
 
 let playedIntro = false;
 const ruffle = window.RufflePlayer.newest();
