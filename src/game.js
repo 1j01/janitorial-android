@@ -299,6 +299,43 @@ const arrayRemove = (array, value) => {
 	}
 };
 
+
+const sortEntitiesForRendering = (entities) => {
+	entities.sort((a, b) => b.y - a.y);
+
+	let n = entities.length;
+	do {
+		let newN = 0;
+		for (let i = 1; i < n; i++) {
+			const a = entities[i - 1];
+			const b = entities[i];
+			if (
+				a.y + a.height < b.y ||
+				b.x + b.width <= a.x
+			) {
+				entities[i - 1] = b;
+				entities[i] = a;
+				newN = i;
+			}
+		}
+		n = newN;
+	} while (n > 1);
+	// from https://en.wikipedia.org/wiki/Bubble_sort
+	// procedure bubbleSort(A : list of sortable items)
+	// 	n := length(A)
+	// 	repeat
+	// 		new_n := 0
+	// 		for i := 1 to n - 1 inclusive do
+	// 			if A[i - 1] > A[i] then
+	// 				swap(A[i - 1], A[i])
+	// 				new_n := i
+	// 			end if
+	// 		end for
+	// 		n := new_n
+	// 	until n ≤ 1
+	// end procedure
+};
+
 // #endregion
 //
 // █████ █████ █     █     ███ █████ ███ █████ █   █    █████ █████ █████ █████ █████
@@ -2570,49 +2607,13 @@ const pasteFromClipboard = async () => {
 
 // #endregion
 //
-// █   █ █   █ █████ █████ █████ █████ █████ █████ █████ ███ █████ █████ ████
-// █   █ ██  █ █     █   █   █   █     █     █   █ █   █  █     █  █     █   █
-// █   █ █ █ █ █     █████   █   █████ █ ███ █   █ █████  █    █   █████ █   █
-// █   █ █  ██ █     █   █   █   █     █   █ █   █ █  █   █   █    █     █   █
-// █████ █   █ █████ █   █   █   █████ █████ █████ █  ██ ███ █████ █████ ████
+// █████ █     ████     █     █████ █   █ █████ █        █████ █████ █   █ █████ █████ █████ █████ █████ █████
+// █   █ █     █   █    █     █     █   █ █     █        █     █     ██  █ █     █   █ █   █   █   █   █ █   █
+// █   █ █     █   █    █     █████ █   █ █████ █        █ ███ █████ █ █ █ █████ █████ █████   █   █   █ █████
+// █   █ █     █   █    █     █      █ █  █     █        █   █ █     █  ██ █     █  █  █   █   █   █   █ █  █
+// █████ █████ ████     █████ █████   █   █████ █████    █████ █████ █   █ █████ █  ██ █   █   █   █████ █  ██
 //
-// #region Uncategorized (@TODO)
-
-const sortEntitiesForRendering = (entities) => {
-	entities.sort((a, b) => b.y - a.y);
-
-	let n = entities.length;
-	do {
-		let newN = 0;
-		for (let i = 1; i < n; i++) {
-			const a = entities[i - 1];
-			const b = entities[i];
-			if (
-				a.y + a.height < b.y ||
-				b.x + b.width <= a.x
-			) {
-				entities[i - 1] = b;
-				entities[i] = a;
-				newN = i;
-			}
-		}
-		n = newN;
-	} while (n > 1);
-	// from https://en.wikipedia.org/wiki/Bubble_sort
-	// procedure bubbleSort(A : list of sortable items)
-	// 	n := length(A)
-	// 	repeat
-	// 		new_n := 0
-	// 		for i := 1 to n - 1 inclusive do
-	// 			if A[i - 1] > A[i] then
-	// 				swap(A[i - 1], A[i])
-	// 				new_n := i
-	// 			end if
-	// 		end for
-	// 		n := new_n
-	// 	until n ≤ 1
-	// end procedure
-};
+// #region Old level generator (@TODO: delete code)
 
 // const initTestLevel = () => {
 // 	for (let row = 5; row >= 0; row--) {
