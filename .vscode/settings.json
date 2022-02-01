@@ -140,8 +140,8 @@
 			"verticalLayout": "default",
 			"trimTrailingWhitespace": true,
 			"trimEmptyLines": false,
-			"prefix": "",
-			"suffix": "",
+			"prefix": " #endregion\n",
+			"suffix": "\n #region __Region_name_here__",
 			"perLinePrefix": "//",
 			"commentStyle": "Block"
 		}
