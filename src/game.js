@@ -142,6 +142,7 @@ let playthroughEvents = []; // records your solution to the current level
 let playbackEvents = []; // could be used for testing or a demo mode or just playing back what you just did
 let playbackLevel = {}; // level object built from json diff patches; if gameplay behavior changes, a recording can still be played back without simulation using this, and compared to simulation for debugging
 let levelLastFrame = {}; // for generating diff patches for playthrough recording
+let winLoseState = "";
 let moves = 0; // your score (lower is better); only picking up bricks counts, not putting them down.
 let frameCounter = 0; // for precise recording/playback
 let desynchronized = false;
@@ -156,6 +157,13 @@ const diffPatcher = jsondiffpatch.create({
 	objectHash: (obj) => obj.id ?? (`${obj.name}@${obj.x},${obj.y}`),
 });
 
+const undos = [];
+const redos = [];
+const clipboard = {};
+
+const mouse = { x: undefined, y: undefined, worldX: undefined, worldY: undefined };
+let dragging = [];
+let selectionBox;
 
 const snapX = 15;
 const snapY = 18; // or 6 for thin brick heights
@@ -882,117 +890,291 @@ const tests = [
 
 // #endregion
 //
-// █     █████ █████ ████  ███ █   █ █████
-// █     █   █ █   █ █   █  █  ██  █ █
-// █     █   █ █████ █   █  █  █ █ █ █ ███
-// █     █   █ █   █ █   █  █  █  ██ █   █
-// █████ █████ █   █ ████  ███ █   █ █████
+// █████ █████ █████ █████ █     █████ █████ █████ █████ ███ █████ █   █ ------ --- -
+// █   █ █     █     █     █     █     █   █ █   █   █    █  █   █ ██  █ ------
+// █████ █     █     █████ █     █████ █████ █████   █    █  █   █ █ █ █ ---- -----
+// █   █ █     █     █     █     █     █  █  █   █   █    █  █   █ █  ██ ----
+// █   █ █████ █████ █████ █████ █████ █  ██ █   █   █   ███ █████ █   █ -------
 //
-// #region Loading
+// #region Acceleration Structures
 
-let resources;
-// resources needed for the title screen
-// ideally this could be split more cleanly (sprite sheets are big)
-const hotResourcePaths = {
-	sprites: "images/spritesheets/sprites.png",
-	spritesAtlas: "images/spritesheets/sprites.json",
-	backgrounds: "images/spritesheets/backgrounds.png",
-	backgroundsAtlas: "images/spritesheets/backgrounds.json",
-	junkbotAnimations: "junkbot-animations.json",
-	font: "images/font.png",
-	turn: "audio/sound-effects/turn1.ogg",
-	blockPickUp: "audio/sound-effects/blockpickup.ogg",
-	// blockPickUpFromAir: "audio/sound-effects/custom/pick-up-from-air.wav",
-	blockDrop: "audio/sound-effects/blockdrop.ogg",
-	blockClick: "audio/sound-effects/blockclick.ogg",
-	buttonClick: "audio/sound-effects/h_button1.ogg",
-	titleScreenLevel: "levels/custom/Title Screen.txt",
-	titleScreenWelcomePanel: "images/menus/loading_bkg_frame.png",
-};
-const otherResourcePaths = {
-	// menus: "images/spritesheets/menus.png",
-	// menusAtlas: "images/spritesheets/menus.json",
-	spritesUndercover: "images/spritesheets/Undercover Exclusive/sprites.png",
-	spritesUndercoverAtlas: "images/spritesheets/Undercover Exclusive/sprites.json",
-	backgroundsUndercover: "images/spritesheets/Undercover Exclusive/backgrounds.png",
-	backgroundsUndercoverAtlas: "images/spritesheets/Undercover Exclusive/backgrounds.json",
-	// menusUndercover: "images/spritesheets/Undercover Exclusive/menus.png",
-	// menusUndercoverAtlas: "images/spritesheets/Undercover Exclusive/menus.json",
-	fall: "audio/sound-effects/fall.ogg",
-	headBonk: "audio/sound-effects/headbonk1.ogg",
-	collectBin: "audio/sound-effects/eat1.ogg",
-	collectBin2: "audio/sound-effects/garbage1.ogg",
-	switchClick: "audio/sound-effects/switch_click.ogg",
-	switchOn: "audio/sound-effects/switch_on.ogg",
-	switchOff: "audio/sound-effects/switch_off.ogg",
-	deathByFire: "audio/sound-effects/fire.ogg",
-	deathByWater: "audio/sound-effects/electricity1.ogg",
-	deathByLaser: "audio/sound-effects/undercover/laser_hit.wav",
-	deathByBot: "audio/sound-effects/robottouch4.ogg",
-	getShield: "audio/sound-effects/shieldon2.ogg",
-	getPowerup: "audio/sound-effects/h_powerup1.ogg",
-	losePowerup: "audio/sound-effects/h_powerdown3.ogg",
-	teleport: "audio/sound-effects/undercover/teleport.wav",
-	ohYeah: "audio/sound-effects/voice_ohyeah.ogg",
-	ouch: "audio/sound-effects/voice_ouch.ogg",
-	uhoh: "audio/sound-effects/voice_uhoh.ogg",
-	jump: "audio/sound-effects/jump3.ogg",
-	fan: "audio/sound-effects/fan.ogg",
-	drip0: "audio/sound-effects/drip1.ogg",
-	drip1: "audio/sound-effects/drip2.ogg",
-	drip2: "audio/sound-effects/drip3.ogg",
-	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
-	selectEnd: "audio/sound-effects/custom/select2.wav",
-	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
-	copyPaste: "audio/sound-effects/lego-creator/copy-I0510.wav",
-	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
-	redo: "audio/sound-effects/lego-creator/redo-I0513.wav",
-	insert: "audio/sound-effects/lego-creator/insert-I0506.wav",
-	rustle0: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML1.WAV",
-	rustle1: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML2.WAV",
-	rustle2: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML3.WAV",
-	rustle3: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML4.WAV",
-	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
-	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
-	levelNames: "levels/_LEVEL_LISTING.txt",
-	levelNamesUndercover: "levels/Undercover Exclusive/_LEVEL_LISTING.txt",
-};
-const allResourcePaths = Object.fromEntries(Object.entries(hotResourcePaths).concat(Object.entries(otherResourcePaths)));
-const numRustles = 6;
-const numDrips = 3;
+let entitiesByTopY = {}; // y to array of entities with that y as their top
+let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
+let lastKeys = new Map(); // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
 
-const loadImage = (imagePath) => {
-	const image = new Image();
-	return new Promise((resolve, reject) => {
-		image.onload = () => {
-			resolve(image);
-		};
-		image.onerror = () => {
-			reject(new Error(`Image failed to load ('${imagePath}')`));
-		};
-		image.src = imagePath;
+const entityMoved = (entity) => {
+	const yKeys = lastKeys.get(entity) || {};
+	entitiesByTopY[entity.y] = entitiesByTopY[entity.y] || [];
+	entitiesByBottomY[entity.y + entity.height] = entitiesByBottomY[entity.y + entity.height] || [];
+	if (yKeys.topY) {
+		arrayRemove(entitiesByTopY[yKeys.topY], entity);
+	}
+	if (yKeys.bottomY) {
+		arrayRemove(entitiesByBottomY[yKeys.bottomY], entity);
+	}
+	yKeys.topY = entity.y;
+	yKeys.bottomY = entity.y + entity.height;
+	entitiesByTopY[yKeys.topY].push(entity);
+	entitiesByBottomY[yKeys.bottomY].push(entity);
+	lastKeys.set(entity, yKeys);
+};
+
+const updateAccelerationStructures = () => {
+	// add new entities to acceleration structures
+	for (const entity of entities) {
+		if (!lastKeys.has(entity)) {
+			entityMoved(entity);
+		}
+	}
+	// clean up acceleration structures
+	lastKeys.forEach((yKeys, entity) => {
+		if (entities.indexOf(entity) === -1) {
+			if (yKeys.topY) {
+				arrayRemove(entitiesByTopY[yKeys.topY], entity);
+			}
+			if (yKeys.bottomY) {
+				arrayRemove(entitiesByBottomY[yKeys.bottomY], entity);
+			}
+			lastKeys.delete(entity);
+		}
 	});
+	const cleanByYObj = (entitiesByY) => {
+		Object.keys(entitiesByY).forEach((y) => {
+			if (entitiesByY[y].length === 0) {
+				delete entitiesByY[y];
+			}
+		});
+	};
+	cleanByYObj(entitiesByTopY);
+	cleanByYObj(entitiesByBottomY);
 };
 
-const loadJSON = async (path) => {
-	const response = await fetch(path);
-	if (response.ok) {
-		return await response.json();
+// #endregion
+//
+//  █ █  █ █ █ ███ █   █ █   █ ███ █   █ █████
+// █████ █ █ █  █  ██  █ ██  █  █  ██  █ █
+//  █ █  █ █ █  █  █ █ █ █ █ █  █  █ █ █ █ ███
+// █████ █ █ █  █  █  ██ █  ██  █  █  ██ █   █
+//  █ █   █ █  ███ █   █ █   █ ███ █   █ █████
+//
+// #region Win/Lose (#winning)
+
+const winOrLose = () => {
+	// Cases:
+	// ("while collecting" and "dying" refer to playing the animations)
+	// - Alive while collecting last bin: "" (winING, probably)
+	// - Dying while collecting last bin: "" (losING)
+	// - Dead while collecting last bin: "lose" (shouldn't happen maybe though, if collectingBin is reset)
+	// - Alive after collecting last bin: "win"
+	// - Dying after collecting last bin: (should already be "win" and paused)
+	// - Dead after collecting last bin: "lose"
+	// - Dead, bins left to collect: "lose"
+	// - Dying, bins left to collect: "" (losING)
+	// - Alive, bins left to collect: "" (normal state)
+	if (entities.some((entity) => entity.type === "junkbot" && !entity.dead)) {
+		if (
+			entities.some((entity) => entity.type === "junkbot" && !entity.dead && !entity.dying) &&
+			!entities.some((entity) => entity.type === "bin") &&
+			entities.every((entity) => !entity.collectingBin)
+		) {
+			return "win";
+		} else {
+			return "";
+		}
 	} else {
-		throw new Error(`got HTTP ${response.status} fetching '${path}'`);
+		return "lose";
 	}
 };
 
-const loadAtlasJSON = async (path) => {
-	const { frames, animations } = await loadJSON(path);
-	const result = {};
-	for (const [name, framesIndices] of Object.entries(animations)) {
-		result[name.replace(/\.png/i, "")] = { bounds: frames[framesIndices[0]] };
-	}
-	return result;
+// #endregion
+//
+// █████ █████ █████ ███ █████ █     ███ █████ █████ █████ ███ █████ █   █
+// █     █     █   █  █  █   █ █      █     █  █   █   █    █  █   █ ██  █
+// █████ █████ █████  █  █████ █      █    █   █████   █    █  █   █ █ █ █
+//     █ █     █  █   █  █   █ █      █   █    █   █   █    █  █   █ █  ██
+// █████ █████ █  ██ ███ █   █ █████ ███ █████ █   █   █   ███ █████ █   █
+//
+// #region Serialization (@TODO: bring deserialization together with serialization)
+
+const serializeToJSON = (level) => {
+	return JSON.stringify({ version: 0.3, format: "janitorial-android", level }, (name, value) => {
+		if (name === "grabbed" || name === "grabOffset") {
+			return undefined;
+		}
+		return value;
+	}, "\t");
 };
 
-// const animations = new Set();
+let editorLevelState = serializeToJSON(currentLevel);
+
+const serializeLevel = (level) => {
+	// let text = [];
+	// const addSection = (name, keyValuePairs) => {
+	// 	text += `[${name}]\n`;
+	// 	for (const [key, value] of keyValuePairs) {
+	// 		text += `${key}=${value}`;
+	// 	}
+	// 	text += "\n";
+	// };
+	// addSection("info", [
+	// 	["", ""]
+	// ]);
+	const types = [];
+	const unknownTypeMappings = [];
+	const parts = [];
+	for (const entity of level.entities) {
+		let type;
+		if (entity.type === "brick") {
+			type = `brick_${String(entity.widthInStuds).padStart(2, "0")}`;
+		} else if (entity.type === "jump") {
+			type = `${entity.fixed ? "haz" : "brick"}_slickjump`;
+		} else if (entity.type === "shield") {
+			type = `${entity.fixed ? "haz" : "brick"}_slickshield`;
+		} else if (entity.type === "laser") {
+			// entity name is confusing in regard to direction
+			type = `haz_slicklaser_${entity.facing === -1 ? "r" : "l"}`;
+		} else if (entity.type === "bin" && entity.scaredy) {
+			type = "scaredy";
+		} else {
+			type = {
+				junkbot: "minifig",
+				gearbot: "haz_walker",
+				climbbot: "haz_climber",
+				flybot: "haz_dumbfloat",
+				eyebot: "haz_float",
+				bin: "flag",
+				crate: "haz_slickcrate",
+				fire: "haz_slickfire",
+				fan: "haz_slickfan",
+				switch: "haz_slickswitch",
+				teleport: "haz_slickteleport",
+				pipe: "haz_slickpipe",
+				droplet: "haz_droplet", // made up / unofficial
+			}[entity.type];
+		}
+		if (type) {
+			if (types.indexOf(type) === -1) {
+				types.push(type);
+			}
+			// [0] - x coordinate
+			// [1] - y coordinate
+			// [2] - type index (in the types array)
+			// [3] - color index (in the colors array)
+			// [4] - starting animation name (0 for objects that don't animate)
+			// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
+			// [6] - object relation ID, either a teleport or a switch; two teleports can reference each other with the same ID
+			const gridX = entity.x / 15 + 1;
+			const gridY = (entity.y + entity.height) / 18;
+			const typeIndex = types.indexOf(type);
+			const colorIndex = brickColorNames.indexOf(entity.colorName || "red");
+			let animationName;
+			if ("on" in entity) {
+				animationName = entity.on ? "on" : "off";
+			} else if (entity.type === "eyebot") {
+				animationName = "inactive";
+			} else if (entity.type === "flybot") {
+				if (entity.facingY === -1) {
+					animationName = "U";
+				} else if (entity.facingY === 1) {
+					animationName = "D";
+				} else if (entity.facing === -1) {
+					animationName = "L";
+				} else {
+					animationName = "R";
+				}
+			} else if (entity.type === "bin" && entity.scaredy) {
+				animationName = "rest";
+			} else if (("facing" in entity) && entity.type !== "bin") {
+				animationName = entity.facing > 0 ? "walk_r" : "walk_l";
+			} else if (entity.type === "jump") {
+				animationName = "dormant";
+			} else if (entity.type === "pipe") {
+				animationName = "dry";
+			} else if (entity.type === "crate") {
+				animationName = "norm";
+			} else {
+				animationName = "";
+			}
+			parts.push(`${gridX};${gridY};${typeIndex + 1};${colorIndex + 1};${animationName};${entity.animationFrame || 1};${entity.switchID || entity.teleportID || ""}`);
+		} else {
+			unknownTypeMappings.push(entity.type);
+		}
+	}
+	if (unknownTypeMappings.length) {
+		showMessageBox(`Unknown type mappings for entity types:\n\n${unknownTypeMappings.join("\n")}`);
+	}
+	const stringifyDecals = (decals = []) => decals.map(({ x, y, name }) => `${x};${y};${name}`).join(",");
+	return `[info]
+title=${level.title || "Saved World"}
+par=${isFinite(level.par) ? level.par : 10000}
+hint=${level.hint || ""}
+
+[playfield]
+${level.bounds ? `size=${level.bounds.width / 15},${level.bounds.height / 18}` : ""}
+spacing=15,18
+scale=1
+
+[background]
+backdrop=${level.backdropName || "bkg1"}
+decals=${stringifyDecals(level.decals)}
+bgdecals=${stringifyDecals(level.backgroundDecals)}
+
+[partslist]
+types=${types.join(",")}
+colors=${brickColorNames.join(",")}
+parts=${parts.join(",")}
+
+`;
+};
+const resetAndInit = (level) => {
+	currentLevel = level;
+	entities = currentLevel.entities; // shortcut
+
+	entitiesByTopY = {};
+	entitiesByBottomY = {};
+	lastKeys = new Map();
+	dragging.length = 0;
+	wind.length = 0;
+	laserBeams.length = 0;
+	teleportEffects.length = 0;
+	playthroughEvents.length = 0;
+	playbackEvents.length = 0;
+	// playbackEvents = playthroughEvents; // for rewinding with negative rewind speed
+	playbackLevel = {};
+	levelLastFrame = {};
+	// sort for consistency for level delta patching
+	entities.sort((a, b) => a.id - b.id);
+	playthroughEvents.push({
+		type: "level",
+		t: 0,
+		levelPatch: diffPatcher.clone(diffPatcher.diff(playbackLevel, currentLevel)),
+	});
+	moves = 0;
+	frameCounter = 0;
+	desynchronized = false;
+	idCounter = 0;
+	for (const entity of entities) {
+		delete entity.grabbed;
+		delete entity.grabOffset;
+		idCounter = Math.max(idCounter, (entity.id ?? 0) + 1);
+	}
+	for (const entity of entities) {
+		// separate from the above loop to avoid ID collisions
+		if (typeof entity.id !== "number") {
+			entity.id = getID();
+		}
+	}
+	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH; and in case there's no junkbots, don't consider it a lose
+	updateEditorUIForLevelChange(currentLevel);
+};
+// @TODO: make this pure, and use initLevel in cases where loading from a file, so undos/etc. are reset
+const deserializeJSON = (json) => {
+	const state = JSON.parse(json);
+	if ("version" in state && state.version < 0.3) {
+		state.level = { entities: state.entities };
+	}
+	resetAndInit(state.level);
+};
 
 // All entity name animation name pairs in the original Junkbot games' levels, normalized to lowercase
 // brick_01:
@@ -1202,6 +1384,120 @@ const loadLevelFromText = (levelData, game) => {
 	return level;
 };
 
+// #endregion
+//
+// █     █████ █████ ████  ███ █   █ █████
+// █     █   █ █   █ █   █  █  ██  █ █
+// █     █   █ █████ █   █  █  █ █ █ █ ███
+// █     █   █ █   █ █   █  █  █  ██ █   █
+// █████ █████ █   █ ████  ███ █   █ █████
+//
+// #region Loading
+
+let resources;
+// resources needed for the title screen
+// ideally this could be split more cleanly (sprite sheets are big)
+const hotResourcePaths = {
+	sprites: "images/spritesheets/sprites.png",
+	spritesAtlas: "images/spritesheets/sprites.json",
+	backgrounds: "images/spritesheets/backgrounds.png",
+	backgroundsAtlas: "images/spritesheets/backgrounds.json",
+	junkbotAnimations: "junkbot-animations.json",
+	font: "images/font.png",
+	turn: "audio/sound-effects/turn1.ogg",
+	blockPickUp: "audio/sound-effects/blockpickup.ogg",
+	// blockPickUpFromAir: "audio/sound-effects/custom/pick-up-from-air.wav",
+	blockDrop: "audio/sound-effects/blockdrop.ogg",
+	blockClick: "audio/sound-effects/blockclick.ogg",
+	buttonClick: "audio/sound-effects/h_button1.ogg",
+	titleScreenLevel: "levels/custom/Title Screen.txt",
+	titleScreenWelcomePanel: "images/menus/loading_bkg_frame.png",
+};
+const otherResourcePaths = {
+	// menus: "images/spritesheets/menus.png",
+	// menusAtlas: "images/spritesheets/menus.json",
+	spritesUndercover: "images/spritesheets/Undercover Exclusive/sprites.png",
+	spritesUndercoverAtlas: "images/spritesheets/Undercover Exclusive/sprites.json",
+	backgroundsUndercover: "images/spritesheets/Undercover Exclusive/backgrounds.png",
+	backgroundsUndercoverAtlas: "images/spritesheets/Undercover Exclusive/backgrounds.json",
+	// menusUndercover: "images/spritesheets/Undercover Exclusive/menus.png",
+	// menusUndercoverAtlas: "images/spritesheets/Undercover Exclusive/menus.json",
+	fall: "audio/sound-effects/fall.ogg",
+	headBonk: "audio/sound-effects/headbonk1.ogg",
+	collectBin: "audio/sound-effects/eat1.ogg",
+	collectBin2: "audio/sound-effects/garbage1.ogg",
+	switchClick: "audio/sound-effects/switch_click.ogg",
+	switchOn: "audio/sound-effects/switch_on.ogg",
+	switchOff: "audio/sound-effects/switch_off.ogg",
+	deathByFire: "audio/sound-effects/fire.ogg",
+	deathByWater: "audio/sound-effects/electricity1.ogg",
+	deathByLaser: "audio/sound-effects/undercover/laser_hit.wav",
+	deathByBot: "audio/sound-effects/robottouch4.ogg",
+	getShield: "audio/sound-effects/shieldon2.ogg",
+	getPowerup: "audio/sound-effects/h_powerup1.ogg",
+	losePowerup: "audio/sound-effects/h_powerdown3.ogg",
+	teleport: "audio/sound-effects/undercover/teleport.wav",
+	ohYeah: "audio/sound-effects/voice_ohyeah.ogg",
+	ouch: "audio/sound-effects/voice_ouch.ogg",
+	uhoh: "audio/sound-effects/voice_uhoh.ogg",
+	jump: "audio/sound-effects/jump3.ogg",
+	fan: "audio/sound-effects/fan.ogg",
+	drip0: "audio/sound-effects/drip1.ogg",
+	drip1: "audio/sound-effects/drip2.ogg",
+	drip2: "audio/sound-effects/drip3.ogg",
+	selectStart: "audio/sound-effects/custom/pick-up-from-air.wav",
+	selectEnd: "audio/sound-effects/custom/select2.wav",
+	delete: "audio/sound-effects/lego-creator/trash-I0514.wav",
+	copyPaste: "audio/sound-effects/lego-creator/copy-I0510.wav",
+	undo: "audio/sound-effects/lego-creator/undo-I0512.wav",
+	redo: "audio/sound-effects/lego-creator/redo-I0513.wav",
+	insert: "audio/sound-effects/lego-creator/insert-I0506.wav",
+	rustle0: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML1.WAV",
+	rustle1: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML2.WAV",
+	rustle2: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML3.WAV",
+	rustle3: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML4.WAV",
+	rustle4: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML5.WAV",
+	rustle5: "audio/sound-effects/lego-star-wars-force-awakens/LEGO_DEBRISSML6.WAV",
+	levelNames: "levels/_LEVEL_LISTING.txt",
+	levelNamesUndercover: "levels/Undercover Exclusive/_LEVEL_LISTING.txt",
+};
+const allResourcePaths = Object.fromEntries(Object.entries(hotResourcePaths).concat(Object.entries(otherResourcePaths)));
+const numRustles = 6;
+const numDrips = 3;
+
+const loadImage = (imagePath) => {
+	const image = new Image();
+	return new Promise((resolve, reject) => {
+		image.onload = () => {
+			resolve(image);
+		};
+		image.onerror = () => {
+			reject(new Error(`Image failed to load ('${imagePath}')`));
+		};
+		image.src = imagePath;
+	});
+};
+
+const loadJSON = async (path) => {
+	const response = await fetch(path);
+	if (response.ok) {
+		return await response.json();
+	} else {
+		throw new Error(`got HTTP ${response.status} fetching '${path}'`);
+	}
+};
+
+const loadAtlasJSON = async (path) => {
+	const { frames, animations } = await loadJSON(path);
+	const result = {};
+	for (const [name, framesIndices] of Object.entries(animations)) {
+		result[name.replace(/\.png/i, "")] = { bounds: frames[framesIndices[0]] };
+	}
+	return result;
+};
+
+// const animations = new Set();
+
 const loadTextFile = async (path) => {
 	const response = await fetch(path);
 	if (response.ok) {
@@ -1269,27 +1565,6 @@ const loadResources = async (resourcePathsByID) => {
 };
 let hotResourcesLoadedPromise;
 let allResourcesLoadedPromise;
-
-// #endregion
-//
-// █████ █████ █████ ███ █████ █     ███ █████ █████ █████ ███ █████ █   █
-// █     █     █   █  █  █   █ █      █     █  █   █   █    █  █   █ ██  █
-// █████ █████ █████  █  █████ █      █    █   █████   █    █  █   █ █ █ █
-//     █ █     █  █   █  █   █ █      █   █    █   █   █    █  █   █ █  ██
-// █████ █████ █  ██ ███ █   █ █████ ███ █████ █   █   █   ███ █████ █   █
-//
-// #region Serialization (@TODO: bring deserialization together with serialization)
-
-const serializeToJSON = (level) => {
-	return JSON.stringify({ version: 0.3, format: "janitorial-android", level }, (name, value) => {
-		if (name === "grabbed" || name === "grabOffset") {
-			return undefined;
-		}
-		return value;
-	}, "\t");
-};
-
-let editorLevelState = serializeToJSON(currentLevel);
 
 // #endregion
 //
@@ -1885,105 +2160,6 @@ const drawEntity = (ctx, entity, hilight) => {
 
 // #endregion
 //
-// █████ █████ █████ █████ █     █████ █████ █████ █████ ███ █████ █   █ ------ --- -
-// █   █ █     █     █     █     █     █   █ █   █   █    █  █   █ ██  █ ------
-// █████ █     █     █████ █     █████ █████ █████   █    █  █   █ █ █ █ ---- -----
-// █   █ █     █     █     █     █     █  █  █   █   █    █  █   █ █  ██ ----
-// █   █ █████ █████ █████ █████ █████ █  ██ █   █   █   ███ █████ █   █ -------
-//
-// #region Acceleration Structures
-
-let entitiesByTopY = {}; // y to array of entities with that y as their top
-let entitiesByBottomY = {}; // y to array of entities with that y as their bottom
-let lastKeys = new Map(); // ancillary structure for updating the by-y structures - entity to {topY, bottomY}
-
-const entityMoved = (entity) => {
-	const yKeys = lastKeys.get(entity) || {};
-	entitiesByTopY[entity.y] = entitiesByTopY[entity.y] || [];
-	entitiesByBottomY[entity.y + entity.height] = entitiesByBottomY[entity.y + entity.height] || [];
-	if (yKeys.topY) {
-		arrayRemove(entitiesByTopY[yKeys.topY], entity);
-	}
-	if (yKeys.bottomY) {
-		arrayRemove(entitiesByBottomY[yKeys.bottomY], entity);
-	}
-	yKeys.topY = entity.y;
-	yKeys.bottomY = entity.y + entity.height;
-	entitiesByTopY[yKeys.topY].push(entity);
-	entitiesByBottomY[yKeys.bottomY].push(entity);
-	lastKeys.set(entity, yKeys);
-};
-
-const updateAccelerationStructures = () => {
-	// add new entities to acceleration structures
-	for (const entity of entities) {
-		if (!lastKeys.has(entity)) {
-			entityMoved(entity);
-		}
-	}
-	// clean up acceleration structures
-	lastKeys.forEach((yKeys, entity) => {
-		if (entities.indexOf(entity) === -1) {
-			if (yKeys.topY) {
-				arrayRemove(entitiesByTopY[yKeys.topY], entity);
-			}
-			if (yKeys.bottomY) {
-				arrayRemove(entitiesByBottomY[yKeys.bottomY], entity);
-			}
-			lastKeys.delete(entity);
-		}
-	});
-	const cleanByYObj = (entitiesByY) => {
-		Object.keys(entitiesByY).forEach((y) => {
-			if (entitiesByY[y].length === 0) {
-				delete entitiesByY[y];
-			}
-		});
-	};
-	cleanByYObj(entitiesByTopY);
-	cleanByYObj(entitiesByBottomY);
-};
-
-// #endregion
-//
-//  █ █  █ █ █ ███ █   █ █   █ ███ █   █ █████
-// █████ █ █ █  █  ██  █ ██  █  █  ██  █ █
-//  █ █  █ █ █  █  █ █ █ █ █ █  █  █ █ █ █ ███
-// █████ █ █ █  █  █  ██ █  ██  █  █  ██ █   █
-//  █ █   █ █  ███ █   █ █   █ ███ █   █ █████
-//
-// #region Win/Lose (#winning)
-
-let winLoseState = "";
-const winOrLose = () => {
-	// Cases:
-	// ("while collecting" and "dying" refer to playing the animations)
-	// - Alive while collecting last bin: "" (winING, probably)
-	// - Dying while collecting last bin: "" (losING)
-	// - Dead while collecting last bin: "lose" (shouldn't happen maybe though, if collectingBin is reset)
-	// - Alive after collecting last bin: "win"
-	// - Dying after collecting last bin: (should already be "win" and paused)
-	// - Dead after collecting last bin: "lose"
-	// - Dead, bins left to collect: "lose"
-	// - Dying, bins left to collect: "" (losING)
-	// - Alive, bins left to collect: "" (normal state)
-	if (entities.some((entity) => entity.type === "junkbot" && !entity.dead)) {
-		if (
-			entities.some((entity) => entity.type === "junkbot" && !entity.dead && !entity.dying) &&
-			!entities.some((entity) => entity.type === "bin") &&
-			entities.every((entity) => !entity.collectingBin)
-		) {
-			return "win";
-		} else {
-			return "";
-		}
-	} else {
-		return "lose";
-	}
-};
-
-// #endregion
-//
 // █████ ████  ███ █████ █████ █████    █████ █   █ █   █ █████ █████ ███ █████ █   █ █████
 // █     █   █  █    █   █   █ █   █    █     █   █ ██  █ █       █    █  █   █ ██  █ █
 // █████ █   █  █    █   █   █ █████    █████ █   █ █ █ █ █       █    █  █   █ █ █ █ █████
@@ -1999,182 +2175,6 @@ const winOrLose = () => {
 //
 // #region Editor Functions, Mostly
 
-const undos = [];
-const redos = [];
-const clipboard = {};
-
-let mouse = { x: undefined, y: undefined, worldX: undefined, worldY: undefined };
-let dragging = [];
-let selectionBox;
-
-const serializeLevel = (level) => {
-	// let text = [];
-	// const addSection = (name, keyValuePairs) => {
-	// 	text += `[${name}]\n`;
-	// 	for (const [key, value] of keyValuePairs) {
-	// 		text += `${key}=${value}`;
-	// 	}
-	// 	text += "\n";
-	// };
-	// addSection("info", [
-	// 	["", ""]
-	// ]);
-	const types = [];
-	const unknownTypeMappings = [];
-	const parts = [];
-	for (const entity of level.entities) {
-		let type;
-		if (entity.type === "brick") {
-			type = `brick_${String(entity.widthInStuds).padStart(2, "0")}`;
-		} else if (entity.type === "jump") {
-			type = `${entity.fixed ? "haz" : "brick"}_slickjump`;
-		} else if (entity.type === "shield") {
-			type = `${entity.fixed ? "haz" : "brick"}_slickshield`;
-		} else if (entity.type === "laser") {
-			// entity name is confusing in regard to direction
-			type = `haz_slicklaser_${entity.facing === -1 ? "r" : "l"}`;
-		} else if (entity.type === "bin" && entity.scaredy) {
-			type = "scaredy";
-		} else {
-			type = {
-				junkbot: "minifig",
-				gearbot: "haz_walker",
-				climbbot: "haz_climber",
-				flybot: "haz_dumbfloat",
-				eyebot: "haz_float",
-				bin: "flag",
-				crate: "haz_slickcrate",
-				fire: "haz_slickfire",
-				fan: "haz_slickfan",
-				switch: "haz_slickswitch",
-				teleport: "haz_slickteleport",
-				pipe: "haz_slickpipe",
-				droplet: "haz_droplet", // made up / unofficial
-			}[entity.type];
-		}
-		if (type) {
-			if (types.indexOf(type) === -1) {
-				types.push(type);
-			}
-			// [0] - x coordinate
-			// [1] - y coordinate
-			// [2] - type index (in the types array)
-			// [3] - color index (in the colors array)
-			// [4] - starting animation name (0 for objects that don't animate)
-			// [5] - starting animation frame ? (this seems to always be 1 for any animated object)
-			// [6] - object relation ID, either a teleport or a switch; two teleports can reference each other with the same ID
-			const gridX = entity.x / 15 + 1;
-			const gridY = (entity.y + entity.height) / 18;
-			const typeIndex = types.indexOf(type);
-			const colorIndex = brickColorNames.indexOf(entity.colorName || "red");
-			let animationName;
-			if ("on" in entity) {
-				animationName = entity.on ? "on" : "off";
-			} else if (entity.type === "eyebot") {
-				animationName = "inactive";
-			} else if (entity.type === "flybot") {
-				if (entity.facingY === -1) {
-					animationName = "U";
-				} else if (entity.facingY === 1) {
-					animationName = "D";
-				} else if (entity.facing === -1) {
-					animationName = "L";
-				} else {
-					animationName = "R";
-				}
-			} else if (entity.type === "bin" && entity.scaredy) {
-				animationName = "rest";
-			} else if (("facing" in entity) && entity.type !== "bin") {
-				animationName = entity.facing > 0 ? "walk_r" : "walk_l";
-			} else if (entity.type === "jump") {
-				animationName = "dormant";
-			} else if (entity.type === "pipe") {
-				animationName = "dry";
-			} else if (entity.type === "crate") {
-				animationName = "norm";
-			} else {
-				animationName = "";
-			}
-			parts.push(`${gridX};${gridY};${typeIndex + 1};${colorIndex + 1};${animationName};${entity.animationFrame || 1};${entity.switchID || entity.teleportID || ""}`);
-		} else {
-			unknownTypeMappings.push(entity.type);
-		}
-	}
-	if (unknownTypeMappings.length) {
-		showMessageBox(`Unknown type mappings for entity types:\n\n${unknownTypeMappings.join("\n")}`);
-	}
-	const stringifyDecals = (decals = []) => decals.map(({ x, y, name }) => `${x};${y};${name}`).join(",");
-	return `[info]
-title=${level.title || "Saved World"}
-par=${isFinite(level.par) ? level.par : 10000}
-hint=${level.hint || ""}
-
-[playfield]
-${level.bounds ? `size=${level.bounds.width / 15},${level.bounds.height / 18}` : ""}
-spacing=15,18
-scale=1
-
-[background]
-backdrop=${level.backdropName || "bkg1"}
-decals=${stringifyDecals(level.decals)}
-bgdecals=${stringifyDecals(level.backgroundDecals)}
-
-[partslist]
-types=${types.join(",")}
-colors=${brickColorNames.join(",")}
-parts=${parts.join(",")}
-
-`;
-};
-const resetAndInit = (level) => {
-	currentLevel = level;
-	entities = currentLevel.entities; // shortcut
-
-	entitiesByTopY = {};
-	entitiesByBottomY = {};
-	lastKeys = new Map();
-	dragging.length = 0;
-	wind.length = 0;
-	laserBeams.length = 0;
-	teleportEffects.length = 0;
-	playthroughEvents.length = 0;
-	playbackEvents.length = 0;
-	// playbackEvents = playthroughEvents; // for rewinding with negative rewind speed
-	playbackLevel = {};
-	levelLastFrame = {};
-	// sort for consistency for level delta patching
-	entities.sort((a, b) => a.id - b.id);
-	playthroughEvents.push({
-		type: "level",
-		t: 0,
-		levelPatch: diffPatcher.clone(diffPatcher.diff(playbackLevel, currentLevel)),
-	});
-	moves = 0;
-	frameCounter = 0;
-	desynchronized = false;
-	idCounter = 0;
-	for (const entity of entities) {
-		delete entity.grabbed;
-		delete entity.grabOffset;
-		idCounter = Math.max(idCounter, (entity.id ?? 0) + 1);
-	}
-	for (const entity of entities) {
-		// separate from the above loop to avoid ID collisions
-		if (typeof entity.id !== "number") {
-			entity.id = getID();
-		}
-	}
-	winLoseState = winOrLose(); // in case there's no bins, don't say OH YEAH; and in case there's no junkbots, don't consider it a lose
-	updateEditorUIForLevelChange(currentLevel);
-};
-// @TODO: make this pure, and use initLevel in cases where loading from a file, so undos/etc. are reset
-const deserializeJSON = (json) => {
-	const state = JSON.parse(json);
-	if ("version" in state && state.version < 0.3) {
-		state.level = { entities: state.entities };
-	}
-	resetAndInit(state.level);
-};
 const initLevel = (level) => {
 	level = diffPatcher.clone(level); // matters for title screen's "reset screen" button
 	editorLevelState = serializeToJSON(level);
