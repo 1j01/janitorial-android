@@ -157,6 +157,7 @@ const diffPatcher = jsondiffpatch.create({
 	objectHash: (obj) => obj.id ?? (`${obj.name}@${obj.x},${obj.y}`),
 });
 
+let editorLevelState;
 const undos = [];
 const redos = [];
 const clipboard = {};
@@ -1004,8 +1005,6 @@ const serializeToJSON = (level) => {
 		return value;
 	}, "\t");
 };
-
-let editorLevelState = serializeToJSON(currentLevel);
 
 const serializeLevel = (level) => {
 	// let text = [];
