@@ -232,6 +232,12 @@ const debugWorldSpaceRect = (x, y, width, height) => {
 // } catch (e) { }
 // let aJunkbot;
 
+const wrapContents = (target, wrapper) => {
+	[...target.childNodes].forEach((child) => wrapper.appendChild(child));
+	target.appendChild(wrapper);
+	return wrapper;
+};
+
 let messageBox;
 let messageBoxContainer;
 const showMessageBox = (message) => {
@@ -1867,6 +1873,36 @@ const entityMoved = (entity) => {
 	entitiesByTopY[yKeys.topY].push(entity);
 	entitiesByBottomY[yKeys.bottomY].push(entity);
 	lastKeys.set(entity, yKeys);
+};
+
+const updateAccelerationStructures = () => {
+	// add new entities to acceleration structures
+	for (const entity of entities) {
+		if (!lastKeys.has(entity)) {
+			entityMoved(entity);
+		}
+	}
+	// clean up acceleration structures
+	lastKeys.forEach((yKeys, entity) => {
+		if (entities.indexOf(entity) === -1) {
+			if (yKeys.topY) {
+				arrayRemove(entitiesByTopY[yKeys.topY], entity);
+			}
+			if (yKeys.bottomY) {
+				arrayRemove(entitiesByBottomY[yKeys.bottomY], entity);
+			}
+			lastKeys.delete(entity);
+		}
+	});
+	const cleanByYObj = (entitiesByY) => {
+		Object.keys(entitiesByY).forEach((y) => {
+			if (entitiesByY[y].length === 0) {
+				delete entitiesByY[y];
+			}
+		});
+	};
+	cleanByYObj(entitiesByTopY);
+	cleanByYObj(entitiesByBottomY);
 };
 
 // #endregion
@@ -4091,44 +4127,23 @@ const simulateTeleport = (teleport) => {
 
 // #endregion
 //
-// █   █ ███ █████ █████ █████ █████ █████ █████ █████ █████ ███ █████ █████ ████
-// ██ ██  █  █     █     █   █   █   █     █     █   █ █   █  █     █  █     █   █
-// █ █ █  █  █████ █     █████   █   █████ █ ███ █   █ █████  █    █   █████ █   █
-// █   █  █      █ █     █   █   █   █     █   █ █   █ █  █   █   █    █     █   █
-// █   █ ███ █████ █████ █   █   █   █████ █████ █████ █  ██ ███ █████ █████ ████
+// █████ █████ █ █ █ ███ █   █ ████            █████ █     █████ █   █ ████  █████ █████ █   █
+// █   █ █     █ █ █  █  ██  █ █   █     █     █   █ █     █   █ █   █ █   █ █   █ █     █  █
+// █████ █████ █ █ █  █  █ █ █ █   █    ███    █████ █     █████  █ █  █████ █████ █     ███
+// █  █  █     █ █ █  █  █  ██ █   █     █     █     █     █   █   █   █   █ █   █ █     █  █
+// █  ██ █████  █ █  ███ █   █ ████            █     █████ █   █   █   ████  █   █ █████ █   █
 //
-// #region Mis-categorized / Miscellaneous (@TODO)
+//
+//  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █
+// ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █
+// ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █
+// ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █
+//  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █
+//
+// #region Rewind + Playback
 
-const updateAccelerationStructures = () => {
-	// add new entities to acceleration structures
-	for (const entity of entities) {
-		if (!lastKeys.has(entity)) {
-			entityMoved(entity);
-		}
-	}
-	// clean up acceleration structures
-	lastKeys.forEach((yKeys, entity) => {
-		if (entities.indexOf(entity) === -1) {
-			if (yKeys.topY) {
-				arrayRemove(entitiesByTopY[yKeys.topY], entity);
-			}
-			if (yKeys.bottomY) {
-				arrayRemove(entitiesByBottomY[yKeys.bottomY], entity);
-			}
-			lastKeys.delete(entity);
-		}
-	});
-	const cleanByYObj = (entitiesByY) => {
-		Object.keys(entitiesByY).forEach((y) => {
-			if (entitiesByY[y].length === 0) {
-				delete entitiesByY[y];
-			}
-		});
-	};
-	cleanByYObj(entitiesByTopY);
-	cleanByYObj(entitiesByBottomY);
-};
-
+// Helps to detect desynchronization between playback and recording.
+// There's also a separate detection in the problem detection code.
 const findMisplacedEntities = (withinEntities, compareToEntities) => {
 	return withinEntities.filter((entity) => {
 		for (const compareToEntity of compareToEntities) {
@@ -4147,23 +4162,6 @@ const findMisplacedEntities = (withinEntities, compareToEntities) => {
 		return true;
 	});
 };
-
-// #endregion
-//
-// █████ █████ █ █ █ ███ █   █ ████            █████ █     █████ █   █ ████  █████ █████ █   █
-// █   █ █     █ █ █  █  ██  █ █   █     █     █   █ █     █   █ █   █ █   █ █   █ █     █  █
-// █████ █████ █ █ █  █  █ █ █ █   █    ███    █████ █     █████  █ █  █████ █████ █     ███
-// █  █  █     █ █ █  █  █  ██ █   █     █     █     █     █   █   █   █   █ █   █ █     █  █
-// █  ██ █████  █ █  ███ █   █ ████            █     █████ █   █   █   ████  █   █ █████ █   █
-//
-//
-//  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █  ▗█   █
-// ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █ ▗██  █
-// ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █ ███ █
-// ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █ ▝██  █
-//  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █  ▝█   █
-//
-// #region Rewind + Playback
 
 let pausedForRewind = false;
 const rewindRate = 2;
@@ -4446,6 +4444,7 @@ const simulate = (entities) => {
 // █     █  ██ █████ ████  █████ █████ █   █    █████ █████ █████ █████   █   █   █
 //
 // #region Problem Sleuth (issue detection)
+// #@: problem detection, problem detector, issue detector, problem highlighting, problem highlighter, issue highlighting, issue highlighter
 
 const detectProblems = () => {
 	// active validity checking of the world
@@ -5022,12 +5021,6 @@ const animate = () => {
 // █████ █████ ███
 //
 // #region GUI (Graphical User Interface)
-
-const wrapContents = (target, wrapper) => {
-	[...target.childNodes].forEach((child) => wrapper.appendChild(child));
-	target.appendChild(wrapper);
-	return wrapper;
-};
 
 let playedIntro = false;
 const ruffle = window.RufflePlayer.newest();
