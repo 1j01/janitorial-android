@@ -101,12 +101,12 @@ const testSpeedInput = document.getElementById("test-speed");
 // const startButton = document.getElementById("start-tests");
 
 // #endregion
-//
-// █████ █     █████ ████  █████ █     █████
-// █     █     █   █ █   █ █   █ █     █
-// █ ███ █     █   █ █████ █████ █     █████
-// █   █ █     █   █ █   █ █   █ █         █
-// █████ █████ █████ ████  █   █ █████ █████
+//                                               .-"~~~"-.
+// █████ █     █████ ████  █████ █     █████    /(-_`.\| ;\
+// █     █     █   █ █   █ █   █ █     █       |'?   /  .(-|
+// █ ███ █     █   █ █████ █████ █     █████   |  \,`_  ,- |
+// █   █ █     █   █ █   █ █   █ █         █    \   ( \ `,/
+// █████ █████ █████ ████  █   █ █████ █████     `-./,'.-'
 //
 // #region Globals (declarations and basic initialization)
 
