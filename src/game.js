@@ -5728,10 +5728,10 @@ const runTests = async () => {
 //
 // █████ █████ █   █ █████ ███ █   █ █████
 // █   █ █   █ █   █   █    █  ██  █ █                 _____                ==o
-// █████ █   █ █   █   █    █  █ █ █ █ ███          ___ |[]|_n__n_I_c       |
-// █  █  █   █ █   █   █    █  █  ██ █   █         |___||__|###|____}       |  ,,mM###################################
-// █  ██ █████ █████   █   ███ █   █ █████ #########O-O--O-O+++--O-O-\########WW######################################
-//
+// █████ █   █ █   █   █    █  █ █ █ █ ███          ___ |[]|_n__n_I_c       |                 ==o
+// █  █  █   █ █   █   █    █  █  ██ █   █         |___||__|###|____}       |  ,,mM###########|#######################
+// █  ██ █████ █████   █   ███ █   █ █████ #########O-O--O-O+++--O-O-\########WW#############W|#######################
+//                                                                                             `'+W###################
 // #region Routing (load from URL hash)
 
 const loadFromHash = async () => {
@@ -5740,50 +5740,62 @@ const loadFromHash = async () => {
 	}
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
-	if (hashOptions.level) {
+
+	const showTestRunner = location.hash.match(/run-tests/);
+	if (!showTestRunner) {
+		stopTests();
+	}
+
+	if (hashOptions.level || showTestRunner) {
 		// Only load (and derive) resources once
 		allResourcesLoadedPromise ??= loadResources(allResourcePaths).then(deriveHotResources);
 		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
 		resources = await allResourcesLoadedPromise;
 
 		initLevelSelect(); // now that level listing is loaded
-		if (editing) {
-			initEditorUI();
-		}
 
-		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
-		if (game === "local") {
-			try {
-				if (!localStorage[`level:${levelName}`]) {
-					throw new Error("Level does not exist.");
-				}
-				deserializeJSON(localStorage[`level:${levelName}`]);
-				dragging = entities.filter((entity) => entity.grabbed);
-				editorLevelState = serializeToJSON(currentLevel);
-			} catch (error) {
-				showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
-			}
+		if (showTestRunner) {
+			runTests();
 		} else {
-			levelSelect.value = levelName;
-			if (levelSelect.selectedIndex === -1) {
-				showMessageBox(`Unknown level "${levelName}"`);
-			} else {
+			if (editing) {
+				initEditorUI();
+			}
+
+			const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
+
+			if (game === "local") {
 				try {
-					const loaded = await loadLevelFromLevelSelect({ fromHash: true });
-					if (!loaded) {
-						// The URL was changed. The load should be silently aborted.
-
-						// This fixes a race condition where it could hide the title screen UI,
-						// and leave you with just the title screen level, navigating back to the title screen.
-
-						// To test: Open the title screen, click Start, go back (Alt+Left),
-						// then hold Alt and press Right and then Left quickly together,
-						// almost as if they're one key, but in that order specifically.
-						// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
-						return;
+					if (!localStorage[`level:${levelName}`]) {
+						throw new Error("Level does not exist.");
 					}
+					deserializeJSON(localStorage[`level:${levelName}`]);
+					dragging = entities.filter((entity) => entity.grabbed);
+					editorLevelState = serializeToJSON(currentLevel);
 				} catch (error) {
-					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
+					showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
+				}
+			} else {
+				levelSelect.value = levelName;
+				if (levelSelect.selectedIndex === -1) {
+					showMessageBox(`Unknown level "${levelName}"`);
+				} else {
+					try {
+						const loaded = await loadLevelFromLevelSelect({ fromHash: true });
+						if (!loaded) {
+							// The URL was changed. The load should be silently aborted.
+
+							// This fixes a race condition where it could hide the title screen UI,
+							// and leave you with just the title screen level, navigating back to the title screen.
+
+							// To test: Open the title screen, click Start, go back (Alt+Left),
+							// then hold Alt and press Right and then Left quickly together,
+							// almost as if they're one key, but in that order specifically.
+							// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
+							return;
+						}
+					} catch (error) {
+						showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
+					}
 				}
 			}
 		}
@@ -5822,11 +5834,6 @@ const loadFromHash = async () => {
 			});
 			loadedImg.src = "images/menus/ready_to_play.png";
 		})();
-	}
-	if (location.hash.match(/run-tests/)) {
-		runTests();
-	} else {
-		stopTests();
 	}
 };
 
