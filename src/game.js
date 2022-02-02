@@ -5640,7 +5640,7 @@ const runTests = async () => {
 			if (winOrLose() === "lose") {
 				lost = true;
 			}
-			return won || lost || paused;
+			return won || lost || paused || !testing;
 		};
 		for (let timeStep = 0; timeStep < test.timeSteps; timeStep++) {
 			// eslint-disable-next-line no-await-in-loop, no-loop-func
@@ -5649,14 +5649,15 @@ const runTests = async () => {
 				for (let i = 0; i < testSpeedInput.valueAsNumber - 1; i++) {
 					simulate(entities);
 					timeStep += 1;
+					console.log("test simulating", { won, lost, paused, testing, testName: test.name, timeStep });
 					if (checkTestEnd()) {
 						break;
 					}
 				}
 			});
-			checkTestEnd();
-			if (paused) {
+			if (checkTestEnd()) {
 				if (editing) {
+					// Transition into editing mode, if you paused to edit.
 					// eslint-disable-next-line require-atomic-updates
 					stopTests();
 					if (muted !== wasMuted) {
