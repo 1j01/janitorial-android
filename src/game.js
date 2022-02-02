@@ -2338,7 +2338,7 @@ const togglePause = () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
-const toggleEditing = () => {
+const toggleEditing = ({ savePreference = true } = {}) => {
 	if (!editing && (titleScreen.style.display !== "none" && !titleScreen.hidden)) {
 		return;
 	}
@@ -2355,7 +2355,9 @@ const toggleEditing = () => {
 		togglePause();
 	}
 	try {
-		localStorage.editing = editing;
+		if (savePreference) {
+			localStorage.editing = editing;
+		}
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
@@ -5015,7 +5017,7 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 
 	// don't show editor UI on the title screen!
 	if (editing) {
-		toggleEditing();
+		toggleEditing({ savePreference: false });
 	}
 	paused = false;
 
@@ -5565,7 +5567,7 @@ const runTests = async () => {
 		togglePause();
 	}
 	if (editing) {
-		toggleEditing();
+		toggleEditing({ savePreference: false });
 	}
 
 	testsUI.hidden = false;
@@ -5748,7 +5750,11 @@ const loadFromHash = async () => {
 
 		initLevelSelect(); // now that level listing is loaded
 		if (editing) {
-			initEditorUI();
+			// initEditorUI();
+			// sort of a hacky way of getting it to open the editor UI when returning to a level from the title screen... doesn't work
+			// would need to restore from localStorage preference
+			toggleEditing({ savePreference: false });
+			toggleEditing({ savePreference: false });
 		}
 
 		const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
