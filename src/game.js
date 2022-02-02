@@ -2343,10 +2343,12 @@ const toggleEditing = () => {
 		return;
 	}
 	editing = !editing;
-	initEditorUI();
 	editorUI.hidden = !editing;
 	toggleEditingButton.ariaPressed = editing;
 	if (editing) {
+		// eslint-disable-next-line no-use-before-define
+		initEditorUI();
+
 		deserializeJSON(editorLevelState);
 	}
 	if (editing !== paused) {
@@ -5010,6 +5012,13 @@ const hideTitleScreen = () => {
 	stopIntro();
 };
 const showTitleScreen = (showIntro = !playedIntro) => {
+
+	// don't show editor UI on the title screen!
+	if (editing) {
+		toggleEditing();
+	}
+	paused = false;
+
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
 	titleScreen.classList.add("title-screen-level-loaded");
@@ -5784,10 +5793,6 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
 		resources = await hotResourcesLoadedPromise;
 		showTitleScreen();
-
-		// don't show editor UI on the title screen!
-		editing = false;
-		paused = false;
 
 		// We loaded from the hash!
 		// There's more to load, but we don't want to block showing the title screen level.
