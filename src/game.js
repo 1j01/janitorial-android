@@ -1462,6 +1462,20 @@ const otherResourcePaths = {
 const allResourcePaths = Object.fromEntries(Object.entries(hotResourcePaths).concat(Object.entries(otherResourcePaths)));
 const numRustles = 6;
 const numDrips = 3;
+// Currently it is assumed only hot resources need derivatives.
+const hotResourceDerivations = [
+	(resources) => {
+		// Monkey patch one frame of a sprite atlas (easier than regenerating the spritesheet)
+		// eslint-disable-next-line camelcase
+		resources.spritesAtlas.eyebot_active_1 = resources.spritesAtlas.eyebot_active_1fix;
+	},
+];
+const deriveHotResources = (resources) => {
+	for (const deriveFn of hotResourceDerivations) {
+		deriveFn(resources);
+	}
+	return resources; // for promise chaining
+};
 
 const loadImage = (imagePath) => {
 	const image = new Image();
@@ -1644,6 +1658,13 @@ const fontColors = {
 	white: "#ffffff",
 };
 const fontCanvases = {};
+
+hotResourceDerivations.push((resources) => {
+	// Generate colored font sprites
+	for (const [colorName, color] of Object.entries(fontColors)) {
+		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
+	}
+});
 
 const drawText = (ctx, text, startX, startY, colorName, bgColor = "rgba(0,0,0,0.5)", padding = true) => {
 	const fontImage = fontCanvases[colorName];
@@ -5702,29 +5723,7 @@ const runTests = async () => {
 // █  █  █   █ █   █   █    █  █  ██ █   █         |___||__|###|____}       |  ,,mM###################################
 // █  ██ █████ █████   █   ███ █   █ █████ #########O-O--O-O+++--O-O-\########WW######################################
 //
-//
-// ███      █████ █████ █████ █████ █   █ █████ █████ █████    ████  █████ █████ ███ █   █ █████ █████ ███ █████ █   █
-// █ █      █   █ █     █     █   █ █   █ █   █ █     █        █   █ █     █   █  █  █   █ █   █   █    █  █   █ ██  █
-//  ██ █    █████ █████ █████ █   █ █   █ █████ █     █████    █   █ █████ █████  █  █   █ █████   █    █  █   █ █ █ █
-// █  █     █  █  █         █ █   █ █   █ █  █  █     █        █   █ █     █  █   █   █ █  █   █   █    █  █   █ █  ██
-// ███ █    █  ██ █████ █████ █████ █████ █  ██ █████ █████    ████  █████ █  ██ ███   █   █   █   █   ███ █████ █   █
-//
-// #region Routing (load from URL hash) & resource derivation
-
-const deriveResources = (resources) => {
-	// Currently this assumes only hot resources need derivatives.
-
-	// Monkey patch one frame of a sprite atlas (easier than regenerating the spritesheet)
-	// eslint-disable-next-line camelcase
-	resources.spritesAtlas.eyebot_active_1 = resources.spritesAtlas.eyebot_active_1fix;
-
-	// Generate colored font sprites
-	for (const [colorName, color] of Object.entries(fontColors)) {
-		fontCanvases[colorName] = colorizeWhiteAlphaImage(resources.font, color);
-	}
-
-	return resources;
-};
+// #region Routing (load from URL hash)
 
 const loadFromHash = async () => {
 	if (disableLoadFromHash) {
@@ -5734,7 +5733,7 @@ const loadFromHash = async () => {
 	// console.log("From URL hash:", hashOptions);
 	if (hashOptions.level) {
 		// Only load (and derive) resources once
-		allResourcesLoadedPromise ??= loadResources(allResourcePaths).then(deriveResources);
+		allResourcesLoadedPromise ??= loadResources(allResourcePaths).then(deriveHotResources);
 		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
 		resources = await allResourcesLoadedPromise;
 
@@ -5782,7 +5781,7 @@ const loadFromHash = async () => {
 		// Hide title screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
 		hideTitleScreen();
 	} else {
-		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveResources);
+		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
 		resources = await hotResourcesLoadedPromise;
 		showTitleScreen();
 
