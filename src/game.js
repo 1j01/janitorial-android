@@ -1567,13 +1567,13 @@ let hotResourcesLoadedPromise;
 let allResourcesLoadedPromise;
 
 // #endregion
-//                                   _
-// █████ █   █ ████  ███ █████      / |    \
-// █   █ █   █ █   █  █  █   █    _/  |  \  \
-// █████ █   █ █   █  █  █   █   ((   | ) | )
-// █   █ █   █ █   █  █  █   █     \  |  /  /
-// █   █ █████ ████  ███ █████      \_|    /
-//
+//                                    _    .
+// █████ █   █ ████  ███ █████      _/ | ,  \
+// █   █ █   █ █   █  █  █   █    _/   |. \  \
+// █████ █   █ █   █  █  █   █   (_    | ) | )
+// █   █ █   █ █   █  █  █   █     \_  |' /  /
+// █   █ █████ ████  ███ █████       \_| '  /
+//                                         '
 // #region Audio
 
 const playSound = (soundName, playbackRate = 1, cutOffEndFraction = 0) => {
