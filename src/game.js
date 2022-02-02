@@ -1,5 +1,3 @@
-/* global jsondiffpatch */
-
 //     ╔════════╗     ╔════════╗     ╔════════╗     ╔════════╗
 //     ║        ║     ║        ║     ║        ║     ║        ║
 // ╔═══╩════════╩═════╩════════╩═════╩════════╩═════╩════════╩═══╗
@@ -151,7 +149,7 @@ const getID = () => {
 	idCounter += 1;
 	return idCounter;
 };
-const diffPatcher = jsondiffpatch.create({
+const diffPatcher = window.jsondiffpatch.create({
 	// objectHash allows array operations to work reasonably; it defines the identity of objects
 	// entities have id, but decals don't (for now anyway), so name+x+y is for decals
 	objectHash: (obj) => obj.id ?? (`${obj.name}@${obj.x},${obj.y}`),
