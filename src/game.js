@@ -3987,11 +3987,12 @@ const simulateClimbbot = (climbbot) => {
 			} else {
 				if (aside) {
 					climbbot.facingY = 1;
-				// } else if (groundAside) {
-				// 	climbbot.x = asidePos.x;
-				// 	climbbot.y = asidePos.y;
-				// 	entityMoved(climbbot);
 				} else {
+					// if (groundAside) {
+					// 	climbbot.x = asidePos.x;
+					// 	climbbot.y = asidePos.y;
+					// 	entityMoved(climbbot);
+					// } else {
 					climbbot.facingY = 1;
 					climbbot.x = belowPos.x;
 					climbbot.y = belowPos.y;

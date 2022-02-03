@@ -32,12 +32,14 @@
 			gap: 2px;
 			justify-content: flex-end;
 		}
+
 		/* prevent occlusion of entities palette */
 		@media screen and (min-width: 400px) {
 			#main-controls {
 				left: unset;
 			}
 		}
+
 		/* approximate width of editor UI + main controls */
 		@media screen and (max-width: 800px) {
 			#editor-ui {
@@ -100,7 +102,7 @@
 
 		.dialog-container {
 			position: fixed;
-		    z-index: 100;
+			z-index: 100;
 			left: 0;
 			top: 0;
 			right: 0;
@@ -121,6 +123,7 @@
 			pointer-events: all;
 			user-select: text;
 		}
+
 		.metal-border {
 			border-style: solid;
 			border-image-slice: 20 22 22 21;
@@ -132,6 +135,7 @@
 			border-image-repeat: stretch stretch;
 			border-image-source: url("images/menus/dBox_sm.png");
 		}
+
 		.generic-button {
 			border-image-slice: 6 17 8 9 fill;
 			border-image-width: 6px 17px 8px 9px;
@@ -141,6 +145,7 @@
 			background: none;
 			padding: 2px 10px;
 		}
+
 		.generic-button:hover {
 			border-image-source: url("images/menus/generic_button_hover.png");
 		}
@@ -227,12 +232,16 @@
 			top: 50%;
 			left: 50%;
 			transform: translate(-50%, -50%);
-			outline: 5000px solid black; /* covers up a few pixels of the title screen level outside its frame */
-			pointer-events: none; /* allows interaction with the title screen level through the frame's cutout */
+			/* cover up a few pixels of the title screen level outside its frame, and forms basically a page background */
+			outline: 5000px solid black;
+			/* allows interaction with the title screen level through the frame's cutout */
+			pointer-events: none;
 		}
+
 		#title-screen>*:not([hidden]) {
 			pointer-events: all;
 		}
+
 		#title-screen:not(.title-screen-level-loaded) {
 			background-color: #7c857c;
 		}
@@ -242,6 +251,7 @@
 			background-color: transparent;
 			color: transparent;
 		}
+
 		#start-game {
 			position: absolute;
 			left: 139px;
@@ -250,9 +260,11 @@
 			width: 116px;
 			height: 45px;
 		}
+
 		#start-game:hover {
 			background-image: url("images/menus/play_hover.png");
 		}
+
 		#show-credits {
 			position: absolute;
 			left: 310px;
@@ -261,9 +273,11 @@
 			width: 96px;
 			height: 26px;
 		}
+
 		#show-credits:hover {
 			background-image: url("images/menus/credit_up_x.png");
 		}
+
 		#skip-intro {
 			position: absolute;
 			left: 508px;
@@ -272,9 +286,11 @@
 			width: 96px;
 			height: 26px;
 		}
+
 		#skip-intro:hover {
 			background-image: url("images/menus/skip_intro_x.png");
 		}
+
 		#replay-intro {
 			position: absolute;
 			left: 508px;
@@ -283,9 +299,11 @@
 			width: 96px;
 			height: 26px;
 		}
+
 		#replay-intro:hover {
 			background-image: url("images/menus/replay_intro_x.png");
 		}
+
 		#reset-screen {
 			position: absolute;
 			left: 508px;
@@ -294,9 +312,11 @@
 			width: 96px;
 			height: 26px;
 		}
+
 		#reset-screen:hover {
 			background-image: url("images/menus/clear_screen_x.png");
 		}
+
 		#load-status-loaded {
 			position: absolute;
 			left: 512px;
@@ -306,6 +326,7 @@
 			height: 25px;
 			color: transparent;
 		}
+
 		#load-status-loading {
 			position: absolute;
 			left: 496px;
@@ -315,6 +336,7 @@
 			height: 25px;
 			color: transparent;
 		}
+
 		#load-progress {
 			position: absolute;
 			left: 506px;
@@ -325,25 +347,31 @@
 			display: flex;
 			align-items: center;
 		}
+
 		.load-progress-brick {
 			animation: fall-into-place 0.6s linear forwards;
 			height: 18px;
 		}
+
 		@keyframes fall-into-place {
 			from {
 				transform: translateY(-500px);
 			}
+
 			to {
 				transform: translateY(0px);
 			}
 		}
+
 		.load-progress-brick::after {
 			height: 32px;
 		}
+
 		.load-progress-brick:nth-child(even)::after {
 			content: url("images/sprites/brick_immobile_2.png");
 			width: 41px;
 		}
+
 		.load-progress-brick:nth-child(odd)::after {
 			content: url("images/sprites/brick_immobile_4.png");
 			width: 71px;
@@ -357,6 +385,7 @@
 			height: 37px;
 			opacity: 20%;
 		}
+
 		.title-screen-arrow.pointing-left {
 			transform: scaleX(-1);
 		}
@@ -439,7 +468,8 @@
 			🔈
 		</button>
 		<input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Volume">
-		<button id="toggle-fullscreen" aria-label="Toggle Fullscreen" aria-pressed="false" aria-keyshortcuts="Alt+Enter F11">
+		<button id="toggle-fullscreen" aria-label="Toggle Fullscreen" aria-pressed="false"
+			aria-keyshortcuts="Alt+Enter F11">
 			<svg fill="currentColor" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 438.543 438.543">
 				<path
