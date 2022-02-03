@@ -280,7 +280,9 @@ const showMessageBox = (message, {
 		messageContentEl.append(...message);
 	}
 	messageBox.append(messageContentEl);
-	messageBox.append(document.createElement("br"));
+	const buttonGroup = document.createElement("div");
+	buttonGroup.className = "button-group";
+	messageBox.append(buttonGroup);
 	const closeMessageBox = () => {
 		messageBoxContainer.remove();
 		messageBox = null;
@@ -298,7 +300,7 @@ const showMessageBox = (message, {
 		button.textContent = label;
 		button.style.margin = "10px";
 		button.style.marginTop = "20px";
-		messageBox.append(button);
+		buttonGroup.append(button);
 	}
 	messageBoxContainer.append(messageBox);
 	document.body.append(messageBoxContainer);
