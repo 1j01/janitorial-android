@@ -291,8 +291,8 @@ const showMessageBox = (message, {
 		const button = document.createElement("button");
 		button.className = "generic-button";
 		button.onclick = () => {
+			closeMessageBox(); // must be before action so a message box can be shown in the action
 			action?.();
-			closeMessageBox();
 		};
 		if (isDefault) {
 			button.focus();
@@ -4924,6 +4924,8 @@ const checkLevelEnd = () => {
 			paused = true;
 			setTimeout(() => {
 				playSound(Math.random() < 0.5 ? "ouch" : "uhoh");
+				// eslint-disable-next-line no-use-before-define
+				showLevelLoseUI();
 			}, 1000);
 		}
 		if (winLoseState === "win" && !paused) {
@@ -5577,6 +5579,60 @@ const initEditorUI = () => {
 			wrapContents(actionCell, button);
 		}
 	}
+};
+
+const showLevelLoseUI = () => {
+	const messages = [
+		"I knew that was going to happen.",
+		"I hate mondays.",
+		"Why me?",
+	];
+	const message = messages[Math.floor(Math.random() * messages.length)];
+	const div = document.createElement("div");
+	div.innerHTML = `
+		<img src="images/menus/level_lose.png" draggable="false">
+		<p>${message}</p>
+	`;
+	showMessageBox([div], {
+		buttons: [
+			{
+				label: "Select Level",
+				action: () => {
+					// @TODO: level select screen
+					if (!editing) {
+						toggleEditing();
+					}
+					levelSelect.focus();
+				},
+			},
+			{
+				label: "Get Hint",
+				action: () => {
+					showMessageBox(currentLevel.hint, {
+						buttons: [
+							{
+								label: "OK",
+								action: () => {
+									// eslint-disable-next-line no-use-before-define
+									loadFromHash();
+									paused = false;
+								},
+							}
+						],
+					});
+				},
+			},
+			{
+				label: "Try Again",
+				action: () => {
+					// eslint-disable-next-line no-use-before-define
+					loadFromHash();
+					paused = false;
+				},
+				isDefault: true,
+			},
+		]
+	});
 };
 
 // #endregion
