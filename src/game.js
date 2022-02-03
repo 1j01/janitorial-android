@@ -2249,65 +2249,60 @@ const initLevel = (level) => {
 	redos.length = 0;
 };
 let disableLoadFromHash = false;
-const loadLevelFromLevelSelect = async ({ fromHash = false } = {}) => {
+const loadLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
 	// If fromHash is true, prevent race conditions by aborting if the hash doesn't match.
 
-	const option = levelSelect.options[levelSelect.selectedIndex];
-	const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
-	const levelName = levelSelect.value;
-	if (levelName !== "Custom World") {
-		let fileName = `${levelName.replace(/[:?]/g, "")}.txt`;
-		const game = optgroup ? optgroup.value : "Custom";
-		let folder = {
-			"Junkbot Undercover": "levels/Undercover Exclusive",
-			"Junkbot": "levels",
-			"Test Cases": "levels/test-cases",
-		}[game];
-		if (levelName === "New Employee Training") {
-			folder = "levels/custom";
-			fileName = "New Employee Training (1j01).txt";
-		}
-		// console.log("loading:", option.value, { option, optgroup, game });
-		const hashMatches = () => decodeURIComponent(parseLocationHash().level || "") === `${game};${levelName}`;
+	levelSelect.value = levelName; // names must be unique across games
+	let fileName = `${levelName.replace(/[:?]/g, "")}.txt`;
+	let folder = {
+		"Junkbot Undercover": "levels/Undercover Exclusive",
+		"Junkbot": "levels",
+		"Test Cases": "levels/test-cases",
+	}[game];
+	if (levelName === "New Employee Training") {
+		folder = "levels/custom";
+		fileName = "New Employee Training (1j01).txt";
+	}
+	// console.log("loading:", option.value, { option, optgroup, game });
+	const hashMatches = () => decodeURIComponent(parseLocationHash().level || "") === `${game};${levelName}`;
 
-		try {
-			const level = await loadLevelFromTextFile(`${folder}/${fileName}`, { game });
-			if (fromHash && !hashMatches()) {
-				// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
-				return false;
-			}
-			initLevel(level);
-			editorLevelState = serializeToJSON(currentLevel);
-		} catch (error) {
-			showMessageBox(`Failed to load level:\n\n${error}`);
+	try {
+		const level = await loadLevelFromTextFile(`${folder}/${fileName}`, { game });
+		if (fromHash && !hashMatches()) {
+			// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
+			return false;
 		}
-		// Change URL hash (if needed) and wait for hashchange event
-		if (!hashMatches()) {
-			await new Promise((resolve, reject) => {
-				// eslint bug?
-				// eslint-disable-next-line prefer-const
-				let tid;
-				const handleHashChange = () => {
-					// console.log("hashchange", location.hash);
-					window.removeEventListener("hashchange", handleHashChange);
-					clearTimeout(tid);
-					// make sure other handlers of hashchange run first
-					setTimeout(() => {
-						disableLoadFromHash = false;
-						resolve();
-					});
-				};
-				window.addEventListener("hashchange", handleHashChange);
-				tid = setTimeout(() => {
-					window.removeEventListener("hashchange", handleHashChange);
-					reject(new Error("timed out waiting for hashchange event"));
-				}, 1000);
-				// console.log("navigate for:", option.value, { option, optgroup, game });
-				// console.log(`gonna set #level=${game};${encodeURIComponent(levelName)}`);
-				disableLoadFromHash = true;
-				location.hash = `level=${game};${encodeURIComponent(levelName)}`;
-			});
-		}
+		initLevel(level);
+		editorLevelState = serializeToJSON(currentLevel);
+	} catch (error) {
+		showMessageBox(`Failed to load level:\n\n${error}`);
+	}
+	// Change URL hash (if needed) and wait for hashchange event
+	if (!hashMatches()) {
+		await new Promise((resolve, reject) => {
+			// eslint bug?
+			// eslint-disable-next-line prefer-const
+			let tid;
+			const handleHashChange = () => {
+				// console.log("hashchange", location.hash);
+				window.removeEventListener("hashchange", handleHashChange);
+				clearTimeout(tid);
+				// make sure other handlers of hashchange run first
+				setTimeout(() => {
+					disableLoadFromHash = false;
+					resolve();
+				});
+			};
+			window.addEventListener("hashchange", handleHashChange);
+			tid = setTimeout(() => {
+				window.removeEventListener("hashchange", handleHashChange);
+				reject(new Error("timed out waiting for hashchange event"));
+			}, 1000);
+			// console.log("navigate for:", option.value, { option, optgroup, game });
+			// console.log(`gonna set #level=${game};${encodeURIComponent(levelName)}`);
+			disableLoadFromHash = true;
+			location.hash = `level=${game};${encodeURIComponent(levelName)}`;
+		});
 	}
 	return true;
 };
@@ -5219,7 +5214,15 @@ const initLevelSelect = () => {
 			optgroup.append(option);
 		}
 	}
-	levelSelect.onchange = loadLevelFromLevelSelect;
+	levelSelect.onchange = () => {
+		const option = levelSelect.options[levelSelect.selectedIndex];
+		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
+		const levelName = levelSelect.value;
+		if (levelName === "Custom World") {
+			return; // this is a placeholder option
+		}
+		location.hash = `#level=${optgroup.value};${levelName}`;
+	};
 };
 let initializedEditorUI = false;
 const initEditorUI = () => {
@@ -5953,7 +5956,7 @@ const loadFromHash = async () => {
 					showMessageBox(`Level "${levelName}" not found.`);
 				} else {
 					try {
-						const loaded = await loadLevelFromLevelSelect({ fromHash: true });
+						const loaded = await loadLevelByName({ game, levelName, fromHash: true });
 						if (!loaded) {
 							// The URL was changed. The load should be silently aborted.
 
@@ -6025,10 +6028,13 @@ window.addEventListener("hashchange", loadFromHash);
 
 const loadEachLevel = async (asyncFn, originalOnly) => {
 	for (const option of levelSelect.options) {
-		if (option.value !== "Custom World" && (!originalOnly || option.parentNode.label.match(/^Junkbot( Undercover)?$/))) {
+		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
+		if (option.value !== "Custom World" && (!originalOnly || optgroup.label.match(/^Junkbot( Undercover)?$/))) {
 			levelSelect.value = option.value;
+			const game = optgroup ? optgroup.value : "Custom";
+
 			// eslint-disable-next-line no-await-in-loop
-			await loadLevelFromLevelSelect();
+			await loadLevelByName({ game, levelName: option.value });
 			// eslint-disable-next-line no-await-in-loop
 			await asyncFn();
 		}
