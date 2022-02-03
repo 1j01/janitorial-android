@@ -5189,19 +5189,31 @@ const initUI = () => {
 		openFromFile(event.dataTransfer.files[0]);
 	});
 };
+const getLevelLists = (resources) => [
+	{
+		game: "Junkbot",
+		levelNames: resources.levelNames,
+	},
+	{
+		game: "Junkbot Undercover",
+		levelNames: resources.levelNamesUndercover,
+	},
+	{
+		game: "Test Cases",
+		levelNames: tests.map((test) => test.name),
+	},
+];
 const initLevelSelect = () => {
-	// The level select is part of the editor UI, but it's also used for navigating to the next level, currently,
-	// via loadLevelFromLevelSelect().
 	const option = document.createElement("option");
 	option.textContent = "Custom World";
 	option.defaultSelected = true;
 	levelSelect.append(option);
-	for (const game of ["Junkbot", "Junkbot Undercover", "Test Cases"]) {
+	for (const { game, levelNames } of getLevelLists(resources)) {
 		const optgroup = document.createElement("optgroup");
 		optgroup.label = game;
 		optgroup.value = game;
 		levelSelect.append(optgroup);
-		for (const levelName of game === "Test Cases" ? tests.map((test) => test.name) : resources[game === "Junkbot Undercover" ? "levelNamesUndercover" : "levelNames"]) {
+		for (const levelName of levelNames) {
 			const option = document.createElement("option");
 			option.textContent = levelName;
 			optgroup.append(option);
@@ -5631,15 +5643,50 @@ const showLevelLoseUI = () => {
 	});
 };
 
+const showGameWinUI = (game) => {
+	const win = document.createElement("div");
+	win.innerHTML = `
+		<h1>You Win!</h1>
+		<h2>You have completed all levels!</h2>
+	`;
+	const buttons = [
+		{
+			label: "Select Level",
+			action: showLevelSelect,
+		},
+	];
+	if (game === "Junkbot") {
+		buttons.push({
+			label: "Play Junkbot Undercover",
+			action: () => {
+				location.hash = "level=Junkbot%20Undercover;Descent";
+				// paused = false;
+			},
+		});
+	}
+	showMessageBox([win], { buttons });
+};
+
 const canGoToNextLevel = () => location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/);
-const goToNextLevel = async () => {
+const goToNextLevel = () => {
 	if (canGoToNextLevel()) {
-		if (levelSelect.selectedIndex === 0) {
-			levelSelect.selectedIndex += 1;
+		const normalize = (levelName) => levelName.replace(/[:?]/g, "").toLowerCase();
+		for (const { game, levelNames } of getLevelLists(resources)) {
+			const index = levelNames.map(normalize).indexOf(normalize(currentLevel.title));
+			if (index !== -1) {
+				const nextLevelName = levelNames[index + 1];
+				if (nextLevelName) {
+					location.hash = `level=${game};${nextLevelName}`;
+					// paused = false;
+				} else {
+					showGameWinUI(game);
+				}
+				return;
+			}
 		}
-		levelSelect.selectedIndex += 1;
-		await loadLevelFromLevelSelect();
-		paused = false;
+		showMessageBox("Don't know how to go to next level from here.");
+	} else {
+		showMessageBox("Can't go to next level.");
 	}
 };
 
