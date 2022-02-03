@@ -4479,7 +4479,7 @@ const detectProblems = () => {
 			problems.push({ message: `width doesn't match widthInStuds * 15 for entity ${JSON.stringify(entity, null, "\t")}\n` });
 			continue;
 		}
-		// eslint-disable-next-line indent
+
 		/* eslint-enable no-continue */
 		for (const topY of Object.keys(entitiesByTopY).map(Number)) {
 			if (
@@ -5686,7 +5686,7 @@ const runTests = async () => {
 			return won || lost || paused;
 		};
 		for (let timeStep = 0; timeStep < test.timeSteps; timeStep++) {
-			// eslint-disable-next-line no-await-in-loop, no-loop-func
+			// eslint-disable-next-line no-loop-func
 			await new Promise((resolve) => {
 				requestAnimationFrame(resolve); // accounts for one time step, with `++` above and `- 1` below (assuming animation loop is running)
 				for (let i = 0; i < testSpeedInput.valueAsNumber - 1; i++) {
@@ -5700,7 +5700,7 @@ const runTests = async () => {
 			checkTestEnd();
 			if (paused) {
 				if (editing) {
-					// eslint-disable-next-line require-atomic-updates
+
 					stopTests();
 					if (muted !== wasMuted) {
 						toggleMute({ savePreference: false });
@@ -5892,7 +5892,7 @@ window.addEventListener("hashchange", loadFromHash);
 // ---------------------------'/                  \__/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾'-----------------./
 // #region Meta
 
-// eslint-disable-next-line no-unused-vars
+
 const loadEachLevel = async (asyncFn, originalOnly) => {
 	for (const option of levelSelect.options) {
 		if (option.value !== "Custom World" && (!originalOnly || option.parentNode.label.match(/^Junkbot( Undercover)?$/))) {
