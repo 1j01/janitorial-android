@@ -255,7 +255,16 @@ const toggleFullscreen = () => {
 
 let messageBox;
 let messageBoxContainer;
-const showMessageBox = (message) => {
+const showMessageBox = (message, {
+	buttons = [
+		{
+			label: "OK",
+			isDefault: true,
+			action: () => { /* the message box will close */ },
+		}
+	]
+} = {}) => {
+	// @TODO: support Esc, Enter, etc.
 	if (messageBox) {
 		messageBoxContainer.remove();
 	}
@@ -268,21 +277,52 @@ const showMessageBox = (message) => {
 	if (typeof message === "string") {
 		messageContentEl.textContent = message;
 	} else {
-		messageContentEl.append(message);
+		messageContentEl.append(...message);
 	}
 	messageBox.append(messageContentEl);
-	const closeButton = document.createElement("button");
-	closeButton.className = "generic-button";
-	closeButton.onclick = () => {
-		messageBoxContainer.remove();
-	};
-	closeButton.textContent = "Close";
-	closeButton.style.marginTop = "20px";
 	messageBox.append(document.createElement("br"));
-	messageBox.append(closeButton);
+	const closeMessageBox = () => {
+		messageBoxContainer.remove();
+		messageBox = null;
+	};
+	for (const { label, isDefault, action } of buttons) {
+		const button = document.createElement("button");
+		button.className = "generic-button";
+		button.onclick = () => {
+			action?.();
+			closeMessageBox();
+		};
+		if (isDefault) {
+			button.focus();
+		}
+		button.textContent = label;
+		button.style.margin = "10px";
+		button.style.marginTop = "20px";
+		messageBox.append(button);
+	}
 	messageBoxContainer.append(messageBox);
 	document.body.append(messageBoxContainer);
-	closeButton.focus();
+};
+const showPrompt = (message, defaultText = "") => {
+	const p = document.createElement("p");
+	p.textContent = message;
+	const input = document.createElement("input");
+	input.type = "text";
+	input.value = defaultText;
+	input.style.marginTop = "10px";
+	input.style.marginBottom = "10px";
+	setTimeout(() => {
+		input.focus();
+		input.select();
+	}, 0);
+	return new Promise((resolve) => {
+		showMessageBox([p, input], {
+			buttons: [
+				{ label: "Cancel", action: () => resolve(undefined) },
+				{ label: "OK", action: () => resolve(input.value) },
+			]
+		});
+	});
 };
 
 const parseLocationHash = (hash = location.hash) => {
@@ -3255,26 +3295,26 @@ canvas.addEventListener("pointerdown", (event) => {
 		}
 	}
 });
-canvas.addEventListener("contextmenu", (event) => {
+canvas.addEventListener("contextmenu", async (event) => {
 	event.preventDefault();
 	const hoveredBrick = brickAt(mouse, { includeFixed: true });
 	if (hoveredBrick && "switchID" in hoveredBrick) {
-		undoable(() => {
-			// @TODO: better UI
-			const newID = prompt("Edit switch group ID for this brick", hoveredBrick.switchID);
-			if (newID) {
+		// @TODO: better UI
+		const newID = await showPrompt("Edit switch group ID for this brick", hoveredBrick.switchID);
+		if (newID) {
+			undoable(() => {
 				hoveredBrick.switchID = newID;
-			}
-		});
+			});
+		}
 	}
 	if (hoveredBrick && "teleportID" in hoveredBrick) {
-		undoable(() => {
-			// @TODO: better UI
-			const newID = prompt("Edit teleport group ID for this brick", hoveredBrick.teleportID);
-			if (newID) {
+		// @TODO: better UI
+		const newID = await showPrompt("Edit teleport group ID for this brick", hoveredBrick.teleportID);
+		if (newID) {
+			undoable(() => {
 				hoveredBrick.teleportID = newID;
-			}
-		});
+			});
+		}
 	}
 });
 
