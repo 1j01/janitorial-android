@@ -133,6 +133,8 @@
 	"cSpell.enableFiletypes": [
 		"postcss"
 	],
+	"editor.formatOnSave": true,
+	"editor.insertSpaces": false,
 	"banner-comments-plus.customFonts": [
 		"junkbot-font.flf"
 	],
