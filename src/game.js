@@ -5874,9 +5874,10 @@ const loadFromHash = async () => {
 					showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
 				}
 			} else {
+				levelSelect.selectedIndex = 0;
 				levelSelect.value = levelName;
-				if (levelSelect.selectedIndex === -1) {
-					showMessageBox(`Unknown level "${levelName}"`);
+				if (levelSelect.selectedIndex <= 0) { // 0 = "Custom World"
+					showMessageBox(`Level "${levelName}" not found.`);
 				} else {
 					try {
 						const loaded = await loadLevelFromLevelSelect({ fromHash: true });
