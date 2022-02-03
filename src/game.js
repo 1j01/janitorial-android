@@ -5644,7 +5644,9 @@ const goToNextLevel = async () => {
 };
 
 const showLevelWinUI = () => {
-	showMessageBox("Level Complete!", {
+	const h1 = document.createElement("h1");
+	h1.textContent = "Level Complete!";
+	showMessageBox([h1], {
 		buttons: [
 			{
 				label: "Select Level",
