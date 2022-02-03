@@ -49,6 +49,43 @@
 //                ║                                              ║
 //                ╚══════════════════════════════════════════════╝
 
+// ---------------------
+// How to view this file
+// ---------------------
+// The file is split into sections, with headings in a large font designed to be viewed with a minimap in an editor like Sublime Text or VS Code.
+// You should disable word wrapping in your editor (and any extra line spacing) to view the ASCII art.
+//
+// VS Code
+// -------
+// If you use VS Code, you can fold the sections with the command Fold All Regions.
+//
+// Recommended Code themes:
+// * Codel
+//
+// Sublime Text
+// ------------
+// If you use Sublime Text, you can fold all functions and objects with Code Folding: Fold All.
+// If you want to fold the sections specifically, you can install SyntaxFold https://packagecontrol.io/packages/SyntaxFold
+// and configure region comments for JavaScript:
+// {
+// 	"config": [
+// 		{
+// 			"scope": "source.js",
+// 			"startMarker": "#region",
+// 			"endMarker": "#endregion"
+// 		},
+// 	]
+// }
+// and use the command SyntaxFold: Fold All.
+//
+// Recommended Sublime color schemes:
+// * Spring (light and bright with orange comments)
+// * cP-Code (medium-dark, sort of hazy / lower contrast theme)
+// * Blackboard (dark)
+// * Art School (light, with primary colors)
+// * Flatland Dark/Black (dark, or darker; lots of orange)
+
+
 // █████ █████ █████    █████ █     █████ █   █ █████ █   █ █████ █████      █     █ █
 // █     █       █      █     █     █     ██ ██ █     ██  █   █   █         █     █   █
 // █ ███ █████   █      █████ █     █████ █ █ █ █████ █ █ █   █   █████    █     █     █
