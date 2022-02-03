@@ -4963,18 +4963,12 @@ const checkLevelEnd = () => {
 						// eslint-disable-next-line no-console
 						console.log(error, "New solution was:", JSON.stringify(playthroughEvents));
 					}
-					setTimeout(async () => {
+					setTimeout(() => {
 						if (currentLevel !== levelAtWin) {
 							return; // especially for while running tests and clicking on a test to go to
 						}
-						if (location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/)) {
-							if (levelSelect.selectedIndex === 0) {
-								levelSelect.selectedIndex += 1;
-							}
-							levelSelect.selectedIndex += 1;
-							await loadLevelFromLevelSelect();
-							paused = false;
-						}
+						// eslint-disable-next-line no-use-before-define
+						showLevelWinUI();
 					}, 500);
 				}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000 - timeSinceCollectBin);
 			}
@@ -5581,6 +5575,14 @@ const initEditorUI = () => {
 	}
 };
 
+const showLevelSelect = () => {
+	// @TODO: level select screen
+	if (!editing) {
+		toggleEditing();
+	}
+	levelSelect.focus();
+};
+
 const showLevelLoseUI = () => {
 	const messages = [
 		"I knew that was going to happen.",
@@ -5597,13 +5599,7 @@ const showLevelLoseUI = () => {
 		buttons: [
 			{
 				label: "Select Level",
-				action: () => {
-					// @TODO: level select screen
-					if (!editing) {
-						toggleEditing();
-					}
-					levelSelect.focus();
-				},
+				action: showLevelSelect,
 			},
 			{
 				label: "Get Hint",
@@ -5632,6 +5628,34 @@ const showLevelLoseUI = () => {
 				isDefault: true,
 			},
 		]
+	});
+};
+
+const canGoToNextLevel = () => location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/);
+const goToNextLevel = async () => {
+	if (canGoToNextLevel()) {
+		if (levelSelect.selectedIndex === 0) {
+			levelSelect.selectedIndex += 1;
+		}
+		levelSelect.selectedIndex += 1;
+		await loadLevelFromLevelSelect();
+		paused = false;
+	}
+};
+
+const showLevelWinUI = () => {
+	showMessageBox("Level Complete!", {
+		buttons: [
+			{
+				label: "Select Level",
+				action: showLevelSelect,
+			},
+			{
+				label: canGoToNextLevel() ? "Next Level" : "Edit Level",
+				action: canGoToNextLevel() ? goToNextLevel : toggleEditing,
+				isDefault: true,
+			},
+		],
 	});
 };
 
