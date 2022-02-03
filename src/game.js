@@ -5007,11 +5007,54 @@ const stopIntro = () => {
 	rufflePlayer?.remove();
 	rufflePlayer = null;
 };
+const playIntro = () => {
+	playedIntro = true;
+	replayIntroButton.hidden = false;
+	rufflePlayer = ruffle.createPlayer();
+	rufflePlayer.classList.add("metal-border");
+	introContainer.appendChild(rufflePlayer);
+	rufflePlayer.load("flash/junkbot_intro.swf").then(() => {
+		// Note: It may not actually be loaded!
+		// @TODO: handle failing to load the SWF somehow? more monkey-patching?
+		// rufflePlayer.readyState is 0 regardless until later...
+
+		if (!window.monkeyPatchedRuffleLoaded) {
+			showMessageBox("If updating the Ruffle library, note that it was patched before!");
+		}
+		// The Junkbot intro Flash animations execute some lingo code via URIs,
+		// which Ruffle by default treats like any URI and does location.assign() here:
+		// https://github.com/ruffle-rs/ruffle/blob/72a811ae2c5aef43144b2a95f0dcf2e72465e005/web/src/navigator.rs#L162
+		// This causes a bewildering permission prompt to run xdg-open (at least for me on XFCE),
+		// We need to intercept it also to handle the timed events.
+		window.monkeyPatchedRuffleLocationAssign = (url) => {
+			if (url === "lingo:glob.download_manager.animDone()") {
+				stopIntro();
+			} else if (url === "lingo:glob.jbxtitle_a.show()") {
+				// this is a todo for Junkbot Undercover
+			} else if (url === "lingo:glob.jbxtitle_b.show()") {
+				// this is a todo for Junkbot Undercover
+			} else {
+				// eslint-disable-next-line no-console
+				console.warn("Prevented Ruffle's location.assign from loading", url);
+			}
+		};
+		rufflePlayer.play();
+		introContainer.hidden = false;
+		skipIntroButton.hidden = false;
+		resetScreenButton.hidden = true;
+	}, (error) => {
+		// Note: the promise doesn't reject if the Flash file is not found.
+		stopIntro();
+		// eslint-disable-next-line no-console
+		console.error("Failed to load Flash movie with Ruffle:", error);
+	});
+}
+
 const hideTitleScreen = () => {
 	titleScreen.hidden = true;
 	stopIntro();
 };
-const showTitleScreen = (showIntro = !playedIntro) => {
+const showTitleScreen = (showingIntro) => {
 
 	// don't show editor UI on the title screen!
 	if (editing) {
@@ -5022,48 +5065,8 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
 	titleScreen.classList.add("title-screen-level-loaded");
-	if (showIntro) {
-		playedIntro = true;
-		replayIntroButton.hidden = false;
-		rufflePlayer = ruffle.createPlayer();
-		rufflePlayer.classList.add("metal-border");
-		introContainer.appendChild(rufflePlayer);
-		rufflePlayer.load("flash/junkbot_intro.swf").then(() => {
-			// Note: It may not actually be loaded!
-			// @TODO: handle failing to load the SWF somehow? more monkey-patching?
-			// rufflePlayer.readyState is 0 regardless until later...
-
-			if (!window.monkeyPatchedRuffleLoaded) {
-				showMessageBox("If updating the Ruffle library, note that it was patched before!");
-			}
-			// The Junkbot intro Flash animations execute some lingo code via URIs,
-			// which Ruffle by default treats like any URI and does location.assign() here:
-			// https://github.com/ruffle-rs/ruffle/blob/72a811ae2c5aef43144b2a95f0dcf2e72465e005/web/src/navigator.rs#L162
-			// This causes a bewildering permission prompt to run xdg-open (at least for me on XFCE),
-			// We need to intercept it also to handle the timed events.
-			window.monkeyPatchedRuffleLocationAssign = (url) => {
-				if (url === "lingo:glob.download_manager.animDone()") {
-					stopIntro();
-				} else if (url === "lingo:glob.jbxtitle_a.show()") {
-					// this is a todo for Junkbot Undercover
-				} else if (url === "lingo:glob.jbxtitle_b.show()") {
-					// this is a todo for Junkbot Undercover
-				} else {
-					// eslint-disable-next-line no-console
-					console.warn("Prevented Ruffle's location.assign from loading", url);
-				}
-			};
-			rufflePlayer.play();
-			introContainer.hidden = false;
-			skipIntroButton.hidden = false;
-			resetScreenButton.hidden = true;
-		}, (error) => {
-			// Note: the promise doesn't reject if the Flash file is not found.
-			stopIntro();
-			// eslint-disable-next-line no-console
-			console.error("Failed to load Flash movie with Ruffle:", error);
-		});
-	} else {
+	// should this look at the DOM to see if the intro is (in)visible?
+	if (!showingIntro) {
 		resetScreenButton.hidden = false;
 	}
 };
@@ -5087,10 +5090,10 @@ const initUI = () => {
 			// eslint-disable-next-line no-console
 			console.error(error);
 		}
-		showTitleScreen(true);
+		playIntro();
 	});
 	resetScreenButton.addEventListener("click", () => {
-		showTitleScreen(false);
+		showTitleScreen();
 	});
 	// Event delegation doesn't work because pointer-events is set to none.
 	// titleScreen.addEventListener("pointerdown", (event) => {
@@ -5137,7 +5140,7 @@ const initUI = () => {
 		rewindingWithButton = false;
 	});
 	// showTitleScreenButton.addEventListener("click", () => {
-	// 	showTitleScreen(false);
+	// 	showTitleScreen();
 	// });
 
 	// Part of editor UX but not editor GUI.
@@ -5802,9 +5805,16 @@ const loadFromHash = async () => {
 		// Hide title screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
 		hideTitleScreen();
 	} else {
+		const showIntro = !playedIntro;
+		if (showIntro) {
+			playIntro();
+			// give intro time to load
+			await new Promise((resolve) => { setTimeout(resolve, 10000); });
+		}
+
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
 		resources = await hotResourcesLoadedPromise;
-		showTitleScreen();
+		showTitleScreen(showIntro);
 
 		// We loaded from the hash!
 		// There's more to load, but we don't want to block showing the title screen level.
