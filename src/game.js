@@ -2252,7 +2252,6 @@ let disableLoadFromHash = false;
 const loadLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
 	// If fromHash is true, prevent race conditions by aborting if the hash doesn't match.
 
-	levelSelect.value = levelName; // names must be unique across games
 	let fileName = `${levelName.replace(/[:?]/g, "")}.txt`;
 	let folder = {
 		"Junkbot Undercover": "levels/Undercover Exclusive",
@@ -2277,6 +2276,16 @@ const loadLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
 	} catch (error) {
 		showMessageBox(`Failed to load level:\n\n${error}`);
 	}
+
+	// For editor
+	levelSelect.selectedIndex = 0;
+	levelSelect.value = levelName;
+	if (levelSelect.selectedIndex <= 0) { // 0 = "Custom World"
+		showMessageBox(`Level "${levelName}" not found in dropdown.`);
+	} else {
+		levelSelect.value = levelName; // names should be unique across games
+	}
+
 	// Change URL hash (if needed) and wait for hashchange event
 	if (!hashMatches()) {
 		await new Promise((resolve, reject) => {
@@ -5950,28 +5959,22 @@ const loadFromHash = async () => {
 					showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
 				}
 			} else {
-				levelSelect.selectedIndex = 0;
-				levelSelect.value = levelName;
-				if (levelSelect.selectedIndex <= 0) { // 0 = "Custom World"
-					showMessageBox(`Level "${levelName}" not found.`);
-				} else {
-					try {
-						const loaded = await loadLevelByName({ game, levelName, fromHash: true });
-						if (!loaded) {
-							// The URL was changed. The load should be silently aborted.
+				try {
+					const loaded = await loadLevelByName({ game, levelName, fromHash: true });
+					if (!loaded) {
+						// The URL was changed. The load should be silently aborted.
 
-							// This fixes a race condition where it could hide the title screen UI,
-							// and leave you with just the title screen level, navigating back to the title screen.
+						// This fixes a race condition where it could hide the title screen UI,
+						// and leave you with just the title screen level, navigating back to the title screen.
 
-							// To test: Open the title screen, click Start, go back (Alt+Left),
-							// then hold Alt and press Right and then Left quickly together,
-							// almost as if they're one key, but in that order specifically.
-							// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
-							return;
-						}
-					} catch (error) {
-						showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
+						// To test: Open the title screen, click Start, go back (Alt+Left),
+						// then hold Alt and press Right and then Left quickly together,
+						// almost as if they're one key, but in that order specifically.
+						// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
+						return;
 					}
+				} catch (error) {
+					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
 				}
 			}
 		}
