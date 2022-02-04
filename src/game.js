@@ -80,7 +80,7 @@ const infoBox = document.getElementById("info");
 const controlsTableRows = document.querySelectorAll("#info table tr");
 // Editor UI
 const editorUI = document.getElementById("editor-ui");
-const levelSelect = document.getElementById("level-select");
+const levelDropdown = document.getElementById("level-dropdown");
 const entitiesPalette = document.getElementById("entities-palette");
 const entitiesScrollContainer = document.getElementById("entities-scroll-container");
 const levelBoundsCheckbox = document.getElementById("level-bounds-checkbox");
@@ -2279,12 +2279,12 @@ const loadLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
 
 	// For editor
 	if (initializedEditorUI) {
-		levelSelect.selectedIndex = 0;
-		levelSelect.value = levelName;
-		if (levelSelect.selectedIndex <= 0) { // 0 = "Custom World", -1 = no items
+		levelDropdown.selectedIndex = 0;
+		levelDropdown.value = levelName;
+		if (levelDropdown.selectedIndex <= 0) { // 0 = "Custom World", -1 = no items
 			showMessageBox(`Level "${levelName}" not found in dropdown.`);
 		} else {
-			levelSelect.value = levelName; // names should be unique across games
+			levelDropdown.value = levelName; // names should be unique across games
 		}
 	}
 
@@ -5209,26 +5209,26 @@ const getLevelLists = (resources) => [
 		levelNames: tests.map((test) => test.name),
 	},
 ];
-const initLevelSelect = () => {
+const initLevelDropdown = () => {
 	const option = document.createElement("option");
 	option.textContent = "Custom World";
 	option.defaultSelected = true;
-	levelSelect.append(option);
+	levelDropdown.append(option);
 	for (const { game, levelNames } of getLevelLists(resources)) {
 		const optgroup = document.createElement("optgroup");
 		optgroup.label = game;
 		optgroup.value = game;
-		levelSelect.append(optgroup);
+		levelDropdown.append(optgroup);
 		for (const levelName of levelNames) {
 			const option = document.createElement("option");
 			option.textContent = levelName;
 			optgroup.append(option);
 		}
 	}
-	levelSelect.onchange = () => {
-		const option = levelSelect.options[levelSelect.selectedIndex];
+	levelDropdown.onchange = () => {
+		const option = levelDropdown.options[levelDropdown.selectedIndex];
 		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
-		const levelName = levelSelect.value;
+		const levelName = levelDropdown.value;
 		if (levelName === "Custom World") {
 			return; // this is a placeholder option
 		}
@@ -5244,7 +5244,7 @@ const initEditorUI = () => {
 
 	editorUI.hidden = !editing;
 
-	initLevelSelect();
+	initLevelDropdown();
 
 	let hilitButton;
 	const makeInsertEntityButton = (protoEntity) => {
@@ -5608,7 +5608,7 @@ const showLevelSelect = () => {
 	if (!editing) {
 		toggleEditing();
 	}
-	levelSelect.focus();
+	levelDropdown.focus();
 };
 
 const showLevelLoseUI = () => {
@@ -6034,10 +6034,10 @@ window.addEventListener("hashchange", loadFromHash);
 
 
 const loadEachLevel = async (asyncFn, originalOnly) => {
-	for (const option of levelSelect.options) {
+	for (const option of levelDropdown.options) {
 		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
 		if (option.value !== "Custom World" && (!originalOnly || optgroup.label.match(/^Junkbot( Undercover)?$/))) {
-			levelSelect.value = option.value;
+			levelDropdown.value = option.value;
 			const game = optgroup ? optgroup.value : "Custom";
 
 			// eslint-disable-next-line no-await-in-loop
