@@ -5124,6 +5124,18 @@ const showLevelSelectScreen = () => {
 	paused = true;
 
 	levelSelectScreen.hidden = false;
+
+	for (const { game, levelNames } of getLevelLists(resources)) {
+		for (const levelName of levelNames) {
+			const li = document.createElement("li");
+			li.className = "level-list-item";
+			const a = document.createElement("a");
+			a.textContent = levelName;
+			a.href = `#level=${game};${levelName}`;
+			li.appendChild(a);
+			levelList.appendChild(li);
+		}
+	}
 };
 const hideLevelSelectScreen = () => {
 	levelSelectScreen.hidden = true;
@@ -5225,19 +5237,6 @@ const getLevelLists = (resources) => [
 		levelNames: tests.map((test) => test.name),
 	},
 ];
-const initLevelSelectScreen = () => {
-	for (const { game, levelNames } of getLevelLists(resources)) {
-		for (const levelName of levelNames) {
-			const li = document.createElement("li");
-			li.className = "level-list-item";
-			const a = document.createElement("a");
-			a.textContent = levelName;
-			a.href = `#level=${game};${levelName}`;
-			li.appendChild(a);
-			levelList.appendChild(li);
-		}
-	}
-};
 const initLevelDropdown = () => {
 	const option = document.createElement("option");
 	option.textContent = "Custom World";
@@ -5972,7 +5971,6 @@ const loadFromHash = async () => {
 		resources = await allResourcesLoadedPromise;
 
 		if (toShowLevelSelectScreen) {
-			initLevelSelectScreen(); // now that level listing is loaded; (could do this only once but it's no big deal perf-wise)
 			hideTitleScreen();
 			showLevelSelectScreen();
 			return; // don't want to hide the level select screen below
@@ -6035,8 +6033,6 @@ const loadFromHash = async () => {
 				return resources; // needs to return all resources so that it doesn't unload them when starting the game
 			});
 			resources = await allResourcesLoadedPromise;
-
-			initLevelSelectScreen(); // now that level listing is loaded
 
 			// Wait for "READY TO PLAY" text image to load before showing it to prevent flash of missing text.
 			// I'm also delaying enabling the start game button because it feels weird to do those at different times.
