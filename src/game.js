@@ -68,6 +68,9 @@ const showCreditsButton = document.getElementById("show-credits");
 const loadStatusLoaded = document.getElementById("load-status-loaded");
 const loadStatusLoading = document.getElementById("load-status-loading");
 const loadProgress = document.getElementById("load-progress");
+// Level Select screen elements
+const levelSelectScreen = document.getElementById("level-select-screen");
+const levelList = document.getElementById("level-list");
 // Main game controls bar
 const toggleInfoButton = document.getElementById("toggle-info");
 const toggleFullscreenButton = document.getElementById("toggle-fullscreen");
@@ -5113,6 +5116,17 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 	}
 };
 
+const showLevelSelectScreen = () => {
+	// don't show editor UI on the level select screen!
+	if (editing) {
+		toggleEditing();
+	}
+	paused = true;
+
+	levelSelectScreen.hidden = false;
+};
+
+
 const initUI = () => {
 	// Title screen
 	startGameButton.addEventListener("click", () => {
@@ -5209,6 +5223,19 @@ const getLevelLists = (resources) => [
 		levelNames: tests.map((test) => test.name),
 	},
 ];
+const initLevelSelectScreen = () => {
+	for (const { game, levelNames } of getLevelLists(resources)) {
+		for (const levelName of levelNames) {
+			const li = document.createElement("li");
+			li.className = "level-list-item";
+			const a = document.createElement("a");
+			a.textContent = levelName;
+			a.href = `#level=${game};${levelName}`;
+			li.appendChild(a);
+			levelList.appendChild(li);
+		}
+	}
+};
 const initLevelDropdown = () => {
 	const option = document.createElement("option");
 	option.textContent = "Custom World";
@@ -5603,14 +5630,6 @@ const initEditorUI = () => {
 	}
 };
 
-const showLevelSelect = () => {
-	// @TODO: level select screen
-	if (!editing) {
-		toggleEditing();
-	}
-	levelDropdown.focus();
-};
-
 const showLevelLoseUI = () => {
 	const messages = [
 		"I knew that was going to happen.",
@@ -5627,7 +5646,7 @@ const showLevelLoseUI = () => {
 		buttons: [
 			{
 				label: "Select Level",
-				action: showLevelSelect,
+				action: showLevelSelectScreen,
 			},
 			{
 				label: "Get Hint",
@@ -5668,7 +5687,7 @@ const showGameWinUI = (game) => {
 	const buttons = [
 		{
 			label: "Select Level",
-			action: showLevelSelect,
+			action: showLevelSelectScreen,
 		},
 	];
 	if (game === "Junkbot") {
@@ -5713,7 +5732,7 @@ const showLevelWinUI = () => {
 		buttons: [
 			{
 				label: "Select Level",
-				action: showLevelSelect,
+				action: showLevelSelectScreen,
 			},
 			{
 				label: canGoToNextLevel() ? "Next Level" : "Edit Level",
@@ -5940,7 +5959,7 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
 		resources = await allResourcesLoadedPromise;
 
-		// initLevelSelectScreen(); // now that level listing is loaded
+		initLevelSelectScreen(); // now that level listing is loaded
 
 		if (showTestRunner) {
 			runTests();
@@ -5998,7 +6017,7 @@ const loadFromHash = async () => {
 			});
 			resources = await allResourcesLoadedPromise;
 
-			// initLevelSelectScreen(); // now that level listing is loaded
+			initLevelSelectScreen(); // now that level listing is loaded
 
 			// Wait for "READY TO PLAY" text image to load before showing it to prevent flash of missing text.
 			// I'm also delaying enabling the start game button because it feels weird to do those at different times.

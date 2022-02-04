@@ -19,6 +19,8 @@
 			user-select: none;
 		}
 
+		/* MAIN GAME CONTROLS */
+
 		#main-controls {
 			position: fixed;
 			top: 0;
@@ -56,6 +58,8 @@
 			align-items: center;
 			justify-content: center;
 		}
+
+		/* INFO PANEL */
 
 		#info {
 			position: fixed;
@@ -99,6 +103,8 @@
 			text-align: left;
 			margin-left: 10px;
 		}
+
+		/* DIALOGS */
 
 		.dialog-container {
 			position: fixed;
@@ -162,6 +168,8 @@
 			align-items: center;
 		}
 
+		/* TEST RUNNER UI */
+
 		#tests-ui:not([hidden]) {
 			position: fixed;
 			right: 0px;
@@ -177,6 +185,8 @@
 			overflow: auto;
 			flex: 1;
 		}
+
+		/* EDITOR UI */
 
 		#editor-ui:not([hidden]) {
 			position: fixed;
@@ -229,6 +239,8 @@
 			width: 50px;
 			align-self: center;
 		}
+
+		/* TITLE SCREEN */
 
 		#title-screen {
 			background-image: url("images/menus/neo_title.png");
@@ -408,6 +420,32 @@
 			box-shadow: #000 -1px 0 0 12px;
 		}
 
+		/* LEVEL SELECT SCREEN */
+
+		#level-select-screen {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 3;
+			background-color: #000;
+			color: #fff;
+		}
+
+		#level-list {
+			display: flex;
+			flex-direction: column;
+		}
+
+		#level-list li {
+			display: flex;
+			flex-direction: row;
+		}
+
+
+		/* NETWORK */
+
 		#preload {
 			display: none;
 		}
@@ -451,6 +489,9 @@
 		<div class="title-screen-arrow" style="left: 85px;"></div>
 		<div class="title-screen-arrow pointing-left" style="left: 260px;"></div>
 		<div class="title-screen-arrow pointing-left" style="left: 407px;"></div>
+	</div>
+	<div id="level-select-screen" hidden>
+		<ul id="level-list"></ul>
 	</div>
 	<div id="main-controls">
 		<!-- aria-keyshortcuts="Shift" is invalid, but what are you gonna do? -->
