@@ -429,20 +429,32 @@
 			width: 100%;
 			height: 100%;
 			z-index: 3;
-			background-color: #000;
-			color: #fff;
+			background-color: #7c857c;
+			color: #000;
+			overflow: auto;
 		}
 
 		#level-list {
-			display: flex;
-			flex-direction: column;
+			background-color: #808080;
+			color: #000;
 		}
 
-		#level-list li {
-			display: flex;
-			flex-direction: row;
+		.level-list-item {
+			font-weight: bold;
+			height: 20px;
 		}
 
+		.level-list-item a {
+			color: inherit;
+			text-decoration: none;
+			display: block;
+		}
+
+		.level-list-item a:hover {
+			background-color: #BFC0BF;
+			color: #000;
+			background-image: url("images/menus/level.selected.png");
+		}
 
 		/* NETWORK */
 
@@ -491,7 +503,7 @@
 		<div class="title-screen-arrow pointing-left" style="left: 407px;"></div>
 	</div>
 	<div id="level-select-screen" hidden>
-		<ul id="level-list"></ul>
+		<ol id="level-list"></ol>
 	</div>
 	<div id="main-controls">
 		<!-- aria-keyshortcuts="Shift" is invalid, but what are you gonna do? -->
