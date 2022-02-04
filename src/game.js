@@ -2278,12 +2278,14 @@ const loadLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
 	}
 
 	// For editor
-	levelSelect.selectedIndex = 0;
-	levelSelect.value = levelName;
-	if (levelSelect.selectedIndex <= 0) { // 0 = "Custom World"
-		showMessageBox(`Level "${levelName}" not found in dropdown.`);
-	} else {
-		levelSelect.value = levelName; // names should be unique across games
+	if (initializedEditorUI) {
+		levelSelect.selectedIndex = 0;
+		levelSelect.value = levelName;
+		if (levelSelect.selectedIndex <= 0) { // 0 = "Custom World", -1 = no items
+			showMessageBox(`Level "${levelName}" not found in dropdown.`);
+		} else {
+			levelSelect.value = levelName; // names should be unique across games
+		}
 	}
 
 	// Change URL hash (if needed) and wait for hashchange event
@@ -5242,6 +5244,8 @@ const initEditorUI = () => {
 
 	editorUI.hidden = !editing;
 
+	initLevelSelect();
+
 	let hilitButton;
 	const makeInsertEntityButton = (protoEntity) => {
 		const getEntityCopy = () => JSON.parse(JSON.stringify(protoEntity));
@@ -5936,7 +5940,7 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
 		resources = await allResourcesLoadedPromise;
 
-		initLevelSelect(); // now that level listing is loaded
+		// initLevelSelectScreen(); // now that level listing is loaded
 
 		if (showTestRunner) {
 			runTests();
@@ -5994,7 +5998,7 @@ const loadFromHash = async () => {
 			});
 			resources = await allResourcesLoadedPromise;
 
-			initLevelSelect(); // now that level listing is loaded
+			// initLevelSelectScreen(); // now that level listing is loaded
 
 			// Wait for "READY TO PLAY" text image to load before showing it to prevent flash of missing text.
 			// I'm also delaying enabling the start game button because it feels weird to do those at different times.
