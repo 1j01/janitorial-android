@@ -441,7 +441,8 @@
 
 		.level-list-item {
 			font-weight: bold;
-			height: 20px;
+			min-height: 20px;
+			line-height: 20px;
 		}
 
 		.level-list-item a {
@@ -454,6 +455,20 @@
 			background-color: #BFC0BF;
 			color: #000;
 			background-image: url("images/menus/level.selected.png");
+		}
+
+		.level-list-item-completed-img,
+		.level-list-item-par-img {
+			vertical-align: bottom;
+			margin-right: 5px;
+			margin-left: 2px;
+			/* measured 5px to bottom border */
+			margin-bottom: 5px;
+		}
+
+		.level-list-item-score {
+			float: right;
+			margin-right: 5px;
 		}
 
 		/* NETWORK */

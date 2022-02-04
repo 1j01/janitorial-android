@@ -2252,9 +2252,7 @@ const initLevel = (level) => {
 	redos.length = 0;
 };
 let disableLoadFromHash = false;
-const loadLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
-	// If fromHash is true, prevent race conditions by aborting if the hash doesn't match.
-
+const loadLevelByName = ({ levelName, game }) => {
 	let fileName = `${levelName.replace(/[:?]/g, "")}.txt`;
 	let folder = {
 		"Junkbot Undercover": "levels/Undercover Exclusive",
@@ -2265,11 +2263,16 @@ const loadLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
 		folder = "levels/custom";
 		fileName = "New Employee Training (1j01).txt";
 	}
+	return loadLevelFromTextFile(`${folder}/${fileName}`, { game });
+};
+const openLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
+	// If fromHash is true, prevent race conditions by aborting if the hash doesn't match.
+
 	// console.log("loading:", option.value, { option, optgroup, game });
 	const hashMatches = () => decodeURIComponent(parseLocationHash().level || "") === `${game};${levelName}`;
 
 	try {
-		const level = await loadLevelFromTextFile(`${folder}/${fileName}`, { game });
+		const level = await loadLevelByName({ levelName, game });
 		if (fromHash && !hashMatches()) {
 			// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
 			return false;
@@ -5130,8 +5133,40 @@ const showLevelSelectScreen = () => {
 			const li = document.createElement("li");
 			li.className = "level-list-item";
 			const a = document.createElement("a");
-			a.textContent = levelName;
 			a.href = `#level=${game};${levelName}`;
+			let completedInMoves;
+			try {
+				completedInMoves = localStorage[`fewest moves for ${levelName.toLowerCase()}`];
+			} catch (error) {
+				// no score tracking :/
+				// @TODO: unlock all levels if there's an error? um, once there's any locking.
+			}
+			const completed = typeof completedInMoves !== "undefined";
+
+			const completedImg = document.createElement("img");
+			completedImg.className = "level-list-item-completed-img";
+			completedImg.src = completed ? "images/menus/checkbox_on.png" : "images/menus/checkbox_off.png";
+			const parImg = document.createElement("img");
+			parImg.src = "images/menus/check_light.png";
+			parImg.style.opacity = 0;
+			parImg.className = "level-list-item-par-img";
+			const score = document.createElement("span");
+			score.className = "level-list-item-score";
+			score.textContent = completedInMoves;
+			a.append(completedImg, parImg, levelName, score);
+
+			if (completedInMoves) {
+				loadLevelByName({ game, levelName }).then((level) => {
+					const metPar = completedInMoves <= level.par;
+					if (metPar) {
+						parImg.style.opacity = 1;
+					}
+				}, (error) => {
+					// eslint-disable-next-line no-console
+					console.error("Failed to load level for score display:", error);
+				});
+			}
+
 			li.appendChild(a);
 			levelList.appendChild(li);
 		}
@@ -5998,7 +6033,7 @@ const loadFromHash = async () => {
 				}
 			} else {
 				try {
-					const loaded = await loadLevelByName({ game, levelName, fromHash: true });
+					const loaded = await openLevelByName({ game, levelName, fromHash: true });
 					if (!loaded) {
 						// The URL was changed. The load should be silently aborted.
 
@@ -6075,7 +6110,7 @@ const loadEachLevel = async (asyncFn, originalOnly) => {
 			const game = optgroup ? optgroup.value : "Custom";
 
 			// eslint-disable-next-line no-await-in-loop
-			await loadLevelByName({ game, levelName: option.value });
+			await openLevelByName({ game, levelName: option.value });
 			// eslint-disable-next-line no-await-in-loop
 			await asyncFn();
 		}
