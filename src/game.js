@@ -5125,7 +5125,9 @@ const showLevelSelectScreen = () => {
 
 	levelSelectScreen.hidden = false;
 };
-
+const hideLevelSelectScreen = () => {
+	levelSelectScreen.hidden = true;
+};
 
 const initUI = () => {
 	// Title screen
@@ -5646,7 +5648,9 @@ const showLevelLoseUI = () => {
 		buttons: [
 			{
 				label: "Select Level",
-				action: showLevelSelectScreen,
+				action: () => {
+					location.hash = "#level-select";
+				},
 			},
 			{
 				label: "Get Hint",
@@ -5687,7 +5691,9 @@ const showGameWinUI = (game) => {
 	const buttons = [
 		{
 			label: "Select Level",
-			action: showLevelSelectScreen,
+			action: () => {
+				location.hash = "#level-select";
+			},
 		},
 	];
 	if (game === "Junkbot") {
@@ -5732,7 +5738,9 @@ const showLevelWinUI = () => {
 		buttons: [
 			{
 				label: "Select Level",
-				action: showLevelSelectScreen,
+				action: () => {
+					location.hash = "#level-select";
+				},
 			},
 			{
 				label: canGoToNextLevel() ? "Next Level" : "Edit Level",
@@ -5937,7 +5945,7 @@ const runTests = async () => {
 // █   █ █   █ █   █   █    █  ██  █ █                 _____                ==o
 // █████ █   █ █   █   █    █  █ █ █ █ ███          ___ |[]|_n__n_I_c       |              ==o
 // █  █  █   █ █   █   █    █  █  ██ █   █         |___||__|###|____}       |  ,,mM########|##########################
-// █  ██ █████ █████   █   ███ █   █ █████ #########O-O--O-O+++--O-O-\########WW###########|##MM#####################
+// █  ██ █████ █████   █   ███ █   █ █████ #########O-O--O-O+++--O-O-\########WW###########|##MM######################
 //                                                                                             `'+W###################
 // #region Routing (load from URL hash)
 
@@ -5948,20 +5956,29 @@ const loadFromHash = async () => {
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
 
-	const showTestRunner = location.hash.match(/run-tests/);
-	if (!showTestRunner) {
+	const toShowTestRunner = Boolean(location.hash.match(/run-tests/));
+	if (!toShowTestRunner) {
 		stopTests();
 	}
 
-	if (hashOptions.level || showTestRunner) {
+	const toShowLevelSelectScreen = Boolean(location.hash.match(/level-select/));
+
+	if (hashOptions.level || toShowTestRunner || toShowLevelSelectScreen) {
+		// These are routes that require all resources to be loaded (i.e. anything but the title screen)
+
 		// Only load (and derive) resources once
 		allResourcesLoadedPromise ??= loadResources(allResourcePaths).then(deriveHotResources);
 		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
 		resources = await allResourcesLoadedPromise;
 
-		initLevelSelectScreen(); // now that level listing is loaded
-
-		if (showTestRunner) {
+		if (toShowLevelSelectScreen) {
+			initLevelSelectScreen(); // now that level listing is loaded; (could do this only once but it's no big deal perf-wise)
+			hideTitleScreen();
+			showLevelSelectScreen();
+			return; // don't want to hide the level select screen below
+		}
+		// These are routes that show a level; other screens are hidden below
+		if (toShowTestRunner) {
 			runTests();
 		} else {
 			if (editing) {
@@ -6001,12 +6018,14 @@ const loadFromHash = async () => {
 				}
 			}
 		}
-		// Hide title screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
+		// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
 		hideTitleScreen();
+		hideLevelSelectScreen();
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
 		resources = await hotResourcesLoadedPromise;
 		showTitleScreen();
+		hideLevelSelectScreen();
 
 		// We loaded from the hash!
 		// There's more to load, but we don't want to block showing the title screen level.
