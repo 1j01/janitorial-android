@@ -6055,6 +6055,7 @@ const loadFromHash = async () => {
 						// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
 						return;
 					}
+					paused = false;
 				} catch (error) {
 					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
 				}
