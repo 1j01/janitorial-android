@@ -4966,11 +4966,13 @@ const checkLevelEnd = () => {
 		winLoseState = winOrLose();
 		if (winLoseState === "lose" && !paused) {
 			paused = true;
-			setTimeout(() => {
-				playSound(Math.random() < 0.5 ? "ouch" : "uhoh");
-				// eslint-disable-next-line no-use-before-define
-				showLevelLoseUI();
-			}, 1000);
+			if (!testing) {
+				setTimeout(() => {
+					playSound(Math.random() < 0.5 ? "ouch" : "uhoh");
+					// eslint-disable-next-line no-use-before-define
+					showLevelLoseUI();
+				}, 1000);
+			}
 		}
 		if (winLoseState === "win" && !paused) {
 			paused = true;
