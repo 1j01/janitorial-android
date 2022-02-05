@@ -76,7 +76,7 @@
 			max-width: 800px;
 			max-height: calc(100% - 30px);
 			box-sizing: border-box;
-			background: #BFC0BF;
+			background-color: #a0a0a4;
 			color: black;
 			padding: 15px;
 			line-height: 1.5;
@@ -98,10 +98,13 @@
 			line-height: 10px;
 			color: #444d56;
 			vertical-align: middle;
-			background-color: #fafbfc;
-			border: 1px solid #d1d5da;
+			background-color: #dddddd;
+			border: 1px solid #fefbf0;
+			border-left-color: #dddddd;
+			border-bottom-color: #dddddd;
 			border-radius: 6px;
-			box-shadow: inset 0 -1px 0 #d1d5da;
+			box-shadow: 1px -1px 0 #fefbf0, 3px 2px 0 #808080;
+			margin-right: 2px;
 		}
 
 		td button {
@@ -198,8 +201,10 @@
 			left: 0px;
 			top: 0px;
 			bottom: 0px;
-			background-color: #224;
-			color: white;
+			/* background-color: #224; */
+			/* color: white; */
+			background-color: #a0a0a4;
+			color: black;
 			display: flex;
 			flex-direction: column;
 		}
@@ -597,10 +602,19 @@
 	<div id="info" class="metal-border">
 		<h1>Janitorial Android (HTML5 Junkbot remake)</h1>
 		<a href="https://github.com/1j01/janitorial-android">Source Code on GitHub</a>
-
 		<p>Drag bricks with the mouse. You don't control Junkbot directly. Junkbot moves on his own.</p>
-		<p>Use the arrow keys or <kbd>WASD</kbd> (or similar patterns of keys on layouts other than QWERTY) to pan the
-			view.</p>
+		<p>Use the arrow keys
+			<span style="display: inline-block;">
+				<kbd style="margin-left: calc(1.2em + 4px);margin-bottom:-7px">↑</kbd><br aria-hidden="true">
+				<kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd>
+			</span>
+			or
+			<span style="display: inline-block;">
+				<kbd style="margin-left: calc(1.2em + 4px);margin-bottom:-7px">W</kbd><br aria-hidden="true">
+				<kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+			</span>
+			(or similar patterns of keys on layouts other than QWERTY) to pan the view.
+		</p>
 		<table>
 			<tr>
 				<td><kbd>E</kbd></td>
@@ -632,15 +646,15 @@
 		<p>Hold <kbd>Ctrl</kbd> and click to drag an individual object.</p>
 		<table>
 			<tr>
-				<td><kbd>Ctrl+C</kbd></td>
+				<td><kbd>Ctrl</kbd>+<kbd>C</kbd></td>
 				<td>Copy selected to clipboard</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl+X</kbd></td>
+				<td><kbd>Ctrl</kbd>+<kbd>X</kbd></td>
 				<td>Cut selected to clipboard</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl+V</kbd></td>
+				<td><kbd>Ctrl</kbd>+<kbd>V</kbd></td>
 				<td>Paste from clipboard</td>
 			</tr>
 			<tr>
@@ -656,23 +670,23 @@
 				<td>Toggle selected switches/things</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl+Z</kbd></td>
+				<td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td>
 				<td>Undo</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl+Shift+Z</kbd> or <kbd>Ctrl+Y</kbd></td>
+				<td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd></td>
 				<td>Redo</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl+A</kbd></td>
+				<td><kbd>Ctrl</kbd>+<kbd>A</kbd></td>
 				<td>Select all</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl+S</kbd></td>
+				<td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
 				<td>Save world to a file</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl+O</kbd></td>
+				<td><kbd>Ctrl</kbd>+<kbd>O</kbd></td>
 				<td>Open a saved world file</td>
 			</tr>
 		</table>
@@ -739,7 +753,7 @@
 			🔎⚠
 		</button>
 	</div>
-	<div id="editor-ui" hidden>
+	<div id="editor-ui" hidden class="metal-border">
 		<!-- wrapper to make layout consistent regardless of scrollbar, without using overflow: auto -->
 		<div id="entities-scroll-container">
 			<div id="entities-palette"></div>
@@ -765,8 +779,8 @@
 					</label>
 				</div>
 			</div>
-			<button id="save-world">Save World</button>
-			<button id="open-world">Open World</button>
+			<button id="save-world" class="generic-button">Save World</button>
+			<button id="open-world" class="generic-button">Open World</button>
 			<br>
 			<label>
 				Choose Level:<br>

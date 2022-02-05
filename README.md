@@ -62,15 +62,15 @@ All mechanics from the original games are implemented:
 <p>Hold <kbd>Ctrl</kbd> and click to drag an individual object.</p>
 <table>
 	<tr>
-		<td><kbd>Ctrl+C</kbd></td>
+		<td><kbd>Ctrl</kbd>+<kbd>C</kbd></td>
 		<td>Copy selected to clipboard</td>
 	</tr>
 	<tr>
-		<td><kbd>Ctrl+X</kbd></td>
+		<td><kbd>Ctrl</kbd>+<kbd>X</kbd></td>
 		<td>Cut selected to clipboard</td>
 	</tr>
 	<tr>
-		<td><kbd>Ctrl+V</kbd></td>
+		<td><kbd>Ctrl</kbd>+<kbd>V</kbd></td>
 		<td>Paste from clipboard</td>
 	</tr>
 	<tr>
@@ -86,23 +86,23 @@ All mechanics from the original games are implemented:
 		<td>Toggle selected switches/things</td>
 	</tr>
 	<tr>
-		<td><kbd>Ctrl+Z</kbd></td>
+		<td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td>
 		<td>Undo</td>
 	</tr>
 	<tr>
-		<td><kbd>Ctrl+Shift+Z</kbd> or <kbd>Ctrl+Y</kbd></td>
+		<td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd></td>
 		<td>Redo</td>
 	</tr>
 	<tr>
-		<td><kbd>Ctrl+A</kbd></td>
+		<td><kbd>Ctrl</kbd>+<kbd>A</kbd></td>
 		<td>Select all</td>
 	</tr>
 	<tr>
-		<td><kbd>Ctrl+S</kbd></td>
+		<td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
 		<td>Save world to a file</td>
 	</tr>
 	<tr>
-		<td><kbd>Ctrl+O</kbd></td>
+		<td><kbd>Ctrl</kbd>+<kbd>O</kbd></td>
 		<td>Open a saved world file</td>
 	</tr>
 </table>

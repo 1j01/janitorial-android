@@ -5321,6 +5321,7 @@ const initUI = () => {
 				key = "NumpadSubtract";
 			}
 			const button = document.createElement("button");
+			button.className = "generic-button";
 			button.addEventListener("click", () => {
 				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
 			});
