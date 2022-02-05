@@ -5129,6 +5129,12 @@ const showLevelSelectScreen = () => {
 	levelSelectScreen.hidden = false;
 
 	for (const { game, levelNames } of getLevelLists(resources)) {
+		if (game === "Test Cases") {
+			// @TODO: show levels only for one game,
+			// and one building/basement area
+			// eslint-disable-next-line no-continue
+			continue;
+		}
 		for (const levelName of levelNames) {
 			const li = document.createElement("li");
 			li.className = "level-list-item";
