@@ -1609,7 +1609,8 @@ const loadSound = async (path) => {
 
 const loadLevelListing = async (path) => {
 	const text = await loadTextFile(path);
-	return text.trim().split(/\r?\n/g).map((line) => line.trim());
+	return text.trim().split(/\r?\n/g)
+		.map((line) => line.trim());
 };
 
 const loadResource = (path) => {
@@ -2385,10 +2386,23 @@ const toggleShowDebug = () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
+const updateMuteButton = () => {
+	toggleMuteButton.ariaPressed = muted;
+	const volume = mainGain.gain.value;
+	const img = toggleMuteButton.querySelector("img");
+	if (muted) {
+		img.src = "images/icons/muted.png";
+	} else if (volume < 0.3) {
+		img.src = "images/icons/volume-low.png";
+	} else if (volume > 0.6) {
+		img.src = "images/icons/volume-high.png";
+	} else {
+		img.src = "images/icons/volume-medium.png";
+	}
+};
 const toggleMute = ({ savePreference = true } = {}) => {
 	muted = !muted;
-	toggleMuteButton.ariaPressed = muted;
-	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
+	updateMuteButton();
 	try {
 		if (savePreference) {
 			localStorage[storageKeys.muteSoundEffects] = muted;
@@ -2406,6 +2420,7 @@ const setVolume = (volume) => {
 		toggleMute();
 	}
 	mainGain.gain.value = volume;
+	updateMuteButton();
 	try {
 		localStorage[storageKeys.volume] = volume;
 		// eslint-disable-next-line no-empty
@@ -2422,6 +2437,10 @@ const togglePause = () => {
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
+const updateEditingButton = () => {
+	toggleEditingButton.ariaPressed = editing;
+	toggleEditingButton.querySelector("img").src = editing ? "images/icons/play.png" : "images/icons/edit.png";
+};
 const toggleEditing = () => {
 	if (!editing && (titleScreen.style.display !== "none" && !titleScreen.hidden)) {
 		return;
@@ -2429,7 +2448,7 @@ const toggleEditing = () => {
 	editing = !editing;
 	editorUI.hidden = !editing;
 	editorControlsBar.hidden = !editing;
-	toggleEditingButton.ariaPressed = editing;
+	updateEditingButton();
 	if (editing) {
 		// eslint-disable-next-line no-use-before-define
 		initEditorUI();
@@ -5273,11 +5292,10 @@ const initUI = () => {
 	});
 
 	toggleMuteButton.addEventListener("click", () => toggleMute());
-	toggleMuteButton.ariaPressed = muted;
-	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
+	updateMuteButton();
 
 	toggleEditingButton.addEventListener("click", toggleEditing);
-	toggleEditingButton.ariaPressed = editing;
+	updateEditingButton();
 
 	volumeSlider.addEventListener("input", () => {
 		setVolume(volumeSlider.valueAsNumber);

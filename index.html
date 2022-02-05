@@ -548,13 +548,14 @@
 	<div id="main-controls">
 		<!-- aria-keyshortcuts="Shift" is invalid, but what are you gonna do? -->
 		<button id="rewind" aria-label="Rewind" aria-keyshortcuts="Shift" title="Rewind (hold Shift)">
-			<!-- @TODO: proper icon, or dynamic control for rewind/fast-forward -->
-			⏪
+			<!-- @TODO: maybe invent a dynamic control for rewind/fast-forward -->
+			<img src="images/icons/seek-backward.png" width="32" height="32" />
 		</button>
 		<button id="toggle-editing" aria-label="Edit level" aria-pressed="false" aria-keyshortcuts="E"
 			title="Edit level (E)">
-			<!-- @TODO: proper icon; emoji for now -->
-			✏️
+			<!-- ✏️ -->
+			<!-- NOTE: src dynamically changed with JS -->
+			<img src="images/icons/edit.png" alt="" width="29" height="14">
 		</button>
 		<!-- <button id="toggle-music" aria-label="Music" aria-pressed="false" aria-keyshortcuts="M">
 			<svg fill="currentColor" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -569,8 +570,8 @@
 		</button> -->
 		<button id="toggle-mute" aria-label="Mute" aria-pressed="false" aria-keyshortcuts="M"
 			title="Mute sound effects (M)">
-			<!-- @TODO: proper icon; note that emoji content is replaced when toggled -->
-			🔈
+			<!-- NOTE: src dynamically changed with JS -->
+			<img src="images/icons/volume-medium.png" alt="" width="32" height="32">
 		</button>
 		<input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Volume">
 		<button id="toggle-fullscreen" aria-label="Toggle Fullscreen" aria-pressed="false"
@@ -584,13 +585,11 @@
 		</button>
 		<button id="zoom-in" aria-label="Zoom In" aria-keyshortcuts="Plus"
 			title="Zoom In (Plus key, or mouse wheel, or pinch on a touch screen)">
-			<!-- @TODO: proper icon; emoji for now -->
-			🔍<span style="width:0;position:relative;left:-1em;top:-0.1em;">+</span>
+			<img src="images/icons/zoom-in.png" alt="" width="32" height="32">
 		</button>
 		<button id="zoom-out" aria-label="Zoom Out" aria-keyshortcuts="Minus"
 			title="Zoom Out (Minus, or mouse wheel, or pinch on a touch screen)">
-			<!-- @TODO: proper icon; emoji for now -->
-			🔍<span style="width:0;position:relative;left:-1em;top:-0.1em;">-</span>
+			<img src="images/icons/zoom-out.png" alt="" width="32" height="32">
 		</button>
 		<button id="toggle-info" aria-label="Toggle Info" aria-expanded="true" title="Toggle Info">
 			<!-- <svg fill="currentColor" width="1em" height="1em" viewBox="0 0 40 40">
