@@ -207,7 +207,7 @@ Tomas Clark
 Requirements:
 - [Git][]
 - [Node.js][]
-- Lack of Lego litigation (hope they're not assholes)
+- Lack of LEGO litigation
 
 Steps
 - [Clone the repo.][git clone]

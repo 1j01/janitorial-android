@@ -5712,7 +5712,8 @@ const initEditorUI = () => {
 		levelHintInput.value = level.hint ?? "";
 		levelParInput.value = level.par ?? "";
 		const showLevelTitle = level.title && (level.title !== "Title Screen" || editing);
-		document.title = showLevelTitle ? `${level.title} - Junkbot` : "Junkbot";
+		const projectTitle = "Janitorial Android (HTML5 Junkbot Remake)";
+		document.title = showLevelTitle ? `${level.title} - ${projectTitle}` : projectTitle;
 	};
 	updateEditorUIForLevelChange(currentLevel);
 
