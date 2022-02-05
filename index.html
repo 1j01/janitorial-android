@@ -19,9 +19,11 @@
 			user-select: none;
 		}
 
-		/* MAIN GAME CONTROLS */
+		/* CONTROL BARS */
 
-		#main-controls {
+		/* needs :not([hidden]) because `display` overrides `hidden` */
+		#main-controls:not([hidden]),
+		#editor-controls:not([hidden]) {
 			position: fixed;
 			top: 0;
 			left: 0;
@@ -57,6 +59,11 @@
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
+		}
+
+		/* needs :not([hidden]), for >= specificity */
+		#editor-controls:not([hidden]) {
+			top: 40px;
 		}
 
 		/* INFO PANEL */
@@ -668,6 +675,59 @@
 		<!-- <button id="start-tests">Start/Restart Tests</button> -->
 		<div id="tests-info"></div>
 		<ul id="tests"></ul>
+	</div>
+	<div id="editor-controls" hidden>
+		<button id="editor-undo" aria-keyshortcuts="Ctrl+Z" aria-label="Undo">
+			<!-- Undo -->
+			↶
+		</button>
+		<button id="editor-redo" aria-keyshortcuts="Ctrl+Shift+Z Ctrl+Y" aria-label="Redo">
+			<!-- Redo -->
+			↷
+		</button>
+		<button id="editor-save" aria-keyshortcuts="Ctrl+S" aria-label="Save">
+			<!-- Save -->
+			💾
+		</button>
+		<button id="editor-open" aria-keyshortcuts="Ctrl+O" aria-label="Open">
+			<!-- Open -->
+			📂
+		</button>
+		<button id="editor-copy" aria-keyshortcuts="Ctrl+C" aria-label="Copy">
+			<!-- Copy -->
+			+➔📋
+		</button>
+		<button id="editor-cut" aria-keyshortcuts="Ctrl+X" aria-label="Cut">
+			<!-- Cut -->
+			✂➔📋
+		</button>
+		<button id="editor-paste" aria-keyshortcuts="Ctrl+V" aria-label="Paste">
+			<!-- Paste -->
+			📋➔
+		</button>
+		<button id="editor-delete" aria-keyshortcuts="Delete" aria-label="Delete">
+			<!-- Delete -->
+			❌
+		</button>
+		<button id="editor-flip-horizontal" aria-keyshortcuts="F" aria-label="Flip Horizontal">
+			<!-- Flip Horizontal -->
+			<!-- ꟻF -->
+			<!-- ⟚ -->
+			Flip
+		</button>
+		<button id="editor-toggle-switch" aria-keyshortcuts="T" aria-label="Toggle Switch or Switchable">
+			<!-- Toggle Switch or Switchable -->
+			On ⇄ Off
+		</button>
+		<button id="editor-select-all" aria-keyshortcuts="Ctrl+A" aria-label="Select All">
+			<!-- Select All -->
+			<!-- ☑ -->
+			⬚
+		</button>
+		<button id="editor-debug" aria-keyshortcuts="`" aria-label="Toggle Debug">
+			<!-- Toggle Debug -->
+			🔎⚠
+		</button>
 	</div>
 	<div id="editor-ui" hidden>
 		<!-- wrapper to make layout consistent regardless of scrollbar, without using overflow: auto -->

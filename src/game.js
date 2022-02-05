@@ -83,6 +83,7 @@ const infoBox = document.getElementById("info");
 const controlsTableRows = document.querySelectorAll("#info table tr");
 // Editor UI
 const editorUI = document.getElementById("editor-ui");
+const editorControlsBar = document.getElementById("editor-controls");
 const levelDropdown = document.getElementById("level-dropdown");
 const entitiesPalette = document.getElementById("entities-palette");
 const entitiesScrollContainer = document.getElementById("entities-scroll-container");
@@ -2425,6 +2426,7 @@ const toggleEditing = () => {
 	}
 	editing = !editing;
 	editorUI.hidden = !editing;
+	editorControlsBar.hidden = !editing;
 	toggleEditingButton.ariaPressed = editing;
 	if (editing) {
 		// eslint-disable-next-line no-use-before-define
@@ -5342,6 +5344,7 @@ const initEditorUI = () => {
 	initializedEditorUI = true;
 
 	editorUI.hidden = !editing;
+	editorControlsBar.hidden = !editing;
 
 	initLevelDropdown();
 
@@ -5699,6 +5702,24 @@ const initEditorUI = () => {
 			});
 			wrapContents(actionCell, button);
 		}
+	}
+
+	for (const button of editorControlsBar.querySelectorAll("button")) {
+		button.addEventListener("click", () => {
+			const match = button.ariaKeyShortcuts.match(/(Ctrl\+)?(.+)/);
+			if (match) {
+				const ctrlKey = match[1] !== "";
+				let key = match[2];
+				if (key === "+") {
+					key = "NumpadAdd";
+				} else if (key === "-") {
+					key = "NumpadSubtract";
+				}
+				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
+			} else {
+				showMessageBox("Oops! Something went wrong. Please report this bug.");
+			}
+		});
 	}
 };
 
