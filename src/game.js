@@ -336,6 +336,33 @@ const parseLocationHash = (hash = location.hash) => {
 		.map((str) => str.split("="));
 	return Object.fromEntries(keyValuePairs);
 };
+const levelNameToSlug = (levelName) => levelName
+	.replace(/[?!.]+$/, "") // remove trailing punctuation
+	.replace(/[^a-z0-9]/gi, "-") // replace non-alphanumeric characters with dashes
+	.toLowerCase()
+	.trim();
+
+const storageKeys = {
+	// best score (fewest moves)
+	score: (levelName) => `janitorial-android:score:${levelNameToSlug(levelName)}`,
+	// a recording that can be played back (corresponding to the best score)
+	solutionRecording: (levelName) => `janitorial-android:solution-recording:${levelNameToSlug(levelName)}`,
+
+	// level editor auto-save
+	level: (levelName) => `janitorial-android:level:${levelNameToSlug(levelName)}`,
+
+	// settings
+	muteSoundEffects: "janitorial-android:mute-sound-effects",
+	muteMusic: "janitorial-android:mute-music",
+	volume: "janitorial-android:volume",
+	editing: "janitorial-android:editing", // might remove in favor of routes
+	paused: "janitorial-android:paused", // weird, should remove as a setting (I think it was helpful in dev, but not so much any more, with muting, editor, other screens to go to)
+	hideInfoBox: "janitorial-android:hide-info-box", // should probably remove in favor of title screen, help screen, and an accessible editor UI with tooltips for learning shortcuts
+
+	// dev helpers
+	showDebug: "janitorial-android:debug",
+	comparisonVideoTime: "janitorial-android:comparison-video-time",
+};
 
 const floor = (x, multiple) => Math.floor(x / multiple) * multiple;
 const round = (x, multiple) => Math.round(x / multiple) * multiple;
@@ -2332,15 +2359,15 @@ const save = () => {
 		try {
 			if (decodeURIComponent(parseLocationHash().level || "") !== `local;${currentLevel.title}`) {
 				const originalTitle = currentLevel.title.replace(/\s\(\d+\)$/, "");
-				for (let n = 1; n < 100 && localStorage[`level:${currentLevel.title}`]; n++) {
+				for (let n = 1; n < 100 && localStorage[storageKeys.level(currentLevel.title)]; n++) {
 					currentLevel.title = `${originalTitle} (${n})`;
 				}
 				editorLevelState = serializeToJSON(currentLevel); // for title update
-				localStorage[`level:${currentLevel.title}`] = editorLevelState;
+				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
 				location.hash = `level=local;${encodeURIComponent(currentLevel.title)}`;
 				updateEditorUIForLevelChange(currentLevel); // for title update
 			} else {
-				localStorage[`level:${currentLevel.title}`] = editorLevelState;
+				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
 			}
 		} catch (error) {
 			showMessageBox(`Couldn't save level.\nAllow local storage (sometimes called 'cookies') to enable autosave.\n\n${error}`);
@@ -2351,7 +2378,7 @@ const save = () => {
 const toggleShowDebug = () => {
 	showDebug = !showDebug;
 	try {
-		localStorage.showDebug = showDebug;
+		localStorage[storageKeys.showDebug] = showDebug;
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
@@ -2361,7 +2388,7 @@ const toggleMute = ({ savePreference = true } = {}) => {
 	toggleMuteButton.textContent = muted ? "🔇" : "🔈";
 	try {
 		if (savePreference) {
-			localStorage.muteSoundEffects = muted;
+			localStorage[storageKeys.muteSoundEffects] = muted;
 		}
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
@@ -2377,7 +2404,7 @@ const setVolume = (volume) => {
 	}
 	mainGain.gain.value = volume;
 	try {
-		localStorage.volume = volume;
+		localStorage[storageKeys.volume] = volume;
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
@@ -2388,7 +2415,7 @@ const togglePause = () => {
 	// 	toggleEditing();
 	// }
 	try {
-		localStorage.paused = paused;
+		localStorage[storageKeys.paused] = paused;
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
@@ -2409,7 +2436,7 @@ const toggleEditing = () => {
 		togglePause();
 	}
 	try {
-		localStorage.editing = editing;
+		localStorage[storageKeys.editing] = editing;
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
@@ -2768,7 +2795,7 @@ addEventListener("keydown", (event) => {
 	if (event.ctrlKey && event.key === "p") {
 		event.preventDefault();
 		// playback saved solution recording
-		const json = localStorage[`best solution for ${currentLevel.title.toLowerCase()}`];
+		const json = localStorage[storageKeys.solutionRecording(currentLevel.title)];
 		if (json) {
 			toggleEditing();
 			if (editing) {
@@ -2805,11 +2832,11 @@ addEventListener("keydown", (event) => {
 			break;
 		// case ",":
 		// 	testVideo.currentTime -= 0.02;
-		// 	localStorage.comparisonVideoTime = testVideo.currentTime;
+		// 	localStorage[storageKeys.comparisonVideoTime] = testVideo.currentTime;
 		// 	break;
 		// case ".":
 		// 	testVideo.currentTime += 0.02;
-		// 	localStorage.comparisonVideoTime = testVideo.currentTime;
+		// 	localStorage[storageKeys.comparisonVideoTime] = testVideo.currentTime;
 		// 	break;
 		// case ";":
 		// 	aJunkbot.animationFrame -= 1;
@@ -4952,8 +4979,8 @@ const checkLevelEnd = () => {
 					playSound("ohYeah");
 					try {
 						if (currentLevel.title) {
-							const scoreKey = `fewest moves for ${currentLevel.title.toLowerCase()}`;
-							const solutionKey = `best solution for ${currentLevel.title.toLowerCase()}`;
+							const scoreKey = storageKeys.score(currentLevel.title);
+							const solutionKey = storageKeys.solutionRecording(currentLevel.title);
 							const formerFewest = Number(localStorage[scoreKey]);
 							if (!isFinite(formerFewest) || formerFewest >= moves) {
 								localStorage[scoreKey] = moves;
@@ -5042,7 +5069,7 @@ const toggleInfoBox = () => {
 	hideInfoBox = !hideInfoBox;
 	updateInfoBoxHidden();
 	try {
-		localStorage.hideInfoBox = hideInfoBox;
+		localStorage[storageKeys.hideInfoBox] = hideInfoBox;
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 };
@@ -5142,7 +5169,7 @@ const showLevelSelectScreen = () => {
 			a.href = `#level=${game};${levelName}`;
 			let completedInMoves;
 			try {
-				completedInMoves = localStorage[`fewest moves for ${levelName.toLowerCase()}`];
+				completedInMoves = localStorage[storageKeys.score(levelName)];
 			} catch (error) {
 				// no score tracking :/
 				// @TODO: unlock all levels if there's an error? um, once there's any locking.
@@ -6031,10 +6058,11 @@ const loadFromHash = async () => {
 
 			if (game === "local") {
 				try {
-					if (!localStorage[`level:${levelName}`]) {
+					const json = localStorage[storageKeys.level(levelName)];
+					if (!json) {
 						throw new Error("Level does not exist.");
 					}
-					deserializeJSON(localStorage[`level:${levelName}`]);
+					deserializeJSON(json);
 					dragging = entities.filter((entity) => entity.grabbed);
 					editorLevelState = serializeToJSON(currentLevel);
 				} catch (error) {
@@ -6265,16 +6293,16 @@ const renderFIGletFont = () => {
 
 const main = async () => {
 	try {
-		showDebug = localStorage.showDebug === "true";
-		muted = localStorage.muteSoundEffects === "true";
-		let volume = parseFloat(localStorage.volume);
+		showDebug = localStorage[storageKeys.showDebug] === "true";
+		muted = localStorage[storageKeys.muteSoundEffects] === "true";
+		let volume = parseFloat(localStorage[storageKeys.volume]);
 		if (!isFinite(volume) || volume < 0 || volume > 1) {
 			volume = 0.5;
 		}
 		mainGain.gain.value = volume;
-		editing = localStorage.editing === "true";
-		paused = localStorage.paused === "true";
-		hideInfoBox = localStorage.hideInfoBox === "true";
+		editing = localStorage[storageKeys.editing] === "true";
+		paused = localStorage[storageKeys.paused] === "true";
+		hideInfoBox = localStorage[storageKeys.hideInfoBox] === "true";
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 
