@@ -1579,7 +1579,7 @@ const loadSound = async (path) => {
 
 const loadLevelListing = async (path) => {
 	const text = await loadTextFile(path);
-	return text.trim().split(/\r?\n/g);
+	return text.trim().split(/\r?\n/g).map((line) => line.trim());
 };
 
 const loadResource = (path) => {
@@ -6111,34 +6111,32 @@ window.addEventListener("hashchange", loadFromHash);
 // ---------------------------'/                  \__/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾'-----------------./
 // #region Meta
 
-const openEachLevel = async (asyncFn, games = ["Junkbot", "Junkbot Undercover"]) => {
+const loadAllLevels = (games = ["Junkbot", "Junkbot Undercover"]) => {
+	const promises = [];
 	for (const { game, levelNames } of getLevelLists(resources)) {
 		if (games.includes(game)) {
 			for (const levelName of levelNames) {
-				// eslint-disable-next-line no-await-in-loop
-				await openLevelByName({ game, levelName });
-				// eslint-disable-next-line no-await-in-loop
-				await asyncFn();
+				promises.push(loadLevelByName({ game, levelName }));
 			}
 		}
 	}
+	return Promise.all(promises);
 };
 // eslint-disable-next-line no-unused-vars
 const gatherStatistics = async (games) => {
 	const occurrencesPerEntityType = {};
 	const levelsPerEntityType = {};
-	// could just load each level without opening them instead...
-	await openEachLevel(() => {
+	const levels = await loadAllLevels(games);
+	for (const level of levels) {
 		const recordedTypesInThisLevel = [];
-		for (const entity of entities) {
+		for (const entity of level.entities) {
 			if (recordedTypesInThisLevel.indexOf(entity.type) === -1) {
 				recordedTypesInThisLevel.push(entity.type);
 				levelsPerEntityType[entity.type] = (levelsPerEntityType[entity.type] || 0) + 1;
 			}
 			occurrencesPerEntityType[entity.type] = (occurrencesPerEntityType[entity.type] || 0) + 1;
 		}
-		return Promise.resolve();
-	}, games);
+	}
 	return { levelsPerEntityType, occurrencesPerEntityType };
 };
 // eslint-disable-next-line no-unused-vars
