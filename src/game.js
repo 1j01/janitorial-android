@@ -5153,7 +5153,10 @@ const showLevelSelectScreen = () => {
 			const score = document.createElement("span");
 			score.className = "level-list-item-score";
 			score.textContent = completedInMoves;
-			a.append(completedImg, parImg, levelName, score);
+			const title = document.createElement("span");
+			title.className = "level-list-item-title";
+			title.textContent = levelName;
+			a.append(completedImg, parImg, title, score);
 
 			if (completedInMoves) {
 				loadLevelByName({ game, levelName }).then((level) => {

@@ -443,6 +443,7 @@
 			font-weight: bold;
 			min-height: 20px;
 			line-height: 20px;
+			position: relative;
 		}
 
 		.level-list-item a {
@@ -459,11 +460,24 @@
 
 		.level-list-item-completed-img,
 		.level-list-item-par-img {
-			vertical-align: bottom;
-			margin-right: 5px;
-			margin-left: 2px;
 			/* measured 5px to bottom border */
-			margin-bottom: 5px;
+			bottom: 5px;
+			position: absolute;
+		}
+
+		.level-list-item-completed-img {
+			/* not measured */
+			left: 5px;
+		}
+
+		.level-list-item-par-img {
+			/* not measured */
+			left: 18px;
+		}
+
+		.level-list-item-title {
+			/* not measured */
+			margin-left: 35px;
 		}
 
 		.level-list-item-score {
