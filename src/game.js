@@ -5306,6 +5306,27 @@ const initUI = () => {
 		event.preventDefault();
 		openFromFile(event.dataTransfer.files[0]);
 	});
+
+	// Info box buttons, generated from table cells
+	for (const tr of controlsTableRows) {
+		const [controlCell, actionCell] = tr.cells;
+		const kbd = controlCell.querySelector("kbd");
+		const match = kbd.textContent.match(/(Ctrl\+)?(.+)/);
+		if (match) {
+			const ctrlKey = match[1] !== "";
+			let key = match[2];
+			if (key === "+") {
+				key = "NumpadAdd";
+			} else if (key === "-") {
+				key = "NumpadSubtract";
+			}
+			const button = document.createElement("button");
+			button.addEventListener("click", () => {
+				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
+			});
+			wrapContents(actionCell, button);
+		}
+	}
 };
 const getLevelLists = (resources) => [
 	{
@@ -5694,26 +5715,6 @@ const initEditorUI = () => {
 		document.title = showLevelTitle ? `${level.title} - Junkbot` : "Junkbot";
 	};
 	updateEditorUIForLevelChange(currentLevel);
-
-	for (const tr of controlsTableRows) {
-		const [controlCell, actionCell] = tr.cells;
-		const kbd = controlCell.querySelector("kbd");
-		const match = kbd.textContent.match(/(Ctrl\+)?(.+)/);
-		if (match) {
-			const ctrlKey = match[1] !== "";
-			let key = match[2];
-			if (key === "+") {
-				key = "NumpadAdd";
-			} else if (key === "-") {
-				key = "NumpadSubtract";
-			}
-			const button = document.createElement("button");
-			button.addEventListener("click", () => {
-				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
-			});
-			wrapContents(actionCell, button);
-		}
-	}
 
 	for (const button of editorControlsBar.querySelectorAll("button")) {
 		button.addEventListener("click", () => {
