@@ -77,6 +77,8 @@ const toggleFullscreenButton = document.getElementById("toggle-fullscreen");
 const toggleMuteButton = document.getElementById("toggle-mute");
 const toggleEditingButton = document.getElementById("toggle-editing");
 const volumeSlider = document.getElementById("volume-slider");
+const zoomInButton = document.getElementById("zoom-in");
+const zoomOutButton = document.getElementById("zoom-out");
 // const showTitleScreenButton = document.getElementById("show-title-screen");
 // Info screen
 const infoBox = document.getElementById("info");
@@ -5275,6 +5277,9 @@ const initUI = () => {
 		setVolume(volumeSlider.valueAsNumber);
 	});
 	volumeSlider.valueAsNumber = mainGain.gain.value;
+
+	zoomInButton.addEventListener("click", () => zoomIn());
+	zoomOutButton.addEventListener("click", () => zoomOut());
 
 	rewindButton.addEventListener("pointerdown", () => {
 		rewindingWithButton = true;
