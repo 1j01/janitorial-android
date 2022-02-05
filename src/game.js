@@ -4471,14 +4471,15 @@ const simulate = (entities) => {
 
 	// sort for consistency for level delta patching
 	entities.sort((a, b) => a.id - b.id);
-	playthroughEvents.push({
-		type: "step",
-		t: frameCounter,
-		x: mouse.worldX,
-		y: mouse.worldY,
-		editing,
-		levelPatch: diffPatcher.clone(diffPatcher.diff(levelLastFrame, currentLevel)),
-	});
+	// DISABLED because it's too space inefficient, it fills up localStorage and causes level progress to not be saved.
+	// playthroughEvents.push({
+	// 	type: "step",
+	// 	t: frameCounter,
+	// 	x: mouse.worldX,
+	// 	y: mouse.worldY,
+	// 	editing,
+	// 	levelPatch: diffPatcher.clone(diffPatcher.diff(levelLastFrame, currentLevel)),
+	// });
 	levelLastFrame = diffPatcher.clone(currentLevel);
 };
 
