@@ -5144,25 +5144,25 @@ const showLevelSelectScreen = () => {
 			const completed = typeof completedInMoves !== "undefined";
 
 			const completedImg = document.createElement("img");
-			completedImg.className = "level-list-item-completed-img";
+			completedImg.className = "level-list-item-completed-indicator";
 			completedImg.src = completed ? "images/menus/checkbox_on.png" : "images/menus/checkbox_off.png";
-			const parImg = document.createElement("img");
-			parImg.src = "images/menus/check_light.png";
-			parImg.style.opacity = 0;
-			parImg.className = "level-list-item-par-img";
+			const goldAwardImg = document.createElement("img");
+			goldAwardImg.src = "images/menus/check_light.png";
+			goldAwardImg.hidden = true;
+			goldAwardImg.className = "level-list-item-gold-award";
 			const score = document.createElement("span");
 			score.className = "level-list-item-score";
 			score.textContent = completedInMoves;
 			const title = document.createElement("span");
 			title.className = "level-list-item-title";
 			title.textContent = levelName;
-			a.append(completedImg, parImg, title, score);
+			a.append(completedImg, goldAwardImg, title, score);
 
 			if (completedInMoves) {
 				loadLevelByName({ game, levelName }).then((level) => {
 					const metPar = completedInMoves <= level.par;
 					if (metPar) {
-						parImg.style.opacity = 1;
+						goldAwardImg.hidden = false;
 					}
 				}, (error) => {
 					// eslint-disable-next-line no-console
