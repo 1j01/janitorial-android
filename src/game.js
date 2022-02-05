@@ -6101,26 +6101,24 @@ window.addEventListener("hashchange", loadFromHash);
 // ---------------------------'/                  \__/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾'-----------------./
 // #region Meta
 
-
-const loadEachLevel = async (asyncFn, originalOnly) => {
-	for (const option of levelDropdown.options) {
-		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
-		if (option.value !== "Custom World" && (!originalOnly || optgroup.label.match(/^Junkbot( Undercover)?$/))) {
-			levelDropdown.value = option.value;
-			const game = optgroup ? optgroup.value : "Custom";
-
-			// eslint-disable-next-line no-await-in-loop
-			await openLevelByName({ game, levelName: option.value });
-			// eslint-disable-next-line no-await-in-loop
-			await asyncFn();
+const openEachLevel = async (asyncFn, games = ["Junkbot", "Junkbot Undercover"]) => {
+	for (const { game, levelNames } of getLevelLists(resources)) {
+		if (games.includes(game)) {
+			for (const levelName of levelNames) {
+				// eslint-disable-next-line no-await-in-loop
+				await openLevelByName({ game, levelName });
+				// eslint-disable-next-line no-await-in-loop
+				await asyncFn();
+			}
 		}
 	}
 };
 // eslint-disable-next-line no-unused-vars
-const gatherStatistics = async (originalOnly) => {
+const gatherStatistics = async (games) => {
 	const occurrencesPerEntityType = {};
 	const levelsPerEntityType = {};
-	await loadEachLevel(() => {
+	// could just load each level without opening them instead...
+	await openEachLevel(() => {
 		const recordedTypesInThisLevel = [];
 		for (const entity of entities) {
 			if (recordedTypesInThisLevel.indexOf(entity.type) === -1) {
@@ -6130,7 +6128,7 @@ const gatherStatistics = async (originalOnly) => {
 			occurrencesPerEntityType[entity.type] = (occurrencesPerEntityType[entity.type] || 0) + 1;
 		}
 		return Promise.resolve();
-	}, originalOnly);
+	}, games);
 	return { levelsPerEntityType, occurrencesPerEntityType };
 };
 // eslint-disable-next-line no-unused-vars
