@@ -2434,6 +2434,7 @@ const toggleEditing = () => {
 		// eslint-disable-next-line no-use-before-define
 		initEditorUI();
 
+		// don't reset undos/redos, just reset the level
 		deserializeJSON(editorLevelState);
 	}
 	if (editing !== paused) {
@@ -2530,6 +2531,7 @@ const openFromFile = (file) => {
 		try {
 			if (content.match(/^\s*{/)) {
 				deserializeJSON(content);
+				initLevel(currentLevel);
 			} else {
 				initLevel(loadLevelFromText(content));
 			}
@@ -5928,6 +5930,7 @@ const runTests = async () => {
 		try {
 			if (test.levelType === "json") {
 				deserializeJSON(await loadTextFile(`levels/test-cases/${test.name}.json`));
+				initLevel(currentLevel);
 			} else {
 				initLevel(await loadLevelFromTextFile(`levels/test-cases/${test.name}.txt`));
 			}
@@ -6093,6 +6096,7 @@ const loadFromHash = async () => {
 						throw new Error("Level does not exist.");
 					}
 					deserializeJSON(json);
+					initLevel(currentLevel);
 					dragging = entities.filter((entity) => entity.grabbed);
 					editorLevelState = serializeToJSON(currentLevel);
 				} catch (error) {
