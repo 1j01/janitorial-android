@@ -4985,7 +4985,8 @@ const checkLevelEnd = () => {
 					}
 					playSound("ohYeah");
 					try {
-						if (currentLevel.title) {
+						// don't save score for edited levels (in particular, don't save over the score for the real levels! cheating!)
+						if (currentLevel.title && !location.hash.match(/local/)) {
 							const scoreKey = storageKeys.score(currentLevel.title);
 							const solutionKey = storageKeys.solutionRecording(currentLevel.title);
 							const formerFewest = Number(localStorage[scoreKey]);
