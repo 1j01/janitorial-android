@@ -2441,7 +2441,8 @@ const togglePause = () => {
 };
 const updateEditingButton = () => {
 	toggleEditingButton.ariaPressed = editing;
-	toggleEditingButton.querySelector("img").src = editing ? "images/icons/play.png" : "images/icons/edit.png";
+	// toggleEditingButton.querySelector("img").src = editing ? "images/icons/play.png" : "images/icons/edit.png";
+	toggleEditingButton.querySelector("img").src = editing ? "images/icons/toggle-editing-edit-mode.png" : "images/icons/toggle-editing-play-mode.png";
 };
 const toggleEditing = () => {
 	if (!editing && (titleScreen.style.display !== "none" && !titleScreen.hidden)) {
