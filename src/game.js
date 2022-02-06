@@ -2389,16 +2389,18 @@ const toggleShowDebug = () => {
 const updateMuteButton = () => {
 	toggleMuteButton.ariaPressed = muted;
 	const volume = mainGain.gain.value;
-	const img = toggleMuteButton.querySelector("img");
+	const icon = toggleMuteButton.querySelector(".sprited-icon");
+	let iconIndex;
 	if (muted) {
-		img.src = "images/icons/muted.png";
+		iconIndex = 21; // muted
 	} else if (volume < 0.3) {
-		img.src = "images/icons/volume-low.png";
-	} else if (volume > 0.6) {
-		img.src = "images/icons/volume-high.png";
+		iconIndex = 22; // volume-low
+	} else if (volume < 0.6) {
+		iconIndex = 23; // volume-medium
 	} else {
-		img.src = "images/icons/volume-medium.png";
+		iconIndex = 24; // volume-high
 	}
+	icon.style.setProperty("--icon-index", iconIndex);
 };
 const toggleMute = ({ savePreference = true } = {}) => {
 	muted = !muted;
