@@ -25,7 +25,6 @@
 		#main-controls:not([hidden]),
 		#editor-controls:not([hidden]) {
 			position: fixed;
-			top: 0;
 			left: 0;
 			right: 0;
 			z-index: 2;
@@ -36,6 +35,14 @@
 			padding: 2px;
 			gap: 2px;
 			justify-content: flex-end;
+		}
+
+		#main-controls:not([hidden]) {
+			top: 0;
+		}
+
+		#editor-controls:not([hidden]) {
+			top: 40px;
 		}
 
 		/* prevent occlusion of entities palette */
@@ -69,11 +76,6 @@
 			height: 20px;
 			background-image: url("images/icons/editor-icons-20px.png");
 			background-position: calc(var(--icon-index) * -20px) 0;
-		}
-
-		/* needs :not([hidden]), for >= specificity */
-		#editor-controls:not([hidden]) {
-			top: 40px;
 		}
 
 		/* INFO PANEL */
