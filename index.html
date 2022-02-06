@@ -19,7 +19,10 @@
 			user-select: none;
 		}
 
-		/* CONTROL BARS */
+		/* CONTROL BARS (AKA TOOLBARS) */
+		:root {
+			--control-bar-height: 46px;
+		}
 
 		/* needs :not([hidden]) because `display` overrides `hidden` */
 		#main-controls:not([hidden]),
@@ -42,7 +45,7 @@
 		}
 
 		#editor-controls:not([hidden]) {
-			top: 40px;
+			top: var(--control-bar-height);
 		}
 
 		#main-controls button,
@@ -212,7 +215,7 @@
 		#editor-ui:not([hidden]) {
 			position: fixed;
 			left: 0px;
-			top: 85px;
+			top: calc(var(--control-bar-height) * 2);
 			bottom: 0px;
 			/* background-color: #224; */
 			/* color: white; */
