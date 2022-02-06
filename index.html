@@ -51,7 +51,8 @@
 			}
 		}
 
-		#main-controls button {
+		#main-controls button,
+		#editor-controls button {
 			font-size: 30px;
 			height: 40px;
 			width: 40px;
@@ -112,7 +113,7 @@
 			margin-left: 10px;
 		}
 
-		/* DIALOGS */
+		/* DIALOGS AND BUTTONS */
 
 		.dialog-container {
 			position: fixed;
@@ -162,6 +163,12 @@
 
 		.generic-button:hover {
 			border-image-source: url("images/menus/generic_button_hover.png");
+		}
+
+		.image-button {
+			border: 0;
+			background-color: transparent;
+			color: transparent;
 		}
 
 		.message-content {
@@ -273,12 +280,6 @@
 
 		#title-screen:not(.title-screen-level-loaded) {
 			background-color: #7c857c;
-		}
-
-		.image-button {
-			border: 0;
-			background-color: transparent;
-			color: transparent;
 		}
 
 		#start-game {
@@ -592,11 +593,12 @@
 			🔍<span style="width:0;position:relative;left:-1em;top:-0.1em;">-</span>
 		</button>
 		<button id="toggle-info" aria-label="Toggle Info" aria-expanded="true" title="Toggle Info">
-			<svg fill="currentColor" width="1em" height="1em" viewBox="0 0 40 40">
+			<!-- <svg fill="currentColor" width="1em" height="1em" viewBox="0 0 40 40">
 				<path
 					d="m18.4 15v-3.4h3.2v3.4h-3.2z m1.6 18.4c7.3 0 13.4-6.1 13.4-13.4s-6.1-13.4-13.4-13.4-13.4 6.1-13.4 13.4 6.1 13.4 13.4 13.4z m0-30c9.2 0 16.6 7.4 16.6 16.6s-7.4 16.6-16.6 16.6-16.6-7.4-16.6-16.6 7.4-16.6 16.6-16.6z m-1.6 25v-10h3.2v10h-3.2z">
 				</path>
-			</svg>
+			</svg> -->
+			<img src="images/icons/help-about.png" alt="" width="32" height="32">
 		</button>
 	</div>
 	<div id="info" class="metal-border">
@@ -703,54 +705,57 @@
 	<div id="editor-controls" hidden>
 		<button id="editor-undo" aria-keyshortcuts="Ctrl+Z" aria-label="Undo">
 			<!-- Undo -->
-			↶
+			<img src="images/icons/edit-undo.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-redo" aria-keyshortcuts="Ctrl+Shift+Z Ctrl+Y" aria-label="Redo">
 			<!-- Redo -->
-			↷
+			<img src="images/icons/edit-redo.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-save" aria-keyshortcuts="Ctrl+S" aria-label="Save">
 			<!-- Save -->
-			💾
+			<img src="images/icons/document-save.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-open" aria-keyshortcuts="Ctrl+O" aria-label="Open">
 			<!-- Open -->
-			📂
+			<img src="images/icons/document-open.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-copy" aria-keyshortcuts="Ctrl+C" aria-label="Copy">
 			<!-- Copy -->
-			+➔📋
+			<img src="images/icons/edit-copy.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-cut" aria-keyshortcuts="Ctrl+X" aria-label="Cut">
 			<!-- Cut -->
-			✂➔📋
+			<img src="images/icons/edit-cut.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-paste" aria-keyshortcuts="Ctrl+V" aria-label="Paste">
 			<!-- Paste -->
-			📋➔
+			<img src="images/icons/edit-paste.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-delete" aria-keyshortcuts="Delete" aria-label="Delete">
 			<!-- Delete -->
-			❌
+			<img src="images/icons/edit-delete.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-flip-horizontal" aria-keyshortcuts="F" aria-label="Flip Horizontal">
 			<!-- Flip Horizontal -->
 			<!-- ꟻF -->
 			<!-- ⟚ -->
-			Flip
+			<img src="images/icons/flip-horizontally.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-toggle-switch" aria-keyshortcuts="T" aria-label="Toggle Switch or Switchable">
 			<!-- Toggle Switch or Switchable -->
-			On ⇄ Off
+			<!-- On ⇄ Off -->
+			<img src="images/icons/toggle-on-off.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-select-all" aria-keyshortcuts="Ctrl+A" aria-label="Select All">
 			<!-- Select All -->
 			<!-- ☑ -->
-			⬚
+			<!-- ⬚ -->
+			<img src="images/icons/edit-select-all.png" alt="" width="32" height="32">
 		</button>
 		<button id="editor-debug" aria-keyshortcuts="`" aria-label="Toggle Debug">
 			<!-- Toggle Debug -->
-			🔎⚠
+			<!-- 🔎⚠ -->
+			<img src="images/icons/debug.png" alt="" width="32" height="32">
 		</button>
 	</div>
 	<div id="editor-ui" hidden class="metal-border">
