@@ -6169,15 +6169,14 @@ const loadFromHash = async () => {
 			// because I want you to see the title screen level, and maybe interact with it, before starting the game.
 
 			// Note that this strategy only works if cache is enabled; make sure "Disable cache" is unchecked in devtools.
-			const loadedImg = document.createElement("img");
-			loadedImg.addEventListener("load", () => {
+			// Also if just this one image fails to load, I don't care, so using finally.
+			loadImage("images/menus/ready_to_play.png").finally(() => {
 				loadStatusLoaded.hidden = false;
 				loadStatusLoading.hidden = true;
 
 				startGameButton.hidden = false;
 				showCreditsButton.hidden = false;
 			});
-			loadedImg.src = "images/menus/ready_to_play.png";
 		})();
 	}
 };
