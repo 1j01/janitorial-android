@@ -29,8 +29,9 @@
 			left: 0;
 			right: 0;
 			z-index: 2;
-			background-color: #000;
-			color: #fff;
+			background-color: #a0a0a4;
+			color: black;
+			border-bottom: 2px solid #666666;
 			display: flex;
 			padding: 2px;
 			gap: 2px;
@@ -53,13 +54,14 @@
 
 		#main-controls button,
 		#editor-controls button {
-			font-size: 30px;
-			height: 40px;
-			width: 40px;
+			height: 32px;
+			width: 32px;
 			padding: 0;
+			box-sizing: content-box;
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
+			margin-bottom: 4px;
 		}
 
 		.sprited-icon {
@@ -554,18 +556,19 @@
 	</div>
 	<div id="main-controls">
 		<!-- aria-keyshortcuts="Shift" is invalid, but what are you gonna do? -->
-		<button id="rewind" aria-label="Rewind" aria-keyshortcuts="Shift" title="Rewind (hold Shift)">
+		<button class="generic-button" id="rewind" aria-label="Rewind" aria-keyshortcuts="Shift"
+			title="Rewind (hold Shift)">
 			<!-- @TODO: maybe invent a dynamic control for rewind/fast-forward -->
 			<!-- <img src="images/icons/seek-backward.png" width="32" height="32" /> -->
 			<span class="sprited-icon" style="--icon-index:13;"></span>
 		</button>
-		<button id="toggle-editing" aria-label="Edit level" aria-pressed="false" aria-keyshortcuts="E"
-			title="Edit level (E)">
+		<button class="generic-button" id="toggle-editing" aria-label="Edit level" aria-pressed="false"
+			aria-keyshortcuts="E" title="Edit level (E)">
 			<!-- ✏️ -->
 			<!-- NOTE: src dynamically changed with JS -->
 			<img src="images/icons/edit.png" alt="" width="29" height="14">
 		</button>
-		<!-- <button id="toggle-music" aria-label="Music" aria-pressed="false" aria-keyshortcuts="M">
+		<!-- <button class="generic-button" id="toggle-music" aria-label="Music" aria-pressed="false" aria-keyshortcuts="M">
 			<svg fill="currentColor" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
 				<g transform="translate(-3.631 -5.26) scale(.025)">
 					<path class="fill-cc" d="M301.429 312.422l372.684-76v103.929l-372.684 76z"></path>
@@ -576,14 +579,14 @@
 				</g>
 			</svg>
 		</button> -->
-		<button id="toggle-mute" aria-label="Mute" aria-pressed="false" aria-keyshortcuts="M"
+		<button class="generic-button" id="toggle-mute" aria-label="Mute" aria-pressed="false" aria-keyshortcuts="M"
 			title="Mute sound effects (M)">
 			<!-- NOTE: dynamically updated with JS -->
 			<!-- <img src="images/icons/volume-medium.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:20;"></span>
 		</button>
 		<input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Volume">
-		<button id="toggle-fullscreen" aria-label="Toggle Fullscreen" aria-pressed="false"
+		<button class="generic-button" id="toggle-fullscreen" aria-label="Toggle Fullscreen" aria-pressed="false"
 			aria-keyshortcuts="Alt+Enter F11" title="Toggle Fullscreen (Alt+Enter or F11)">
 			<!-- <svg fill="currentColor" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 438.543 438.543">
@@ -593,17 +596,18 @@
 			</svg> -->
 			<span class="sprited-icon" style="--icon-index:12;"></span>
 		</button>
-		<button id="zoom-in" aria-label="Zoom In" aria-keyshortcuts="Plus"
+		<button class="generic-button" id="zoom-in" aria-label="Zoom In" aria-keyshortcuts="Plus"
 			title="Zoom In (Plus key, or mouse wheel, or pinch on a touch screen)">
 			<!-- <img src="images/icons/zoom-in.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:18;"></span>
 		</button>
-		<button id="zoom-out" aria-label="Zoom Out" aria-keyshortcuts="Minus"
+		<button class="generic-button" id="zoom-out" aria-label="Zoom Out" aria-keyshortcuts="Minus"
 			title="Zoom Out (Minus, or mouse wheel, or pinch on a touch screen)">
 			<!-- <img src="images/icons/zoom-out.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:17;"></span>
 		</button>
-		<button id="toggle-info" aria-label="Toggle Info" aria-expanded="true" title="Toggle Info">
+		<button class="generic-button" id="toggle-info" aria-label="Toggle Info" aria-expanded="true"
+			title="Toggle Info">
 			<!-- <svg fill="currentColor" width="1em" height="1em" viewBox="0 0 40 40">
 				<path
 					d="m18.4 15v-3.4h3.2v3.4h-3.2z m1.6 18.4c7.3 0 13.4-6.1 13.4-13.4s-6.1-13.4-13.4-13.4-13.4 6.1-13.4 13.4 6.1 13.4 13.4 13.4z m0-30c9.2 0 16.6 7.4 16.6 16.6s-7.4 16.6-16.6 16.6-16.6-7.4-16.6-16.6 7.4-16.6 16.6-16.6z m-1.6 25v-10h3.2v10h-3.2z">
@@ -710,72 +714,73 @@
 			<label for="test-speed">Simulation Speed:</label>
 			<input type="range" min="1" max="100" step="1" id="test-speed">
 		</div>
-		<!-- <button id="start-tests">Start/Restart Tests</button> -->
+		<!-- <button class="generic-button" id="start-tests">Start/Restart Tests</button> -->
 		<div id="tests-info"></div>
 		<ul id="tests"></ul>
 	</div>
 	<div id="editor-controls" hidden>
-		<button id="editor-undo" aria-keyshortcuts="Ctrl+Z" aria-label="Undo">
+		<button class="generic-button" id="editor-undo" aria-keyshortcuts="Ctrl+Z" aria-label="Undo">
 			<!-- Undo -->
 			<!-- <img src="images/icons/edit-undo.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:3;"></span>
 		</button>
-		<button id="editor-redo" aria-keyshortcuts="Ctrl+Shift+Z Ctrl+Y" aria-label="Redo">
+		<button class="generic-button" id="editor-redo" aria-keyshortcuts="Ctrl+Shift+Z Ctrl+Y" aria-label="Redo">
 			<!-- Redo -->
 			<!-- <img src="images/icons/edit-redo.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:4;"></span>
 		</button>
-		<button id="editor-save" aria-keyshortcuts="Ctrl+S" aria-label="Save">
+		<button class="generic-button" id="editor-save" aria-keyshortcuts="Ctrl+S" aria-label="Save">
 			<!-- Save -->
 			<!-- <img src="images/icons/document-save.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:8;"></span>
 		</button>
-		<button id="editor-open" aria-keyshortcuts="Ctrl+O" aria-label="Open">
+		<button class="generic-button" id="editor-open" aria-keyshortcuts="Ctrl+O" aria-label="Open">
 			<!-- Open -->
 			<!-- <img src="images/icons/document-open.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:7;"></span>
 		</button>
-		<button id="editor-copy" aria-keyshortcuts="Ctrl+C" aria-label="Copy">
+		<button class="generic-button" id="editor-copy" aria-keyshortcuts="Ctrl+C" aria-label="Copy">
 			<!-- Copy -->
 			<!-- <img src="images/icons/edit-copy.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:1;"></span>
 		</button>
-		<button id="editor-cut" aria-keyshortcuts="Ctrl+X" aria-label="Cut">
+		<button class="generic-button" id="editor-cut" aria-keyshortcuts="Ctrl+X" aria-label="Cut">
 			<!-- Cut -->
 			<!-- <img src="images/icons/edit-cut.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:0;"></span>
 		</button>
-		<button id="editor-paste" aria-keyshortcuts="Ctrl+V" aria-label="Paste">
+		<button class="generic-button" id="editor-paste" aria-keyshortcuts="Ctrl+V" aria-label="Paste">
 			<!-- Paste -->
 			<!-- <img src="images/icons/edit-paste.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:2;"></span>
 		</button>
-		<button id="editor-delete" aria-keyshortcuts="Delete" aria-label="Delete">
+		<button class="generic-button" id="editor-delete" aria-keyshortcuts="Delete" aria-label="Delete">
 			<!-- Delete -->
 			<!-- <img src="images/icons/edit-delete.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:5;"></span>
 		</button>
-		<button id="editor-flip-horizontal" aria-keyshortcuts="F" aria-label="Flip Horizontal">
+		<button class="generic-button" id="editor-flip-horizontal" aria-keyshortcuts="F" aria-label="Flip Horizontal">
 			<!-- Flip Horizontal -->
 			<!-- ꟻF -->
 			<!-- ⟚ -->
 			<img src="images/icons/flip-horizontally.png" alt="" width="32" height="32">
 			<!-- <span class="sprited-icon" style="--icon-index:0;"></span> -->
 		</button>
-		<button id="editor-toggle-switch" aria-keyshortcuts="T" aria-label="Toggle Switch or Switchable">
+		<button class="generic-button" id="editor-toggle-switch" aria-keyshortcuts="T"
+			aria-label="Toggle Switch or Switchable">
 			<!-- Toggle Switch or Switchable -->
 			<!-- On ⇄ Off -->
 			<img src="images/icons/toggle-on-off.png" alt="" width="32" height="32">
 			<!-- <span class="sprited-icon" style="--icon-index:0;"></span> -->
 		</button>
-		<button id="editor-select-all" aria-keyshortcuts="Ctrl+A" aria-label="Select All">
+		<button class="generic-button" id="editor-select-all" aria-keyshortcuts="Ctrl+A" aria-label="Select All">
 			<!-- Select All -->
 			<!-- ☑ -->
 			<!-- ⬚ -->
 			<!-- <img src="images/icons/edit-select-all.png" alt="" width="32" height="32"> -->
 			<span class="sprited-icon" style="--icon-index:25;"></span>
 		</button>
-		<button id="editor-debug" aria-keyshortcuts="`" aria-label="Toggle Debug">
+		<button class="generic-button" id="editor-debug" aria-keyshortcuts="`" aria-label="Toggle Debug">
 			<!-- Toggle Debug -->
 			<!-- 🔎⚠ -->
 			<!-- <img src="images/icons/debug.png" alt="" width="32" height="32"> -->
@@ -808,8 +813,8 @@
 					</label>
 				</div>
 			</div>
-			<button id="save-world" class="generic-button">Save World</button>
-			<button id="open-world" class="generic-button">Open World</button>
+			<button class="generic-button" id="save-world" class="generic-button">Save World</button>
+			<button class="generic-button" id="open-world" class="generic-button">Open World</button>
 			<br>
 			<label>
 				Choose Level:<br>
