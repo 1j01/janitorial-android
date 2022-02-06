@@ -72,6 +72,7 @@ const loadProgress = document.getElementById("load-progress");
 const levelSelectScreen = document.getElementById("level-select-screen");
 const levelList = document.getElementById("level-list");
 // Main game controls bar
+const mainControlsBar = document.getElementById("main-controls");
 const toggleInfoButton = document.getElementById("toggle-info");
 const toggleFullscreenButton = document.getElementById("toggle-fullscreen");
 const toggleMuteButton = document.getElementById("toggle-mute");
@@ -4974,7 +4975,9 @@ Lines marked with [?] may be outdated for this frame.
 			debugText += `[${time === frameStartTime ? " " : "?"}] ${subject}${text ? `: ${text}` : ""}\n`;
 		}
 		const x = 1 + editorUI.offsetWidth;
-		drawText(ctx, debugText, x, 1, "white");
+		const y = 1 + mainControlsBar.offsetHeight + editorControlsBar.offsetHeight;
+		drawText(ctx, debugText, x, y, "white");
+
 		const hoveredBrick = brickAt(mouse, { includeFixed: true });
 		if (dragging.length) {
 			drawText(ctx, `DRAGGING: ${JSON.stringify(dragging, null, "\t")}`, mouse.x + 50, mouse.y - 30, "white");
