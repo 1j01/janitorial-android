@@ -5449,6 +5449,7 @@ const initEditorUI = () => {
 		const buttonCanvas = document.createElement("canvas");
 		const buttonCtx = buttonCanvas.getContext("2d");
 		button.style.margin = "0";
+		button.style.padding = "1px 6px";
 		button.style.borderWidth = "3px";
 		button.style.borderStyle = "solid";
 		button.style.borderColor = "transparent";
