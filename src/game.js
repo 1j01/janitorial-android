@@ -6057,12 +6057,13 @@ const runTests = async () => {
 // Press Alt+Right/Left several times to make sure the title screen is always shown properly.
 //
 // You can also try simply spamming Alt+Left/Right; note that in Chrome it aborts fetches, giving an indistinguishable "TypeError: Failed to fetch" error.
-let loadFromHashRequest = 0;
+let latestLoadFromHashRequest = 0;
 
 const loadFromHash = async () => {
 
-	loadFromHashRequest += 1;
-	const thisLoadFromHashRequest = loadFromHashRequest;
+	latestLoadFromHashRequest += 1;
+	const thisLoadFromHashRequest = latestLoadFromHashRequest;
+	console.log("loadFromHash", thisLoadFromHashRequest, ":", location.hash);
 
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
@@ -6088,7 +6089,7 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
 		resources = await allResourcesLoadedPromise;
 
-		if (loadFromHashRequest !== thisLoadFromHashRequest) {
+		if (latestLoadFromHashRequest !== thisLoadFromHashRequest) {
 			// prevents e.g. running tests if you load #run-tests part way and navigate elsewhere
 			// (test this with network throttling in the devtools)
 			return;
@@ -6129,14 +6130,22 @@ const loadFromHash = async () => {
 
 					try {
 						const level = await loadLevelByName({ levelName, game });
-						if (loadFromHashRequest !== thisLoadFromHashRequest) {
+						if (latestLoadFromHashRequest !== thisLoadFromHashRequest) {
 							// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
 							return;
 						}
 						initLevel(level);
 						editorLevelState = serializeToJSON(currentLevel);
 					} catch (error) {
-						showMessageBox(`Failed to load level:\n\n${error}`);
+						console.log(`loadFromHash #${thisLoadFromHashRequest} errored.`, error);
+						setTimeout(() => {
+							if (latestLoadFromHashRequest !== thisLoadFromHashRequest) {
+								console.log(`Hash changed while loading level data for '${levelName}'; aborting failed load.`);
+								return;
+							}
+							showMessageBox(`Failed to load level:\n\n${error}`);
+						}, 200);
+						return;
 					}
 
 					// For editor
@@ -6160,7 +6169,7 @@ const loadFromHash = async () => {
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
 		resources = await hotResourcesLoadedPromise;
-		if (loadFromHashRequest !== thisLoadFromHashRequest) {
+		if (latestLoadFromHashRequest !== thisLoadFromHashRequest) {
 			return;
 		}
 		showTitleScreen();
