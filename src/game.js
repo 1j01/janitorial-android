@@ -6132,7 +6132,14 @@ const loadFromHash = async () => {
 						initLevel(level);
 						editorLevelState = serializeToJSON(currentLevel);
 					} catch (error) {
-						showMessageBox(`Failed to load level:\n\n${error}`);
+						setTimeout(() => {
+							if (location.hash !== loadingFrom) {
+								console.log("Hash changed within timeframe; ignoring failed load.", error);
+								return;
+							}
+							console.log(error.name, error);
+							showMessageBox(`Failed to load level:\n\n${error}`);
+						}, 200);
 					}
 
 					// For editor
