@@ -211,17 +211,21 @@
 		#tests-ui:not([hidden]) {
 			position: fixed;
 			right: 0px;
-			top: 0px;
+			top: calc(var(--control-bar-height) * 2);
 			bottom: 0px;
-			background-color: white;
+			background-color: #a0a0a4;
 			color: black;
 			display: flex;
 			flex-direction: column;
+			padding: 10px;
 		}
 
 		#tests {
 			overflow: auto;
 			flex: 1;
+			border: 5px inset lightgray;
+			background-color: white;
+			color: black;
 		}
 
 		/* EDITOR UI */
@@ -278,7 +282,7 @@
 			flex-direction: row;
 		}
 
-		.label-input-row label {
+		#editor-ui .label-input-row label {
 			width: 50px;
 			align-self: center;
 		}
@@ -701,7 +705,7 @@
 			</tr>
 		</table>
 	</div>
-	<div id="tests-ui" hidden>
+	<div id="tests-ui" class="metal-border" hidden>
 		<div class="label-input-row">
 			<label for="test-speed">Simulation Speed:</label>
 			<input type="range" min="1" max="100" step="1" id="test-speed">
