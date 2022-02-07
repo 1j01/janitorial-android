@@ -2318,7 +2318,6 @@ const initLevel = (level) => {
 	undos.length = 0;
 	redos.length = 0;
 };
-let disableLoadFromHash = false;
 const loadLevelByName = ({ levelName, game }) => {
 	let fileName = `${levelName.replace(/[:?]/g, "")}.txt`;
 	let folder = {
@@ -2334,6 +2333,8 @@ const loadLevelByName = ({ levelName, game }) => {
 };
 const openLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
 	// If fromHash is true, prevent race conditions by aborting if the hash doesn't match.
+	// Note that this function doesn't change the location hash.
+	// To open a level, other code should change the URL, so that the URL is a consistent source of truth.
 
 	// console.log("loading:", option.value, { option, optgroup, game });
 	const hashMatches = () => decodeURIComponent(parseLocationHash().level || "") === `${game};${levelName}`;
@@ -2361,33 +2362,6 @@ const openLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
 		}
 	}
 
-	// Change URL hash (if needed) and wait for hashchange event
-	if (!hashMatches()) {
-		await new Promise((resolve, reject) => {
-			// eslint bug?
-			// eslint-disable-next-line prefer-const
-			let tid;
-			const handleHashChange = () => {
-				// console.log("hashchange", location.hash);
-				window.removeEventListener("hashchange", handleHashChange);
-				clearTimeout(tid);
-				// make sure other handlers of hashchange run first
-				setTimeout(() => {
-					disableLoadFromHash = false;
-					resolve();
-				});
-			};
-			window.addEventListener("hashchange", handleHashChange);
-			tid = setTimeout(() => {
-				window.removeEventListener("hashchange", handleHashChange);
-				reject(new Error("timed out waiting for hashchange event"));
-			}, 1000);
-			// console.log("navigate for:", option.value, { option, optgroup, game });
-			// console.log(`gonna set #level=${game};${encodeURIComponent(levelName)}`);
-			disableLoadFromHash = true;
-			location.hash = `level=${game};${encodeURIComponent(levelName)}`;
-		});
-	}
 	return true;
 };
 const save = () => {
@@ -6102,9 +6076,6 @@ const runTests = async () => {
 // #region Routing (load from URL hash)
 
 const loadFromHash = async () => {
-	if (disableLoadFromHash) {
-		return;
-	}
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
 
