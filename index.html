@@ -192,6 +192,14 @@
 			align-items: center;
 		}
 
+		button img {
+			pointer-events: none;
+		}
+
+		button {
+			user-select: none;
+		}
+
 		/* TEST RUNNER UI */
 
 		#tests-ui:not([hidden]) {
@@ -567,7 +575,7 @@
 		<button class="generic-button" id="toggle-editing" aria-label="Edit level" aria-pressed="false"
 			aria-keyshortcuts="E" title="Edit level (E)">
 			<!-- NOTE: src dynamically changed with JS -->
-			<img draggable="false" src="images/icons/toggle-editing-play-mode.png" alt="" width="32" height="32">
+			<img src="images/icons/toggle-editing-play-mode.png" alt="" width="32" height="32">
 		</button>
 		<div class="spacer"></div>
 		<button class="generic-button" id="toggle-mute" aria-label="Mute" aria-pressed="false" aria-keyshortcuts="M"
@@ -733,11 +741,11 @@
 		</button>
 		<button class="generic-button" id="editor-flip-horizontal" aria-keyshortcuts="F" aria-label="Flip Horizontal"
 			title="Flip selection horizontally (F)">
-			<img draggable="false" src="images/icons/flip-horizontally.png" alt="" width="32" height="32">
+			<img src="images/icons/flip-horizontally.png" alt="" width="32" height="32">
 		</button>
 		<button class="generic-button" id="editor-toggle-switch" aria-keyshortcuts="T" aria-label="Toggle On/Off"
 			title="Toggle selected switches and switch-controlled entities on or off (T)">
-			<img draggable="false" src="images/icons/toggle-on-off.png" alt="" width="32" height="32">
+			<img src="images/icons/toggle-on-off.png" alt="" width="32" height="32">
 		</button>
 		<button class="generic-button" id="editor-select-all" aria-keyshortcuts="Ctrl+A" aria-label="Select All"
 			title="Select all (Ctrl+A)">
