@@ -1,3 +1,7 @@
+# SonarQube
+sonar-project.properties
+.scannerwork/
+
 # Logs
 logs
 *.log
