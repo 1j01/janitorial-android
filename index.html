@@ -107,7 +107,7 @@
 			margin-bottom: 16px;
 		}
 
-		kbd {
+		kbd:not(.grouping-kbd) {
 			display: inline-block;
 			padding: 3px 5px;
 			font: 11px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
@@ -121,6 +121,12 @@
 			border-radius: 6px;
 			box-shadow: 1px -1px 0 #fefbf0, 3px 2px 0 #808080;
 			margin-right: 2px;
+		}
+
+		.grouping-kbd {
+			border-radius: 6px;
+			border: 1px solid #c0c0c0;
+			padding: 5px;
 		}
 
 		td button {
@@ -631,6 +637,10 @@
 		</p>
 		<table>
 			<tr>
+				<th scope="col">Shortcut</th>
+				<th scope="col">Action</th>
+			</tr>
+			<tr>
 				<td><kbd>E</kbd></td>
 				<td>Toggle edit mode</td>
 			</tr>
@@ -660,15 +670,19 @@
 		<p>Hold <kbd>Ctrl</kbd> and click to drag an individual object.</p>
 		<table>
 			<tr>
-				<td><kbd>Ctrl</kbd>+<kbd>C</kbd></td>
+				<th scope="col">Shortcut</th>
+				<th scope="col">Action</th>
+			</tr>
+			<tr>
+				<td><kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>C</kbd></kbd></td>
 				<td>Copy selected to clipboard</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl</kbd>+<kbd>X</kbd></td>
+				<td><kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>X</kbd></kbd></td>
 				<td>Cut selected to clipboard</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl</kbd>+<kbd>V</kbd></td>
+				<td><kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>V</kbd></kbd></td>
 				<td>Paste from clipboard</td>
 			</tr>
 			<tr>
@@ -684,23 +698,26 @@
 				<td>Toggle selected switches/things</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td>
+				<td><kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>Z</kbd></kbd></td>
 				<td>Undo</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd></td>
+				<td>
+					<kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></kbd> or
+					<kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>Y</kbd></kbd>
+				</td>
 				<td>Redo</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl</kbd>+<kbd>A</kbd></td>
+				<td><kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>A</kbd></kbd></td>
 				<td>Select all</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
+				<td><kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>S</kbd></kbd></td>
 				<td>Save world to a file</td>
 			</tr>
 			<tr>
-				<td><kbd>Ctrl</kbd>+<kbd>O</kbd></td>
+				<td><kbd class="grouping-kbd"><kbd>Ctrl</kbd>+<kbd>O</kbd></kbd></td>
 				<td>Open a saved world file</td>
 			</tr>
 		</table>

@@ -5300,21 +5300,28 @@ const initUI = () => {
 	for (const tr of controlsTableRows) {
 		const [controlCell, actionCell] = tr.cells;
 		const kbd = controlCell.querySelector("kbd");
-		const match = kbd.textContent.match(/(Ctrl\+)?(.+)/);
-		if (match) {
-			const ctrlKey = match[1] !== "";
-			let key = match[2];
-			if (key === "+") {
-				key = "NumpadAdd";
-			} else if (key === "-") {
-				key = "NumpadSubtract";
+		if (kbd) {
+			// relying on a kbd representing whole key combos, and the order of modifiers, and lack of Alt/Meta/Super/Hyper
+			const match = kbd.textContent.match(/(Ctrl\s*\+\s*)?(Shift\s*\+\s*)?(.+)/);
+			if (match) {
+				const ctrlKey = Boolean(match[1]);
+				const shiftKey = Boolean(match[2]);
+				let key = match[3];
+				if (key === "+") {
+					key = "NumpadAdd";
+				} else if (key === "-") {
+					key = "NumpadSubtract";
+				}
+				const button = document.createElement("button");
+				button.className = "generic-button";
+				button.addEventListener("click", () => {
+					canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, shiftKey, bubbles: true }));
+				});
+				wrapContents(actionCell, button);
 			}
-			const button = document.createElement("button");
-			button.className = "generic-button";
-			button.addEventListener("click", () => {
-				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
-			});
-			wrapContents(actionCell, button);
+		} else if (!controlCell.matches("th")) {
+			// eslint-disable-next-line no-console
+			console.warn("No keyboard shortcut for", actionCell.textContent, actionCell);
 		}
 	}
 };
