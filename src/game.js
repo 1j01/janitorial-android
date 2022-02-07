@@ -377,12 +377,10 @@ const parseLocationHash = (hash = location.hash) => {
 	return Object.fromEntries(keyValuePairs);
 };
 const levelNameToSlug = (levelName) => levelName
-	.trim()
-	.replace(/[?!.]+$/, "") // remove trailing punctuation
-	.replace(/'/g, "") // remove apostrophes
+	.replace(/'/g, "") // remove apostrophes (because "don-t" and "it-s" look stupid)
 	.replace(/[^a-z0-9]/gi, "-") // replace non-alphanumeric characters with dashes
 	.replace(/-{2,}/g, "-") // replace multiple dashes with a single dash
-	.replace(/^-+|-+$/g, "") // remove leading and trailing dashes
+	.replace(/^-+|-+$/g, "") // remove leading and trailing dashes (effectively trimming whitespace etc.)
 	.toLowerCase();
 
 const storageKeys = {
