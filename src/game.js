@@ -397,7 +397,6 @@ const storageKeys = {
 	muteMusic: "janitorial-android:mute-music",
 	volume: "janitorial-android:volume",
 	editing: "janitorial-android:editing", // might remove in favor of routes
-	paused: "janitorial-android:paused", // weird, should remove as a setting (I think it was helpful in dev, but not so much any more, with muting, editor, other screens to go to)
 	hideInfoBox: "janitorial-android:hide-info-box", // should probably remove in favor of title screen, help screen, and an accessible editor UI with tooltips for learning shortcuts
 
 	// dev helpers
@@ -2472,10 +2471,6 @@ const togglePause = () => {
 	// if (editing !== paused) {
 	// 	toggleEditing();
 	// }
-	try {
-		localStorage[storageKeys.paused] = paused;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
 };
 const updateEditingButton = () => {
 	toggleEditingButton.ariaPressed = editing;
@@ -6400,7 +6395,6 @@ const main = async () => {
 		}
 		mainGain.gain.value = volume;
 		editing = localStorage[storageKeys.editing] === "true";
-		paused = localStorage[storageKeys.paused] === "true";
 		hideInfoBox = localStorage[storageKeys.hideInfoBox] === "true";
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
