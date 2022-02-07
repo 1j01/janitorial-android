@@ -4526,15 +4526,14 @@ const simulate = (entities) => {
 
 	// sort for consistency for level delta patching
 	entities.sort((a, b) => a.id - b.id);
-	// DISABLED because it's too space inefficient, it fills up localStorage and causes level progress to not be saved.
-	// playthroughEvents.push({
-	// 	type: "step",
-	// 	t: frameCounter,
-	// 	x: mouse.worldX,
-	// 	y: mouse.worldY,
-	// 	editing,
-	// 	levelPatch: diffPatcher.clone(diffPatcher.diff(levelLastFrame, currentLevel)),
-	// });
+	playthroughEvents.push({
+		type: "step",
+		t: frameCounter,
+		x: mouse.worldX,
+		y: mouse.worldY,
+		editing,
+		levelPatch: diffPatcher.clone(diffPatcher.diff(levelLastFrame, currentLevel)),
+	});
 	levelLastFrame = diffPatcher.clone(currentLevel);
 };
 
@@ -5053,7 +5052,9 @@ const checkLevelEnd = () => {
 								// and possible future server-verification
 								// Don't save over if replaying a solution. (Maybe should extend to the score as well...)
 								if (playbackEvents.length === 0) {
-									localStorage[solutionKey] = JSON.stringify(playthroughEvents);
+									// I've disabled "step" events because they take up too much space, right now.
+									// They cause localStorage to be filled up and then you can't even save your level progress (scores).
+									localStorage[solutionKey] = JSON.stringify(playthroughEvents.filter(({ type }) => type !== "step"));
 									// eslint-disable-next-line no-console
 									console.log("Saved solution for", currentLevel.title);
 								}
