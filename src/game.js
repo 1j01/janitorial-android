@@ -377,10 +377,13 @@ const parseLocationHash = (hash = location.hash) => {
 	return Object.fromEntries(keyValuePairs);
 };
 const levelNameToSlug = (levelName) => levelName
+	.trim()
 	.replace(/[?!.]+$/, "") // remove trailing punctuation
+	.replace(/'/g, "") // remove apostrophes
 	.replace(/[^a-z0-9]/gi, "-") // replace non-alphanumeric characters with dashes
-	.toLowerCase()
-	.trim();
+	.replace(/-{2,}/g, "-") // replace multiple dashes with a single dash
+	.replace(/^-+|-+$/g, "") // remove leading and trailing dashes
+	.toLowerCase();
 
 const storageKeys = {
 	// best score (fewest moves)
@@ -5862,9 +5865,8 @@ const showGameWinUI = (game) => {
 const canGoToNextLevel = () => location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/);
 const goToNextLevel = () => {
 	if (canGoToNextLevel()) {
-		const normalize = (levelName) => levelName.replace(/[:?]/g, "").toLowerCase();
 		for (const { game, levelNames } of getLevelLists(resources)) {
-			const index = levelNames.map(normalize).indexOf(normalize(currentLevel.title));
+			const index = levelNames.map(levelNameToSlug).indexOf(levelNameToSlug(currentLevel.title));
 			if (index !== -1) {
 				const nextLevelName = levelNames[index + 1];
 				if (nextLevelName) {
