@@ -6126,11 +6126,9 @@ const loadFromHash = async () => {
 					// For editor
 					if (initializedEditorUI) {
 						levelDropdown.selectedIndex = 0;
-						levelDropdown.value = levelName;
+						levelDropdown.value = levelName; // names should be unique across games
 						if (levelDropdown.selectedIndex <= 0) { // 0 = "Custom World", -1 = no items
 							showMessageBox(`Level "${levelName}" not found in dropdown.`);
-						} else {
-							levelDropdown.value = levelName; // names should be unique across games
 						}
 					}
 
