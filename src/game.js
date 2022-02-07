@@ -4728,8 +4728,7 @@ const render = () => {
 			["with the mouse", "white", 164, 253],
 			["before you play the game", "black", 104, 271],
 		];
-		for (let i = 0; i < lines.length; i++) {
-			const [text, color, x, y] = lines[i];
+		for (const [text, color, x, y] of lines) {
 			ctx.save();
 			ctx.translate(x, y);
 			ctx.scale(2, 2);
