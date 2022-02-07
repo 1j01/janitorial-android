@@ -3172,7 +3172,8 @@ const possibleGrabs = ({ worldX, worldY } = mouse) => {
 		return grabs;
 	}
 	if (editing && brick.selected) {
-		grabs.push(grabs.selection = entities.filter((entity) => entity.selected));
+		grabs.selection = entities.filter((entity) => entity.selected);
+		grabs.push(grabs.selection);
 		return grabs;
 	}
 	if (brick.fixed || (brick.type !== "brick" && brick.type !== "jump" && brick.type !== "shield")) {
