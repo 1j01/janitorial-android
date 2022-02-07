@@ -6112,6 +6112,12 @@ const loadFromHash = async () => {
 		stopTests();
 	}
 
+	if (!infoBox.hidden) {
+		// don't need to show it initially or at any routes right now so this is fine
+		// this prevents it from showing on the title screen, colliding
+		toggleInfoBox();
+	}
+
 	const toShowLevelSelectScreen = Boolean(location.hash.match(/level-select/));
 
 	if (hashOptions.level || toShowTestRunner || toShowLevelSelectScreen) {
