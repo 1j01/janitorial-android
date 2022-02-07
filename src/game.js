@@ -232,7 +232,6 @@ let paused = false;
 let editing = false;
 let testing = false;
 let rewindingWithButton = false;
-let hideInfoBox = false;
 
 // eslint-disable-next-line no-empty-function, no-unused-vars
 let updateEditorUIForLevelChange = (level) => { };
@@ -397,7 +396,6 @@ const storageKeys = {
 	muteMusic: "janitorial-android:mute-music",
 	volume: "janitorial-android:volume",
 	editing: "janitorial-android:editing", // might remove in favor of routes
-	hideInfoBox: "janitorial-android:hide-info-box", // should probably remove in favor of title screen, help screen, and an accessible editor UI with tooltips for learning shortcuts
 
 	// dev helpers
 	showDebug: "janitorial-android:debug",
@@ -5128,17 +5126,9 @@ const animate = () => {
 //                      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 // #region GUI (Graphical User Interface)
 
-const updateInfoBoxHidden = () => {
-	infoBox.hidden = hideInfoBox;
-	toggleInfoButton.setAttribute("aria-expanded", hideInfoBox ? "false" : "true");
-};
 const toggleInfoBox = () => {
-	hideInfoBox = !hideInfoBox;
-	updateInfoBoxHidden();
-	try {
-		localStorage[storageKeys.hideInfoBox] = hideInfoBox;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
+	infoBox.hidden = !infoBox.hidden;
+	toggleInfoButton.setAttribute("aria-expanded", infoBox.hidden ? "false" : "true");
 };
 
 let playedIntro = false;
@@ -5320,8 +5310,6 @@ const initUI = () => {
 	// Main game controls bar
 
 	toggleInfoButton.addEventListener("click", toggleInfoBox);
-
-	updateInfoBoxHidden();
 
 	toggleFullscreenButton.addEventListener("click", toggleFullscreen);
 	toggleFullscreenButton.ariaPressed = false; // document.fullscreenElement unlikely to work when loading page
@@ -6395,7 +6383,6 @@ const main = async () => {
 		}
 		mainGain.gain.value = volume;
 		editing = localStorage[storageKeys.editing] === "true";
-		hideInfoBox = localStorage[storageKeys.hideInfoBox] === "true";
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 
