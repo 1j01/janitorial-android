@@ -6167,6 +6167,7 @@ const loadFromHash = async () => {
 				} catch (error) {
 					showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
 				}
+				paused = editing;
 			} else {
 				try {
 					const loaded = await openLevelByName({ game, levelName, fromHash: true });
@@ -6182,7 +6183,7 @@ const loadFromHash = async () => {
 						// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
 						return;
 					}
-					paused = false;
+					paused = editing;
 				} catch (error) {
 					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
 				}
