@@ -1630,8 +1630,9 @@ const loadTextFile = async (path) => {
 	}
 };
 
-const loadLevelFromTextFile = async (path) => {
-	return loadLevelFromText(await loadTextFile(path), path.match(/Undercover/i) ? "Junkbot Undercover" : "Junkbot");
+const loadLevelFromTextFile = async (path, game) => {
+	game ??= path.match(/Undercover/i) ? "Junkbot Undercover" : "Junkbot";
+	return loadLevelFromText(await loadTextFile(path), game);
 };
 
 const loadSound = async (path) => {
@@ -2329,7 +2330,7 @@ const loadLevelByName = ({ levelName, game }) => {
 		folder = "levels/custom";
 		fileName = "New Employee Training (1j01).txt";
 	}
-	return loadLevelFromTextFile(`${folder}/${fileName}`, { game });
+	return loadLevelFromTextFile(`${folder}/${fileName}`, game);
 };
 
 const save = () => {
