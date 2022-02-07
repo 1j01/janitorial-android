@@ -6044,22 +6044,25 @@ const runTests = async () => {
 //                                                                                             `'+W###################
 // #region Routing (load from URL hash)
 
+// Keep track of the location hash we're loading from, so that if the user navigates away, we can abort the load.
+// This is important to avoid race conditions, for robust routing.
+// To test the routing, it helps a lot to enable network throttling in the devtools. Then load screens and navigate while loading.
+//
+// This fixes a race condition where it could hide the title screen UI,
+// and leave you with just the title screen level, navigating back to the title screen.
+//
+// To test: Open the title screen, click Start, go back (Alt+Left),
+// then hold Alt and press Right and then Left quickly together,
+// almost as if they're one key, but in that order specifically.
+// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
+//
+// You can also try simply spamming Alt+Left/Right; note that in Chrome it aborts fetches, giving an indistinguishable "TypeError: Failed to fetch" error.
+let loadFromHashRequest = 0;
+
 const loadFromHash = async () => {
 
-	// Keep track of the location hash we're loading from, so that if the user navigates away, we can abort the load.
-	// This is important to avoid race conditions, for robust routing.
-	// To test the routing, it helps a lot to enable network throttling in the devtools. Then load screens and navigate while loading.
-
-	// This fixes a race condition where it could hide the title screen UI,
-	// and leave you with just the title screen level, navigating back to the title screen.
-
-	// To test: Open the title screen, click Start, go back (Alt+Left),
-	// then hold Alt and press Right and then Left quickly together,
-	// almost as if they're one key, but in that order specifically.
-	// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
-
-	// You can also try simply spamming Alt+Left/Right; note that in Chrome it aborts fetches, so it can show an error message to the user currently.
-	const loadingFrom = location.hash;
+	loadFromHashRequest += 1;
+	const thisLoadFromHashRequest = loadFromHashRequest;
 
 	const hashOptions = parseLocationHash();
 	// console.log("From URL hash:", hashOptions);
@@ -6085,7 +6088,7 @@ const loadFromHash = async () => {
 		hotResourcesLoadedPromise ??= allResourcesLoadedPromise;
 		resources = await allResourcesLoadedPromise;
 
-		if (location.hash !== loadingFrom) {
+		if (loadFromHashRequest !== thisLoadFromHashRequest) {
 			// prevents e.g. running tests if you load #run-tests part way and navigate elsewhere
 			// (test this with network throttling in the devtools)
 			return;
@@ -6126,7 +6129,7 @@ const loadFromHash = async () => {
 
 					try {
 						const level = await loadLevelByName({ levelName, game });
-						if (location.hash !== loadingFrom) {
+						if (loadFromHashRequest !== thisLoadFromHashRequest) {
 							// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
 							return;
 						}
@@ -6157,7 +6160,7 @@ const loadFromHash = async () => {
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
 		resources = await hotResourcesLoadedPromise;
-		if (location.hash !== loadingFrom) {
+		if (loadFromHashRequest !== thisLoadFromHashRequest) {
 			return;
 		}
 		showTitleScreen();
