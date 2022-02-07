@@ -405,7 +405,6 @@ const storageKeys = {
 
 const floor = (x, multiple) => Math.floor(x / multiple) * multiple;
 const round = (x, multiple) => Math.round(x / multiple) * multiple;
-// const ceil = (x, multiple) => Math.ceil(x / multiple) * multiple;
 
 const arrayRemove = (array, value) => {
 	if (array === entities) {
@@ -1433,10 +1432,6 @@ const loadLevelFromText = (levelData, game) => {
 					facingY = 1;
 				}
 				const brickMatch = typeName.match(/brick_(\d+)/i);
-				// animations.add(`${typeName}:${animationName}`);
-				// if (typeName === "haz_slickcrate" && animationName !== "norm") {
-				// 	console.log(level.title, entityDef);
-				// }
 				if (brickMatch) {
 					entities.push(makeBrick({
 						x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
@@ -1619,8 +1614,6 @@ const loadAtlasJSON = async (path) => {
 	return result;
 };
 
-// const animations = new Set();
-
 const loadTextFile = async (path) => {
 	const response = await fetch(path);
 	if (response.ok) {
@@ -1684,7 +1677,6 @@ const loadResources = async (resourcePathsByID) => {
 			progressBricks.push(progressBrick);
 			loadProgress.appendChild(progressBrick);
 		}
-		// console.log(`Loaded '${path}'`);
 		return [id, resource];
 	})));
 };
@@ -1851,11 +1843,9 @@ const drawSwitchConnection = (ctx, switchEntity, controlledEntity) => {
 	ctx.moveTo(startX, startY);
 	ctx.quadraticCurveTo(controlPointX, controlPointY, endX, endY);
 	ctx.lineCap = "round";
-	// ctx.strokeStyle = "#000000";
 	ctx.strokeStyle = controlledEntity.on ? "#005500" : "#550000";
 	ctx.lineWidth = 4;
 	ctx.stroke();
-	// ctx.strokeStyle = controlledEntity.on ? "#00cc00" : "#aa0000";
 	ctx.strokeStyle = controlledEntity.on ? "#00ff00" : "#ff0000";
 	ctx.lineWidth = 3;
 	ctx.stroke();
@@ -2416,7 +2406,6 @@ const togglePause = () => {
 };
 const updateEditingButton = () => {
 	toggleEditingButton.ariaPressed = editing;
-	// toggleEditingButton.querySelector("img").src = editing ? "images/icons/play.png" : "images/icons/edit.png";
 	toggleEditingButton.querySelector("img").src = editing ? "images/icons/toggle-editing-edit-mode.png" : "images/icons/toggle-editing-play-mode.png";
 };
 const toggleEditing = () => {
@@ -2566,23 +2555,14 @@ const flipSelected = () => {
 	if (!editing) {
 		return;
 	}
-	// let meanX = 0;
 	let maxX = -Infinity;
 	let minX = Infinity;
 	const selectedEntities = entities.filter((entity) => entity.selected);
 	for (const entity of selectedEntities) {
-		// meanX += entity.x + entity.width / 2;
 		maxX = Math.max(maxX, entity.x + entity.width);
 		minX = Math.min(minX, entity.x);
 	}
-	// meanX /= selectedEntities.length;
-	// let flipCenterX = floor(meanX, 15);
 	let flipCenterX = (maxX + minX) / 2;
-	// if (round(flipCenterX, 15) !== flipCenterX) {
-	// 	flipCenterX = floor(flipCenterX, 15);
-	// } else {
-	// 	flipCenterX = round(flipCenterX, 15);
-	// }
 	// Note the divide by two. This handles even and odd numbers of cells wide.
 	// It doesn't however handle sub-grid widths. But I'm not sure what it should do in that case.
 	flipCenterX = round(flipCenterX, 15 / 2);
@@ -3615,7 +3595,6 @@ const walk = (junkbot) => {
 		const posStepDown = { x: posInFront.x, y: step.y - junkbot.height };
 		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropletOrEnemyBot)
 			.sort((a, b) => a.y - b.y)[0];
-		// debug("JUNKBOT", `step: ${JSON.stringify(step, null, "\t")}`);
 		if (
 			posStepDown.y - junkbot.y <= 18 &&
 			posStepDown.y - junkbot.y > 0 &&
@@ -3696,9 +3675,6 @@ const simulateJunkbot = (junkbot) => {
 	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notDroplet);
 	if (inside) {
 		debug("JUNKBOT", "STUCK IN WALL");
-		// debug("JUNKBOT", "STUCK IN WALL - GO UP");
-		// junkbot.y = inside.y - junkbot.height;
-		// entityMoved(junkbot);
 		return;
 	}
 	if (junkbot.floating) {
@@ -3741,7 +3717,6 @@ const simulateJunkbot = (junkbot) => {
 		const newX = junkbot.x + dirX * 15;
 		const newY = junkbot.y + dirY * 18;
 		if (entityCollisionTest(newX, newY, junkbot, notDroplet)) {
-			// debug("JUNKBOT", `collision at ${newX}, ${newY}`);
 			if (!entityCollisionTest(junkbot.x, newY, junkbot, notDroplet)) {
 				// moving Y only is not a collision
 				junkbot.momentumX = 0;
@@ -3757,18 +3732,9 @@ const simulateJunkbot = (junkbot) => {
 			}
 			playSound("headBonk");
 		} else {
-			// debug("JUNKBOT", "move to", newX, newY);
 			junkbot.x = newX;
 			junkbot.y = newY;
 			junkbot.momentumX -= dirX; // -= Math.sign(junkbot.momentumX) would be different
-			// if (
-			// 	entityCollisionTest(newX + dirX, newY + 1, junkbot, notDroplet) &&
-			// 	!entityCollisionTest(newX, newY + 1, junkbot, notDroplet) &&
-			// 	!entityCollisionTest(newX + dirX, newY, junkbot, notDroplet)
-			// ) {
-			// 	junkbot.momentumX = 0;
-			// 	junkbot.momentumY = 0;
-			// }
 		}
 		junkbot.momentumY += 1;
 		if (junkbot.momentumY === 5) {
@@ -3935,13 +3901,12 @@ const simulateScaredy = (bin) => {
 };
 
 const simulateFlybot = (flybot) => {
+	// Could merge with eyebot movement:
 	// doEyebotMovement(flybot);
 	// return;
 
 	flybot.animationFrame += 1;
-	// if (flybot.animationFrame > 2) {
 	if (flybot.animationFrame % 2 === 0) {
-		// flybot.animationFrame = 0;
 		const aheadPos = { x: flybot.x + flybot.facing * 15, y: flybot.y };
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, flybot, (otherEntity) => otherEntity.type !== "droplet");
 		if (ahead) {
@@ -3998,9 +3963,6 @@ const doEyebotMovement = (eyebot) => {
 			entityMoved(eyebot);
 		}
 	}
-	// if (eyebot.animationFrame > 2) {
-	// 	eyebot.animationFrame = 0;
-	// }
 };
 
 const simulateClimbbot = (climbbot) => {
@@ -4114,7 +4076,7 @@ const simulateDroplet = (droplet) => {
 					if (ground.type === "junkbot") {
 						hurtJunkbot(ground, "water");
 					}
-					// ground.colorName = "blue";
+
 					droplet.splashing = true;
 					droplet.animationFrame = 0;
 
@@ -4247,7 +4209,7 @@ const handleRewind = () => {
 	}
 };
 const handlePlayback = () => {
-	// console.log("playback at frameCounter =", frameCounter);
+	debug("handlePlayback: frameCounter", frameCounter);
 	for (const event of playbackEvents) {
 		if (event.t === frameCounter + 1) {
 			if (event.levelPatch) {
@@ -4275,14 +4237,12 @@ const handlePlayback = () => {
 				}
 			}
 
-			// console.log("playback", event);
 			const playbackMouse = { worldX: event.x, worldY: event.y };
 			const { x, y } = worldToCanvas(playbackMouse.worldX, playbackMouse.worldY);
 			playbackMouse.x = x;
 			playbackMouse.y = y;
 			if (event.type === "pickup") {
 				const grabs = possibleGrabs(playbackMouse);
-				// console.log("grabs", grabs, "playbackMouse", playbackMouse, "brick", brickAt(playbackMouse));
 				if (grabs && !dragging.length) {
 					if (event.grabType === "upward") {
 						startGrab(grabs.upward, { grabType: "upward", duringPlayback: true, mouse: playbackMouse });
@@ -4291,6 +4251,7 @@ const handlePlayback = () => {
 					} else {
 						startGrab(grabs[0], { grabType: "single", duringPlayback: true, mouse: playbackMouse });
 					}
+					// @TODO: this should play a sound, right?
 					// playSound("blockClick");
 				} else {
 					// showMessageBox("Something must be different between recording and playback.");
@@ -4741,10 +4702,6 @@ const render = () => {
 
 	const shouldHilight = (entity) => {
 		return editing ? entity.selected : entity.misplaced;
-		// if (dragging.length) {
-		// 	return dragging.indexOf(entity) > -1;
-		// }
-		// return hovered.length && hovered[Math.floor(Date.now() / 500 % hovered.length)].indexOf(entity) > -1;
 	};
 
 	const placeable = canRelease();
@@ -4897,7 +4854,6 @@ const render = () => {
 		if (Math.random() > 0.7) {
 			playSound("deathByWater");
 		} else {
-			// playSound(`rustle${Math.floor(Math.random() * numRustles)}`);
 			playSound("rustle0");
 		}
 	}
@@ -5803,7 +5759,6 @@ const showGameWinUI = (game) => {
 			label: "Play Junkbot Undercover",
 			action: () => {
 				location.hash = "level=Junkbot%20Undercover;Descent";
-				// paused = false;
 			},
 		});
 	}
@@ -5819,7 +5774,6 @@ const goToNextLevel = () => {
 				const nextLevelName = levelNames[index + 1];
 				if (nextLevelName) {
 					location.hash = `level=${game};${nextLevelName}`;
-					// paused = false;
 				} else {
 					showGameWinUI(game);
 				}
@@ -5889,7 +5843,6 @@ const runTests = async () => {
 	const render = () => {
 		const passedTests = tests.filter((test) => test.state === "passed");
 		const failedTests = tests.filter((test) => test.state === "failed");
-		// const remainingTests = tests.filter((test) => test.state !== "failed" && test.state !== "passed");
 
 		testsInfo.innerHTML = `
 			<p>Passed: ${passedTests.length} / ${tests.length}</p>
@@ -6069,7 +6022,6 @@ const loadFromHash = async () => {
 	const loadingFrom = location.hash;
 
 	const hashOptions = parseLocationHash();
-	// console.log("From URL hash:", hashOptions);
 
 	const toShowTestRunner = Boolean(location.hash.match(/run-tests/));
 	if (!toShowTestRunner) {
@@ -6129,12 +6081,9 @@ const loadFromHash = async () => {
 				paused = editing;
 			} else {
 				try {
-					// console.log("loading:", option.value, { option, optgroup, game });
-
 					try {
 						const level = await loadLevelByName({ levelName, game });
 						if (location.hash !== loadingFrom) {
-							// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
 							return;
 						}
 						initLevel(level);
