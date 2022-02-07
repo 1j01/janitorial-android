@@ -2331,39 +2331,7 @@ const loadLevelByName = ({ levelName, game }) => {
 	}
 	return loadLevelFromTextFile(`${folder}/${fileName}`, { game });
 };
-const openLevelByName = async ({ levelName, game, fromHash = false } = {}) => {
-	// If fromHash is true, prevent race conditions by aborting if the hash doesn't match.
-	// Note that this function doesn't change the location hash.
-	// To open a level, other code should change the URL, so that the URL is a consistent source of truth.
 
-	// console.log("loading:", option.value, { option, optgroup, game });
-	const hashMatches = () => decodeURIComponent(parseLocationHash().level || "") === `${game};${levelName}`;
-
-	try {
-		const level = await loadLevelByName({ levelName, game });
-		if (fromHash && !hashMatches()) {
-			// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
-			return false;
-		}
-		initLevel(level);
-		editorLevelState = serializeToJSON(currentLevel);
-	} catch (error) {
-		showMessageBox(`Failed to load level:\n\n${error}`);
-	}
-
-	// For editor
-	if (initializedEditorUI) {
-		levelDropdown.selectedIndex = 0;
-		levelDropdown.value = levelName;
-		if (levelDropdown.selectedIndex <= 0) { // 0 = "Custom World", -1 = no items
-			showMessageBox(`Level "${levelName}" not found in dropdown.`);
-		} else {
-			levelDropdown.value = levelName; // names should be unique across games
-		}
-	}
-
-	return true;
-};
 const save = () => {
 	if (editing) {
 		editorLevelState = serializeToJSON(currentLevel);
@@ -6131,19 +6099,41 @@ const loadFromHash = async () => {
 				paused = editing;
 			} else {
 				try {
-					const loaded = await openLevelByName({ game, levelName, fromHash: true });
-					if (!loaded) {
-						// The URL was changed. The load should be silently aborted.
+					// console.log("loading:", option.value, { option, optgroup, game });
+					const hashMatches = () => decodeURIComponent(parseLocationHash().level || "") === `${game};${levelName}`;
 
-						// This fixes a race condition where it could hide the title screen UI,
-						// and leave you with just the title screen level, navigating back to the title screen.
+					try {
+						const level = await loadLevelByName({ levelName, game });
+						if (!hashMatches()) {
+							// console.log(`Hash changed while loading level data for '${levelName}'; aborting load. New location.hash: '${location.hash}'`);
+							return;
+							// The URL was changed. The load should be silently aborted.
 
-						// To test: Open the title screen, click Start, go back (Alt+Left),
-						// then hold Alt and press Right and then Left quickly together,
-						// almost as if they're one key, but in that order specifically.
-						// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
-						return;
+							// This fixes a race condition where it could hide the title screen UI,
+							// and leave you with just the title screen level, navigating back to the title screen.
+
+							// To test: Open the title screen, click Start, go back (Alt+Left),
+							// then hold Alt and press Right and then Left quickly together,
+							// almost as if they're one key, but in that order specifically.
+							// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
+						}
+						initLevel(level);
+						editorLevelState = serializeToJSON(currentLevel);
+					} catch (error) {
+						showMessageBox(`Failed to load level:\n\n${error}`);
 					}
+
+					// For editor
+					if (initializedEditorUI) {
+						levelDropdown.selectedIndex = 0;
+						levelDropdown.value = levelName;
+						if (levelDropdown.selectedIndex <= 0) { // 0 = "Custom World", -1 = no items
+							showMessageBox(`Level "${levelName}" not found in dropdown.`);
+						} else {
+							levelDropdown.value = levelName; // names should be unique across games
+						}
+					}
+
 					paused = editing;
 				} catch (error) {
 					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
