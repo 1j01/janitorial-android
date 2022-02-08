@@ -389,6 +389,11 @@ const levelNameToSlug = (levelName) => levelName
 	.replace(/^-+|-+$/g, "") // remove leading and trailing dashes (effectively trimming whitespace etc.)
 	.toLowerCase();
 
+const gameNameToSlug = (gameName) => levelNameToSlug(gameName)
+	.replace(/-*(uc|undercover)/, "2")
+	.replace(/-*1/g, "")
+	.replace(/test-cases|run-tests/, "tests");
+
 const storageKeys = {
 	// best score (fewest moves)
 	score: (levelName) => `janitorial-android:score:${levelNameToSlug(levelName)}`,
@@ -5838,12 +5843,28 @@ const showLevelWinUI = () => {
 //                                                                               \)      \____/                  \____/\____/
 // #region Test Runner
 
+const testRouting = () => {
+	for (const { hash, expected } of routingTests) {
+		// const { game, levelName, levelSection, screen, canonicalHash, wantsEdit } = parseHash(hash);
+		const actual = parseRoute(hash);
+		for (const [key, value] of Object.entries(expected)) {
+			if (actual[key] !== value) {
+				// eslint-disable-next-line no-console
+				console.warn(`Routing test failed for hash ${hash}\n"${key}" was ${JSON.stringify(actual[key])} instead of ${JSON.stringify(value)}\n\n`); // , "Expected", expected, "\n", "Actual", actual, ``
+				break;
+			}
+		}
+	}
+};
+
 const stopTests = () => {
 	testing = false;
 	testsUI.hidden = true;
 };
 
 const runTests = async () => {
+	testRouting();
+
 	testing = true;
 
 	const realTime = location.hash.match(/realtime/);
@@ -6026,6 +6047,302 @@ const runTests = async () => {
 //                                                                                             `'+W###################
 // #region Routing (load from URL hash)
 
+// Routing plan:
+//
+// #/ (or anything not matched)
+//   ╚══> redirect to title screen for Junkbot 1, or if making a sequel, perhaps Junkbot 3
+// #/junkbot
+//   ╚══> title screen
+// #/junkbot/levels
+//   ╚══> redirect to level select's first tab/page (building/basement)
+// #/junkbot/levels/building-1
+//   ╚══> level select, specific tab (building)
+// #/junkbot/levels/building-1/new-employee-training
+//   ╚══> first level
+// #/junkbot-undercover[/blah]
+//   ╚══> redirect to #junkbot2[/blah]
+// #/junkbot2
+//   ╚══> title screen
+// #/junkbot2/levels/basement-1/descent
+//   ╚══> first level of the sequel
+// #/edit/junkbot/levels/building-1/new-employee-training
+//   ╚══> redirect to editor with local version
+// #/junkbot/levels/building-1/new-employee-training/edit
+//   ╚══> redirect to editor with local version
+// #/tests
+//   ╚══> run all tests
+// #/tests/tippy-toast
+//   ╚══> run a specific test (or at least load the level)
+// #/edit
+//   ╚══> new file
+// #/edit/local/foo-bar
+//   ╚══> existing file
+// #/edit/data/a99897sdf987a9879a9as70gah0986h96gjs6797659...
+//   ╚══> existing level (easy sharing)
+//
+// Old routes:
+//
+// #level=Junkbot%20Undercover;Water%20Works
+//   ╚══> redirect to #junkbot2/levels/basement-1/water-works
+// #level=local;water%20works
+//   ╚══> redirect to #edit/local/water-works (if I'm gonna bother making it work to load like that, hyphens vs space)
+// #level=Test%20Cases;Tippy%20Toast
+//   ╚══> redirect to #tests/tippy-toast
+// #run-tests
+//   ╚══> redirect to #tests
+//
+// Notes:
+// - I'm thinking "junkbot2" rather than "junkbot-uc" or similar, so that if I make a sequel, there's an easy working title, "junkbot3".
+// - Not sure I'm going to support the old routes. It's not a popular project, so no big deal.
+// - Might get rid of locally stored levels, in favor of data in the URL.
+// - Should it be #/editor/<level> or #/<level>/edit?
+//   - It's probably a little easier to edit the end of the URL (not that you should need to)
+//   - URL changing less when switching to edit mode probably feels nicer... but these are redirects (for some cases?), so that might not apply
+//   - I figure I'll want a button on the main menu or somewhere that opens up the level editor, so there's the question of what URL would that be; would it be weird if it includes level data in the URL for that?
+//     It wouldn't be that weird, but it might be nicer to have it at simply "#edit"
+//   - Which is more distinguishing, the editing mode or the level? If I think about going to the editor from the title screen, the level editor is more important, but in that case there's no level yet. If I think about the editor being a mode, it's clearly less important.
+// - I should automatically canonicalize URLs (letter case, etc.) with replaceState.
+//   - I could add some extra redirects like allowing the game to be omitted, so you can type e.g. "#descent" instead of "#junkbot2/levels/basement-1/descent". Mainly for fun I guess.
+//     - Synonyms: "junkbot2"/"junkbot-uc"/"junkbot-undercover", "_"/"-"/"", "edit"/"editor"/"editing"/"edit-mode"/"ed"/"e"
+// - Should I include the slash at the start? "#/foo/bar" vs "#foo/bar" (either way, I should normalize it)
+// - I guess I want a route for PLAYING a level for easy sharing too
+// `#play/data/...` or just `#data/...` matching built-in level routes better (rather than mirroring the edit URL)
+// hm, heck, maybe the `local` levels should match like that too
+// the difference being that a URL for playing a local level only works locally
+// but I might just get rid of that style of level autosave, in favor of the beepbox (et al) way (data in url)
+
+const SCREEN_TITLE = "SCREEN_TITLE";
+const SCREEN_LEVEL_SELECT = "SCREEN_LEVEL_SELECT";
+const SCREEN_LEVEL = "SCREEN_LEVEL";
+
+const parseRoute = (hash) => {
+	hash = hash.replace(/^#?\/?/, "").replace(/\/$/, "");
+	const hashParts = hash.split("/").map(decodeURIComponent);
+	hash = decodeURIComponent(hash);
+	const editSynonyms = ["edit", "editor", "level-editor", "editing", "editable", "edit-mode", "ed", "e", "design", "designer"];
+	const levelSelectSynonyms = ["levels", "level-select", "level-selector", "select", "select-level", "choose-level"];
+	const wantsEdit = editSynonyms.includes(hashParts[0]) || editSynonyms.includes(hashParts[hashParts.length - 1]);
+	const maybeLevelSelect = hashParts.some((hashPart) => levelSelectSynonyms.includes(hashPart));
+	let game;
+	// let levelSection;
+	let levelName;
+	for (const list of getLevelLists(resources)) {
+		for (const listedLevelName of list.levelNames) {
+			// if (hashParts.some((hashPart) => levelNameToSlug(listedLevelName) === levelNameToSlug(hashPart))) {
+			// being very lax in order to support old URLs
+			if (levelNameToSlug(hash).includes(levelNameToSlug(listedLevelName))) {
+				game = list.game;
+				// levelSection = list.section;
+				levelName = listedLevelName;
+				break;
+			}
+		}
+		if (levelName) {
+			break;
+		}
+	}
+
+	for (const hashPart of hashParts) {
+		if (gameNameToSlug(hashPart) === "junkbot") {
+			game = "Junkbot";
+		} else if (gameNameToSlug(hashPart) === "junkbot2") {
+			game = "Junkbot Undercover";
+		} else if (gameNameToSlug(hashPart) === "junkbot3") {
+			game = "Junkbot 3";
+		} else if (gameNameToSlug(hashPart) === "tests") {
+			game = "Test Cases";
+		}
+	}
+	if (hashParts[0].match(/level=Test Cases/)) {
+		game = "Test Cases";
+	}
+	game ??= "Junkbot";
+
+	let canonicalHash = `#${gameNameToSlug(game)}`;
+	let screen = SCREEN_TITLE;
+
+	if (levelName) {
+		screen = SCREEN_LEVEL;
+		if (game === "Test Cases") {
+			canonicalHash = `#tests/${levelNameToSlug(levelName)}`;
+		} else {
+			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelNameToSlug(levelName)}`;
+		}
+		if (wantsEdit) {
+			canonicalHash += "/edit";
+		}
+	} else if (game === "Test Cases") {
+		screen = SCREEN_LEVEL;
+		canonicalHash = "#tests";
+	} else if (wantsEdit) {
+		screen = SCREEN_LEVEL;
+		canonicalHash = `#level-editor`;
+	} else if (maybeLevelSelect) {
+		screen = SCREEN_LEVEL_SELECT;
+		canonicalHash = `#${gameNameToSlug(game)}/levels`;
+	}
+
+	return {
+		game,
+		levelName,
+		// levelSection,
+		screen,
+		canonicalHash,
+		wantsEdit,
+	};
+};
+
+const routingTests = [
+	{
+		hash: "#junkbot2/levels/basement-1/descent",
+		expected: {
+			game: "Junkbot Undercover",
+			levelName: "Descent",
+			// levelSection: "Basement 1",
+			screen: SCREEN_LEVEL,
+			// canonicalHash: "#junkbot2/levels/basement-1/descent", // @TODO
+			canonicalHash: "#junkbot2/levels/descent",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot2/levels/basement-1/descent/edit-mode",
+		expected: {
+			game: "Junkbot Undercover",
+			levelName: "Descent",
+			// levelSection: "Basement 1",
+			screen: SCREEN_LEVEL,
+			// canonicalHash: "#junkbot2/levels/basement-1/descent/edit", // @TODO
+			canonicalHash: "#junkbot2/levels/descent/edit",
+			wantsEdit: true,
+		},
+	},
+	{
+		hash: "#junkbot2/levels/basement-2",
+		expected: {
+			game: "Junkbot Undercover",
+			levelName: undefined,
+			// levelSection: "Basement 2",
+			screen: SCREEN_LEVEL_SELECT,
+			// canonicalHash: "#junkbot2/levels/basement-2", // @TODO
+			canonicalHash: "#junkbot2/levels",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot2/levels",
+		expected: {
+			game: "Junkbot Undercover",
+			levelName: undefined,
+			// levelSection: "Basement 1",
+			screen: SCREEN_LEVEL_SELECT,
+			// canonicalHash: "#junkbot2/levels/basement-1", // @TODO
+			canonicalHash: "#junkbot2/levels",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#level-editor",
+		expected: {
+			game: "Junkbot",
+			levelName: undefined,
+			levelSection: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#level-editor",
+			wantsEdit: true,
+		},
+	},
+	// {
+	// 	hash: "#junkbot2/level-editor",
+	// 	expected: {
+	// 		game: "Junkbot Undercover",
+	// 		levelName: undefined,
+	// 		levelSection: undefined,
+	// 		screen: SCREEN_LEVEL,
+	// 		canonicalHash: "#junkbot2/level-editor",
+	// 		wantsEdit: true,
+	// 	},
+	// },
+	{
+		hash: "#",
+		expected: {
+			game: "Junkbot",
+			levelName: undefined,
+			levelSection: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot",
+		expected: {
+			game: "Junkbot",
+			levelName: undefined,
+			levelSection: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#JUNKBOT2",
+		expected: {
+			game: "Junkbot Undercover",
+			levelName: undefined,
+			levelSection: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#tests/tippy-toast",
+		expected: {
+			game: "Test Cases",
+			levelName: "Tippy Toast",
+			levelSection: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests/tippy-toast",
+			wantsEdit: false,
+		},
+	},
+	// Old routes:
+	{
+		hash: "#run-tests",
+		expected: {
+			game: "Test Cases",
+			levelName: undefined,
+			levelSection: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#level=Junkbot;new-employee-training",
+		expected: {
+			game: "Junkbot",
+			levelName: "New Employee Training",
+			levelSection: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#junkbot/levels/new-employee-training",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#level=Test%20Cases;Tippy%20Toast",
+		expected: {
+			game: "Test Cases",
+			levelName: "Tippy Toast",
+			levelSection: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests/tippy-toast",
+			wantsEdit: false,
+		},
+	},
+];
+
 const loadFromHash = async () => {
 
 	// Keep track of the location hash we're loading from, so that if the user navigates away, we can abort the load.
@@ -6042,70 +6359,6 @@ const loadFromHash = async () => {
 
 	// You can also try simply spamming Alt+Left/Right; note that in Chrome it aborts fetches, so it can show an error message to the user currently.
 	const loadingFrom = location.hash;
-
-	// Routing plan:
-	//
-	// #/ (or anything not matched)
-	//   ╚══> redirect to title screen for Junkbot 1, or if making a sequel, perhaps Junkbot 3
-	// #/junkbot
-	//   ╚══> title screen
-	// #/junkbot/levels
-	//   ╚══> redirect to level select's first tab/page (building/basement)
-	// #/junkbot/levels/building-1
-	//   ╚══> level select, specific tab (building)
-	// #/junkbot/levels/building-1/new-employee-training
-	//   ╚══> first level
-	// #/junkbot-undercover[/blah]
-	//   ╚══> redirect to #junkbot2[/blah]
-	// #/junkbot2
-	//   ╚══> title screen
-	// #/junkbot2/levels/basement-1/descent
-	//   ╚══> first level of the sequel
-	// #/edit/junkbot/levels/building-1/new-employee-training
-	//   ╚══> redirect to editor with local version
-	// #/junkbot/levels/building-1/new-employee-training/edit
-	//   ╚══> redirect to editor with local version
-	// #/tests
-	//   ╚══> run all tests
-	// #/tests/tippy-toast
-	//   ╚══> run a specific test (or at least load the level)
-	// #/edit
-	//   ╚══> new file
-	// #/edit/local/foo-bar
-	//   ╚══> existing file
-	// #/edit/data/a99897sdf987a9879a9as70gah0986h96gjs6797659...
-	//   ╚══> existing level (easy sharing)
-	//
-	// Old routes:
-	//
-	// #level=Junkbot%20Undercover;Water%20Works
-	//   ╚══> redirect to #junkbot2/levels/basement-1/water-works
-	// #level=local;water%20works
-	//   ╚══> redirect to #edit/local/water-works (if I'm gonna bother making it work to load like that, hyphens vs space)
-	// #level=Test%20Cases;Tippy%20Toast
-	//   ╚══> redirect to #tests/tippy-toast
-	// #run-tests
-	//   ╚══> redirect to #tests
-	//
-	// Notes:
-	// - I'm thinking "junkbot2" rather than "junkbot-uc" or similar, so that if I make a sequel, there's an easy working title, "junkbot3".
-	// - Not sure I'm going to support the old routes. It's not a popular project, so no big deal.
-	// - Might get rid of locally stored levels, in favor of data in the URL.
-	// - Should it be #/editor/<level> or #/<level>/edit?
-	//   - It's probably a little easier to edit the end of the URL (not that you should need to)
-	//   - URL changing less when switching to edit mode probably feels nicer... but these are redirects (for some cases?), so that might not apply
-	//   - I figure I'll want a button on the main menu or somewhere that opens up the level editor, so there's the question of what URL would that be; would it be weird if it includes level data in the URL for that?
-	//     It wouldn't be that weird, but it might be nicer to have it at simply "#edit"
-	//   - Which is more distinguishing, the editing mode or the level? If I think about going to the editor from the title screen, the level editor is more important, but in that case there's no level yet. If I think about the editor being a mode, it's clearly less important.
-	// - I should automatically canonicalize URLs (letter case, etc.) with replaceState.
-	//   - I could add some extra redirects like allowing the game to be omitted, so you can type e.g. "#descent" instead of "#junkbot2/levels/basement-1/descent". Mainly for fun I guess.
-	//     - Synonyms: "junkbot2"/"junkbot-uc"/"junkbot-undercover", "_"/"-"/"", "edit"/"editor"/"editing"/"edit-mode"/"ed"/"e"
-	// - Should I include the slash at the start? "#/foo/bar" vs "#foo/bar" (either way, I should normalize it)
-	// - I guess I want a route for PLAYING a level for easy sharing too
-	// `#play/data/...` or just `#data/...` matching built-in level routes better (rather than mirroring the edit URL)
-	// hm, heck, maybe the `local` levels should match like that too
-	// the difference being that a URL for playing a local level only works locally
-	// and I might just get rid of that style of level autosave, in favor of the beepbox (et al) way (data in url)
 
 	const hashOptions = parseLocationHash();
 
