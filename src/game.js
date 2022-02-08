@@ -369,6 +369,12 @@ const showPrompt = (message, defaultText = "") => {
 		});
 	});
 };
+const closeMessageBox = () => {
+	if (messageBox) {
+		messageBoxContainer.remove();
+		messageBox = null;
+	}
+};
 
 const parseLocationHash = (hash = location.hash) => {
 	const keyValuePairs = hash.replace(/^#/, "")
@@ -2415,6 +2421,7 @@ const toggleEditing = () => {
 	editing = !editing;
 	editorUI.hidden = !editing;
 	editorControlsBar.hidden = !editing;
+	closeMessageBox();
 	updateEditingButton();
 	if (editing) {
 		// eslint-disable-next-line no-use-before-define
@@ -6052,6 +6059,7 @@ const loadFromHash = async () => {
 
 		if (toShowLevelSelectScreen) {
 			hideTitleScreen();
+			closeMessageBox();
 			showLevelSelectScreen();
 			return; // don't want to hide the level select screen below
 		}
@@ -6110,6 +6118,7 @@ const loadFromHash = async () => {
 		// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
 		hideTitleScreen();
 		hideLevelSelectScreen();
+		closeMessageBox();
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
 		resources = await hotResourcesLoadedPromise;
@@ -6118,6 +6127,7 @@ const loadFromHash = async () => {
 		}
 		showTitleScreen();
 		hideLevelSelectScreen();
+		closeMessageBox();
 
 		// We loaded from the hash!
 		// There's more to load, but we don't want to block showing the title screen level.
