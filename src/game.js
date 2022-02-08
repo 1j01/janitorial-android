@@ -2316,13 +2316,28 @@ const initLevel = (level) => {
 	redos.length = 0;
 };
 const loadLevelByName = ({ levelName, game }) => {
-	let fileName = `${levelName.replace(/[:?]/g, "")}.txt`;
+	const slug = levelNameToSlug(levelName);
+	let fileName;
+	// Level files are not named as URL slugs, so we can't just use `${slug}.txt`;
+	// we have to find the file name by iterating through the known levels.
+	for (const list of getLevelLists(resources)) {
+		if (list.game === game || !game) {
+			for (const listedLevelName of list.levelNames) {
+				if (levelNameToSlug(listedLevelName) === slug) {
+					fileName = `${listedLevelName.replace(/[:?]/g, "")}.txt`;
+				}
+			}
+		}
+	}
+	if (!fileName) {
+		throw new Error(`Could not find level file for level name "${levelName}"`);
+	}
 	let folder = {
 		"Junkbot Undercover": "levels/Undercover Exclusive",
 		"Junkbot": "levels",
 		"Test Cases": "levels/test-cases",
 	}[game];
-	if (levelName === "New Employee Training") {
+	if (slug === "new-employee-training") {
 		folder = "levels/custom";
 		fileName = "New Employee Training (1j01).txt";
 	}
@@ -2343,7 +2358,7 @@ const save = () => {
 				}
 				editorLevelState = serializeToJSON(currentLevel); // for title update
 				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
-				location.hash = `level=local;${encodeURIComponent(currentLevel.title)}`;
+				location.hash = `#level=local;${levelNameToSlug(currentLevel.title)}`;
 				updateEditorUIForLevelChange(currentLevel); // for title update
 			} else {
 				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
@@ -5131,7 +5146,7 @@ const showLevelSelectScreen = () => {
 			const li = document.createElement("li");
 			li.className = "level-list-item";
 			const a = document.createElement("a");
-			a.href = `#level=${game};${levelName}`;
+			a.href = `#level=${game};${levelNameToSlug(levelName)}`;
 			let completedInMoves;
 			try {
 				completedInMoves = localStorage[storageKeys.score(levelName)];
@@ -5181,7 +5196,7 @@ const initUI = () => {
 	// Title screen
 	startGameButton.addEventListener("click", () => {
 		// Load the first level, New Employee Training
-		location.hash = "#level=Junkbot;New%20Employee%20Training";
+		location.hash = "#level=Junkbot;new-employee-training";
 	});
 	showCreditsButton.addEventListener("click", () => {
 		window.open("https://github.com/1j01/janitorial-android#credits");
@@ -5325,7 +5340,7 @@ const initLevelDropdown = () => {
 		if (levelName === "Custom World") {
 			return; // this is a placeholder option
 		}
-		location.hash = `#level=${optgroup.value};${levelName}`;
+		location.hash = `#level=${optgroup.value};${levelNameToSlug(levelName)}`;
 	};
 };
 let initializedEditorUI = false;
@@ -5765,7 +5780,7 @@ const showGameWinUI = (game) => {
 		buttons.push({
 			label: "Play Junkbot Undercover",
 			action: () => {
-				location.hash = "level=Junkbot%20Undercover;Descent";
+				location.hash = "#level=Junkbot%20Undercover;descent";
 			},
 		});
 	}
@@ -5780,7 +5795,7 @@ const goToNextLevel = () => {
 			if (index !== -1) {
 				const nextLevelName = levelNames[index + 1];
 				if (nextLevelName) {
-					location.hash = `level=${game};${nextLevelName}`;
+					location.hash = `#level=${game};${levelNameToSlug(nextLevelName)}`;
 				} else {
 					showGameWinUI(game);
 				}
@@ -5868,7 +5883,7 @@ const runTests = async () => {
 			li.innerHTML = `
 			<h3>
 				<span class="icon">${emoji}</span>
-				<a href="#level=Test Cases;${encodeURIComponent(test.name)}">${test.name}</a>
+				<a href="#level=Test Cases;${levelNameToSlug(test.name)}">${test.name}</a>
 			</h3>
 			<div>${test.message || ""}</div>`; // || test.state
 			testsUL.append(li);
@@ -5939,7 +5954,7 @@ const runTests = async () => {
 					if (muted !== wasMuted) {
 						toggleMute({ savePreference: false });
 					}
-					location.hash = `level=Test Cases;${test.name}`;
+					location.hash = `#level=Test Cases;${levelNameToSlug(test.name)}`;
 					return;
 				}
 				paused = false;
