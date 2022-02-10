@@ -5273,12 +5273,8 @@ const hideLevelSelectScreen = () => {
 };
 
 const getLevelSelectURL = () => {
-	const { game } = parseRoute(location.hash);
-	if (game === "Junkbot Undercover") {
-		return "#junkbot2/levels";
-	} else {
-		return "#junkbot/levels";
-	}
+	const { game, levelGroup } = parseRoute(location.hash);
+	return `#${gameNameToSlug(game)}/levels${levelGroup ? `/${levelGroup}` : ""}`;
 };
 
 const initUI = () => {
@@ -6284,7 +6280,7 @@ const parseRoute = (hash) => {
 		if (levelGroupSlug) {
 			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}`;
 		} else {
-			canonicalHash = `#${gameNameToSlug(game)}/levels`;
+			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupToSlug("1", game)}`;
 		}
 	}
 
