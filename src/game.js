@@ -5325,6 +5325,7 @@ const getLevelLists = (resources) => [
 const initLevelDropdown = () => {
 	const option = document.createElement("option");
 	option.textContent = "Custom World";
+	option.value = "custom-world";
 	option.defaultSelected = true;
 	levelDropdown.append(option);
 	for (const { game, levelNames } of getLevelLists(resources)) {
@@ -5335,17 +5336,18 @@ const initLevelDropdown = () => {
 		for (const levelName of levelNames) {
 			const option = document.createElement("option");
 			option.textContent = levelName;
+			option.value = levelNameToSlug(levelName);
 			optgroup.append(option);
 		}
 	}
 	levelDropdown.onchange = () => {
 		const option = levelDropdown.options[levelDropdown.selectedIndex];
 		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
-		const levelName = levelDropdown.value;
-		if (levelName === "Custom World") {
+		const levelID = levelDropdown.value;
+		if (levelID === "custom-world") {
 			return; // this is a placeholder option
 		}
-		location.hash = `#level=${optgroup.value};${levelNameToSlug(levelName)}`;
+		location.hash = `#level=${optgroup.value};${levelNameToSlug(levelID)}`; // already a slug, but whatever
 	};
 };
 let initializedEditorUI = false;
@@ -5792,7 +5794,13 @@ const showGameWinUI = (game) => {
 	showMessageBox([win], { buttons });
 };
 
-const canGoToNextLevel = () => location.hash.match(/level=(Junkbot|Junkbot.*Undercover|Test.*Cases);/);
+const canGoToNextLevel = () => {
+	const { game, levelSlug } = parseRoute(location.hash);
+	if (game && levelSlug) {
+		return true;
+	}
+	return false;
+};
 const goToNextLevel = () => {
 	if (canGoToNextLevel()) {
 		for (const { game, levelNames } of getLevelLists(resources)) {
@@ -6375,11 +6383,6 @@ const routingTests = [
 	// },
 ];
 
-const replaceHash = (hash) => {
-	history.replaceState(null, null, `#${hash}`);
-	window.dispatchEvent(new HashChangeEvent("hashchange"));
-};
-
 const loadFromHash = async () => {
 
 	// Keep track of the location hash we're loading from, so that if the user navigates away, we can abort the load.
@@ -6395,11 +6398,20 @@ const loadFromHash = async () => {
 	// Press Alt+Right/Left several times to make sure the title screen is always shown properly.
 
 	// You can also try simply spamming Alt+Left/Right; note that in Chrome it aborts fetches, so it can show an error message to the user currently.
-	const loadingFrom = location.hash;
+	let loadingFrom = location.hash;
 
-	const { screen, levelName, game, wantsEdit, canonicalHash } = parseRoute(location.hash);
+	const { screen, levelSlug, game, wantsEdit, canonicalHash } = parseRoute(location.hash);
 
-	const toShowTestRunner = game === "Test Cases" && !levelName;
+	// console.log(`${location.hash}\nvs\n${canonicalHash}`, parseRoute(location.hash));
+	if (location.hash !== canonicalHash) {
+		// replaceState does not trigger hashchange.
+		// but triggering hashchange would cause infinite recursion without special care.
+		// and we have promises to keep! so we actually want to load this time, not in a recursion (waiting for a recursive call would be ugly, if going through the event).
+		history.replaceState(null, null, canonicalHash);
+		loadingFrom = canonicalHash;
+	}
+
+	const toShowTestRunner = game === "Test Cases" && !levelSlug;
 	if (!toShowTestRunner) {
 		stopTests();
 	}
@@ -6434,13 +6446,14 @@ const loadFromHash = async () => {
 		if (toShowTestRunner) {
 			runTests();
 		} else {
+			editing = wantsEdit;
 			if (editing) {
 				initEditorUI();
 			}
 
 			if (game === "local") {
 				try {
-					const json = localStorage[storageKeys.level(levelName)];
+					const json = localStorage[storageKeys.level(levelSlug)];
 					if (!json) {
 						throw new Error("Level does not exist.");
 					}
@@ -6449,13 +6462,13 @@ const loadFromHash = async () => {
 					dragging = entities.filter((entity) => entity.grabbed);
 					editorLevelState = serializeToJSON(currentLevel);
 				} catch (error) {
-					showMessageBox(`Failed to load local level for editing ("${levelName}")\n\n${error}`);
+					showMessageBox(`Failed to load local level for editing ("${levelSlug}")\n\n${error}`);
 				}
 				paused = editing;
 			} else {
 				try {
 					try {
-						const level = await loadLevelByName({ levelName, game });
+						const level = await loadLevelByName({ levelName: levelSlug, game });
 						if (location.hash !== loadingFrom) {
 							return;
 						}
@@ -6468,15 +6481,15 @@ const loadFromHash = async () => {
 					// For editor
 					if (initializedEditorUI) {
 						levelDropdown.selectedIndex = 0;
-						levelDropdown.value = levelName; // names should be unique across games
+						levelDropdown.value = levelSlug; // names should be unique across games
 						if (levelDropdown.selectedIndex <= 0) { // 0 = "Custom World", -1 = no items
-							showMessageBox(`Level "${levelName}" not found in dropdown.`);
+							showMessageBox(`Level "${levelSlug}" not found in dropdown.`);
 						}
 					}
 
 					paused = editing;
 				} catch (error) {
-					showMessageBox(`Failed to load level "${levelName}"\n\n${error}`);
+					showMessageBox(`Failed to load level "${levelSlug}"\n\n${error}`);
 				}
 			}
 		}
