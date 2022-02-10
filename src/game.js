@@ -407,7 +407,6 @@ const storageKeys = {
 	muteSoundEffects: "janitorial-android:mute-sound-effects",
 	muteMusic: "janitorial-android:mute-music",
 	volume: "janitorial-android:volume",
-	editing: "janitorial-android:editing", // might remove in favor of routes
 
 	// dev helpers
 	showDebug: "janitorial-android:debug",
@@ -2453,10 +2452,11 @@ const toggleEditing = () => {
 	if (editing !== paused) {
 		togglePause();
 	}
-	try {
-		localStorage[storageKeys.editing] = editing;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
+	if (parseRoute(location.hash).wantsEdit && !editing) {
+		location.hash = location.hash.replace(/(^#?\/?edit\/)|(\/edit$)/, "");
+	} else if (editing && !parseRoute(location.hash).wantsEdit) {
+		location.hash += "/edit";
+	}
 };
 
 const undoable = (fn) => {
@@ -6709,7 +6709,6 @@ const main = async () => {
 			volume = 0.5;
 		}
 		mainGain.gain.value = volume;
-		editing = localStorage[storageKeys.editing] === "true";
 		// eslint-disable-next-line no-empty
 	} catch (error) { }
 
