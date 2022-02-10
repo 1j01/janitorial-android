@@ -108,6 +108,8 @@ const loadProgress = document.getElementById("load-progress");
 // Level Select screen elements
 const levelSelectScreen = document.getElementById("level-select-screen");
 const levelList = document.getElementById("level-list");
+const junkbotPagination = document.getElementById("junkbot-level-group-tabs");
+const junkbotUndercoverPagination = document.getElementById("junkbot-undercover-level-group-tabs");
 // Main game controls bar
 const mainControlsBar = document.getElementById("main-controls");
 const toggleInfoButton = document.getElementById("toggle-info");
@@ -5178,6 +5180,13 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 
 	levelList.innerHTML = "";
 
+	junkbotPagination.hidden = true;
+	junkbotUndercoverPagination.hidden = true;
+	if (game === "Junkbot") {
+		junkbotPagination.hidden = false;
+	} else if (game === "Junkbot Undercover") {
+		junkbotUndercoverPagination.hidden = false;
+	}
 	if (levelNamesToShow.length === 0) {
 		showMessageBox(`No levels found for game "${game}" and group "${levelGroupName}"`, {
 			buttons: [
