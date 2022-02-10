@@ -6191,7 +6191,7 @@ const SCREEN_TITLE = "SCREEN_TITLE";
 const SCREEN_LEVEL_SELECT = "SCREEN_LEVEL_SELECT";
 const SCREEN_LEVEL = "SCREEN_LEVEL";
 
-const parseRoute = (hash) => {
+const parseRoute = (hash, levelLists) => {
 	hash = hash.replace(/^#?\/?/, "").replace(/\/$/, "");
 	const hashParts = hash.split("/").map(decodeURIComponent);
 	hash = decodeURIComponent(hash);
@@ -6254,6 +6254,17 @@ const parseRoute = (hash) => {
 			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}/${levelNameToSlug(levelName)}`;
 		} else {
 			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelNameToSlug(levelName)}`;
+			if (levelLists) {
+				for (const levelList of levelLists) {
+					const index = levelList.findIndex((level) => levelNameToSlug(level.name) === levelNameToSlug(levelName));
+					if (index >= 0) {
+						const levelGroupNumber = floor(index / 15) + 1;
+						const levelGroupSlug = levelGroupToSlug(`${levelGroupNumber}`, game);
+						canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}/${levelNameToSlug(levelName)}`;
+						break;
+					}
+				}
+			}
 		}
 		if (wantsEdit) {
 			canonicalHash += "/edit";
