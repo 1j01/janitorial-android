@@ -6341,7 +6341,24 @@ const routingTests = [
 			wantsEdit: false,
 		},
 	},
+	// @TODO
+	// {
+	// 	hash: "#level=local;Custom%20Level",
+	// 	expected: {
+	// 		game: "local",
+	// 		levelName: "Custom Level",
+	// 		levelSection: undefined,
+	// 		screen: SCREEN_LEVEL,
+	// 		canonicalHash: "#my-computer/levels/custom-level",
+	// 		wantsEdit: false,
+	// 	},
+	// },
 ];
+
+const replaceHash = (hash) => {
+	history.replaceState(null, null, `#${hash}`);
+	window.dispatchEvent(new HashChangeEvent("hashchange"));
+};
 
 const loadFromHash = async () => {
 
@@ -6360,9 +6377,9 @@ const loadFromHash = async () => {
 	// You can also try simply spamming Alt+Left/Right; note that in Chrome it aborts fetches, so it can show an error message to the user currently.
 	const loadingFrom = location.hash;
 
-	const hashOptions = parseLocationHash();
+	const { screen, levelName, game, wantsEdit, canonicalHash } = parseRoute(location.hash);
 
-	const toShowTestRunner = Boolean(location.hash.match(/run-tests/));
+	const toShowTestRunner = game === "Test Cases" && !levelName;
 	if (!toShowTestRunner) {
 		stopTests();
 	}
@@ -6373,9 +6390,7 @@ const loadFromHash = async () => {
 		toggleInfoBox();
 	}
 
-	const toShowLevelSelectScreen = Boolean(location.hash.match(/level-select/));
-
-	if (hashOptions.level || toShowTestRunner || toShowLevelSelectScreen) {
+	if (screen === SCREEN_LEVEL || screen === SCREEN_LEVEL_SELECT) {
 		// These are routes that require all resources to be loaded (i.e. anything but the title screen)
 
 		// Only load (and derive) resources once
@@ -6389,7 +6404,7 @@ const loadFromHash = async () => {
 			return;
 		}
 
-		if (toShowLevelSelectScreen) {
+		if (screen === SCREEN_LEVEL_SELECT) {
 			hideTitleScreen();
 			closeMessageBox();
 			showLevelSelectScreen();
@@ -6402,8 +6417,6 @@ const loadFromHash = async () => {
 			if (editing) {
 				initEditorUI();
 			}
-
-			const [game, levelName] = hashOptions.level.split(";").map(decodeURIComponent);
 
 			if (game === "local") {
 				try {
