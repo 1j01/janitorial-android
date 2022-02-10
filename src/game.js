@@ -5194,7 +5194,7 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 					label: "Title Screen",
 					isDefault: true,
 					action: () => {
-						location.hash = `#${game}`;
+						location.hash = `#${gameNameToSlug(game)}`;
 					},
 				},
 			],
@@ -5206,7 +5206,7 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 		const li = document.createElement("li");
 		li.className = "level-list-item";
 		const a = document.createElement("a");
-		a.href = `#level=${game};${levelNameToSlug(levelName)}`;
+		a.href = `#${gameNameToSlug(game)}/levels/${levelGroupToSlug(`${levelGroupNumber}`, game)}/${levelNameToSlug(levelName)}`;
 		let completedInMoves;
 		try {
 			completedInMoves = localStorage[storageKeys.score(levelName)];
@@ -5251,17 +5251,19 @@ const hideLevelSelectScreen = () => {
 	levelSelectScreen.hidden = true;
 };
 
+const getLevelSelectURL = () => {
+	const { game } = parseRoute(location.hash);
+	if (game === "Junkbot Undercover") {
+		return "#junkbot2/levels";
+	} else {
+		return "#junkbot/levels";
+	}
+};
+
 const initUI = () => {
 	// Title screen
 	startGameButton.addEventListener("click", () => {
-		const { game } = parseRoute(location.hash);
-		if (game === "Junkbot Undercover") {
-			// location.hash = "/junkbot2/levels/basement-1/descent";
-			location.hash = "/junkbot2/levels";
-		} else {
-			// location.hash = "/junkbot/levels/building-1/new-employee-training";
-			location.hash = "/junkbot/levels";
-		}
+		location.hash = getLevelSelectURL();
 	});
 	showCreditsButton.addEventListener("click", () => {
 		window.open("https://github.com/1j01/janitorial-android#credits");
@@ -5391,7 +5393,7 @@ const initLevelDropdown = () => {
 	for (const { game, levelNames } of getLevelLists(resources)) {
 		const optgroup = document.createElement("optgroup");
 		optgroup.label = game;
-		optgroup.value = game;
+		optgroup.value = game; // gameNameToSlug(game);
 		levelDropdown.append(optgroup);
 		for (const levelName of levelNames) {
 			const option = document.createElement("option");
@@ -5403,11 +5405,12 @@ const initLevelDropdown = () => {
 	levelDropdown.onchange = () => {
 		const option = levelDropdown.options[levelDropdown.selectedIndex];
 		const optgroup = option.parentNode.matches("optgroup") ? option.parentNode : null;
-		const levelID = levelDropdown.value;
-		if (levelID === "custom-world") {
+		const gameSlug = optgroup ? gameNameToSlug(optgroup.value) : null;
+		const levelSlug = levelDropdown.value;
+		if (levelSlug === "custom-world") {
 			return; // this is a placeholder option
 		}
-		location.hash = `#level=${optgroup.value};${levelNameToSlug(levelID)}`; // already a slug, but whatever
+		location.hash = `#${gameSlug}/levels/${levelSlug}`;
 	};
 };
 let initializedEditorUI = false;
@@ -5796,7 +5799,7 @@ const showLevelLoseUI = () => {
 			{
 				label: "Select Level",
 				action: () => {
-					location.hash = "#level-select";
+					location.hash = getLevelSelectURL();
 				},
 			},
 			{
@@ -5839,7 +5842,7 @@ const showGameWinUI = (game) => {
 		{
 			label: "Select Level",
 			action: () => {
-				location.hash = "#level-select";
+				location.hash = getLevelSelectURL();
 			},
 		},
 	];
@@ -5847,7 +5850,7 @@ const showGameWinUI = (game) => {
 		buttons.push({
 			label: "Play Junkbot Undercover",
 			action: () => {
-				location.hash = "#level=Junkbot%20Undercover;descent";
+				location.hash = "#junkbot2";
 			},
 		});
 	}
@@ -5868,7 +5871,7 @@ const goToNextLevel = () => {
 			if (index !== -1) {
 				const nextLevelName = levelNames[index + 1];
 				if (nextLevelName) {
-					location.hash = `#level=${game};${levelNameToSlug(nextLevelName)}`;
+					location.hash = `#${gameNameToSlug(game)}/levels/${levelNameToSlug(nextLevelName)}`;
 				} else {
 					showGameWinUI(game);
 				}
@@ -5889,7 +5892,7 @@ const showLevelWinUI = () => {
 			{
 				label: "Select Level",
 				action: () => {
-					location.hash = "#level-select";
+					location.hash = getLevelSelectURL();
 				},
 			},
 			{
@@ -6038,12 +6041,11 @@ const runTests = async () => {
 			checkTestEnd();
 			if (paused) {
 				if (editing) {
-
 					stopTests();
 					if (muted !== wasMuted) {
 						toggleMute({ savePreference: false });
 					}
-					location.hash = `#level=Test Cases;${levelNameToSlug(test.name)}`;
+					location.hash = `#tests/${levelNameToSlug(test.name)}/edit`;
 					return;
 				}
 				paused = false;
@@ -6255,7 +6257,7 @@ const parseRoute = (hash) => {
 		canonicalHash = "#tests";
 	} else if (wantsEdit) {
 		screen = SCREEN_LEVEL;
-		canonicalHash = `#level-editor`;
+		canonicalHash = "#level-editor";
 	} else if (maybeLevelSelect) {
 		screen = SCREEN_LEVEL_SELECT;
 		if (levelGroupSlug) {
