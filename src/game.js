@@ -5889,6 +5889,8 @@ const goToNextLevel = () => {
 			if (index !== -1) {
 				const nextLevelName = levelNames[index + 1];
 				if (nextLevelName) {
+					// not going to the canonical URL,
+					// because it's easier to rely on auto-canonicalization
 					location.hash = `#${gameNameToSlug(game)}/levels/${levelNameToSlug(nextLevelName)}`;
 				} else {
 					showGameWinUI(game);
