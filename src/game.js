@@ -5254,8 +5254,14 @@ const hideLevelSelectScreen = () => {
 const initUI = () => {
 	// Title screen
 	startGameButton.addEventListener("click", () => {
-		// Load the first level, New Employee Training
-		location.hash = "#level=Junkbot;new-employee-training";
+		const { game } = parseRoute(location.hash);
+		if (game === "Junkbot Undercover") {
+			// location.hash = "/junkbot2/levels/basement-1/descent";
+			location.hash = "/junkbot2/levels";
+		} else {
+			// location.hash = "/junkbot/levels/building-1/new-employee-training";
+			location.hash = "/junkbot/levels";
+		}
 	});
 	showCreditsButton.addEventListener("click", () => {
 		window.open("https://github.com/1j01/janitorial-android#credits");
