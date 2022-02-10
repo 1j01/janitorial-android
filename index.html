@@ -326,6 +326,15 @@
 			pointer-events: all;
 		}
 
+		#junkbot-undercover-logo {
+			position: absolute;
+			/* position's not very good because the sequel has a different title screen layout which I haven't implemented */
+			top: 71px;
+			left: 190px;
+			z-index: 5;
+			transform: scale(0.8);
+		}
+
 		#title-screen:not(.title-screen-level-loaded) {
 			background-color: #7c857c;
 		}
@@ -577,6 +586,8 @@
 	</div>
 	<div id="title-screen">
 		<div id="intro-container" hidden></div>
+		<img id="junkbot-undercover-logo" alt="Undercover" draggable="false" hidden
+			src="images/menus/Undercover Exclusive/title_UC.png" />
 		<button class="image-button" id="start-game" hidden>Play</button>
 		<button class="image-button" id="show-credits" hidden>Credits</button>
 		<button class="image-button" id="replay-intro" hidden>Replay Intro</button>

@@ -105,6 +105,7 @@ const showCreditsButton = document.getElementById("show-credits");
 const loadStatusLoaded = document.getElementById("load-status-loaded");
 const loadStatusLoading = document.getElementById("load-status-loading");
 const loadProgress = document.getElementById("load-progress");
+const junkbotUndercoverTitle = document.getElementById("junkbot-undercover-logo");
 // Level Select screen elements
 const levelSelectScreen = document.getElementById("level-select-screen");
 const levelList = document.getElementById("level-list");
@@ -5095,6 +5096,9 @@ const stopIntro = () => {
 	rufflePlayer?.destroy(); // there is no stop or rewind method
 	rufflePlayer?.remove();
 	rufflePlayer = null;
+
+	const { game } = parseRoute(location.hash);
+	junkbotUndercoverTitle.hidden = game !== "Junkbot Undercover";
 };
 const hideTitleScreen = () => {
 	titleScreen.hidden = true;
@@ -5109,6 +5113,7 @@ const showTitleScreen = (showIntro) => {
 	paused = false;
 
 	titleScreen.hidden = false;
+	junkbotUndercoverTitle.hidden = true;
 	initLevel(resources.titleScreenLevel);
 	titleScreen.classList.add("title-screen-level-loaded");
 	const { game } = parseRoute(location.hash);
@@ -5147,9 +5152,10 @@ const showTitleScreen = (showIntro) => {
 				if (url === "lingo:glob.download_manager.animDone()") {
 					stopIntro();
 				} else if (url === "lingo:glob.jbxtitle_a.show()") {
-					// this is a todo for Junkbot Undercover
+					// @TODO: for Junkbot Undercover, split "Junkbot" part of title,
+					// to show it at this time
 				} else if (url === "lingo:glob.jbxtitle_b.show()") {
-					// this is a todo for Junkbot Undercover
+					junkbotUndercoverTitle.hidden = false;
 				} else {
 					// eslint-disable-next-line no-console
 					console.warn("Prevented Ruffle's location.assign from loading", url);
@@ -5167,6 +5173,7 @@ const showTitleScreen = (showIntro) => {
 		});
 	} else {
 		resetScreenButton.hidden = false;
+		junkbotUndercoverTitle.hidden = game !== "Junkbot Undercover";
 	}
 };
 
