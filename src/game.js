@@ -387,9 +387,10 @@ const levelNameToSlug = (levelName) => levelName
 	.toLowerCase();
 
 const gameNameToSlug = (gameName) => levelNameToSlug(gameName)
-	.replace(/-*(uc|undercover)/, "2")
-	.replace(/-*1/g, "")
-	.replace(/test-cases|run-tests/, "tests");
+	.replace(/(uc|undercover)/, "2")
+	.replace(/1/g, "")
+	.replace(/test-cases|run-tests|test-runner/, "tests")
+	.replace(/-/g, "");
 
 const levelGroupToSlug = (groupName, gameName) => {
 	const gameSlug = gameNameToSlug(gameName);
@@ -6410,6 +6411,50 @@ const routingTests = [
 	},
 	{
 		hash: "#JUNKBOT2",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot-undercover",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot-uc",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot-1",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot-2",
 		expected: {
 			game: "Junkbot Undercover",
 			levelSlug: undefined,
