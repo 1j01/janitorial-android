@@ -376,12 +376,6 @@ const closeMessageBox = () => {
 	}
 };
 
-const parseLocationHash = (hash = location.hash) => {
-	const keyValuePairs = hash.replace(/^#/, "")
-		.split("&")
-		.map((str) => str.split("="));
-	return Object.fromEntries(keyValuePairs);
-};
 const levelNameToSlug = (levelName) => levelName
 	.replace(/'/g, "") // remove apostrophes (because "don-t" and "it-s" look stupid)
 	.replace(/[^a-z0-9]/gi, "-") // replace non-alphanumeric characters with dashes
@@ -2355,14 +2349,16 @@ const save = () => {
 			currentLevel.title = "Custom Level";
 		}
 		try {
-			if (decodeURIComponent(parseLocationHash().level || "") !== `local;${currentLevel.title}`) {
+			const { game, levelSlug } = parseRoute(location.hash);
+			// console.log({ game, levelSlug }, "vs", currentLevel.game, levelNameToSlug(currentLevel.title));
+			if (levelSlug !== levelNameToSlug(currentLevel.title) || game !== "local") {
 				const originalTitle = currentLevel.title.replace(/\s\(\d+\)$/, "");
 				for (let n = 1; n < 100 && localStorage[storageKeys.level(currentLevel.title)]; n++) {
 					currentLevel.title = `${originalTitle} (${n})`;
 				}
 				editorLevelState = serializeToJSON(currentLevel); // for title update
 				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
-				location.hash = `#level=local;${levelNameToSlug(currentLevel.title)}`;
+				location.hash = `#local/levels/${levelNameToSlug(currentLevel.title)}/edit`;
 				updateEditorUIForLevelChange(currentLevel); // for title update
 			} else {
 				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
@@ -6178,6 +6174,8 @@ const parseRoute = (hash) => {
 			game = "Junkbot 3";
 		} else if (gameNameToSlug(hashPart) === "tests") {
 			game = "Test Cases";
+		} else if (gameNameToSlug(hashPart) === "local") {
+			game = "local";
 		}
 	}
 	if (hashParts[0].match(/level=Test Cases/)) {
