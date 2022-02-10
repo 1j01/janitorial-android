@@ -6174,20 +6174,24 @@ const parseRoute = (hash) => {
 	hash = decodeURIComponent(hash);
 	const editSynonyms = ["edit", "editor", "level-editor", "editing", "editable", "edit-mode", "ed", "e", "design", "designer"];
 	const levelSelectSynonyms = ["levels", "level-select", "level-selector", "select", "select-level", "choose-level"];
+	const levelGroupRegexp = /^(basement|building|section|page|tab)-/i;
 	const wantsEdit = editSynonyms.includes(hashParts[0]) || editSynonyms.includes(hashParts[hashParts.length - 1]);
-	const maybeLevelSelect = hashParts.some((hashPart) => levelSelectSynonyms.includes(hashPart));
+	let maybeLevelSelect = hashParts.some((hashPart) => levelSelectSynonyms.includes(hashPart));
 	let game;
 	let levelGroup;
 	let levelName;
 	for (let i = 0; i < hashParts.length; i++) {
 		if (hashParts[i].match(/^(levels|tests)$/i)) {
-			if (hashParts[i + 1]?.match(/^(basement|building|section|page|tab)-/i)) {
-				levelGroup = hashParts[i + 1];
+			if (hashParts[i + 1]?.match(levelGroupRegexp)) {
+				levelGroup = hashParts[i + 1]; // (we should get it on the next loop iteration anyways...)
 				levelName = hashParts[i + 2];
 			} else {
 				levelName = hashParts[i + 1];
 			}
-			break;
+		} else if (hashParts[i].match(levelGroupRegexp)) {
+			levelGroup = hashParts[i];
+			levelName = hashParts[i + 1];
+			maybeLevelSelect = true;
 		}
 	}
 	// Parse old URLs (#level=game;level-name)
@@ -6281,6 +6285,28 @@ const routingTests = [
 		},
 	},
 	{
+		hash: "#junkbot/levels",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			// levelGroup: "building-1", // @TODO
+			screen: SCREEN_LEVEL_SELECT,
+			// canonicalHash: "#junkbot/levels/building-1", // @TODO
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot/building-1",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			levelGroup: "building-1",
+			screen: SCREEN_LEVEL_SELECT,
+			canonicalHash: "#junkbot/levels/building-1",
+			wantsEdit: false,
+		},
+	},
+	{
 		hash: "#junkbot2/levels/basement-2",
 		expected: {
 			game: "Junkbot Undercover",
@@ -6296,9 +6322,10 @@ const routingTests = [
 		expected: {
 			game: "Junkbot Undercover",
 			levelSlug: undefined,
+			// levelGroup: "basement-1", // @TODO
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL_SELECT,
-			// canonicalHash: "#junkbot2/levels/basement-1", // @TODO?
+			// canonicalHash: "#junkbot2/levels/basement-1", // @TODO
 			canonicalHash: "#junkbot2/levels",
 			wantsEdit: false,
 		},
