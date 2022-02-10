@@ -6266,7 +6266,7 @@ const routingTests = [
 		expected: {
 			game: "Junkbot Undercover",
 			levelSlug: undefined,
-			levelGroup: "basement-1",
+			levelGroup: undefined,
 			screen: SCREEN_LEVEL_SELECT,
 			// canonicalHash: "#junkbot2/levels/basement-1", // @TODO
 			canonicalHash: "#junkbot2/levels",
