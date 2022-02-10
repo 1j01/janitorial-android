@@ -5084,7 +5084,8 @@ const toggleInfoBox = () => {
 	toggleInfoButton.setAttribute("aria-expanded", infoBox.hidden ? "false" : "true");
 };
 
-let playedIntro = false;
+let playedJunkbotIntro = false;
+let playedJunkbotUndercoverIntro = false;
 const ruffle = window.RufflePlayer.newest();
 let rufflePlayer;
 const stopIntro = () => {
@@ -5099,7 +5100,7 @@ const hideTitleScreen = () => {
 	titleScreen.hidden = true;
 	stopIntro();
 };
-const showTitleScreen = (showIntro = !playedIntro) => {
+const showTitleScreen = (showIntro) => {
 
 	// don't show editor UI on the title screen!
 	if (editing) {
@@ -5110,13 +5111,26 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 	titleScreen.hidden = false;
 	initLevel(resources.titleScreenLevel);
 	titleScreen.classList.add("title-screen-level-loaded");
+	const { game } = parseRoute(location.hash);
+	if (game === "Junkbot") {
+		showIntro ??= !playedJunkbotIntro;
+	} else if (game === "Junkbot Undercover") {
+		showIntro ??= !playedJunkbotUndercoverIntro;
+	} else {
+		showIntro = false;
+	}
 	if (showIntro) {
-		playedIntro = true;
+		if (game === "Junkbot") {
+			playedJunkbotIntro = true;
+		} else if (game === "Junkbot Undercover") {
+			playedJunkbotUndercoverIntro = true;
+		}
 		replayIntroButton.hidden = false;
 		rufflePlayer = ruffle.createPlayer();
 		rufflePlayer.classList.add("metal-border");
 		introContainer.appendChild(rufflePlayer);
-		rufflePlayer.load("flash/junkbot_intro.swf").then(() => {
+		const swf = game === "Junkbot Undercover" ? "flash/junkbot_undercover_intro.swf" : "flash/junkbot_intro.swf";
+		rufflePlayer.load(swf).then(() => {
 			// Note: It may not actually be loaded!
 			// @TODO: handle failing to load the SWF somehow? more monkey-patching?
 			// rufflePlayer.readyState is 0 regardless until later...
