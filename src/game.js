@@ -6147,25 +6147,21 @@ const runTests = async () => {
 //   ╚══> level select, specific tab (building)
 // #/junkbot/levels/building-1/new-employee-training
 //   ╚══> first level
-// #/junkbot-undercover[/blah]
-//   ╚══> redirect to #junkbot2[/blah]
+// #/junkbot/levels/building-1/new-employee-training/edit
+//   ╚══> level editor for first level, redirects to local version when you make a change
 // #/junkbot2
-//   ╚══> title screen
+//   ╚══> title screen for Junkbot Undercover
 // #/junkbot2/levels/basement-1/descent
 //   ╚══> first level of the sequel
-// #/edit/junkbot/levels/building-1/new-employee-training
-//   ╚══> redirect to editor with local version
-// #/junkbot/levels/building-1/new-employee-training/edit
-//   ╚══> redirect to editor with local version
 // #/tests
 //   ╚══> run all tests
 // #/tests/tippy-toast
 //   ╚══> run a specific test (or at least load the level)
-// #/edit
+// #/level-editor
 //   ╚══> new file
-// #/edit/local/foo-bar
+// #/local/foo-bar/edit
 //   ╚══> existing file
-// #/edit/data/a99897sdf987a9879a9as70gah0986h96gjs6797659...
+// #/data/a99897sdf987a9879a9as70gah0986h96gjs6797659.../edit
 //   ╚══> existing level (easy sharing)
 //
 // Old routes:
@@ -6180,24 +6176,14 @@ const runTests = async () => {
 //   ╚══> redirect to #tests
 //
 // Notes:
-// - I'm thinking "junkbot2" rather than "junkbot-uc" or similar, so that if I make a sequel, there's an easy working title, "junkbot3".
-// - Not sure I'm going to support the old routes. It's not a popular project, so no big deal.
-// - Might get rid of locally stored levels, in favor of data in the URL.
-// - Should it be #/editor/<level> or #/<level>/edit?
-//   - It's probably a little easier to edit the end of the URL (not that you should need to)
-//   - URL changing less when switching to edit mode probably feels nicer... but these are redirects (for some cases?), so that might not apply
-//   - I figure I'll want a button on the main menu or somewhere that opens up the level editor, so there's the question of what URL would that be; would it be weird if it includes level data in the URL for that?
-//     It wouldn't be that weird, but it might be nicer to have it at simply "#edit"
-//   - Which is more distinguishing, the editing mode or the level? If I think about going to the editor from the title screen, the level editor is more important, but in that case there's no level yet. If I think about the editor being a mode, it's clearly less important.
-// - I should automatically canonicalize URLs (letter case, etc.) with replaceState.
-//   - I could add some extra redirects like allowing the game to be omitted, so you can type e.g. "#descent" instead of "#junkbot2/levels/basement-1/descent". Mainly for fun I guess.
-//     - Synonyms: "junkbot2"/"junkbot-uc"/"junkbot-undercover", "_"/"-"/"", "edit"/"editor"/"editing"/"edit-mode"/"ed"/"e"
-// - Should I include the slash at the start? "#/foo/bar" vs "#foo/bar" (either way, I should normalize it)
-// - I guess I want a route for PLAYING a level for easy sharing too
-// `#play/data/...` or just `#data/...` matching built-in level routes better (rather than mirroring the edit URL)
-// hm, heck, maybe the `local` levels should match like that too
-// the difference being that a URL for playing a local level only works locally
-// but I might just get rid of that style of level autosave, in favor of the beepbox (et al) way (data in url)
+// - I'm using "junkbot2" rather than "junkbot-uc" or similar, so that if I make a sequel, there's an easy working title, "junkbot3" ;)
+// - I might get rid of locally stored levels, in favor of data in the URL (like beepbox.co and some other web apps).
+// - I automatically canonicalize URLs (letter case, etc.) with replaceState
+//   - I could allow the game to be omitted, so you can type e.g. "#descent" instead of "#junkbot2/levels/basement-1/descent".
+//   - I can support synonyms: "junkbot2"/"junkbot-uc"/"junkbot-undercover", "_"/"-"/"", "edit"/"editor"/"editing"/"edit-mode"/"ed"/"e"
+//   - #edit/<level> is synonymous with #<level>/edit 
+// - Should I include the slash at the start? "#/foo/bar" vs "#foo/bar"
+// - Should unmatched routes show an error?
 
 const SCREEN_TITLE = "SCREEN_TITLE";
 const SCREEN_LEVEL_SELECT = "SCREEN_LEVEL_SELECT";
@@ -6376,17 +6362,6 @@ const routingTests = [
 			wantsEdit: true,
 		},
 	},
-	// {
-	// 	hash: "#junkbot2/level-editor",
-	// 	expected: {
-	// 		game: "Junkbot Undercover",
-	// 		levelSlug: undefined,
-	// 		levelGroup: undefined,
-	// 		screen: SCREEN_LEVEL,
-	// 		canonicalHash: "#junkbot2/level-editor",
-	// 		wantsEdit: true,
-	// 	},
-	// },
 	{
 		hash: "#",
 		expected: {
@@ -6475,6 +6450,18 @@ const routingTests = [
 			wantsEdit: false,
 		},
 	},
+	// @TODO maybe
+	// {
+	// 	hash: "#descent",
+	// 	expected: {
+	// 		game: "Junkbot Undercover",
+	// 		levelSlug: "descent",
+	// 		levelGroup: undefined,
+	// 		screen: SCREEN_TITLE,
+	// 		canonicalHash: "#junkbot2/levels/basement-1/descent",
+	// 		wantsEdit: false,
+	// 	},
+	// },
 	// Old routes:
 	{
 		hash: "#run-tests",
