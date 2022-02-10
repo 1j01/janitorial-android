@@ -2459,7 +2459,10 @@ const toggleEditing = () => {
 		initEditorUI();
 
 		// don't reset undos/redos, just reset the level
-		deserializeJSON(editorLevelState);
+		// also, this may be undefined if loading from hash like #some/level/edit
+		if (editorLevelState) {
+			deserializeJSON(editorLevelState);
+		}
 	}
 	if (editing !== paused) {
 		togglePause();
@@ -2468,6 +2471,7 @@ const toggleEditing = () => {
 	if (parseRoute(location.hash).wantsEdit !== editing) {
 		let newHash;
 		if (editing) {
+			// @TODO: if levelName not in URL, add it ("#tests/edit" is weird and broken)
 			newHash = `${location.hash}/edit`;
 		} else {
 			newHash = location.hash.replace(/(^#?\/?edit\/)|(\/edit$)/, "");
@@ -5150,7 +5154,7 @@ const showTitleScreen = (showIntro = !playedIntro) => {
 	}
 };
 
-const showLevelSelectScreen = () => {
+const showLevelSelectScreen = (game, levelGroupName) => {
 	// don't show editor UI on the level select screen!
 	if (editing) {
 		toggleEditing();
@@ -5159,57 +5163,79 @@ const showLevelSelectScreen = () => {
 
 	levelSelectScreen.hidden = false;
 
-	for (const { game, levelNames } of getLevelLists(resources)) {
-		if (game === "Test Cases") {
-			// @TODO: show levels only for one game,
-			// and one building/basement area
-			// eslint-disable-next-line no-continue
-			continue;
+	let levelNamesToShow = [];
+	let levelGroupNumber = parseInt((levelGroupName ?? "").replace(/\D/g, ""), 10);
+	if (isNaN(levelGroupNumber)) {
+		levelGroupNumber = 1;
+	}
+	const levelsPerGroup = 15;
+	for (const list of getLevelLists(resources)) {
+		if (gameNameToSlug(game) === gameNameToSlug(list.game)) {
+			levelNamesToShow = list.levelNames.slice((levelGroupNumber - 1) * levelsPerGroup, levelGroupNumber * levelsPerGroup);
+			break;
 		}
-		for (const levelName of levelNames) {
-			const li = document.createElement("li");
-			li.className = "level-list-item";
-			const a = document.createElement("a");
-			a.href = `#level=${game};${levelNameToSlug(levelName)}`;
-			let completedInMoves;
-			try {
-				completedInMoves = localStorage[storageKeys.score(levelName)];
-			} catch (error) {
-				// no score tracking :/
-				// @TODO: unlock all levels if there's an error? um, once there's any locking.
-			}
-			const completed = typeof completedInMoves !== "undefined";
+	}
 
-			const completedImg = document.createElement("img");
-			completedImg.className = "level-list-item-completed-indicator";
-			completedImg.src = completed ? "images/menus/checkbox_on.png" : "images/menus/checkbox_off.png";
-			const goldAwardImg = document.createElement("img");
-			goldAwardImg.src = "images/menus/check_light.png";
-			goldAwardImg.hidden = true;
-			goldAwardImg.className = "level-list-item-gold-award";
-			const score = document.createElement("span");
-			score.className = "level-list-item-score";
-			score.textContent = completedInMoves;
-			const title = document.createElement("span");
-			title.className = "level-list-item-title";
-			title.textContent = levelName;
-			a.append(completedImg, goldAwardImg, title, score);
+	levelList.innerHTML = "";
 
-			if (completedInMoves) {
-				loadLevelByName({ game, levelName }).then((level) => {
-					const metPar = completedInMoves <= level.par;
-					if (metPar) {
-						goldAwardImg.hidden = false;
-					}
-				}, (error) => {
-					// eslint-disable-next-line no-console
-					console.error("Failed to load level for score display:", error);
-				});
-			}
+	if (levelNamesToShow.length === 0) {
+		showMessageBox(`No levels found for game "${game}" and group "${levelGroupName}"`, {
+			buttons: [
+				{
+					label: "Title Screen",
+					isDefault: true,
+					action: () => {
+						location.hash = `#${game}`;
+					},
+				},
+			],
+		});
+		return;
+	}
 
-			li.appendChild(a);
-			levelList.appendChild(li);
+	for (const levelName of levelNamesToShow) {
+		const li = document.createElement("li");
+		li.className = "level-list-item";
+		const a = document.createElement("a");
+		a.href = `#level=${game};${levelNameToSlug(levelName)}`;
+		let completedInMoves;
+		try {
+			completedInMoves = localStorage[storageKeys.score(levelName)];
+		} catch (error) {
+			// no score tracking :/
+			// @TODO: unlock all levels if there's an error? um, once there's any locking.
 		}
+		const completed = typeof completedInMoves !== "undefined";
+
+		const completedImg = document.createElement("img");
+		completedImg.className = "level-list-item-completed-indicator";
+		completedImg.src = completed ? "images/menus/checkbox_on.png" : "images/menus/checkbox_off.png";
+		const goldAwardImg = document.createElement("img");
+		goldAwardImg.src = "images/menus/check_light.png";
+		goldAwardImg.hidden = true;
+		goldAwardImg.className = "level-list-item-gold-award";
+		const score = document.createElement("span");
+		score.className = "level-list-item-score";
+		score.textContent = completedInMoves;
+		const title = document.createElement("span");
+		title.className = "level-list-item-title";
+		title.textContent = levelName;
+		a.append(completedImg, goldAwardImg, title, score);
+
+		if (completedInMoves) {
+			loadLevelByName({ game, levelName }).then((level) => {
+				const metPar = completedInMoves <= level.par;
+				if (metPar) {
+					goldAwardImg.hidden = false;
+				}
+			}, (error) => {
+				// eslint-disable-next-line no-console
+				console.error("Failed to load level for score display:", error);
+			});
+		}
+
+		li.appendChild(a);
+		levelList.appendChild(li);
 	}
 };
 const hideLevelSelectScreen = () => {
@@ -6191,11 +6217,14 @@ const parseRoute = (hash) => {
 
 	let canonicalHash = `#${gameNameToSlug(game)}`;
 	let screen = SCREEN_TITLE;
+	const levelGroupSlug = levelGroup ? levelGroupToSlug(levelGroup, game) : undefined;
 
 	if (levelName) {
 		screen = SCREEN_LEVEL;
 		if (game === "Test Cases") {
 			canonicalHash = `#tests/${levelNameToSlug(levelName)}`;
+		} else if (levelGroupSlug) {
+			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}/${levelNameToSlug(levelName)}`;
 		} else {
 			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelNameToSlug(levelName)}`;
 		}
@@ -6210,14 +6239,18 @@ const parseRoute = (hash) => {
 		canonicalHash = `#level-editor`;
 	} else if (maybeLevelSelect) {
 		screen = SCREEN_LEVEL_SELECT;
-		canonicalHash = `#${gameNameToSlug(game)}/levels`;
+		if (levelGroupSlug) {
+			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}`;
+		} else {
+			canonicalHash = `#${gameNameToSlug(game)}/levels`;
+		}
 	}
 
 	return {
 		game,
 		// levelName,
 		levelSlug: levelName ? levelNameToSlug(levelName) : undefined,
-		levelGroup: levelGroup ? levelGroupToSlug(levelGroup, game) : undefined,
+		levelGroup: levelGroupSlug,
 		screen,
 		canonicalHash,
 		wantsEdit,
@@ -6232,8 +6265,7 @@ const routingTests = [
 			levelSlug: "descent",
 			levelGroup: "basement-1",
 			screen: SCREEN_LEVEL,
-			// canonicalHash: "#junkbot2/levels/basement-1/descent", // @TODO
-			canonicalHash: "#junkbot2/levels/descent",
+			canonicalHash: "#junkbot2/levels/basement-1/descent",
 			wantsEdit: false,
 		},
 	},
@@ -6244,8 +6276,7 @@ const routingTests = [
 			levelSlug: "descent",
 			levelGroup: "basement-1",
 			screen: SCREEN_LEVEL,
-			// canonicalHash: "#junkbot2/levels/basement-1/descent/edit", // @TODO
-			canonicalHash: "#junkbot2/levels/descent/edit",
+			canonicalHash: "#junkbot2/levels/basement-1/descent/edit",
 			wantsEdit: true,
 		},
 	},
@@ -6256,8 +6287,7 @@ const routingTests = [
 			levelSlug: undefined,
 			levelGroup: "basement-2",
 			screen: SCREEN_LEVEL_SELECT,
-			// canonicalHash: "#junkbot2/levels/basement-2", // @TODO
-			canonicalHash: "#junkbot2/levels",
+			canonicalHash: "#junkbot2/levels/basement-2",
 			wantsEdit: false,
 		},
 	},
@@ -6268,7 +6298,7 @@ const routingTests = [
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL_SELECT,
-			// canonicalHash: "#junkbot2/levels/basement-1", // @TODO
+			// canonicalHash: "#junkbot2/levels/basement-1", // @TODO?
 			canonicalHash: "#junkbot2/levels",
 			wantsEdit: false,
 		},
@@ -6404,7 +6434,7 @@ const loadFromHash = async () => {
 	// You can also try simply spamming Alt+Left/Right; note that in Chrome it aborts fetches, so it can show an error message to the user currently.
 	let loadingFrom = location.hash;
 
-	const { screen, levelSlug, game, wantsEdit, canonicalHash } = parseRoute(location.hash);
+	const { screen, levelSlug, levelGroup, game, wantsEdit, canonicalHash } = parseRoute(location.hash);
 
 	// console.log(`${location.hash}\nvs\n${canonicalHash}`, parseRoute(location.hash));
 	if (location.hash !== canonicalHash) {
@@ -6443,7 +6473,7 @@ const loadFromHash = async () => {
 		if (screen === SCREEN_LEVEL_SELECT) {
 			hideTitleScreen();
 			closeMessageBox();
-			showLevelSelectScreen();
+			showLevelSelectScreen(game, levelGroup);
 			return; // don't want to hide the level select screen below
 		}
 		// These are routes that show a level; other screens are hidden below
