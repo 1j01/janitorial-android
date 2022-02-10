@@ -6451,11 +6451,6 @@ const loadFromHash = async () => {
 		if (toShowTestRunner) {
 			runTests();
 		} else {
-			editing = wantsEdit;
-			if (editing) {
-				initEditorUI();
-			}
-
 			if (game === "local") {
 				try {
 					const json = localStorage[storageKeys.level(levelSlug)];
@@ -6502,6 +6497,11 @@ const loadFromHash = async () => {
 		hideTitleScreen();
 		hideLevelSelectScreen();
 		closeMessageBox();
+		// This currently relies on the title screen being hidden
+		// @TODO: remove check on title screen visibility in toggleEditing
+		if (wantsEdit !== editing) {
+			toggleEditing();
+		}
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
 		resources = await hotResourcesLoadedPromise;
