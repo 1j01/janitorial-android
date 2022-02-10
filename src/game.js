@@ -2448,10 +2448,17 @@ const toggleEditing = () => {
 	if (editing !== paused) {
 		togglePause();
 	}
-	if (parseRoute(location.hash).wantsEdit && !editing) {
-		location.hash = location.hash.replace(/(^#?\/?edit\/)|(\/edit$)/, "");
-	} else if (editing && !parseRoute(location.hash).wantsEdit) {
-		location.hash += "/edit";
+
+	if (parseRoute(location.hash).wantsEdit !== editing) {
+		let newHash;
+		if (editing) {
+			newHash = `${location.hash}/edit`;
+		} else {
+			newHash = location.hash.replace(/(^#?\/?edit\/)|(\/edit$)/, "");
+		}
+		// replaceState doesn't trigger hashchange, but we don't need to update from the hash,
+		// we're just syncing the URL with the new state.
+		history.replaceState(null, null, newHash);
 	}
 };
 
