@@ -179,6 +179,22 @@
 				if (event.key === "ArrowLeft") {
 					model.position.x -= moveSpeed;
 				}
+				if (event.key === "PageUp") {
+					model.position.z += moveSpeed;
+				}
+				if (event.key === "PageDown") {
+					model.position.z -= moveSpeed;
+				}
+				if (event.key === "Insert") {
+					model.scale.x += 0.01 * moveSpeed;
+					model.scale.y += 0.01 * moveSpeed;
+					model.scale.z += 0.01 * moveSpeed;
+				}
+				if (event.key === "Delete") {
+					model.scale.x -= 0.01 * moveSpeed;
+					model.scale.y -= 0.01 * moveSpeed;
+					model.scale.z -= 0.01 * moveSpeed;
+				}
 			});
 
 			progressBarDiv = document.createElement('div');
