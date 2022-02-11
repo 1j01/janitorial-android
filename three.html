@@ -10,6 +10,7 @@
 	<style>
 		body {
 			color: #444;
+			overflow: hidden;
 		}
 
 		a {
@@ -153,21 +154,30 @@
 				animate();
 			}
 			window.addEventListener('keydown', (event) => {
-				if (event.key === "ArrowUp") {
-					// model.rotation.x -= Math.PI / 2;
+				if (event.code === "KeyI") {
 					tween(model.rotation, { x: model.rotation.x - Math.PI / 2 });
 				}
-				if (event.key === "ArrowDown") {
-					// model.rotation.x += Math.PI / 2;
+				if (event.code === "KeyK") {
 					tween(model.rotation, { x: model.rotation.x + Math.PI / 2 });
 				}
-				if (event.key === "ArrowRight") {
-					// model.rotation.y -= Math.PI / 2;
+				if (event.code === "KeyJ") {
 					tween(model.rotation, { y: model.rotation.y - Math.PI / 2 });
 				}
-				if (event.key === "ArrowLeft") {
-					// model.rotation.y += Math.PI / 2;
+				if (event.code === "KeyL") {
 					tween(model.rotation, { y: model.rotation.y + Math.PI / 2 });
+				}
+				const moveSpeed = event.shiftKey ? 10 : event.ctrlKey ? 0.01 : 1;
+				if (event.key === "ArrowUp") {
+					model.position.y += moveSpeed;
+				}
+				if (event.key === "ArrowDown") {
+					model.position.y -= moveSpeed;
+				}
+				if (event.key === "ArrowRight") {
+					model.position.x += moveSpeed;
+				}
+				if (event.key === "ArrowLeft") {
+					model.position.x -= moveSpeed;
 				}
 			});
 
@@ -187,6 +197,10 @@
 			reloadObject(true);
 
 		}
+
+		window.addEventListener("scroll", () => {
+			scrollTo(0, 0);
+		});
 
 		function updateObjectsVisibility() {
 
