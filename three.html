@@ -125,18 +125,43 @@
 
 			window.addEventListener('resize', setupProjection, false);
 
+			function tween(object, to, from) {
+				if (!from) {
+					from = {};
+					for (const key of Object.keys(to)) {
+						from[key] = object[key];
+					}
+				}
+				const startTime = performance.now();
+				function animate() {
+					const timeFraction = (performance.now() - startTime) / 1000;
+					for (const [key, to_value] of Object.entries(to)) {
+						const from_value = from[key];
+						const value = from_value + (to_value - from_value) * timeFraction;
+						object[key] = value;
+					}
+					if (timeFraction < 1) {
+						requestAnimationFrame(animate);
+					}
+				}
+				animate();
+			}
 			window.addEventListener('keydown', (event) => {
 				if (event.key === "ArrowUp") {
-					model.rotation.x -= Math.PI / 2;
+					// model.rotation.x -= Math.PI / 2;
+					tween(model.rotation, { x: model.rotation.x - Math.PI / 2 });
 				}
 				if (event.key === "ArrowDown") {
-					model.rotation.x += Math.PI / 2;
+					// model.rotation.x += Math.PI / 2;
+					tween(model.rotation, { x: model.rotation.x + Math.PI / 2 });
 				}
 				if (event.key === "ArrowRight") {
-					model.rotation.y -= Math.PI / 2;
+					// model.rotation.y -= Math.PI / 2;
+					tween(model.rotation, { y: model.rotation.y - Math.PI / 2 });
 				}
 				if (event.key === "ArrowLeft") {
-					model.rotation.y += Math.PI / 2;
+					// model.rotation.y += Math.PI / 2;
+					tween(model.rotation, { y: model.rotation.y + Math.PI / 2 });
 				}
 			});
 
