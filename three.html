@@ -74,6 +74,34 @@
 		init();
 		animate();
 
+		let tweening = false;
+		function tween(object, to, from) {
+			if (tweening) return;
+			tweening = true;
+			if (!from) {
+				from = {};
+				for (const key of Object.keys(to)) {
+					from[key] = object[key];
+				}
+			}
+			const startTime = performance.now();
+			function animate() {
+				let timeFraction = (performance.now() - startTime) / 1000;
+				if (timeFraction < 1) {
+					requestAnimationFrame(animate);
+				} else {
+					tweening = false;
+					timeFraction = 1;
+				}
+				for (const [key, to_value] of Object.entries(to)) {
+					const from_value = from[key];
+					const value = from_value + (to_value - from_value) * timeFraction;
+					object[key] = value;
+				}
+			}
+			animate();
+		}
+
 		function init() {
 
 			container = document.createElement('div');
@@ -126,33 +154,6 @@
 
 			window.addEventListener('resize', setupProjection, false);
 
-			let tweening = false;
-			function tween(object, to, from) {
-				if (tweening) return;
-				tweening = true;
-				if (!from) {
-					from = {};
-					for (const key of Object.keys(to)) {
-						from[key] = object[key];
-					}
-				}
-				const startTime = performance.now();
-				function animate() {
-					let timeFraction = (performance.now() - startTime) / 1000;
-					if (timeFraction < 1) {
-						requestAnimationFrame(animate);
-					} else {
-						tweening = false;
-						timeFraction = 1;
-					}
-					for (const [key, to_value] of Object.entries(to)) {
-						const from_value = from[key];
-						const value = from_value + (to_value - from_value) * timeFraction;
-						object[key] = value;
-					}
-				}
-				animate();
-			}
 			window.addEventListener('keydown', (event) => {
 				if (event.code === "KeyI") {
 					tween(model.rotation, { x: model.rotation.x - Math.PI / 2 });
@@ -525,6 +526,9 @@
 		scanningCanvas.style.left = '0px';
 
 		function scanPixels() {
+			if (tweening) {
+				return;
+			}
 			scanningCanvas.width = renderSize[0];
 			scanningCanvas.height = renderSize[1];
 			var context = scanningCanvas.getContext('2d');
