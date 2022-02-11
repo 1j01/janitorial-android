@@ -503,6 +503,57 @@
 
 		}
 
+		var scanningCanvas = document.createElement('canvas');
+		document.body.appendChild(scanningCanvas);
+		scanningCanvas.style.position = 'absolute';
+		scanningCanvas.style.top = '0px';
+		scanningCanvas.style.left = '0px';
+
+		function scanPixels() {
+			scanningCanvas.width = renderSize[0];
+			scanningCanvas.height = renderSize[1];
+			var context = scanningCanvas.getContext('2d');
+			context.drawImage(renderer.domElement, 0, 0);
+			var imageData = context.getImageData(0, 0, renderSize[0], renderSize[1]);
+			var data = imageData.data;
+			var buckets = [];
+			for (var x = 0; x < imageData.width; x++) {
+				buckets[x] = 0;
+				for (var y = 0; y < imageData.height; y++) {
+					var index = (y * imageData.width + x) * 4;
+					var alpha = data[index + 3];
+					buckets[x] += alpha;
+				}
+				buckets[x] /= imageData.height;
+			}
+			var transitions = [];
+			for (var x = 0; x < imageData.width - 1; x++) {
+				if (Math.abs(buckets[x] - buckets[x + 1]) > 1) {
+					transitions.push(x);
+				}
+			}
+			var distances = [];
+			for (var i = 0; i < transitions.length - 1; i++) {
+				distances.push(transitions[i + 1] - transitions[i]);
+			}
+			var averageDistance = distances.reduce((a, b) => a + b, 0) / distances.length;
+			console.log({ transitions, distances, averageDistance });
+
+			for (const transitionX of transitions) {
+				for (var y = 0; y < imageData.height; y++) {
+					var index = (y * imageData.width + transitionX) * 4;
+					data[index + 3] = 255;
+					data[index + 2] = 255;
+					data[index + 1] = 255;
+					data[index + 0] = 255;
+				}
+			}
+			context.putImageData(imageData, 0, 0);
+
+		}
+
+		setInterval(scanPixels, 1000);
+
 	</script>
 
 	<!-- LDraw.org CC BY 2.0 Parts Library attribution -->
