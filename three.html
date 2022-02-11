@@ -351,8 +351,9 @@
 
 			camera.updateProjectionMatrix();
 
+			/*
 			// code based on https://stackoverflow.com/a/26060068/2624876
-			// Create shear matrix
+			// Create shear matrix for oblique projection
 			var alpha = Math.PI / 4;
 
 			var Syx = 0,
@@ -368,6 +369,20 @@
 				Sxy, 1, Szy, 0,
 				Sxz, Syz, 1, 0,
 				0, 0, 0, 1);
+			*/
+
+			var matrix = new THREE.Matrix4();
+			// 1. result of the above code
+			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.3535533905932738, -0.35355339059327373, 1, 0, 0, 0, 0, 1]);
+			// 2. try using the same number since they're similar
+			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.3535533905932738, -0.3535533905932738, 1, 0, 0, 0, 0, 1]);
+			// 3. try reducing precision
+			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.35, -0.35, 1, 0, 0, 0, 0, 1]);
+			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.32, -0.32, 1, 0, 0, 0, 0, 1]);
+			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.25, -0.25, 1, 0, 0, 0, 0, 1]);
+			// 4. head-on view, to simplify the problem
+			matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0., -0., 1, 0, 0, 0, 0, 1]);
+
 
 			camera.projectionMatrix.multiply(matrix);
 			camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
