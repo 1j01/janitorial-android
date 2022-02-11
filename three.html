@@ -17,9 +17,7 @@
 			color: #08f;
 		}
 
-		canvas {
-			image-rendering: pixelated;
-		}
+		/* put most stuff in main.css, this is just for the background */
 	</style>
 </head>
 
@@ -150,6 +148,7 @@
 				smoothNormals: false,
 				constructionStep: 0,
 				noConstructionSteps: "No steps.",
+				pixelScanner: false,
 				exportImages: exportImages,
 			};
 
@@ -382,10 +381,10 @@
 			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.3535533905932738, -0.3535533905932738, 1, 0, 0, 0, 0, 1]);
 			// 3. try reducing precision
 			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.35, -0.35, 1, 0, 0, 0, 0, 1]);
-			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.32, -0.32, 1, 0, 0, 0, 0, 1]);
+			matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.32, -0.32, 1, 0, 0, 0, 0, 1]);
 			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.25, -0.25, 1, 0, 0, 0, 0, 1]);
 			// 4. head-on view, to simplify the problem
-			matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0., -0., 1, 0, 0, 0, 0, 1]);
+			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0., -0., 1, 0, 0, 0, 0, 1]);
 
 
 			camera.projectionMatrix.multiply(matrix);
@@ -445,6 +444,10 @@
 
 			gui.add(guiData, 'displayLines').name('Display Lines').onChange(updateObjectsVisibility);
 			gui.add(guiData, 'conditionalLines').name('Conditional Lines').onChange(updateObjectsVisibility);
+
+			gui.add(guiData, 'pixelScanner').name('Pixel Scanner (measurement tool)').onChange(function changePixelScanner(value) {
+				scanningCanvas.hidden = !value;
+			});
 
 			gui.add(guiData, 'exportImages').name('Export Image(s)');
 
@@ -529,7 +532,7 @@
 		scanningCanvas.style.left = '0px';
 
 		function scanPixels() {
-			if (tweening) {
+			if (tweening || !guiData.pixelScanner) {
 				return;
 			}
 			scanningCanvas.width = renderSize[0];

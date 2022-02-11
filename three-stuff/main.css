@@ -22,8 +22,9 @@ button {
 	text-transform: uppercase;
 }
 
-canvas {
+canvas:not([hidden]) {
 	display: block;
+	image-rendering: pixelated;
 }
 
 #info {
