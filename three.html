@@ -97,7 +97,7 @@
 			//
 
 			renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, preserveDrawingBuffer: true });
-			renderer.setPixelRatio(window.devicePixelRatio);
+			// renderer.setPixelRatio(window.devicePixelRatio); // I'm generating pixel art, and I want to be able to zoom in to inspect it
 			renderer.setSize(...renderSize);
 			container.appendChild(renderer.domElement);
 
