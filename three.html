@@ -69,7 +69,8 @@
 
 		const renderSize = [2000, 1000];
 		const aspect = renderSize[0] / renderSize[1];
-		const frustumSize = renderSize[1] * 1.35; // TODO: play around with this, get more exact
+		// const frustumSize = renderSize[1];// * 1.35; // TODO: play around with this, get more exact
+		const frustumSize = renderSize[1] * (1 + 1 / 3); // r u serious? well that seems like a possibly reasonable value (very math-y), and this aligns the bricks to 15px wide, but the pixels of the studs are still variously aliased...
 
 		init();
 		animate();
@@ -190,11 +191,13 @@
 					model.scale.x += 0.01 * moveSpeed;
 					model.scale.y += 0.01 * moveSpeed;
 					model.scale.z += 0.01 * moveSpeed;
+					console.log("scale", model.scale);
 				}
 				if (event.key === "Delete") {
 					model.scale.x -= 0.01 * moveSpeed;
 					model.scale.y -= 0.01 * moveSpeed;
 					model.scale.z -= 0.01 * moveSpeed;
+					console.log("scale", model.scale);
 				}
 			});
 
