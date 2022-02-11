@@ -565,6 +565,14 @@
 			}
 			context.putImageData(imageData, 0, 0);
 
+			for (var i = 0; i < distances.length; i++) {
+				var x = transitions[i];
+				var distance = distances[i];
+				var y = scanningCanvas.height / 2 + (x * 50) % 500;
+				context.fillStyle = 'red';
+				context.font = "20px Arial";
+				context.fillText(distance, x, y);
+			}
 		}
 
 		setInterval(scanPixels, 1000);
