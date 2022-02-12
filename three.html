@@ -107,7 +107,7 @@
 			document.body.appendChild(container);
 
 			// camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
-			camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 10000);
+			camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, -10000, 100000);
 			// camera.position.set( 150, 200, 250 );
 			camera.position.set(0, 0, 250);
 			camera.lookAt(new THREE.Vector3(0, 0, 0));
