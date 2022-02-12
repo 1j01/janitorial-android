@@ -35,7 +35,7 @@
 
 		var camera, scene, renderer, controls, gui, guiData;
 
-		var modelFileList, model, textureCube;
+		var modelFileList, model, textureCube, gridHelper;
 
 		var envMapActivated = false;
 
@@ -126,6 +126,11 @@
 			directionalLight.position.set(- 1000, 3200, 1500);
 			scene.add(directionalLight);
 
+			const divisions = 100;
+			const size = 15 * divisions;
+			gridHelper = new THREE.GridHelper(size, divisions);
+			scene.add(gridHelper);
+
 			//
 
 			renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, preserveDrawingBuffer: true });
@@ -134,8 +139,6 @@
 			container.appendChild(renderer.domElement);
 
 			// controls = new OrbitControls( camera, renderer.domElement );
-
-			setupProjection();
 
 			//
 
@@ -148,9 +151,13 @@
 				smoothNormals: false,
 				constructionStep: 0,
 				noConstructionSteps: "No steps.",
+				grid: false,
+				obliqueProjection: true,
 				pixelScanner: false,
 				exportImages: exportImages,
 			};
+
+			setupProjection();
 
 			window.addEventListener('resize', setupProjection, false);
 
@@ -246,6 +253,8 @@
 				}
 
 			});
+
+			gridHelper.visible = guiData.grid;
 
 		}
 
@@ -354,41 +363,40 @@
 
 			camera.updateProjectionMatrix();
 
-			/*
-			// code based on https://stackoverflow.com/a/26060068/2624876
-			// Create shear matrix for oblique projection
-			var alpha = Math.PI / 4;
+			if (guiData.obliqueProjection) {
+				// code based on https://stackoverflow.com/a/26060068/2624876
+				// Create shear matrix for oblique projection
+				var alpha = Math.PI / 4;
 
-			var Syx = 0,
-				Szx = - 0.5 * Math.cos(alpha),
-				Sxy = 0,
-				Szy = - 0.5 * Math.sin(alpha),
-				Sxz = 0,
-				Syz = 0;
+				var Syx = 0,
+					Szx = - 0.5 * Math.cos(alpha),
+					Sxy = 0,
+					Szy = - 0.5 * Math.sin(alpha),
+					Sxz = 0,
+					Syz = 0;
 
-			var matrix = new THREE.Matrix4();
+				var matrix = new THREE.Matrix4();
 
-			matrix.set(1, Syx, Szx, 0,
-				Sxy, 1, Szy, 0,
-				Sxz, Syz, 1, 0,
-				0, 0, 0, 1);
-			*/
+				matrix.set(1, Syx, Szx, 0,
+					Sxy, 1, Szy, 0,
+					Sxz, Syz, 1, 0,
+					0, 0, 0, 1);
 
-			var matrix = new THREE.Matrix4();
-			// 1. result of the above code
-			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.3535533905932738, -0.35355339059327373, 1, 0, 0, 0, 0, 1]);
-			// 2. try using the same number since they're similar
-			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.3535533905932738, -0.3535533905932738, 1, 0, 0, 0, 0, 1]);
-			// 3. try reducing precision
-			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.35, -0.35, 1, 0, 0, 0, 0, 1]);
-			matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.32, -0.32, 1, 0, 0, 0, 0, 1]);
-			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.25, -0.25, 1, 0, 0, 0, 0, 1]);
-			// 4. head-on view, to simplify the problem
-			// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0., -0., 1, 0, 0, 0, 0, 1]);
+				// var matrix = new THREE.Matrix4();
+				// 1. result of the above code
+				// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.3535533905932738, -0.35355339059327373, 1, 0, 0, 0, 0, 1]);
+				// 2. try using the same number since they're similar
+				// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.3535533905932738, -0.3535533905932738, 1, 0, 0, 0, 0, 1]);
+				// 3. try reducing precision
+				// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.35, -0.35, 1, 0, 0, 0, 0, 1]);
+				// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.32, -0.32, 1, 0, 0, 0, 0, 1]);
+				// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.25, -0.25, 1, 0, 0, 0, 0, 1]);
+				// 4. head-on view
+				// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0., -0., 1, 0, 0, 0, 0, 1]);
 
-
-			camera.projectionMatrix.multiply(matrix);
-			camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+				camera.projectionMatrix.multiply(matrix);
+				camera.projectionMatrixInverse.getInverse(camera.projectionMatrix);
+			}
 
 			renderer.setSize(...renderSize);
 
@@ -444,6 +452,12 @@
 
 			gui.add(guiData, 'displayLines').name('Display Lines').onChange(updateObjectsVisibility);
 			gui.add(guiData, 'conditionalLines').name('Conditional Lines').onChange(updateObjectsVisibility);
+
+			gui.add(guiData, 'grid').name('Grid').onChange(updateObjectsVisibility);
+
+			gui.add(guiData, 'obliqueProjection').name('Oblique Projection').onChange(function changeProjection(value) {
+				setupProjection();
+			});
 
 			gui.add(guiData, 'pixelScanner').name('Pixel Scanner (measurement tool)').onChange(function changePixelScanner(value) {
 				scanningCanvas.hidden = !value;
