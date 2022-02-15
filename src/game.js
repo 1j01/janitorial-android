@@ -350,7 +350,7 @@ const showMessageBox = (message, {
 		closing = true;
 		if (animate) {
 			messageBox.style.transition = "transform 1s linear";
-			messageBox.style.transform = "translateX(-200%)";
+			messageBox.style.transform = "translateX(-100vw)";
 			await waitForTransitionEnd();
 			messageBoxContainer.remove();
 		} else {
