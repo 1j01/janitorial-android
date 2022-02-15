@@ -5729,6 +5729,7 @@ const initUI = () => {
 		}
 	}
 };
+
 const getLevelLists = (resources) => [
 	{
 		game: "Junkbot",
@@ -5743,6 +5744,25 @@ const getLevelLists = (resources) => [
 		levelNames: tests.map((test) => test.name),
 	},
 ];
+
+const whereLevelIsInTheGame = (level, game) => {
+	const gameSlug = gameNameToSlug(game);
+	const levelSlug = levelNameToSlug(level.title);
+	for (const list of getLevelLists(resources)) {
+		if (gameSlug === gameNameToSlug(list.game)) {
+			for (let i = 0; i < list.levelNames.length; i++) {
+				if (levelSlug === levelNameToSlug(list.levelNames[i])) {
+					return {
+						pageNumber: 1 + Math.floor(i / levelsPerPage),
+						levelNumber: 1 + (i % levelsPerPage),
+					};
+				}
+			}
+			break;
+		}
+	}
+};
+
 const initLevelDropdown = () => {
 	const option = document.createElement("option");
 	option.textContent = "Custom World";
@@ -6757,15 +6777,14 @@ const loadFromHash = async () => {
 					<h1 class="level-info-header"><img class="level-info-building-image"><img class="level-info-building-text-image"></h1>
 					<h2 class="level-info-title"></h2>
 				`;
-				const pageNumber = parseInt(levelGroup.replace(/\D/g, ""), 10);
+				const { pageNumber, levelNumber } = whereLevelIsInTheGame(currentLevel, game);
 				if (game === "Junkbot") {
 					levelInfoContent.querySelector(".level-info-building-image").src = `images/menus/building_icon_${pageNumber}.png`;
 					levelInfoContent.querySelector(".level-info-building-text-image").src = `images/menus/building_text_${pageNumber}.png`;
 				} else {
 					levelInfoContent.querySelector(".level-info-header").textContent = game === "Junkbot Undercover" ? `Basement ${pageNumber}` : `Section ${pageNumber}`;
 				}
-				// @TODO: "Level <N>: "
-				levelInfoContent.querySelector(".level-info-title").textContent = `Level: ${currentLevel.title.toLocaleUpperCase()}`;
+				levelInfoContent.querySelector(".level-info-title").textContent = `Level ${levelNumber}: ${currentLevel.title.toLocaleUpperCase()}`;
 
 				const toast = showMessageBox([levelInfoContent], { buttons: [] });
 				nonErrorDialogs.push(toast);
