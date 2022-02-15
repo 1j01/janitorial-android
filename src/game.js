@@ -1250,6 +1250,39 @@ const routingTests = [
 			wantsEdit: false,
 		},
 	},
+	{
+		hash: "#tests/levels/armor-farmer",
+		expected: {
+			game: GAME_TEST_CASES,
+			levelSlug: "armor-farmer",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests/armor-farmer",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#tests/armor-farmer/edit",
+		expected: {
+			game: GAME_TEST_CASES,
+			levelSlug: "armor-farmer",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests/armor-farmer/edit",
+			wantsEdit: true,
+		},
+	},
+	{
+		hash: "#tests/levels/armor-farmer/edit",
+		expected: {
+			game: GAME_TEST_CASES,
+			levelSlug: "armor-farmer",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests/armor-farmer/edit",
+			wantsEdit: true,
+		},
+	},
 	// @TODO maybe
 	// {
 	// 	hash: "#descent",
@@ -6591,6 +6624,9 @@ const parseRoute = (hash) => {
 		if (editSynonyms.includes(hashParts[i].toLowerCase()) && !wantsEdit) {
 			wantsEdit = true;
 		} else if (hashParts[i].match(/^(levels|tests)$/i)) {
+			if (hashParts[i].match(/tests/i) && hashParts[i + 1]?.match(/levels/)) {
+				i += 1;
+			}
 			if (hashParts[i + 1]?.match(levelGroupRegexp)) {
 				levelGroup = hashParts[i + 1]; // (we should get it on the next loop iteration anyways...)
 				levelName = hashParts[i + 2];
