@@ -111,6 +111,7 @@ const levelSelectScreen = document.getElementById("level-select-screen");
 const levelList = document.getElementById("level-list");
 const junkbotPagination = document.getElementById("junkbot-level-group-tabs");
 const junkbotUndercoverPagination = document.getElementById("junkbot-undercover-level-group-tabs");
+const backToTitleScreenButton = document.getElementById("back-to-title");
 // Main game controls bar
 const mainControlsBar = document.getElementById("main-controls");
 const toggleInfoButton = document.getElementById("toggle-info");
@@ -120,7 +121,7 @@ const toggleEditingButton = document.getElementById("toggle-editing");
 const volumeSlider = document.getElementById("volume-slider");
 const zoomInButton = document.getElementById("zoom-in");
 const zoomOutButton = document.getElementById("zoom-out");
-// const showTitleScreenButton = document.getElementById("show-title-screen");
+// const selectLevelButton = document.getElementById("back-to-level-select");
 // Info screen
 const infoBox = document.getElementById("info");
 const controlsTableRows = document.querySelectorAll("#info table tr");
@@ -5658,9 +5659,21 @@ const getLevelSelectURL = () => {
 	const { game, levelGroup } = parseRoute(location.hash);
 	return `#${gameNameToSlug(game)}/levels${levelGroup ? `/${levelGroup}` : ""}`;
 };
+const getTitleScreenURL = () => {
+	const { game } = parseRoute(location.hash);
+	return `#${gameNameToSlug(game)}`;
+};
 
 const initUI = () => {
+	document.body.addEventListener("pointerdown", (event) => {
+		const button = event.target.closest(".generic-sound");
+		if (button) {
+			playSound("buttonClick");
+		}
+	});
+
 	// Title screen
+
 	startGameButton.addEventListener("click", () => {
 		location.hash = getLevelSelectURL();
 	});
@@ -5682,11 +5695,11 @@ const initUI = () => {
 	resetScreenButton.addEventListener("click", () => {
 		showTitleScreen(false);
 	});
-	document.body.addEventListener("pointerdown", (event) => {
-		const button = event.target.closest(".generic-sound");
-		if (button) {
-			playSound("buttonClick");
-		}
+
+	// Level select screen
+
+	backToTitleScreenButton.addEventListener("click", () => {
+		location.hash = getTitleScreenURL();
 	});
 
 	document.addEventListener("click", (event) => {
@@ -5735,9 +5748,6 @@ const initUI = () => {
 	addEventListener("pointerup", () => {
 		rewindingWithButton = false;
 	});
-	// showTitleScreenButton.addEventListener("click", () => {
-	// 	location.hash = getTitleScreenURL();
-	// });
 
 	// Part of editor UX but not editor GUI.
 	// Should be supported before opening editor UI.

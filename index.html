@@ -629,6 +629,18 @@
 			margin-bottom: 12px;
 		}
 
+		#back-to-title {
+			background-image: url("images/menus/lv_quit.png");
+			width: 96px;
+			height: 26px;
+			/* not measured, not a similar layout to the original for now */
+			margin: 15px;
+		}
+
+		#back-to-title:hover {
+			background-image: url("images/menus/lv_quit_X.png");
+		}
+
 		/* LEVEL START TOAST */
 
 		.level-info-building-text-image {
@@ -725,6 +737,7 @@
 			<a href="#junkbot2/levels/basement-4" class="level-group-tab">Basement 4</a>
 		</div>
 		<ol id="level-list"></ol>
+		<button class="image-button generic-sound" id="back-to-title">Main</button>
 	</div>
 	<div id="main-controls">
 		<!-- aria-keyshortcuts doesn't technically allow for modifiers on their own, but what are you gonna do? -->
