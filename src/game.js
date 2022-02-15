@@ -291,7 +291,9 @@ const debugWorldSpaceRect = (x, y, width, height) => {
 // let aJunkbot;
 
 const wrapContents = (target, wrapper) => {
-	[...target.childNodes].forEach((child) => wrapper.appendChild(child));
+	for (const child of target.childNodes) {
+		wrapper.appendChild(child);
+	}
 	target.appendChild(wrapper);
 	return wrapper;
 };
@@ -1291,7 +1293,7 @@ const updateAccelerationStructures = () => {
 		}
 	}
 	// clean up acceleration structures
-	lastKeys.forEach((yKeys, entity) => {
+	for (const [entity, yKeys] of Object.entries(lastKeys)) {
 		if (entities.indexOf(entity) === -1) {
 			if (yKeys.topY) {
 				arrayRemove(entitiesByTopY[yKeys.topY], entity);
@@ -1301,13 +1303,13 @@ const updateAccelerationStructures = () => {
 			}
 			lastKeys.delete(entity);
 		}
-	});
+	}
 	const cleanByYObj = (entitiesByY) => {
-		Object.keys(entitiesByY).forEach((y) => {
+		for (const y of Object.keys(entitiesByY)) {
 			if (entitiesByY[y].length === 0) {
 				delete entitiesByY[y];
 			}
-		});
+		}
 	};
 	cleanByYObj(entitiesByTopY);
 	cleanByYObj(entitiesByBottomY);
@@ -1608,22 +1610,22 @@ const loadLevelFromText = (levelData, game) => {
 	};
 
 	if (sections.info) {
-		sections.info.forEach(([key, value]) => {
+		for (const [key, value] of sections.info) {
 			if (key.match(/^(title|hint)$/i)) {
 				level[key] = value;
 			} else if (key.match(/^par$/i)) {
 				level.par = Number(value);
 			}
-		});
+		}
 	}
 	let spacing = [15, 18];
 	if (sections.playfield) {
-		sections.playfield.forEach(([key, value]) => {
+		for (const [key, value] of sections.playfield) {
 			if (key.match(/^spacing$/i)) {
 				spacing = value.split(",").map(Number);
 			}
-		});
-		sections.playfield.forEach(([key, value]) => {
+		}
+		for (const [key, value] of sections.playfield) {
 			if (key.match(/^size$/i)) {
 				const size = value.split(",").map(Number);
 				level.bounds = {
@@ -1633,7 +1635,7 @@ const loadLevelFromText = (levelData, game) => {
 					height: size[1] * spacing[1],
 				};
 			}
-		});
+		}
 	}
 	if (sections.background) {
 		const parseDecals = (value) => {
@@ -1645,7 +1647,7 @@ const loadLevelFromText = (levelData, game) => {
 				return { x: Number(x), y: Number(y), name };
 			});
 		};
-		sections.background.forEach(([key, value]) => {
+		for (const [key, value] of sections.background) {
 			if (key.match(/^bgdecals$/i)) {
 				level.backgroundDecals = level.backgroundDecals.concat(parseDecals(value));
 			} else if (key.match(/^decals$/i)) {
@@ -1653,7 +1655,7 @@ const loadLevelFromText = (levelData, game) => {
 			} else if (key.match(/^backdrop$/i)) {
 				level.backdropName = value;
 			}
-		});
+		}
 	}
 
 	let types = [];
@@ -1662,13 +1664,13 @@ const loadLevelFromText = (levelData, game) => {
 	if (!sections.partslist) {
 		throw new SyntaxError("No [partslist] section found.");
 	}
-	sections.partslist.forEach(([key, value]) => {
+	for (const [key, value] of sections.partslist) {
 		if (key === "types") {
 			types = types.concat(value.toLowerCase().split(","));
 		} else if (key === "colors") {
 			colors = colors.concat(value.toLowerCase().split(","));
 		} else if (key === "parts") {
-			value.split(",").forEach((entityDef) => {
+			for (const entityDef of value.split(",")) {
 				const e = entityDef.split(";");
 				// [0] - x coordinate
 				// [1] - y coordinate
@@ -1739,9 +1741,9 @@ const loadLevelFromText = (levelData, game) => {
 				} else {
 					entities.push({ id: getID(), type: typeName, x, y, colorName, widthInStuds: 2, width: 2 * 15, height: 18, fixed: true });
 				}
-			});
+			}
 		}
-	});
+	}
 
 	return level;
 };
@@ -2838,9 +2840,9 @@ const selectAll = () => {
 	if (!editing) {
 		toggleEditing();
 	}
-	entities.forEach((entity) => {
+	for (const entity of entities) {
 		entity.selected = true;
-	});
+	}
 };
 const flipSelected = () => {
 	if (!editing) {
@@ -3734,10 +3736,10 @@ const finishDrag = ({
 		editing,
 	});
 
-	dragging.forEach((entity) => {
+	for (const entity of dragging) {
 		delete entity.grabbed;
 		delete entity.grabOffset;
-	});
+	}
 	dragging = [];
 	playSound("blockDrop");
 	save();
@@ -3748,9 +3750,9 @@ addEventListener("pointerup", () => {
 		finishDrag();
 	} else if (selectionBox) {
 		const toSelect = entitiesWithinSelection(selectionBox);
-		toSelect.forEach((entity) => {
+		for (const entity of toSelect) {
 			entity.selected = true;
-		});
+		}
 		selectionBox = null;
 		if (toSelect.length) {
 			playSound("selectEnd");
@@ -5836,8 +5838,8 @@ const initEditorUI = () => {
 		return button;
 	};
 
-	brickColorNames.forEach((colorName) => {
-		brickWidthsInStuds.forEach((widthInStuds) => {
+	for (const colorName of brickColorNames) {
+		for (const widthInStuds of brickWidthsInStuds) {
 			makeInsertEntityButton(makeBrick({
 				colorName,
 				widthInStuds,
@@ -5845,8 +5847,8 @@ const initEditorUI = () => {
 				x: 0,
 				y: 0,
 			}));
-		});
-	});
+		}
+	}
 
 	makeInsertEntityButton(makeJunkbot({
 		x: 0,
