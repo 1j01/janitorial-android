@@ -375,6 +375,14 @@ const showMessageBox = (message, {
 	}
 	messageBoxContainer.append(messageBox);
 	document.body.append(messageBoxContainer);
+	messageBox.style.transform = "translateY(-100vh)";
+	messageBox.style.transition = "transform 1s linear";
+	requestAnimationFrame(() => { // wait just before the next paint
+		// eslint-disable-next-line no-unused-expressions
+		document.body.offsetHeight; // force a reflow
+		// trigger the initial transition
+		messageBox.style.transform = "translateY(0)";
+	});
 
 	messageBoxContainer.close = closeMessageBox;
 
