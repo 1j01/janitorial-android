@@ -2727,7 +2727,8 @@ const updateEditingButton = () => {
 	toggleEditingButton.querySelector("img").src = editing ? "images/icons/toggle-editing-edit-mode.png" : "images/icons/toggle-editing-play-mode.png";
 };
 const toggleEditing = () => {
-	if (!editing && (titleScreen.style.display !== "none" && !titleScreen.hidden)) {
+	if (!editing && parseRoute(location.hash).screen === SCREEN_TITLE) {
+		// @TODO: navigate, in order to edit the title screen level (ideally)
 		return;
 	}
 	editing = !editing;
@@ -6684,6 +6685,10 @@ const loadFromHash = async () => {
 			hideLevelSelectScreen();
 			await closeNonErrorDialogs();
 
+			if (wantsEdit !== editing) {
+				toggleEditing();
+			}
+
 			if (editing) {
 				paused = true;
 			} else {
@@ -6698,11 +6703,6 @@ const loadFromHash = async () => {
 				}, 2500);
 			}
 
-			// This currently relies on the title screen being hidden
-			// @TODO: remove check on title screen visibility in toggleEditing, maybe allow editing the title screen level too
-			if (wantsEdit !== editing) {
-				toggleEditing();
-			}
 		}
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
