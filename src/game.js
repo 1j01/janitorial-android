@@ -4472,6 +4472,13 @@ const handleRewind = () => {
 			paused = true;
 			playbackLevel = diffPatcher.clone(currentLevel); // HACK
 		}
+		if (frameCounter > 0) {
+			// playSound("undo", 0.3, 0.6);
+			playSound("undo", 0.1, 0.6);
+			// playSound("turn", 0.3, 0.5);
+			// playSound("jump", 0.3, 0.8);
+			// playSound("rustle0", 0.1, 0.8);
+		}
 		// sort for consistency for level delta patching
 		entities.sort((a, b) => a.id - b.id);
 		for (let i = 0; i < rewindRate; i++) {
