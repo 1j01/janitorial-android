@@ -1550,6 +1550,8 @@ const otherResourcePaths = {
 	backgroundsUndercoverAtlas: "images/spritesheets/Undercover Exclusive/backgrounds.json",
 	// menusUndercover: "images/spritesheets/Undercover Exclusive/menus.png",
 	// menusUndercoverAtlas: "images/spritesheets/Undercover Exclusive/menus.json",
+	tabLocked: "audio/sound-effects/spring_1.ogg",
+	tabSwitch: "audio/sound-effects/h_powerup3.ogg",
 	fall: "audio/sound-effects/fall.ogg",
 	headBonk: "audio/sound-effects/headbonk1.ogg",
 	collectBin: "audio/sound-effects/eat1.ogg",
@@ -5317,6 +5319,19 @@ const initUI = () => {
 	for (const button of buttons) {
 		button.addEventListener("pointerdown", () => {
 			playSound("buttonClick");
+		});
+	}
+
+	// Could use event delegation here (but I'm not)
+	const tabs = [...junkbotPagination.querySelectorAll(".level-group-tab"), ...junkbotUndercoverPagination.querySelectorAll(".level-group-tab")];
+	for (const tab of tabs) {
+		tab.addEventListener("click", () => {
+			if (tab.classList.contains("selected")) {
+				return;
+			}
+			// @TODO: check if the level group is locked (implement keycards system)
+			playSound("tabSwitch");
+			// playSound("tabLocked");
 		});
 	}
 
