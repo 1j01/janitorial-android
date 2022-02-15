@@ -1125,8 +1125,7 @@ const routingTests = [
 		expected: {
 			game: "Junkbot Undercover",
 			levelSlug: undefined,
-			// levelGroup: "basement-1", // @TODO
-			levelGroup: undefined,
+			levelGroup: "basement-1",
 			screen: SCREEN_LEVEL_SELECT,
 			canonicalHash: "#junkbot2/levels/basement-1",
 			wantsEdit: false,
@@ -6533,7 +6532,7 @@ const parseRoute = (hash) => {
 
 	let canonicalHash = `#${gameNameToSlug(game)}`;
 	let screen = SCREEN_TITLE;
-	const levelGroupSlug = levelGroup ? levelGroupToSlug(levelGroup, game) : undefined;
+	let levelGroupSlug = levelGroup ? levelGroupToSlug(levelGroup, game) : undefined;
 
 	if (levelName) {
 		screen = SCREEN_LEVEL;
@@ -6558,7 +6557,9 @@ const parseRoute = (hash) => {
 		if (levelGroupSlug) {
 			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}`;
 		} else {
-			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupToSlug("1", game)}`;
+			levelGroup = "1";
+			levelGroupSlug = levelGroupToSlug(levelGroup, game);
+			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}`;
 		}
 	}
 
