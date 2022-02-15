@@ -360,7 +360,7 @@ const showMessageBox = (message, {
 	};
 	for (const { label, isDefault, action } of buttons) {
 		const button = document.createElement("button");
-		button.className = "generic-button";
+		button.className = "generic-button generic-sound";
 		button.onclick = () => {
 			closeMessageBox(true); // must be before action so a message box can be shown in the action
 			action?.();
