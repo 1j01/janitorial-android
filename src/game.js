@@ -165,8 +165,6 @@ const GAME_JANITORIAL_ANDROID = "GAME_JANITORIAL_ANDROID";
 const GAME_TEST_CASES = "GAME_TEST_CASES";
 const GAME_USER_CREATED = "GAME_USER_CREATED";
 
-const levelsPerPage = 15; // level select screen is divided into tabs
-
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -5573,7 +5571,7 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 	}
 	for (const list of getLevelLists(resources)) {
 		if (gameNameToSlug(game) === gameNameToSlug(list.game)) {
-			levelNamesToShow = list.levelNames.slice((levelGroupNumber - 1) * levelsPerPage, levelGroupNumber * levelsPerPage);
+			levelNamesToShow = list.levelNames.slice((levelGroupNumber - 1) * list.levelsPerPage, levelGroupNumber * list.levelsPerPage);
 			break;
 		}
 	}
@@ -5785,14 +5783,17 @@ const getLevelLists = (resources) => [
 	{
 		game: GAME_JUNKBOT,
 		levelNames: resources.levelNames,
+		levelsPerPage: 15,
 	},
 	{
 		game: GAME_JUNKBOT_UNDERCOVER,
 		levelNames: resources.levelNamesUndercover,
+		levelsPerPage: 15,
 	},
 	{
 		game: GAME_TEST_CASES,
 		levelNames: tests.map((test) => test.name),
+		levelsPerPage: Infinity,
 	},
 ];
 
@@ -5804,8 +5805,8 @@ const whereLevelIsInTheGame = (level, game) => {
 			for (let i = 0; i < list.levelNames.length; i++) {
 				if (levelSlug === levelNameToSlug(list.levelNames[i])) {
 					return {
-						pageNumber: 1 + Math.floor(i / levelsPerPage),
-						levelNumber: 1 + (i % levelsPerPage),
+						pageNumber: 1 + Math.floor(i / list.levelsPerPage),
+						levelNumber: 1 + (i % list.levelsPerPage),
 					};
 				}
 			}
@@ -6827,31 +6828,39 @@ const loadFromHash = async () => {
 			if (editing) {
 				paused = true;
 			} else {
-				// Show level name as a sort of toast
-				const levelInfoContent = document.createElement("div");
-				levelInfoContent.innerHTML = `
-					<h1 class="level-info-header"><img class="level-info-building-image"><img class="level-info-building-text-image"></h1>
-					<h2 class="level-info-title"></h2>
-				`;
-				const { pageNumber, levelNumber } = whereLevelIsInTheGame(currentLevel, game);
-				if (game === GAME_JUNKBOT) {
-					levelInfoContent.querySelector(".level-info-building-image").src = `images/menus/building_icon_${pageNumber}.png`;
-					levelInfoContent.querySelector(".level-info-building-text-image").src = `images/menus/building_text_${pageNumber}.png`;
+				const levelLocation = whereLevelIsInTheGame(currentLevel, game);
+				if (levelLocation) {
+					// Show level name as a sort of toast
+					const levelInfoContent = document.createElement("div");
+					levelInfoContent.innerHTML = `
+						<h1 class="level-info-header"><img class="level-info-building-image"><img class="level-info-building-text-image"></h1>
+						<h2 class="level-info-title"></h2>
+					`;
+					const { pageNumber, levelNumber } = levelLocation;
+					if (game === GAME_JUNKBOT) {
+						levelInfoContent.querySelector(".level-info-building-image").src = `images/menus/building_icon_${pageNumber}.png`;
+						levelInfoContent.querySelector(".level-info-building-text-image").src = `images/menus/building_text_${pageNumber}.png`;
+					} else if (game === GAME_JUNKBOT_UNDERCOVER) {
+						levelInfoContent.querySelector(".level-info-header").textContent = `Basement ${pageNumber}`;
+					} else if (game === GAME_TEST_CASES) {
+						levelInfoContent.querySelector(".level-info-header").textContent = "Test Cases";
+					} else {
+						levelInfoContent.querySelector(".level-info-header").remove();
+					}
+					levelInfoContent.querySelector(".level-info-title").textContent = `Level ${levelNumber}: ${currentLevel.title.toLocaleUpperCase()}`;
+
+					const toast = showMessageBox([levelInfoContent], { buttons: [] });
+					nonErrorDialogs.push(toast);
+					// Don't await this delay, because we want the animation loop to start so the level gets rendered.
+					setTimeout(async () => {
+						await toast.close(true);
+						// Unpause, unless user switched into edit mode by now
+						paused = editing;
+					}, 2500);
 				} else {
-					levelInfoContent.querySelector(".level-info-header").textContent = game === GAME_JUNKBOT_UNDERCOVER ? `Basement ${pageNumber}` : `Section ${pageNumber}`;
+					paused = false;
 				}
-				levelInfoContent.querySelector(".level-info-title").textContent = `Level ${levelNumber}: ${currentLevel.title.toLocaleUpperCase()}`;
-
-				const toast = showMessageBox([levelInfoContent], { buttons: [] });
-				nonErrorDialogs.push(toast);
-				// Don't await this delay, because we want the animation loop to start so the level gets rendered.
-				setTimeout(async () => {
-					await toast.close(true);
-					// Unpause, unless user switched into edit mode by now
-					paused = editing;
-				}, 2500);
 			}
-
 		}
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
