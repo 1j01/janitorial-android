@@ -1242,6 +1242,53 @@ const routingTests = [
 	// 		wantsEdit: false,
 	// 	},
 	// },
+	{
+		hash: "#local/levels/custom-level",
+		expected: {
+			game: "local",
+			levelSlug: "custom-level",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			// canonicalHash: "#my-computer-NOT_A_SHARABLE_LINK/levels/custom-level", // @TODO maybe rename to clarify these URLs aren't sharable
+			canonicalHash: "#local/levels/custom-level",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#local/levels/custom-level/edit",
+		expected: {
+			game: "local",
+			levelSlug: "custom-level",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#local/levels/custom-level/edit",
+			wantsEdit: true,
+		},
+	},
+	// edge case: if you name a level "edit", "/edit" should be treated as the level name, not the edit mode
+	{
+		hash: "#local/levels/edit",
+		expected: {
+			game: "local",
+			levelSlug: "edit",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#local/levels/edit",
+			wantsEdit: false,
+		},
+	},
+	// hypothetical edge case: if there were a built-in level called "edit"
+	{
+		hash: "#junkbot2/levels/basement-1/edit",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: "edit",
+			levelGroup: "basement-1",
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#junkbot2/levels/basement-1/edit",
+			wantsEdit: false,
+		},
+	},
 	// Old routes:
 	{
 		hash: "#run-tests",
