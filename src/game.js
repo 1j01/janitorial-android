@@ -332,19 +332,30 @@ const showMessageBox = (message, {
 	buttonGroup.className = "button-group";
 	messageBox.append(buttonGroup);
 	let closing = false;
-	const closeMessageBox = (animate) => {
+	const waitForTransitionEnd = () => {
+		return new Promise((resolve) => {
+			messageBox.addEventListener("transitionend", () => {
+				resolve();
+			});
+		});
+	};
+	const closeMessageBox = async (animate) => {
+		if (!messageBoxContainer.parentNode) {
+			return Promise.resolve();
+		}
 		if (closing) {
+			await waitForTransitionEnd();
 			return;
 		}
 		closing = true;
 		if (animate) {
 			messageBox.style.transition = "transform 1s linear";
 			messageBox.style.transform = "translateX(-200%)";
-			messageBox.addEventListener("transitionend", () => {
-				messageBoxContainer.remove();
-			});
+			await waitForTransitionEnd();
+			messageBoxContainer.remove();
 		} else {
 			messageBoxContainer.remove();
+			return Promise.resolve();
 		}
 	};
 	for (const { label, isDefault, action } of buttons) {
@@ -374,11 +385,11 @@ const showMessageBox = (message, {
 // Other dialogs are fine to close due to navigation.
 const nonErrorDialogs = [];
 const closeNonErrorDialogs = () => {
-	for (const el of nonErrorDialogs) {
-		el.close(false);
-		// not just el.remove() because close animation shouldn't be interrupted when loading the next level for example
-	}
+	// When loading the next level for example, we want to close all non-error dialogs
+	// When hitting Select Level, we want to wait for the transition to finish before changing screens
+	const promise = Promise.all(nonErrorDialogs.map((dialog) => dialog.close(false)));
 	nonErrorDialogs.length = 0;
+	return promise;
 };
 
 const showPrompt = (message, defaultText = "") => {
@@ -5376,6 +5387,7 @@ const showTitleScreen = (showIntro) => {
 	if (editing) {
 		toggleEditing();
 	}
+	// @TODO: pause while intro plays, so the squeaky turning sound effect doesn't play!
 	paused = false;
 
 	titleScreen.hidden = false;
@@ -5625,7 +5637,7 @@ const initUI = () => {
 		rewindingWithButton = false;
 	});
 	// showTitleScreenButton.addEventListener("click", () => {
-	// 	showTitleScreen(false);
+	// 	location.hash = getTitleScreenURL();
 	// });
 
 	// Part of editor UX but not editor GUI.
@@ -6613,11 +6625,12 @@ const loadFromHash = async () => {
 
 		if (screen === SCREEN_LEVEL_SELECT) {
 			hideTitleScreen();
-			closeNonErrorDialogs();
+			await closeNonErrorDialogs();
 			showLevelSelectScreen(game, levelGroup);
 			return; // don't want to hide the level select screen below
 		}
-		// These are routes that show a level; other screens are hidden below
+
+		// These are routes that show a level; other screens are hidden below, once the level is ready.
 		if (toShowTestRunner) {
 			runTests();
 		} else {
@@ -6666,6 +6679,8 @@ const loadFromHash = async () => {
 		// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
 		hideTitleScreen();
 		hideLevelSelectScreen();
+
+		// @TODO: add level name toast, and wait for transitions before starting simulation
 		closeNonErrorDialogs();
 		// This currently relies on the title screen being hidden
 		// @TODO: remove check on title screen visibility in toggleEditing, maybe allow editing the title screen level too
@@ -6678,9 +6693,9 @@ const loadFromHash = async () => {
 		if (location.hash !== loadingFrom) {
 			return;
 		}
+		await closeNonErrorDialogs();
 		showTitleScreen();
 		hideLevelSelectScreen();
-		closeNonErrorDialogs();
 
 		// We loaded the title screen!
 		// There's more to load, but we don't want to block showing the title screen level,
