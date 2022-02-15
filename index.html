@@ -505,6 +505,12 @@
 		#level-list {
 			background-color: #808080;
 			color: #000;
+			margin: 0;
+			/* not measured */
+			padding-top: 10px;
+			padding-bottom: 10px;
+			/* border-top: 1px solid #000; */
+			box-shadow: 0 0 0 1px #000;
 		}
 
 		.level-list-item {
@@ -553,7 +559,38 @@
 			margin-right: 5px;
 		}
 
-		/* NETWORK */
+		.level-group-tab {
+			display: inline-block;
+			vertical-align: bottom;
+			background-image: url("images/menus/custom/tab.png");
+			/* measured image size: 124x22 */
+			width: 124px;
+			background-position: bottom;
+			background-repeat: no-repeat;
+			/* not measured */
+			margin-right: -20px;
+			/* for z-index */
+			position: relative;
+			/* for text-only tabs (placeholder for the sequel) */
+			text-align: center;
+		}
+
+		.level-group-tab:not(.selected) {
+			/* border-bottom: 1px solid #000; */
+			box-shadow: inset 0 -1px 0 0 #000;
+		}
+
+		.level-group-tab.selected {
+			z-index: 1;
+		}
+
+		.level-group-tab img {
+			display: block;
+			/* not measured */
+			margin: 5px auto;
+		}
+
+		/* NETWORK ORDER */
 
 		#preload {
 			display: none;

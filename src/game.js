@@ -5209,6 +5209,11 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 	} else if (game === "Junkbot Undercover") {
 		junkbotUndercoverPagination.hidden = false;
 	}
+	const tabs = (game === "Junkbot" ? junkbotPagination : junkbotUndercoverPagination).querySelectorAll(".level-group-tab");
+	for (let i = 0; i < tabs.length; i++) {
+		const tab = tabs[i];
+		tab.classList.toggle("selected", i === levelGroupNumber - 1);
+	}
 	if (levelNamesToShow.length === 0) {
 		showMessageBox(`No levels found for game "${game}" and group "${levelGroupName}"`, {
 			buttons: [
