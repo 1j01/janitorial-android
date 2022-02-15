@@ -160,6 +160,8 @@ const SCREEN_LEVEL_SELECT = "SCREEN_LEVEL_SELECT";
 const SCREEN_LEVEL = "SCREEN_LEVEL";
 // @TODO: enum for games (Junkbot, Junkbot Undercover, Test Cases, User-Created)
 
+const levelsPerPage = 15; // level select screen is divided into tabs
+
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -5518,10 +5520,9 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 	if (isNaN(levelGroupNumber)) {
 		levelGroupNumber = 1;
 	}
-	const levelsPerGroup = 15;
 	for (const list of getLevelLists(resources)) {
 		if (gameNameToSlug(game) === gameNameToSlug(list.game)) {
-			levelNamesToShow = list.levelNames.slice((levelGroupNumber - 1) * levelsPerGroup, levelGroupNumber * levelsPerGroup);
+			levelNamesToShow = list.levelNames.slice((levelGroupNumber - 1) * levelsPerPage, levelGroupNumber * levelsPerPage);
 			break;
 		}
 	}
