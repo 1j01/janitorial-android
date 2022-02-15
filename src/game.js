@@ -6684,18 +6684,20 @@ const loadFromHash = async () => {
 		hideTitleScreen();
 		hideLevelSelectScreen();
 		await closeNonErrorDialogs();
-		// Show level name as a sort of toast
-		const toast = showMessageBox(currentLevel.title, { buttons: [] });
-		nonErrorDialogs.push(toast);
-		// Wait before closing toast
-		// await new Promise((resolve) => setTimeout(resolve, 2500));
-		// await toast.close(true);
-		// paused = editing;
-		// Don't actually want to await, because then the animation loop doesn't start and the level doesn't get rendered.
-		setTimeout(async () => {
-			await toast.close(true);
-			paused = editing;
-		}, 2500);
+
+		if (editing) {
+			paused = true;
+		} else {
+			// Show level name as a sort of toast
+			const toast = showMessageBox(currentLevel.title, { buttons: [] });
+			nonErrorDialogs.push(toast);
+			// Don't await this delay, because we want the animation loop to start so the level gets rendered.
+			setTimeout(async () => {
+				await toast.close(true);
+				// Unpause, unless user switched into edit mode
+				paused = editing;
+			}, 2500);
+		}
 
 		// This currently relies on the title screen being hidden
 		// @TODO: remove check on title screen visibility in toggleEditing, maybe allow editing the title screen level too
