@@ -5556,20 +5556,15 @@ const initUI = () => {
 		}
 	});
 
-	// Could use event delegation here (but I'm not)
-	const tabs = [...junkbotPagination.querySelectorAll(".level-group-tab"), ...junkbotUndercoverPagination.querySelectorAll(".level-group-tab")];
-	for (const tab of tabs) {
-		tab.addEventListener("click", () => {
-			if (tab.classList.contains("selected")) {
-				return;
-			}
+	document.addEventListener("click", (event) => {
+		const tab = event.target.closest(".level-group-tab");
+		if (tab && !tab.classList.contains("selected")) {
 			// @TODO: check if the level group is locked (implement keycards system)
 			playSound("tabSwitch");
 			// playSound("tabLocked");
-		});
-	}
+		}
+	});
 
-	// Going to use event delegation here though! For the dynamically created level list.
 	levelList.addEventListener("click", (event) => {
 		const a = event.target.closest("a");
 		if (a) {
