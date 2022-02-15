@@ -5620,7 +5620,7 @@ const initUI = () => {
 		const kbd = controlCell.querySelector("kbd");
 		if (kbd) {
 			// relying on a kbd representing whole key combos, and the order of modifiers, and lack of Alt/Meta/Super/Hyper
-			const match = kbd.textContent.match(/(Ctrl\s*\+\s*)?(Shift\s*\+\s*)?(.+)/);
+			const match = kbd.textContent.match(/(Ctrl\s*\+\s*)?(Shift\s*\+\s*)?(\S+)/);
 			if (match) {
 				const ctrlKey = Boolean(match[1]);
 				const shiftKey = Boolean(match[2]);
@@ -6038,16 +6038,17 @@ const initEditorUI = () => {
 
 	for (const button of editorControlsBar.querySelectorAll("button")) {
 		button.addEventListener("click", () => {
-			const match = button.ariaKeyShortcuts.match(/(Ctrl\+)?(.+)/);
+			const match = button.ariaKeyShortcuts?.match(/(Ctrl\s*\+\s*)?(Shift\s*\+\s*)?(\S+)/);
 			if (match) {
-				const ctrlKey = match[1] !== "";
-				let key = match[2];
+				const ctrlKey = Boolean(match[1]);
+				const shiftKey = Boolean(match[2]);
+				let key = match[3];
 				if (key === "+") {
 					key = "NumpadAdd";
 				} else if (key === "-") {
 					key = "NumpadSubtract";
 				}
-				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, bubbles: true }));
+				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, shiftKey, bubbles: true }));
 			} else {
 				showMessageBox("Oops! Something went wrong. Please report this bug.");
 			}
