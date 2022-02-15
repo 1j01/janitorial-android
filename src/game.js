@@ -1552,6 +1552,7 @@ const otherResourcePaths = {
 	// menusUndercoverAtlas: "images/spritesheets/Undercover Exclusive/menus.json",
 	tabLocked: "audio/sound-effects/spring_1.ogg",
 	tabSwitch: "audio/sound-effects/h_powerup3.ogg",
+	enterLevel: "audio/sound-effects/enter_level.wav",
 	fall: "audio/sound-effects/fall.ogg",
 	headBonk: "audio/sound-effects/headbonk1.ogg",
 	collectBin: "audio/sound-effects/eat1.ogg",
@@ -5334,6 +5335,14 @@ const initUI = () => {
 			// playSound("tabLocked");
 		});
 	}
+
+	// Going to use event delegation here though! For the dynamically created level list.
+	levelList.addEventListener("click", (event) => {
+		const a = event.target.closest("a");
+		if (a) {
+			playSound("enterLevel");
+		}
+	});
 
 	// Main game controls bar
 
