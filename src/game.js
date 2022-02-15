@@ -1428,7 +1428,7 @@ const updateAccelerationStructures = () => {
 		}
 	}
 	// clean up acceleration structures
-	for (const [entity, yKeys] of Object.entries(lastKeys)) {
+	for (const [entity, yKeys] of lastKeys.entries()) {
 		if (entities.indexOf(entity) === -1) {
 			if (yKeys.topY) {
 				arrayRemove(entitiesByTopY[yKeys.topY], entity);
