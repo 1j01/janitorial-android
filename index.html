@@ -593,14 +593,16 @@
 			z-index: 1;
 		}
 
-		.level-group-tab img {
+		.tab-text-image {
 			display: block;
 			/* not measured */
 			margin: 5px auto;
 		}
 
-		.level-group-tab img:first-of-type {
-			/* not measured, and other margin is involved... */
+		.building-image {
+			display: block;
+			/* not measured, and margin from other element is involved... */
+			margin: 5px auto;
 			margin-bottom: 9px;
 		}
 
@@ -655,20 +657,20 @@
 	<div id="level-select-screen" hidden>
 		<div id="junkbot-level-group-tabs">
 			<a href="#junkbot/levels/building-1" class="level-group-tab">
-				<img alt="Unlocked" src="images/menus/building_icon_1.png">
-				<img alt="Building 1" src="images/menus/buidling_tab_1.png">
+				<img class="building-image" alt="Unlocked" src="images/menus/building_icon_1.png">
+				<img class="tab-text-image" alt="Building 1" src="images/menus/buidling_tab_1.png">
 			</a>
 			<a href="#junkbot/levels/building-2" class="level-group-tab">
-				<img alt="Unlocked" src="images/menus/building_icon_2.png">
-				<img alt="Building 2" src="images/menus/buidling_tab_2.png">
+				<img class="building-image" alt="Unlocked" src="images/menus/building_icon_2.png">
+				<img class="tab-text-image" alt="Building 2" src="images/menus/buidling_tab_2.png">
 			</a>
 			<a href="#junkbot/levels/building-3" class="level-group-tab">
-				<img alt="Unlocked" src="images/menus/building_icon_3.png">
-				<img alt="Building 3" src="images/menus/buidling_tab_3.png">
+				<img class="building-image" alt="Unlocked" src="images/menus/building_icon_3.png">
+				<img class="tab-text-image" alt="Building 3" src="images/menus/buidling_tab_3.png">
 			</a>
 			<a href="#junkbot/levels/building-4" class="level-group-tab">
-				<img alt="Unlocked" src="images/menus/building_icon_4.png">
-				<img alt="Building 4" src="images/menus/buidling_tab_4.png">
+				<img class="building-image" alt="Unlocked" src="images/menus/building_icon_4.png">
+				<img class="tab-text-image" alt="Building 4" src="images/menus/buidling_tab_4.png">
 			</a>
 		</div>
 		<div id="junkbot-undercover-level-group-tabs" hidden>
