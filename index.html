@@ -559,6 +559,14 @@
 			margin-right: 5px;
 		}
 
+		#junkbot-level-group-tabs {
+			background: #33CCFF;
+			box-shadow: inset 0 -32px 0 0 #33CC33;
+			color: #000;
+			height: 74px;
+			line-height: 74px;
+		}
+
 		.level-group-tab {
 			display: inline-block;
 			vertical-align: bottom;
@@ -573,6 +581,7 @@
 			position: relative;
 			/* for text-only tabs (placeholder for the sequel) */
 			text-align: center;
+			line-height: 24px;
 		}
 
 		.level-group-tab:not(.selected) {
@@ -588,6 +597,11 @@
 			display: block;
 			/* not measured */
 			margin: 5px auto;
+		}
+
+		.level-group-tab img:first-of-type {
+			/* not measured, and other margin is involved... */
+			margin-bottom: 9px;
 		}
 
 		/* NETWORK ORDER */
