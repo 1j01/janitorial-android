@@ -1659,6 +1659,9 @@ const loadLevelFromText = (levelData, game) => {
 	let types = [];
 	let colors = [];
 	const { entities } = level;
+	if (!sections.partslist) {
+		throw new SyntaxError("No [partslist] section found.");
+	}
 	sections.partslist.forEach(([key, value]) => {
 		if (key === "types") {
 			types = types.concat(value.toLowerCase().split(","));
