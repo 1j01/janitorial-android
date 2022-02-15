@@ -565,22 +565,42 @@
 			color: #000;
 			height: 74px;
 			line-height: 74px;
+			display: flex;
+			align-items: flex-end;
 		}
 
 		.level-group-tab {
 			display: inline-block;
-			vertical-align: bottom;
 			background-image: url("images/menus/custom/tab.png");
 			/* measured image size: 124x22 */
 			width: 124px;
+			flex-shrink: 0;
 			background-position: bottom;
 			background-repeat: no-repeat;
 			margin-right: -15px;
 			/* for z-index */
 			position: relative;
+			/* prevent weirdly shaped touch callout (tap highlight) with relative-positioned .tab-text-image */
+			overflow: hidden;
 			/* for text-only tabs (placeholder for the sequel) */
 			text-align: center;
 			line-height: 24px;
+		}
+
+		@media (max-width: 450px) {
+			.level-group-tab {
+				margin-right: -30px;
+			}
+
+			.level-group-tab:first-child {
+				margin-left: -20px;
+			}
+
+			.tab-text-image {
+				clip-path: inset(0 0 0 75px);
+				position: relative;
+				left: -40px;
+			}
 		}
 
 		.level-group-tab:not(.selected) {
