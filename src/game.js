@@ -6633,7 +6633,7 @@ const loadFromHash = async () => {
 			return; // don't want to hide the level select screen below
 		}
 
-		// These are routes that show a level
+		// These are routes that show a level screen
 		if (toShowTestRunner) {
 			runTests();
 			closeNonErrorDialogs();
@@ -6679,30 +6679,30 @@ const loadFromHash = async () => {
 					showMessageBox(`Failed to load level "${levelSlug}"\n\n${error}`);
 				}
 			}
-		}
-		// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
-		hideTitleScreen();
-		hideLevelSelectScreen();
-		await closeNonErrorDialogs();
+			// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
+			hideTitleScreen();
+			hideLevelSelectScreen();
+			await closeNonErrorDialogs();
 
-		if (editing) {
-			paused = true;
-		} else {
-			// Show level name as a sort of toast
-			const toast = showMessageBox(currentLevel.title, { buttons: [] });
-			nonErrorDialogs.push(toast);
-			// Don't await this delay, because we want the animation loop to start so the level gets rendered.
-			setTimeout(async () => {
-				await toast.close(true);
-				// Unpause, unless user switched into edit mode
-				paused = editing;
-			}, 2500);
-		}
+			if (editing) {
+				paused = true;
+			} else {
+				// Show level name as a sort of toast
+				const toast = showMessageBox(currentLevel.title, { buttons: [] });
+				nonErrorDialogs.push(toast);
+				// Don't await this delay, because we want the animation loop to start so the level gets rendered.
+				setTimeout(async () => {
+					await toast.close(true);
+					// Unpause, unless user switched into edit mode by now
+					paused = editing;
+				}, 2500);
+			}
 
-		// This currently relies on the title screen being hidden
-		// @TODO: remove check on title screen visibility in toggleEditing, maybe allow editing the title screen level too
-		if (wantsEdit !== editing) {
-			toggleEditing();
+			// This currently relies on the title screen being hidden
+			// @TODO: remove check on title screen visibility in toggleEditing, maybe allow editing the title screen level too
+			if (wantsEdit !== editing) {
+				toggleEditing();
+			}
 		}
 	} else {
 		hotResourcesLoadedPromise ??= loadResources(hotResourcePaths).then(deriveHotResources);
