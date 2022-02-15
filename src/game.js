@@ -6752,7 +6752,22 @@ const loadFromHash = async () => {
 				paused = true;
 			} else {
 				// Show level name as a sort of toast
-				const toast = showMessageBox(currentLevel.title, { buttons: [] });
+				const levelInfoContent = document.createElement("div");
+				levelInfoContent.innerHTML = `
+					<h1 class="level-info-header"><img class="level-info-building-image"><img class="level-info-building-text-image"></h1>
+					<h2 class="level-info-title"></h2>
+				`;
+				const pageNumber = parseInt(levelGroup.replace(/\D/g, ""), 10);
+				if (game === "Junkbot") {
+					levelInfoContent.querySelector(".level-info-building-image").src = `images/menus/building_icon_${pageNumber}.png`;
+					levelInfoContent.querySelector(".level-info-building-text-image").src = `images/menus/building_text_${pageNumber}.png`;
+				} else {
+					levelInfoContent.querySelector(".level-info-header").textContent = game === "Junkbot Undercover" ? `Basement ${pageNumber}` : `Section ${pageNumber}`;
+				}
+				// @TODO: "Level <N>: "
+				levelInfoContent.querySelector(".level-info-title").textContent = `Level: ${currentLevel.title.toLocaleUpperCase()}`;
+
+				const toast = showMessageBox([levelInfoContent], { buttons: [] });
 				nonErrorDialogs.push(toast);
 				// Don't await this delay, because we want the animation loop to start so the level gets rendered.
 				setTimeout(async () => {
