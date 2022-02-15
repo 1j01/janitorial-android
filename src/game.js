@@ -3570,7 +3570,9 @@ const possibleGrabs = ({ worldX, worldY } = mouse) => {
 		}
 		return true;
 	};
-
+	if (paused && !editing) {
+		return [];
+	}
 	const brick = brickAt({ worldX, worldY }, { includeFixed: editing });
 	if (!brick) {
 		return [];
@@ -3718,6 +3720,9 @@ canvas.addEventListener("pointerdown", (event) => {
 	}
 	canvas.focus(); // for keyboard shortcuts, after interacting with dropdown
 	window.getSelection().removeAllRanges(); // for keyboard shortcuts for copy and paste after selecting text
+	if (paused && !editing) {
+		return;
+	}
 	updateMouse(event);
 	if (event.button !== 0) {
 		return; // right click is handled by contextmenu
@@ -3806,6 +3811,9 @@ const canRelease = () => {
 	}
 	if (editing) {
 		return true;
+	}
+	if (paused && !editing) {
+		return false;
 	}
 
 	const connectedToFixed = allConnectedToFixed();
@@ -5061,7 +5069,9 @@ const render = () => {
 
 	const hovered = dragging.length ? [] : possibleGrabs();
 
-	if (dragging.length) {
+	if (paused && !editing) {
+		canvas.style.cursor = "default";
+	} else if (dragging.length) {
 		updateDrag(mouse);
 		canvas.style.cursor = `url("images/cursors/cursor-grabbing.png") 8 8, grabbing`;
 	} else if (hovered.length >= 2) {
