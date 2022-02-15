@@ -121,7 +121,7 @@ const toggleEditingButton = document.getElementById("toggle-editing");
 const volumeSlider = document.getElementById("volume-slider");
 const zoomInButton = document.getElementById("zoom-in");
 const zoomOutButton = document.getElementById("zoom-out");
-// const selectLevelButton = document.getElementById("back-to-level-select");
+const backToLevelSelectButton = document.getElementById("back-to-level-select");
 // Info screen
 const infoBox = document.getElementById("info");
 const controlsTableRows = document.querySelectorAll("#info table tr");
@@ -5747,6 +5747,10 @@ const initUI = () => {
 	});
 	addEventListener("pointerup", () => {
 		rewindingWithButton = false;
+	});
+
+	backToLevelSelectButton.addEventListener("click", () => {
+		location.hash = getLevelSelectURL();
 	});
 
 	// Part of editor UX but not editor GUI.
