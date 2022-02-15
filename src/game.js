@@ -6692,7 +6692,6 @@ const loadFromHash = async () => {
 			hideTitleScreen();
 			hideLevelSelectScreen();
 		} else {
-			paused = true;
 			if (game === "local") {
 				try {
 					const json = localStorage[storageKeys.level(levelSlug)];
@@ -6705,6 +6704,8 @@ const loadFromHash = async () => {
 					editorLevelState = serializeToJSON(currentLevel);
 				} catch (error) {
 					showMessageBox(`Failed to load local level for editing ("${levelSlug}")\n\n${error}`);
+					location.hash = "#junkbot/levels";
+					return;
 				}
 			} else {
 				try {
@@ -6717,6 +6718,8 @@ const loadFromHash = async () => {
 						editorLevelState = serializeToJSON(currentLevel);
 					} catch (error) {
 						showMessageBox(`Failed to load level:\n\n${error}`);
+						location.hash = "#junkbot/levels";
+						return;
 					}
 
 					// For editor
@@ -6729,9 +6732,13 @@ const loadFromHash = async () => {
 					}
 				} catch (error) {
 					showMessageBox(`Failed to load level "${levelSlug}"\n\n${error}`);
+					location.hash = "#junkbot/levels";
+					return;
 				}
 			}
+
 			// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
+			paused = true;
 			hideTitleScreen();
 			hideLevelSelectScreen();
 			await closeNonErrorDialogs();
