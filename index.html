@@ -575,8 +575,7 @@
 			width: 124px;
 			background-position: bottom;
 			background-repeat: no-repeat;
-			/* not measured */
-			margin-right: -20px;
+			margin-right: -15px;
 			/* for z-index */
 			position: relative;
 			/* for text-only tabs (placeholder for the sequel) */
@@ -595,15 +594,18 @@
 
 		.tab-text-image {
 			display: block;
-			/* not measured */
-			margin: 5px auto;
+			margin: auto;
+			margin-bottom: 2px;
+		}
+
+		.level-group-tab:not(.selected) .tab-text-image {
+			opacity: 0.5;
 		}
 
 		.building-image {
 			display: block;
-			/* not measured, and margin from other element is involved... */
-			margin: 5px auto;
-			margin-bottom: 9px;
+			margin: 0 auto;
+			margin-bottom: 12px;
 		}
 
 		/* NETWORK ORDER */
