@@ -304,8 +304,6 @@ const toggleFullscreen = () => {
 	}
 };
 
-let messageBox;
-let messageBoxContainer;
 const showMessageBox = (message, {
 	buttons = [
 		{
@@ -313,15 +311,12 @@ const showMessageBox = (message, {
 			isDefault: true,
 			action: () => { /* the message box will close */ },
 		}
-	]
+	],
 } = {}) => {
 	// @TODO: support Esc, Enter, etc.
-	if (messageBox) {
-		messageBoxContainer.remove();
-	}
-	messageBoxContainer = document.createElement("div");
+	const messageBoxContainer = document.createElement("div");
 	messageBoxContainer.className = "dialog-container";
-	messageBox = document.createElement("div");
+	const messageBox = document.createElement("div");
 	messageBox.className = "dialog metal-border";
 	const messageContentEl = document.createElement("div");
 	messageContentEl.className = "message-content";
@@ -336,7 +331,6 @@ const showMessageBox = (message, {
 	messageBox.append(buttonGroup);
 	const closeMessageBox = () => {
 		messageBoxContainer.remove();
-		messageBox = null;
 	};
 	for (const { label, isDefault, action } of buttons) {
 		const button = document.createElement("button");
@@ -355,6 +349,7 @@ const showMessageBox = (message, {
 	}
 	messageBoxContainer.append(messageBox);
 	document.body.append(messageBoxContainer);
+	return messageBoxContainer;
 };
 const showPrompt = (message, defaultText = "") => {
 	const p = document.createElement("p");
@@ -369,18 +364,21 @@ const showPrompt = (message, defaultText = "") => {
 		input.select();
 	}, 0);
 	return new Promise((resolve) => {
-		showMessageBox([p, input], {
+		nonErrorDialogs.push(showMessageBox([p, input], {
 			buttons: [
 				{ label: "Cancel", action: () => resolve(undefined) },
 				{ label: "OK", action: () => resolve(input.value) },
 			]
-		});
+		}));
 	});
 };
-const closeMessageBox = () => {
-	if (messageBox) {
-		messageBoxContainer.remove();
-		messageBox = null;
+
+// Error messages are important and shouldn't be lost due to timing of close vs open during navigation (immediate close after open).
+// Other dialogs are fine to close due to navigation.
+let nonErrorDialogs = [];
+const closeNonErrorDialogs = () => {
+	for (const el of nonErrorDialogs) {
+		el.remove();
 	}
 };
 
@@ -2692,7 +2690,7 @@ const toggleEditing = () => {
 	editing = !editing;
 	editorUI.hidden = !editing;
 	editorControlsBar.hidden = !editing;
-	closeMessageBox();
+	closeNonErrorDialogs();
 	updateEditingButton();
 	if (editing) {
 		// eslint-disable-next-line no-use-before-define
@@ -6070,7 +6068,7 @@ const showLevelLoseUI = () => {
 		<img src="images/menus/level_lose.png" draggable="false">
 		<p>${message}</p>
 	`;
-	showMessageBox([div], {
+	nonErrorDialogs.push(showMessageBox([div], {
 		buttons: [
 			{
 				label: "Select Level",
@@ -6105,7 +6103,7 @@ const showLevelLoseUI = () => {
 				isDefault: true,
 			},
 		]
-	});
+	}));
 };
 
 const showGameWinUI = (game) => {
@@ -6130,7 +6128,7 @@ const showGameWinUI = (game) => {
 			},
 		});
 	}
-	showMessageBox([win], { buttons });
+	nonErrorDialogs.push(showMessageBox([win], { buttons }));
 };
 
 const canGoToNextLevel = () => {
@@ -6163,7 +6161,7 @@ const goToNextLevel = () => {
 const showLevelWinUI = () => {
 	const h1 = document.createElement("h1");
 	h1.textContent = "Level Complete!";
-	showMessageBox([h1], {
+	nonErrorDialogs.push(showMessageBox([h1], {
 		buttons: [
 			{
 				label: "Select Level",
@@ -6177,7 +6175,7 @@ const showLevelWinUI = () => {
 				isDefault: true,
 			},
 		],
-	});
+	}));
 };
 
 // #endregion
@@ -6591,7 +6589,7 @@ const loadFromHash = async () => {
 
 		if (screen === SCREEN_LEVEL_SELECT) {
 			hideTitleScreen();
-			closeMessageBox();
+			closeNonErrorDialogs();
 			showLevelSelectScreen(game, levelGroup);
 			return; // don't want to hide the level select screen below
 		}
@@ -6644,7 +6642,7 @@ const loadFromHash = async () => {
 		// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
 		hideTitleScreen();
 		hideLevelSelectScreen();
-		closeMessageBox();
+		closeNonErrorDialogs();
 		// This currently relies on the title screen being hidden
 		// @TODO: remove check on title screen visibility in toggleEditing, maybe allow editing the title screen level too
 		if (wantsEdit !== editing) {
@@ -6658,7 +6656,7 @@ const loadFromHash = async () => {
 		}
 		showTitleScreen();
 		hideLevelSelectScreen();
-		closeMessageBox();
+		closeNonErrorDialogs();
 
 		// We loaded the title screen!
 		// There's more to load, but we don't want to block showing the title screen level,
