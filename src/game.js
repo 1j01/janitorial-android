@@ -5261,10 +5261,10 @@ const checkLevelEnd = () => {
 		if (winLoseState === "lose" && !paused) {
 			paused = true;
 			if (!testing) {
+				// eslint-disable-next-line no-use-before-define
+				showLevelLoseUI();
 				setTimeout(() => {
 					playSound(Math.random() < 0.5 ? "ouch" : "uhoh");
-					// eslint-disable-next-line no-use-before-define
-					showLevelLoseUI();
 				}, 1000);
 			}
 		}
@@ -5306,13 +5306,8 @@ const checkLevelEnd = () => {
 						// eslint-disable-next-line no-console
 						console.log(error, "New solution was:", JSON.stringify(playthroughEvents));
 					}
-					setTimeout(() => {
-						if (currentLevel !== levelAtWin) {
-							return; // especially for while running tests and clicking on a test to go to
-						}
-						// eslint-disable-next-line no-use-before-define
-						showLevelWinUI();
-					}, 500);
+					// eslint-disable-next-line no-use-before-define
+					showLevelWinUI();
 				}, Math.max(resources.collectBin.duration, resources.collectBin2.duration) * 1000 - timeSinceCollectBin);
 			}
 		}
