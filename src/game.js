@@ -158,7 +158,12 @@ const testSpeedInput = document.getElementById("test-speed");
 const SCREEN_TITLE = "SCREEN_TITLE";
 const SCREEN_LEVEL_SELECT = "SCREEN_LEVEL_SELECT";
 const SCREEN_LEVEL = "SCREEN_LEVEL";
-// @TODO: enum for games (Junkbot, Junkbot Undercover, Test Cases, User-Created)
+
+const GAME_JUNKBOT = "GAME_JUNKBOT";
+const GAME_JUNKBOT_UNDERCOVER = "GAME_JUNKBOT_UNDERCOVER";
+const GAME_JANITORIAL_ANDROID = "GAME_JANITORIAL_ANDROID";
+const GAME_TEST_CASES = "GAME_TEST_CASES";
+const GAME_USER_CREATED = "GAME_USER_CREATED";
 
 const levelsPerPage = 15; // level select screen is divided into tabs
 
@@ -432,18 +437,31 @@ const levelNameToSlug = (levelName) => levelName
 	.toLowerCase();
 
 const gameNameToSlug = (gameName) => levelNameToSlug(gameName)
+	.replace(/^game-/, "") // for converting enum names (GAME_*) to slugs, especially for loose comparison
 	.replace(/(uc|undercover)/, "2")
 	.replace(/1/g, "")
+	.replace(/janitorial-android/, "junkbot3")
 	.replace(/test-cases|run-tests|test-runner/, "tests")
+	.replace(/user-created|my-computer|local/, "local")
 	.replace(/-/g, "");
 
+const canonicalSlugToGame = {
+	"junkbot": GAME_JUNKBOT,
+	"junkbot2": GAME_JUNKBOT_UNDERCOVER,
+	"junkbot3": GAME_JANITORIAL_ANDROID,
+	"tests": GAME_TEST_CASES,
+	"local": GAME_USER_CREATED,
+};
+
+const parseGameID = (gameName) => canonicalSlugToGame[gameNameToSlug(gameName)];
+
 const levelGroupToSlug = (groupName, gameName) => {
-	const gameSlug = gameNameToSlug(gameName);
+	const game = parseGameID(gameName);
 	const levelGroupNumber = parseInt(groupName.replace(/\D/g, ""), 10);
 	if (isFinite(levelGroupNumber)) {
-		if (gameSlug === "junkbot2") {
+		if (game === GAME_JUNKBOT_UNDERCOVER) {
 			return `basement-${levelGroupNumber}`;
-		} else if (gameSlug === "junkbot") {
+		} else if (game === GAME_JUNKBOT) {
 			return `building-${levelGroupNumber}`;
 		} else {
 			return `page-${levelGroupNumber}`;
@@ -1070,7 +1088,7 @@ const routingTests = [
 	{
 		hash: "#junkbot2/levels/basement-1/descent",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: "descent",
 			levelGroup: "basement-1",
 			screen: SCREEN_LEVEL,
@@ -1081,7 +1099,7 @@ const routingTests = [
 	{
 		hash: "#junkbot2/levels/basement-1/descent/edit-mode",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: "descent",
 			levelGroup: "basement-1",
 			screen: SCREEN_LEVEL,
@@ -1092,7 +1110,7 @@ const routingTests = [
 	{
 		hash: "#junkbot/levels",
 		expected: {
-			game: "Junkbot",
+			game: GAME_JUNKBOT,
 			levelSlug: undefined,
 			// levelGroup: "building-1", // @TODO
 			screen: SCREEN_LEVEL_SELECT,
@@ -1103,7 +1121,7 @@ const routingTests = [
 	{
 		hash: "#junkbot/building-1",
 		expected: {
-			game: "Junkbot",
+			game: GAME_JUNKBOT,
 			levelSlug: undefined,
 			levelGroup: "building-1",
 			screen: SCREEN_LEVEL_SELECT,
@@ -1114,7 +1132,7 @@ const routingTests = [
 	{
 		hash: "#junkbot2/levels/basement-2",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: undefined,
 			levelGroup: "basement-2",
 			screen: SCREEN_LEVEL_SELECT,
@@ -1125,7 +1143,7 @@ const routingTests = [
 	{
 		hash: "#junkbot2/levels",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: undefined,
 			levelGroup: "basement-1",
 			screen: SCREEN_LEVEL_SELECT,
@@ -1136,7 +1154,7 @@ const routingTests = [
 	{
 		hash: "#level-editor",
 		expected: {
-			game: "Junkbot",
+			game: GAME_JUNKBOT,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1147,7 +1165,7 @@ const routingTests = [
 	{
 		hash: "#",
 		expected: {
-			game: "Junkbot",
+			game: GAME_JUNKBOT,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_TITLE,
@@ -1158,7 +1176,7 @@ const routingTests = [
 	{
 		hash: "#junkbot",
 		expected: {
-			game: "Junkbot",
+			game: GAME_JUNKBOT,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_TITLE,
@@ -1169,7 +1187,7 @@ const routingTests = [
 	{
 		hash: "#JUNKBOT2",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_TITLE,
@@ -1180,7 +1198,7 @@ const routingTests = [
 	{
 		hash: "#junkbot-undercover",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_TITLE,
@@ -1191,7 +1209,7 @@ const routingTests = [
 	{
 		hash: "#junkbot-uc",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_TITLE,
@@ -1202,7 +1220,7 @@ const routingTests = [
 	{
 		hash: "#junkbot-1",
 		expected: {
-			game: "Junkbot",
+			game: GAME_JUNKBOT,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_TITLE,
@@ -1213,7 +1231,7 @@ const routingTests = [
 	{
 		hash: "#junkbot-2",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_TITLE,
@@ -1224,7 +1242,7 @@ const routingTests = [
 	{
 		hash: "#tests/tippy-toast",
 		expected: {
-			game: "Test Cases",
+			game: GAME_TEST_CASES,
 			levelSlug: "tippy-toast",
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1236,7 +1254,7 @@ const routingTests = [
 	// {
 	// 	hash: "#descent",
 	// 	expected: {
-	// 		game: "Junkbot Undercover",
+	// 		game: GAME_JUNKBOT_UNDERCOVER,
 	// 		levelSlug: "descent",
 	// 		levelGroup: undefined,
 	// 		screen: SCREEN_TITLE,
@@ -1247,7 +1265,7 @@ const routingTests = [
 	{
 		hash: "#local/levels/custom-level",
 		expected: {
-			game: "local",
+			game: GAME_USER_CREATED,
 			levelSlug: "custom-level",
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1259,7 +1277,7 @@ const routingTests = [
 	{
 		hash: "#local/levels/custom-level/edit",
 		expected: {
-			game: "local",
+			game: GAME_USER_CREATED,
 			levelSlug: "custom-level",
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1271,7 +1289,7 @@ const routingTests = [
 	{
 		hash: "#local/levels/edit",
 		expected: {
-			game: "local",
+			game: GAME_USER_CREATED,
 			levelSlug: "edit",
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1283,7 +1301,7 @@ const routingTests = [
 	{
 		hash: "#junkbot2/levels/basement-1/edit",
 		expected: {
-			game: "Junkbot Undercover",
+			game: GAME_JUNKBOT_UNDERCOVER,
 			levelSlug: "edit",
 			levelGroup: "basement-1",
 			screen: SCREEN_LEVEL,
@@ -1295,7 +1313,7 @@ const routingTests = [
 	{
 		hash: "#run-tests",
 		expected: {
-			game: "Test Cases",
+			game: GAME_TEST_CASES,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1306,7 +1324,7 @@ const routingTests = [
 	{
 		hash: "#level=Junkbot;new-employee-training",
 		expected: {
-			game: "Junkbot",
+			game: GAME_JUNKBOT,
 			levelSlug: "new-employee-training",
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1317,7 +1335,7 @@ const routingTests = [
 	{
 		hash: "#level=Test%20Cases;Tippy%20Toast",
 		expected: {
-			game: "Test Cases",
+			game: GAME_TEST_CASES,
 			levelSlug: "tippy-toast",
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1329,7 +1347,7 @@ const routingTests = [
 	// {
 	// 	hash: "#level=local;Custom%20Level",
 	// 	expected: {
-	// 		game: "local",
+	// 		game: GAME_USER_CREATED,
 	// 		levelSlug: "custom-level",
 	// 		levelGroup: undefined,
 	// 		screen: SCREEN_LEVEL,
@@ -1972,7 +1990,7 @@ const loadTextFile = async (path) => {
 };
 
 const loadLevelFromTextFile = async (path, game) => {
-	game ??= path.match(/Undercover/i) ? "Junkbot Undercover" : "Junkbot";
+	game ??= path.match(/Undercover/i) ? GAME_JUNKBOT_UNDERCOVER : GAME_JUNKBOT;
 	return loadLevelFromText(await loadTextFile(path), game);
 };
 
@@ -2224,7 +2242,7 @@ const drawTeleportConnection = (ctx, teleportA, teleportB) => {
 };
 
 const drawDecal = (ctx, x, y, name, game) => {
-	let atlas = resources[game === "Junkbot Undercover" ? "backgroundsUndercoverAtlas" : "backgroundsAtlas"];
+	let atlas = resources[game === GAME_JUNKBOT_UNDERCOVER ? "backgroundsUndercoverAtlas" : "backgroundsAtlas"];
 	let frame = atlas[name];
 	if (!frame) {
 		atlas = resources.backgroundsAtlas;
@@ -2675,9 +2693,9 @@ const loadLevelByName = ({ levelName, game }) => {
 		throw new Error(`Could not find level file for level name "${levelName}"`);
 	}
 	let folder = {
-		"Junkbot Undercover": "levels/Undercover Exclusive",
-		"Junkbot": "levels",
-		"Test Cases": "levels/test-cases",
+		[GAME_JUNKBOT_UNDERCOVER]: "levels/Undercover Exclusive",
+		[GAME_JUNKBOT]: "levels",
+		[GAME_TEST_CASES]: "levels/test-cases",
 	}[game];
 	if (slug === "new-employee-training") {
 		folder = "levels/custom";
@@ -2695,7 +2713,7 @@ const save = () => {
 		try {
 			const { game, levelSlug } = parseRoute(location.hash);
 			// console.log({ game, levelSlug }, "vs", currentLevel.game, levelNameToSlug(currentLevel.title));
-			if (levelSlug !== levelNameToSlug(currentLevel.title) || game !== "local") {
+			if (levelSlug !== levelNameToSlug(currentLevel.title) || game !== GAME_USER_CREATED) {
 				const originalTitle = currentLevel.title.replace(/\s\(\d+\)$/, "");
 				for (let n = 1; n < 100 && localStorage[storageKeys.level(currentLevel.title)]; n++) {
 					currentLevel.title = `${originalTitle} (${n})`;
@@ -5328,7 +5346,7 @@ const checkLevelEnd = () => {
 					playSound("ohYeah");
 					try {
 						// don't save score for edited levels (in particular, don't save over the score for the real levels! cheating!)
-						if (currentLevel.title && !location.hash.match(/local/)) {
+						if (currentLevel.title && parseRoute(location.hash).game !== GAME_USER_CREATED) {
 							const scoreKey = storageKeys.score(currentLevel.title);
 							const solutionKey = storageKeys.solutionRecording(currentLevel.title);
 							const formerFewest = Number(localStorage[scoreKey]);
@@ -5426,7 +5444,7 @@ const stopIntro = () => {
 	rufflePlayer = null;
 
 	const { game } = parseRoute(location.hash);
-	junkbotUndercoverTitle.hidden = game !== "Junkbot Undercover";
+	junkbotUndercoverTitle.hidden = game !== GAME_JUNKBOT_UNDERCOVER;
 };
 const hideTitleScreen = () => {
 	titleScreen.hidden = true;
@@ -5446,24 +5464,24 @@ const showTitleScreen = (showIntro) => {
 	initLevel(resources.titleScreenLevel);
 	titleScreen.classList.add("title-screen-level-loaded");
 	const { game } = parseRoute(location.hash);
-	if (game === "Junkbot") {
+	if (game === GAME_JUNKBOT) {
 		showIntro ??= !playedJunkbotIntro;
-	} else if (game === "Junkbot Undercover") {
+	} else if (game === GAME_JUNKBOT_UNDERCOVER) {
 		showIntro ??= !playedJunkbotUndercoverIntro;
 	} else {
 		showIntro = false;
 	}
 	if (showIntro) {
-		if (game === "Junkbot") {
+		if (game === GAME_JUNKBOT) {
 			playedJunkbotIntro = true;
-		} else if (game === "Junkbot Undercover") {
+		} else if (game === GAME_JUNKBOT_UNDERCOVER) {
 			playedJunkbotUndercoverIntro = true;
 		}
 		replayIntroButton.hidden = false;
 		rufflePlayer = ruffle.createPlayer();
 		rufflePlayer.classList.add("metal-border");
 		introContainer.appendChild(rufflePlayer);
-		const swf = game === "Junkbot Undercover" ? "flash/junkbot_undercover_intro.swf" : "flash/junkbot_intro.swf";
+		const swf = game === GAME_JUNKBOT_UNDERCOVER ? "flash/junkbot_undercover_intro.swf" : "flash/junkbot_intro.swf";
 		rufflePlayer.load(swf).then(() => {
 			// Note: It may not actually be loaded!
 			// @TODO: handle failing to load the SWF somehow? more monkey-patching?
@@ -5481,7 +5499,7 @@ const showTitleScreen = (showIntro) => {
 				if (url === "lingo:glob.download_manager.animDone()") {
 					stopIntro();
 				} else if (url === "lingo:glob.jbxtitle_a.show()") {
-					// @TODO: for Junkbot Undercover, split "Junkbot" part of title,
+					// @TODO: for Junkbot Undercover, split GAME_JUNKBOT part of title,
 					// to show it at this time
 				} else if (url === "lingo:glob.jbxtitle_b.show()") {
 					junkbotUndercoverTitle.hidden = false;
@@ -5502,7 +5520,7 @@ const showTitleScreen = (showIntro) => {
 		});
 	} else {
 		resetScreenButton.hidden = false;
-		junkbotUndercoverTitle.hidden = game !== "Junkbot Undercover";
+		junkbotUndercoverTitle.hidden = game !== GAME_JUNKBOT_UNDERCOVER;
 	}
 };
 
@@ -5531,12 +5549,12 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 
 	junkbotPagination.hidden = true;
 	junkbotUndercoverPagination.hidden = true;
-	if (game === "Junkbot") {
+	if (game === GAME_JUNKBOT) {
 		junkbotPagination.hidden = false;
-	} else if (game === "Junkbot Undercover") {
+	} else if (game === GAME_JUNKBOT_UNDERCOVER) {
 		junkbotUndercoverPagination.hidden = false;
 	}
-	const tabs = (game === "Junkbot" ? junkbotPagination : junkbotUndercoverPagination).querySelectorAll(".level-group-tab");
+	const tabs = (game === GAME_JUNKBOT ? junkbotPagination : junkbotUndercoverPagination).querySelectorAll(".level-group-tab");
 	for (let i = 0; i < tabs.length; i++) {
 		const tab = tabs[i];
 		tab.classList.toggle("selected", i === levelGroupNumber - 1);
@@ -5732,15 +5750,15 @@ const initUI = () => {
 
 const getLevelLists = (resources) => [
 	{
-		game: "Junkbot",
+		game: GAME_JUNKBOT,
 		levelNames: resources.levelNames,
 	},
 	{
-		game: "Junkbot Undercover",
+		game: GAME_JUNKBOT_UNDERCOVER,
 		levelNames: resources.levelNamesUndercover,
 	},
 	{
-		game: "Test Cases",
+		game: GAME_TEST_CASES,
 		levelNames: tests.map((test) => test.name),
 	},
 ];
@@ -6226,7 +6244,7 @@ const showGameWinUI = (game) => {
 			},
 		},
 	];
-	if (game === "Junkbot") {
+	if (game === GAME_JUNKBOT) {
 		buttons.push({
 			label: "Play Junkbot Undercover",
 			action: () => {
@@ -6306,6 +6324,17 @@ const testRouting = () => {
 	}
 };
 
+const testIDs = () => {
+	for (const [gameSlug, gameID] of Object.entries(canonicalSlugToGame)) {
+		// eslint-disable-next-line no-console
+		console.assert(parseGameID(gameSlug) === gameID, `parseGameID("${gameSlug}") should be "${gameID}"`);
+		// eslint-disable-next-line no-console
+		console.assert(parseGameID(gameID) === gameID, `parseGameID("${gameID}") should be "${gameID}"`);
+		// eslint-disable-next-line no-console
+		console.assert(gameNameToSlug(gameSlug) === gameSlug, `gameNameToSlug("${gameSlug}") should be "${gameSlug}"`);
+	}
+};
+
 const stopTests = () => {
 	testing = false;
 	testsUI.hidden = true;
@@ -6313,6 +6342,7 @@ const stopTests = () => {
 
 const runTests = async () => {
 	testRouting();
+	testIDs();
 
 	testing = true;
 
@@ -6578,27 +6608,19 @@ const parseRoute = (hash) => {
 	// Parse old URLs (#level=game;level-name)
 	const match = hash.match(/level=([^;&]+);([^;&]+)$/i);
 	if (match) {
-		game = match[1];
+		game = parseGameID(match[1]);
 		levelName = match[2];
 	}
 
 	for (const hashPart of hashParts) {
-		if (gameNameToSlug(hashPart) === "junkbot") {
-			game = "Junkbot";
-		} else if (gameNameToSlug(hashPart) === "junkbot2") {
-			game = "Junkbot Undercover";
-		} else if (gameNameToSlug(hashPart) === "junkbot3") {
-			game = "Junkbot 3";
-		} else if (gameNameToSlug(hashPart) === "tests") {
-			game = "Test Cases";
-		} else if (gameNameToSlug(hashPart) === "local") {
-			game = "local";
+		if (parseGameID(hashPart)) {
+			game = parseGameID(hashPart);
 		}
 	}
 	if (hashParts[0].match(/level=Test Cases/)) {
-		game = "Test Cases";
+		game = GAME_TEST_CASES;
 	}
-	game ??= "Junkbot";
+	game ??= GAME_JUNKBOT;
 
 	let canonicalHash = `#${gameNameToSlug(game)}`;
 	let screen = SCREEN_TITLE;
@@ -6606,7 +6628,7 @@ const parseRoute = (hash) => {
 
 	if (levelName) {
 		screen = SCREEN_LEVEL;
-		if (game === "Test Cases") {
+		if (game === GAME_TEST_CASES) {
 			canonicalHash = `#tests/${levelNameToSlug(levelName)}`;
 		} else if (levelGroupSlug) {
 			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}/${levelNameToSlug(levelName)}`;
@@ -6616,7 +6638,7 @@ const parseRoute = (hash) => {
 		if (wantsEdit) {
 			canonicalHash += "/edit";
 		}
-	} else if (game === "Test Cases") {
+	} else if (game === GAME_TEST_CASES) {
 		screen = SCREEN_LEVEL;
 		canonicalHash = "#tests";
 	} else if (wantsEdit) {
@@ -6672,7 +6694,7 @@ const loadFromHash = async () => {
 		loadingFrom = canonicalHash;
 	}
 
-	const toShowTestRunner = game === "Test Cases" && !levelSlug;
+	const toShowTestRunner = game === GAME_TEST_CASES && !levelSlug;
 	if (!toShowTestRunner) {
 		stopTests();
 	}
@@ -6711,7 +6733,7 @@ const loadFromHash = async () => {
 			hideTitleScreen();
 			hideLevelSelectScreen();
 		} else {
-			if (game === "local") {
+			if (game === GAME_USER_CREATED) {
 				try {
 					const json = localStorage[storageKeys.level(levelSlug)];
 					if (!json) {
@@ -6776,11 +6798,11 @@ const loadFromHash = async () => {
 					<h2 class="level-info-title"></h2>
 				`;
 				const { pageNumber, levelNumber } = whereLevelIsInTheGame(currentLevel, game);
-				if (game === "Junkbot") {
+				if (game === GAME_JUNKBOT) {
 					levelInfoContent.querySelector(".level-info-building-image").src = `images/menus/building_icon_${pageNumber}.png`;
 					levelInfoContent.querySelector(".level-info-building-text-image").src = `images/menus/building_text_${pageNumber}.png`;
 				} else {
-					levelInfoContent.querySelector(".level-info-header").textContent = game === "Junkbot Undercover" ? `Basement ${pageNumber}` : `Section ${pageNumber}`;
+					levelInfoContent.querySelector(".level-info-header").textContent = game === GAME_JUNKBOT_UNDERCOVER ? `Basement ${pageNumber}` : `Section ${pageNumber}`;
 				}
 				levelInfoContent.querySelector(".level-info-title").textContent = `Level ${levelNumber}: ${currentLevel.title.toLocaleUpperCase()}`;
 
@@ -6846,7 +6868,7 @@ window.addEventListener("hashchange", loadFromHash);
 // ---------------------------'/                  \__/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾'-----------------./
 // #region Meta
 
-const loadAllLevels = (games = ["Junkbot", "Junkbot Undercover"]) => {
+const loadAllLevels = (games = [GAME_JUNKBOT, GAME_JUNKBOT_UNDERCOVER]) => {
 	const promises = [];
 	for (const { game, levelNames } of getLevelLists(resources)) {
 		if (games.includes(game)) {
