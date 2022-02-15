@@ -353,6 +353,16 @@ const showMessageBox = (message, {
 	document.body.append(messageBoxContainer);
 	return messageBoxContainer;
 };
+
+// Error messages are important and shouldn't be lost due to timing of close vs open during navigation (immediate close after open).
+// Other dialogs are fine to close due to navigation.
+const nonErrorDialogs = [];
+const closeNonErrorDialogs = () => {
+	for (const el of nonErrorDialogs) {
+		el.remove();
+	}
+};
+
 const showPrompt = (message, defaultText = "") => {
 	const p = document.createElement("p");
 	p.textContent = message;
@@ -373,15 +383,6 @@ const showPrompt = (message, defaultText = "") => {
 			]
 		}));
 	});
-};
-
-// Error messages are important and shouldn't be lost due to timing of close vs open during navigation (immediate close after open).
-// Other dialogs are fine to close due to navigation.
-let nonErrorDialogs = [];
-const closeNonErrorDialogs = () => {
-	for (const el of nonErrorDialogs) {
-		el.remove();
-	}
 };
 
 const levelNameToSlug = (levelName) => levelName
