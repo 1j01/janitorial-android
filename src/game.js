@@ -4174,6 +4174,9 @@ const simulateJunkbot = (junkbot) => {
 			junkbot.momentumX -= dirX; // -= Math.sign(junkbot.momentumX) would be different
 		}
 		junkbot.momentumY += 1;
+		if (junkbot.momentumY < 5) {
+			junkbot.animationFrame = 9; // stick leg closer to the camera out backwards
+		}
 		if (junkbot.momentumY === 5) {
 			playSound("fall");
 		}
