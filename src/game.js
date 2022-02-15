@@ -6614,7 +6614,7 @@ const parseRoute = (hash) => {
 	hash = decodeURIComponent(hash);
 	const editSynonyms = ["edit", "editor", "level-editor", "editing", "editable", "edit-mode", "ed", "e", "design", "designer"];
 	const levelSelectSynonyms = ["levels", "level-select", "level-selector", "select", "select-level", "choose-level"];
-	const levelGroupRegexp = /^(basement|building|section|page|tab)-/i;
+	const levelGroupRegexp = /^(basement(-area)?|building|section|page|tab|group|area|zone)-/i;
 	let wantsEdit = false;
 	let maybeLevelSelect = hashParts.some((hashPart) => levelSelectSynonyms.includes(hashPart));
 	let game;
