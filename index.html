@@ -625,11 +625,11 @@
 		<div id="intro-container" hidden></div>
 		<img id="junkbot-undercover-logo" alt="Undercover" draggable="false" hidden
 			src="images/menus/Undercover Exclusive/title_UC.png" />
-		<button class="image-button" id="start-game" hidden>Play</button>
-		<button class="image-button" id="show-credits" hidden>Credits</button>
-		<button class="image-button" id="replay-intro" hidden>Replay Intro</button>
-		<button class="image-button" id="skip-intro" hidden>Skip Intro</button>
-		<button class="image-button" id="reset-screen" hidden>Reset Screen</button>
+		<button class="image-button generic-sound" id="start-game" hidden>Play</button>
+		<button class="image-button generic-sound" id="show-credits" hidden>Credits</button>
+		<button class="image-button generic-sound" id="replay-intro" hidden>Replay Intro</button>
+		<button class="image-button generic-sound" id="skip-intro" hidden>Skip Intro</button>
+		<button class="image-button generic-sound" id="reset-screen" hidden>Reset Screen</button>
 		<span id="load-status-loaded" hidden>Ready to play</span>
 		<span id="load-status-loading">Download in progress</span>
 		<div id="load-progress"></div>
@@ -672,7 +672,7 @@
 			<!-- @TODO: maybe invent a dynamic control for rewind/fast-forward -->
 			<span class="sprited-icon" style="--icon-index: 13;"></span>
 		</button>
-		<button class="generic-button" id="toggle-editing" aria-label="Edit level" aria-pressed="false"
+		<button class="generic-button generic-sound" id="toggle-editing" aria-label="Edit level" aria-pressed="false"
 			aria-keyshortcuts="E" title="Edit level (E)">
 			<!-- NOTE: src dynamically changed with JS -->
 			<img src="images/icons/toggle-editing-play-mode.png" alt="" width="32" height="32">
@@ -685,20 +685,20 @@
 		</button>
 		<input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Volume">
 		<div class="spacer"></div>
-		<button class="generic-button" id="toggle-fullscreen" aria-label="Toggle Fullscreen" aria-pressed="false"
-			aria-keyshortcuts="Alt+Enter F11" title="Toggle Fullscreen (Alt+Enter or F11)">
+		<button class="generic-button generic-sound" id="toggle-fullscreen" aria-label="Toggle Fullscreen"
+			aria-pressed="false" aria-keyshortcuts="Alt+Enter F11" title="Toggle Fullscreen (Alt+Enter or F11)">
 			<span class="sprited-icon" style="--icon-index: 12;"></span>
 		</button>
-		<button class="generic-button" id="zoom-in" aria-label="Zoom In" aria-keyshortcuts="Plus"
+		<button class="generic-button generic-sound" id="zoom-in" aria-label="Zoom In" aria-keyshortcuts="Plus"
 			title="Zoom In (Plus key, or mouse wheel, or pinch on a touch screen)">
 			<span class="sprited-icon" style="--icon-index: 18;"></span>
 		</button>
-		<button class="generic-button" id="zoom-out" aria-label="Zoom Out" aria-keyshortcuts="Minus"
+		<button class="generic-button generic-sound" id="zoom-out" aria-label="Zoom Out" aria-keyshortcuts="Minus"
 			title="Zoom Out (Minus, or mouse wheel, or pinch on a touch screen)">
 			<span class="sprited-icon" style="--icon-index: 17;"></span>
 		</button>
 		<div class="spacer"></div>
-		<button class="generic-button" id="toggle-info" aria-label="Toggle Info" aria-expanded="false"
+		<button class="generic-button generic-sound" id="toggle-info" aria-label="Toggle Info" aria-expanded="false"
 			title="Toggle Info">
 			<span class="sprited-icon" style="--icon-index: 26;"></span>
 		</button>
@@ -811,7 +811,7 @@
 			<label for="test-speed">Simulation Speed:</label>
 			<input type="range" min="1" max="100" step="1" id="test-speed">
 		</div>
-		<!-- <button class="generic-button" id="start-tests">Start/Restart Tests</button> -->
+		<!-- <button class="generic-button generic-sound" id="start-tests">Start/Restart Tests</button> -->
 		<div id="tests-info"></div>
 		<ul id="tests"></ul>
 	</div>
@@ -825,11 +825,11 @@
 			<span class="sprited-icon" style="--icon-index: 4;"></span>
 		</button>
 		<div class="spacer"></div>
-		<button class="generic-button" id="editor-save" aria-keyshortcuts="Ctrl+S" aria-label="Save"
+		<button class="generic-button generic-sound" id="editor-save" aria-keyshortcuts="Ctrl+S" aria-label="Save"
 			title="Save (Ctrl+S)">
 			<span class="sprited-icon" style="--icon-index: 8;"></span>
 		</button>
-		<button class="generic-button" id="editor-open" aria-keyshortcuts="Ctrl+O" aria-label="Open"
+		<button class="generic-button generic-sound" id="editor-open" aria-keyshortcuts="Ctrl+O" aria-label="Open"
 			title="Open (Ctrl+O)">
 			<span class="sprited-icon" style="--icon-index: 7;"></span>
 		</button>
@@ -858,12 +858,12 @@
 			title="Toggle selected switches and switch-controlled entities on or off (T)">
 			<img src="images/icons/toggle-on-off.png" alt="" width="32" height="32">
 		</button>
-		<button class="generic-button" id="editor-select-all" aria-keyshortcuts="Ctrl+A" aria-label="Select All"
-			title="Select all (Ctrl+A)">
+		<button class="generic-button generic-sound" id="editor-select-all" aria-keyshortcuts="Ctrl+A"
+			aria-label="Select All" title="Select all (Ctrl+A)">
 			<span class="sprited-icon" style="--icon-index: 25;"></span>
 		</button>
 		<div class="spacer"></div>
-		<button class="generic-button" id="editor-debug" aria-keyshortcuts="`" aria-label="Toggle Debug"
+		<button class="generic-button generic-sound" id="editor-debug" aria-keyshortcuts="`" aria-label="Toggle Debug"
 			title="Toggle debug mode (`)">
 			<span class="sprited-icon" style="--icon-index: 19;"></span>
 		</button>
@@ -894,8 +894,8 @@
 					</label>
 				</div>
 			</div>
-			<button class="generic-button" id="save-world" class="generic-button">Save World</button>
-			<button class="generic-button" id="open-world" class="generic-button">Open World</button>
+			<button class="generic-button generic-sound" id="save-world" class="generic-button">Save World</button>
+			<button class="generic-button generic-sound" id="open-world" class="generic-button">Open World</button>
 			<br>
 			<label>
 				Choose Level:<br>

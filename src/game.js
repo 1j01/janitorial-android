@@ -5309,19 +5309,12 @@ const initUI = () => {
 	resetScreenButton.addEventListener("click", () => {
 		showTitleScreen(false);
 	});
-	// Event delegation doesn't work because pointer-events is set to none.
-	// titleScreen.addEventListener("pointerdown", (event) => {
-	// 	const button = event.target.closest("button");
-	// 	if (button) {
-	// 		playSound("buttonClick");
-	// 	}
-	// });
-	const buttons = [...titleScreen.querySelectorAll("button")];
-	for (const button of buttons) {
-		button.addEventListener("pointerdown", () => {
+	document.body.addEventListener("pointerdown", (event) => {
+		const button = event.target.closest(".generic-sound");
+		if (button) {
 			playSound("buttonClick");
-		});
-	}
+		}
+	});
 
 	// Could use event delegation here (but I'm not)
 	const tabs = [...junkbotPagination.querySelectorAll(".level-group-tab"), ...junkbotUndercoverPagination.querySelectorAll(".level-group-tab")];
