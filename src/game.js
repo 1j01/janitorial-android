@@ -6436,7 +6436,7 @@ const runTests = async () => {
 // - I automatically canonicalize URLs (letter case, etc.) with replaceState
 //   - I could allow the game to be omitted, so you can type e.g. "#descent" instead of "#junkbot2/levels/basement-1/descent".
 //   - I can support synonyms: "junkbot2"/"junkbot-uc"/"junkbot-undercover", "_"/"-"/"", "edit"/"editor"/"editing"/"edit-mode"/"ed"/"e"
-//   - #edit/<level> is synonymous with #<level>/edit 
+//   - #edit/<level> is synonymous with #<level>/edit
 // - Should I include the slash at the start? "#/foo/bar" vs "#foo/bar"
 // - Should unmatched routes show an error?
 
