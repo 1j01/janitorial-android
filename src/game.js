@@ -6290,7 +6290,7 @@ const showGameWinUI = (game) => {
 
 const canGoToNextLevel = () => {
 	const { game, levelSlug } = parseRoute(location.hash);
-	if (game && levelSlug) {
+	if (game && levelSlug && game !== GAME_USER_CREATED && game !== GAME_TEST_CASES) {
 		return true;
 	}
 	return false;
