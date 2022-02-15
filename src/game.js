@@ -332,8 +332,14 @@ const showMessageBox = (message, {
 	buttonGroup.className = "button-group";
 	messageBox.append(buttonGroup);
 	const closeMessageBox = () => {
-		messageBoxContainer.remove();
+		// messageBoxContainer.remove();
+		messageBox.style.transition = "transform 1s linear";
+		messageBox.style.transform = "translateX(-200%)";
+		messageBox.addEventListener("transitionend", () => {
+			messageBoxContainer.remove();
+		});
 	};
+	messageBox.animateClose = closeMessageBox;
 	for (const { label, isDefault, action } of buttons) {
 		const button = document.createElement("button");
 		button.className = "generic-button";
@@ -359,7 +365,8 @@ const showMessageBox = (message, {
 const nonErrorDialogs = [];
 const closeNonErrorDialogs = () => {
 	for (const el of nonErrorDialogs) {
-		el.remove();
+		// el.remove();
+		el.animateClose();
 	}
 };
 
