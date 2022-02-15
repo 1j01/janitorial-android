@@ -331,20 +331,27 @@ const showMessageBox = (message, {
 	const buttonGroup = document.createElement("div");
 	buttonGroup.className = "button-group";
 	messageBox.append(buttonGroup);
-	const closeMessageBox = () => {
-		// messageBoxContainer.remove();
-		messageBox.style.transition = "transform 1s linear";
-		messageBox.style.transform = "translateX(-200%)";
-		messageBox.addEventListener("transitionend", () => {
+	let closing = false;
+	const closeMessageBox = (animate) => {
+		if (closing) {
+			return;
+		}
+		closing = true;
+		if (animate) {
+			messageBox.style.transition = "transform 1s linear";
+			messageBox.style.transform = "translateX(-200%)";
+			messageBox.addEventListener("transitionend", () => {
+				messageBoxContainer.remove();
+			});
+		} else {
 			messageBoxContainer.remove();
-		});
+		}
 	};
-	messageBox.animateClose = closeMessageBox;
 	for (const { label, isDefault, action } of buttons) {
 		const button = document.createElement("button");
 		button.className = "generic-button";
 		button.onclick = () => {
-			closeMessageBox(); // must be before action so a message box can be shown in the action
+			closeMessageBox(true); // must be before action so a message box can be shown in the action
 			action?.();
 		};
 		if (isDefault) {
@@ -357,6 +364,9 @@ const showMessageBox = (message, {
 	}
 	messageBoxContainer.append(messageBox);
 	document.body.append(messageBoxContainer);
+
+	messageBoxContainer.close = closeMessageBox;
+
 	return messageBoxContainer;
 };
 
@@ -365,9 +375,10 @@ const showMessageBox = (message, {
 const nonErrorDialogs = [];
 const closeNonErrorDialogs = () => {
 	for (const el of nonErrorDialogs) {
-		// el.remove();
-		el.animateClose();
+		el.close(false);
+		// not just el.remove() because close animation shouldn't be interrupted when loading the next level for example
 	}
+	nonErrorDialogs.length = 0;
 };
 
 const showPrompt = (message, defaultText = "") => {
