@@ -6633,10 +6633,14 @@ const loadFromHash = async () => {
 			return; // don't want to hide the level select screen below
 		}
 
-		// These are routes that show a level; other screens are hidden below, once the level is ready.
+		// These are routes that show a level
 		if (toShowTestRunner) {
 			runTests();
+			closeNonErrorDialogs();
+			hideTitleScreen();
+			hideLevelSelectScreen();
 		} else {
+			paused = true;
 			if (game === "local") {
 				try {
 					const json = localStorage[storageKeys.level(levelSlug)];
@@ -6650,7 +6654,6 @@ const loadFromHash = async () => {
 				} catch (error) {
 					showMessageBox(`Failed to load local level for editing ("${levelSlug}")\n\n${error}`);
 				}
-				paused = editing;
 			} else {
 				try {
 					try {
@@ -6672,8 +6675,6 @@ const loadFromHash = async () => {
 							showMessageBox(`Level "${levelSlug}" not found in dropdown.`);
 						}
 					}
-
-					paused = editing;
 				} catch (error) {
 					showMessageBox(`Failed to load level "${levelSlug}"\n\n${error}`);
 				}
@@ -6682,9 +6683,20 @@ const loadFromHash = async () => {
 		// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
 		hideTitleScreen();
 		hideLevelSelectScreen();
+		await closeNonErrorDialogs();
+		// Show level name as a sort of toast
+		const toast = showMessageBox(currentLevel.title, { buttons: [] });
+		nonErrorDialogs.push(toast);
+		// Wait before closing toast
+		// await new Promise((resolve) => setTimeout(resolve, 2500));
+		// await toast.close(true);
+		// paused = editing;
+		// Don't actually want to await, because then the animation loop doesn't start and the level doesn't get rendered.
+		setTimeout(async () => {
+			await toast.close(true);
+			paused = editing;
+		}, 2500);
 
-		// @TODO: add level name toast, and wait for transitions before starting simulation
-		closeNonErrorDialogs();
 		// This currently relies on the title screen being hidden
 		// @TODO: remove check on title screen visibility in toggleEditing, maybe allow editing the title screen level too
 		if (wantsEdit !== editing) {
