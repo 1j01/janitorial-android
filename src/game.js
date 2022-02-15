@@ -155,6 +155,11 @@ const testSpeedInput = document.getElementById("test-speed");
 //                                                 `-....-'
 // #region Globals (declarations and basic initialization)
 
+const SCREEN_TITLE = "SCREEN_TITLE";
+const SCREEN_LEVEL_SELECT = "SCREEN_LEVEL_SELECT";
+const SCREEN_LEVEL = "SCREEN_LEVEL";
+// @TODO: enum for games (Junkbot, Junkbot Undercover, Test Cases, User-Created)
+
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -1019,6 +1024,234 @@ const tests = [
 		name: "Ally",
 		expect: "to win",
 	},
+];
+
+const routingTests = [
+	{
+		hash: "#junkbot2/levels/basement-1/descent",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: "descent",
+			levelGroup: "basement-1",
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#junkbot2/levels/basement-1/descent",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot2/levels/basement-1/descent/edit-mode",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: "descent",
+			levelGroup: "basement-1",
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#junkbot2/levels/basement-1/descent/edit",
+			wantsEdit: true,
+		},
+	},
+	{
+		hash: "#junkbot/levels",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			// levelGroup: "building-1", // @TODO
+			screen: SCREEN_LEVEL_SELECT,
+			// canonicalHash: "#junkbot/levels/building-1", // @TODO
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot/building-1",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			levelGroup: "building-1",
+			screen: SCREEN_LEVEL_SELECT,
+			canonicalHash: "#junkbot/levels/building-1",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot2/levels/basement-2",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			levelGroup: "basement-2",
+			screen: SCREEN_LEVEL_SELECT,
+			canonicalHash: "#junkbot2/levels/basement-2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot2/levels",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			// levelGroup: "basement-1", // @TODO
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL_SELECT,
+			// canonicalHash: "#junkbot2/levels/basement-1", // @TODO
+			canonicalHash: "#junkbot2/levels",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#level-editor",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#level-editor",
+			wantsEdit: true,
+		},
+	},
+	{
+		hash: "#",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#JUNKBOT2",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot-undercover",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot-uc",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot-1",
+		expected: {
+			game: "Junkbot",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#junkbot-2",
+		expected: {
+			game: "Junkbot Undercover",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_TITLE,
+			canonicalHash: "#junkbot2",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#tests/tippy-toast",
+		expected: {
+			game: "Test Cases",
+			levelSlug: "tippy-toast",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests/tippy-toast",
+			wantsEdit: false,
+		},
+	},
+	// @TODO maybe
+	// {
+	// 	hash: "#descent",
+	// 	expected: {
+	// 		game: "Junkbot Undercover",
+	// 		levelSlug: "descent",
+	// 		levelGroup: undefined,
+	// 		screen: SCREEN_TITLE,
+	// 		canonicalHash: "#junkbot2/levels/basement-1/descent",
+	// 		wantsEdit: false,
+	// 	},
+	// },
+	// Old routes:
+	{
+		hash: "#run-tests",
+		expected: {
+			game: "Test Cases",
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#level=Junkbot;new-employee-training",
+		expected: {
+			game: "Junkbot",
+			levelSlug: "new-employee-training",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#junkbot/levels/new-employee-training",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#level=Test%20Cases;Tippy%20Toast",
+		expected: {
+			game: "Test Cases",
+			levelSlug: "tippy-toast",
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#tests/tippy-toast",
+			wantsEdit: false,
+		},
+	},
+	// @TODO
+	// {
+	// 	hash: "#level=local;Custom%20Level",
+	// 	expected: {
+	// 		game: "local",
+	// 		levelSlug: "custom-level",
+	// 		levelGroup: undefined,
+	// 		screen: SCREEN_LEVEL,
+	// 		canonicalHash: "#my-computer/levels/custom-level",
+	// 		wantsEdit: false,
+	// 	},
+	// },
 ];
 
 // #endregion
@@ -6207,10 +6440,6 @@ const runTests = async () => {
 // - Should I include the slash at the start? "#/foo/bar" vs "#foo/bar"
 // - Should unmatched routes show an error?
 
-const SCREEN_TITLE = "SCREEN_TITLE";
-const SCREEN_LEVEL_SELECT = "SCREEN_LEVEL_SELECT";
-const SCREEN_LEVEL = "SCREEN_LEVEL";
-
 const parseRoute = (hash) => {
 	hash = hash.replace(/^#?\/?/, "").replace(/\/$/, "");
 	const hashParts = hash.split("/").map(decodeURIComponent);
@@ -6303,234 +6532,6 @@ const parseRoute = (hash) => {
 		wantsEdit,
 	};
 };
-
-const routingTests = [
-	{
-		hash: "#junkbot2/levels/basement-1/descent",
-		expected: {
-			game: "Junkbot Undercover",
-			levelSlug: "descent",
-			levelGroup: "basement-1",
-			screen: SCREEN_LEVEL,
-			canonicalHash: "#junkbot2/levels/basement-1/descent",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot2/levels/basement-1/descent/edit-mode",
-		expected: {
-			game: "Junkbot Undercover",
-			levelSlug: "descent",
-			levelGroup: "basement-1",
-			screen: SCREEN_LEVEL,
-			canonicalHash: "#junkbot2/levels/basement-1/descent/edit",
-			wantsEdit: true,
-		},
-	},
-	{
-		hash: "#junkbot/levels",
-		expected: {
-			game: "Junkbot",
-			levelSlug: undefined,
-			// levelGroup: "building-1", // @TODO
-			screen: SCREEN_LEVEL_SELECT,
-			// canonicalHash: "#junkbot/levels/building-1", // @TODO
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot/building-1",
-		expected: {
-			game: "Junkbot",
-			levelSlug: undefined,
-			levelGroup: "building-1",
-			screen: SCREEN_LEVEL_SELECT,
-			canonicalHash: "#junkbot/levels/building-1",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot2/levels/basement-2",
-		expected: {
-			game: "Junkbot Undercover",
-			levelSlug: undefined,
-			levelGroup: "basement-2",
-			screen: SCREEN_LEVEL_SELECT,
-			canonicalHash: "#junkbot2/levels/basement-2",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot2/levels",
-		expected: {
-			game: "Junkbot Undercover",
-			levelSlug: undefined,
-			// levelGroup: "basement-1", // @TODO
-			levelGroup: undefined,
-			screen: SCREEN_LEVEL_SELECT,
-			// canonicalHash: "#junkbot2/levels/basement-1", // @TODO
-			canonicalHash: "#junkbot2/levels",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#level-editor",
-		expected: {
-			game: "Junkbot",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_LEVEL,
-			canonicalHash: "#level-editor",
-			wantsEdit: true,
-		},
-	},
-	{
-		hash: "#",
-		expected: {
-			game: "Junkbot",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_TITLE,
-			canonicalHash: "#junkbot",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot",
-		expected: {
-			game: "Junkbot",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_TITLE,
-			canonicalHash: "#junkbot",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#JUNKBOT2",
-		expected: {
-			game: "Junkbot Undercover",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_TITLE,
-			canonicalHash: "#junkbot2",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot-undercover",
-		expected: {
-			game: "Junkbot Undercover",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_TITLE,
-			canonicalHash: "#junkbot2",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot-uc",
-		expected: {
-			game: "Junkbot Undercover",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_TITLE,
-			canonicalHash: "#junkbot2",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot-1",
-		expected: {
-			game: "Junkbot",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_TITLE,
-			canonicalHash: "#junkbot",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#junkbot-2",
-		expected: {
-			game: "Junkbot Undercover",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_TITLE,
-			canonicalHash: "#junkbot2",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#tests/tippy-toast",
-		expected: {
-			game: "Test Cases",
-			levelSlug: "tippy-toast",
-			levelGroup: undefined,
-			screen: SCREEN_LEVEL,
-			canonicalHash: "#tests/tippy-toast",
-			wantsEdit: false,
-		},
-	},
-	// @TODO maybe
-	// {
-	// 	hash: "#descent",
-	// 	expected: {
-	// 		game: "Junkbot Undercover",
-	// 		levelSlug: "descent",
-	// 		levelGroup: undefined,
-	// 		screen: SCREEN_TITLE,
-	// 		canonicalHash: "#junkbot2/levels/basement-1/descent",
-	// 		wantsEdit: false,
-	// 	},
-	// },
-	// Old routes:
-	{
-		hash: "#run-tests",
-		expected: {
-			game: "Test Cases",
-			levelSlug: undefined,
-			levelGroup: undefined,
-			screen: SCREEN_LEVEL,
-			canonicalHash: "#tests",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#level=Junkbot;new-employee-training",
-		expected: {
-			game: "Junkbot",
-			levelSlug: "new-employee-training",
-			levelGroup: undefined,
-			screen: SCREEN_LEVEL,
-			canonicalHash: "#junkbot/levels/new-employee-training",
-			wantsEdit: false,
-		},
-	},
-	{
-		hash: "#level=Test%20Cases;Tippy%20Toast",
-		expected: {
-			game: "Test Cases",
-			levelSlug: "tippy-toast",
-			levelGroup: undefined,
-			screen: SCREEN_LEVEL,
-			canonicalHash: "#tests/tippy-toast",
-			wantsEdit: false,
-		},
-	},
-	// @TODO
-	// {
-	// 	hash: "#level=local;Custom%20Level",
-	// 	expected: {
-	// 		game: "local",
-	// 		levelSlug: "custom-level",
-	// 		levelGroup: undefined,
-	// 		screen: SCREEN_LEVEL,
-	// 		canonicalHash: "#my-computer/levels/custom-level",
-	// 		wantsEdit: false,
-	// 	},
-	// },
-];
 
 const loadFromHash = async () => {
 
