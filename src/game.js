@@ -6533,18 +6533,22 @@ const parseRoute = (hash) => {
 	const editSynonyms = ["edit", "editor", "level-editor", "editing", "editable", "edit-mode", "ed", "e", "design", "designer"];
 	const levelSelectSynonyms = ["levels", "level-select", "level-selector", "select", "select-level", "choose-level"];
 	const levelGroupRegexp = /^(basement|building|section|page|tab)-/i;
-	const wantsEdit = editSynonyms.includes(hashParts[0]) || editSynonyms.includes(hashParts[hashParts.length - 1]);
+	let wantsEdit = false;
 	let maybeLevelSelect = hashParts.some((hashPart) => levelSelectSynonyms.includes(hashPart));
 	let game;
 	let levelGroup;
 	let levelName;
 	for (let i = 0; i < hashParts.length; i++) {
-		if (hashParts[i].match(/^(levels|tests)$/i)) {
+		if (editSynonyms.includes(hashParts[i].toLowerCase()) && !wantsEdit) {
+			wantsEdit = true;
+		} else if (hashParts[i].match(/^(levels|tests)$/i)) {
 			if (hashParts[i + 1]?.match(levelGroupRegexp)) {
 				levelGroup = hashParts[i + 1]; // (we should get it on the next loop iteration anyways...)
 				levelName = hashParts[i + 2];
+				i += 2;
 			} else {
 				levelName = hashParts[i + 1];
+				i += 1;
 			}
 		} else if (hashParts[i].match(levelGroupRegexp)) {
 			levelGroup = hashParts[i];
