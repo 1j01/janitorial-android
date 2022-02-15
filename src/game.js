@@ -6298,12 +6298,10 @@ const testRouting = () => {
 	for (const { hash, expected } of routingTests) {
 		// const { game, levelName, levelSection, screen, canonicalHash, wantsEdit } = parseHash(hash);
 		const actual = parseRoute(hash);
-		for (const [key, value] of Object.entries(expected)) {
-			if (actual[key] !== value) {
-				// eslint-disable-next-line no-console
-				console.warn(`Routing test failed for hash ${hash}\n"${key}" was ${JSON.stringify(actual[key])} instead of ${JSON.stringify(value)}\n\n`); // , "Expected", expected, "\n", "Actual", actual, ``
-				break;
-			}
+		const mismatched = Object.keys(expected).filter(key => actual[key] !== expected[key]);
+		if (mismatched.length) {
+			// eslint-disable-next-line no-console
+			console.warn(`Routing test failed for hash ${hash}\n`, ...mismatched.map((key) => `"${key}": expected ${JSON.stringify(expected[key])} but got ${JSON.stringify(actual[key])}\n`));
 		}
 	}
 };
