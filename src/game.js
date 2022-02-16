@@ -1154,7 +1154,7 @@ const routingTests = [
 	{
 		hash: "#level-editor",
 		expected: {
-			game: GAME_JUNKBOT,
+			game: GAME_USER_CREATED,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
