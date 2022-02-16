@@ -1,13 +1,13 @@
-# [Janitorial Android][demo]
+# [Janitorial Android][play Junkbot]
 
 An HTML5 remake of [Junkbot][] and [Junkbot Undercover][], maybe a sequel / spinoff?
 Not sure what direction this project will take.
 
-[![](images/teaser.png)][demo]
+[![](images/teaser.png)][play Junkbot]
 
-- [**Play LEGO Junkbot**][demo]
+- [**Play LEGO Junkbot**][play Junkbot]
 
-- [**Play LEGO Junkbot Undercover**][sequel demo]
+- [**Play LEGO Junkbot Undercover**][play Junkbot Undercover]
 
 - [**Run automated tests**][tests]
 
@@ -33,7 +33,7 @@ All mechanics from the original games are implemented:
 
 ## 3D Renderer
 
-I've made a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo].
+I've made a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D renderer].
 
 I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
 
@@ -237,11 +237,11 @@ Steps
 [Node.js]: https://nodejs.org/
 [Git]: https://git-scm.org/
 [git clone]: https://help.github.com/articles/cloning-a-repository/
-[demo]: https://1j01.github.io/janitorial-android/#junkbot
-[sequel demo]: https://1j01.github.io/janitorial-android/#junkbot-undercover
+[play Junkbot]: https://1j01.github.io/janitorial-android/#junkbot
+[play Junkbot Undercover]: https://1j01.github.io/janitorial-android/#junkbot2
 [tests]: https://1j01.github.io/janitorial-android/#tests
 [level editor]: https://1j01.github.io/janitorial-android/#level-editor
-[3D demo]: https://1j01.github.io/janitorial-android/three
+[3D renderer]: https://1j01.github.io/janitorial-android/three
 [Junkbot]: https://brickipedia.fandom.com/wiki/Junkbot
 [Junkbot Undercover]: https://brickipedia.fandom.com/wiki/Junkbot_Undercover
 [Three.js]: https://threejs.org/
