@@ -1194,7 +1194,7 @@ const routingTests = [
 	{
 		hash: "#level-editor",
 		expected: {
-			game: GAME_JUNKBOT,
+			game: GAME_USER_CREATED,
 			levelSlug: undefined,
 			levelGroup: undefined,
 			screen: SCREEN_LEVEL,
@@ -1976,6 +1976,7 @@ const hotResourcePaths = {
 	titleScreenWelcomePanel: "images/menus/loading_bkg_frame.png",
 };
 const otherResourcePaths = {
+	levelEditorDefaultLevel: "levels/custom/Level Editor Default Level.txt",
 	// menus: "images/spritesheets/menus.png",
 	// menusAtlas: "images/spritesheets/menus.json",
 	spritesUndercover: "images/spritesheets/Undercover Exclusive/sprites.png",
@@ -6830,6 +6831,7 @@ const parseRoute = (hash) => {
 	} else if (wantsEdit) {
 		screen = SCREEN_LEVEL;
 		canonicalHash = "#level-editor";
+		game = GAME_USER_CREATED;
 	} else if (maybeLevelSelect) {
 		screen = SCREEN_LEVEL_SELECT;
 		if (levelGroupSlug) {
@@ -6921,7 +6923,7 @@ const loadFromHash = async () => {
 			hideTitleScreen();
 			hideLevelSelectScreen();
 		} else {
-			if (game === GAME_USER_CREATED) {
+			if (levelSlug && game === GAME_USER_CREATED) {
 				try {
 					const json = localStorage[storageKeys.level(levelSlug)];
 					if (!json) {
@@ -6936,7 +6938,7 @@ const loadFromHash = async () => {
 					location.hash = "#junkbot/levels";
 					return;
 				}
-			} else {
+			} else if (levelSlug) {
 				try {
 					try {
 						const level = await loadLevelByName({ levelName: levelSlug, game });
@@ -6964,6 +6966,15 @@ const loadFromHash = async () => {
 					location.hash = "#junkbot/levels";
 					return;
 				}
+			} else {
+				if (!wantsEdit || game !== GAME_USER_CREATED) {
+					showErrorMessage("No level specified.");
+					location.hash = "#junkbot/levels";
+					return;
+				}
+				// Level editor with default level (#level-editor route)
+				initLevel(resources.levelEditorDefaultLevel);
+				editorLevelState = serializeToJSON(currentLevel);
 			}
 
 			// Hide other screen after loading the level so that there's not a flash of the title screen level without the title screen frame.
