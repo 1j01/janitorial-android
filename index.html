@@ -506,17 +506,18 @@
 		#level-list {
 			background-color: #808080;
 			color: #000;
+			list-style: none;
 			margin: 0;
-			padding-top: 13px;
-			padding-bottom: 13px;
+			padding: 13px 11px;
 			/* border-top: 1px solid #000; */
 			box-shadow: 0 0 0 1px #000;
 		}
 
 		.level-list-item {
 			font-weight: bold;
-			min-height: 18px;
-			line-height: 18px;
+			box-sizing: content-box;
+			min-height: 20px;
+			line-height: 20px;
 			position: relative;
 			border-bottom: 1px solid #CCCCCC;
 		}
@@ -525,16 +526,21 @@
 			border-top: 1px solid #CCCCCC;
 		}
 
+		.level-list-item:hover {
+			background-color: #BFC0BF;
+			border-color: #DFE0DF;
+			color: #000;
+		}
+
 		.level-list-item a {
 			color: inherit;
 			text-decoration: none;
 			display: block;
 		}
 
-		.level-list-item a:hover {
-			background-color: #BFC0BF;
-			color: #000;
-			background-image: url("images/menus/level.selected.png");
+		.level-list-item-ordinal {
+			position: absolute;
+			left: 2px;
 		}
 
 		.level-list-item-completed-indicator,
@@ -545,18 +551,15 @@
 		}
 
 		.level-list-item-completed-indicator {
-			/* not measured */
-			left: 8px;
+			left: 35px;
 		}
 
 		.level-list-item-gold-award {
-			/* not measured */
-			left: 22px;
+			left: 48px;
 		}
 
 		.level-list-item-title {
-			/* not measured */
-			margin-left: 35px;
+			margin-left: 63px;
 			display: inline-block;
 		}
 

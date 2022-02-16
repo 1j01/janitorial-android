@@ -5647,7 +5647,9 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 		return;
 	}
 
+	let n = 0;
 	for (const levelName of levelNamesToShow) {
+		n += 1;
 		const li = document.createElement("li");
 		li.className = "level-list-item";
 		const a = document.createElement("a");
@@ -5680,10 +5682,13 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 		const title = document.createElement("span");
 		title.className = "level-list-item-title";
 		title.textContent = levelName;
+		const ordinal = document.createElement("span");
+		ordinal.className = "level-list-item-ordinal";
+		ordinal.textContent = n;
 		if (game !== GAME_USER_CREATED) {
-			a.append(completedImg, goldAwardImg, title, score);
+			a.append(ordinal, completedImg, goldAwardImg, title, score);
 		} else {
-			a.append(title);
+			a.append(ordinal, title);
 		}
 
 		if (completedInMoves) {
