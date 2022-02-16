@@ -1,5 +1,6 @@
 {
 	"cSpell.words": [
+		"antialiasing",
 		"ÄÖÜẞ",
 		"arrowd",
 		"arrowl",
@@ -81,6 +82,7 @@
 		"negx",
 		"negy",
 		"negz",
+		"Nosamu",
 		"Odhner",
 		"ohyeah",
 		"overscroll",
@@ -124,6 +126,7 @@
 		"Starfighter",
 		"Stunkbot",
 		"subobject",
+		"swfexport",
 		"tdtdtdtdtkwhh",
 		"tele",
 		"teleporter",
@@ -139,7 +142,8 @@
 		"unmute",
 		"unpatch",
 		"WASD",
-		"XFCE"
+		"XFCE",
+		"xtra"
 	],
 	"cSpell.enableFiletypes": [
 		"postcss"

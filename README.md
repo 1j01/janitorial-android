@@ -1,11 +1,16 @@
-# [Janitorial Android][demo]
+# [Janitorial Android][play Junkbot]
 
-An HTML5 remake of [Junkbot][] and [Junkbot Undercover][], maybe a sequel / spinoff?
-Not sure what direction this project will take.
+An HTML5 remake of LEGO [Junkbot][] and [Junkbot Undercover][] games, nearly complete!
 
-[![](images/teaser.png)][demo]
+[![](images/title-screen-teaser.png)][play Junkbot]
 
-[Try it out here!][demo]
+- [**Play LEGO Junkbot**][play Junkbot]
+
+- [**Play LEGO Junkbot Undercover**][play Junkbot Undercover]
+
+- [**Run automated tests**][tests]
+
+- [**Create your own levels**][level editor]
 
 All mechanics from the original games are implemented:
 - Dragging bricks, and handling grabs that are ambiguous until you drag up or down, with cursors for different dragging options (up, down, or either)
@@ -21,11 +26,22 @@ All mechanics from the original games are implemented:
 - Gearbots, climbbots, flybots, and eyebots (aside from exact timings and some edge cases)
 - Crates (upside-down white bricks that you can push)
 - Laser beams
-- Complete level editing functionality (not present in the original games)
-	- Rectangular selection, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette
-	- With additional sound effects taken from Lego Creator
 
-- I've started making a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo]; I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
+## [Level Editor][level editor]
+
+I've made a level editor with all functions you might expect (Rectangular selection, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette).
+
+I filled gaps in the sound design by taking sound effects from [Lego Creator][], which holds additional nostalgia for me.
+
+## 3D Renderer
+
+I've made a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D renderer].
+
+I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
+
+Regarding the rendering: Unfortunately, whilst the scale appears correct, the pixels are **aliased inconsistently**, which means I can't do a simple image-based find and replace to convert studs to a matching style.
+I might be able to either: 1. replace the stud sub-part with something that renders a single pixel to search for, 2. render at a higher resolution or with antialiasing, and use some image processing to reduce it to pixel art, 3. use a completely different rendering technology (I've started looking into Blender).
+
 
 ## Controls
 
@@ -109,8 +125,13 @@ All mechanics from the original games are implemented:
 
 ## Credits
 
+### Web Remake
+
+Isaiah Odhner
+
 ### Ripping resources
-- [Rory Fewell](https://github.com/rozniak) and [TommytheJerk](https://github.com/TommytheJerk), via [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
+- [Rory Fewell](https://github.com/rozniak) and [TommytheJerk](https://github.com/TommytheJerk), via project [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
+- Tools: CastRipperTool (Nosamu), SharpExport (Werner), swfExport Xtra (Valentin Schmidt), MP3 Xtra (Valentin Schmidt)
 
 ### Some sounds taken from
 - Lego Creator (editor sounds)
@@ -218,10 +239,14 @@ Steps
 [Node.js]: https://nodejs.org/
 [Git]: https://git-scm.org/
 [git clone]: https://help.github.com/articles/cloning-a-repository/
-[demo]: https://1j01.github.io/janitorial-android/
-[3D demo]: https://1j01.github.io/janitorial-android/three
+[play Junkbot]: https://1j01.github.io/janitorial-android/#junkbot
+[play Junkbot Undercover]: https://1j01.github.io/janitorial-android/#junkbot2
+[tests]: https://1j01.github.io/janitorial-android/#tests
+[level editor]: https://1j01.github.io/janitorial-android/#level-editor
+[3D renderer]: https://1j01.github.io/janitorial-android/three
 [Junkbot]: https://brickipedia.fandom.com/wiki/Junkbot
 [Junkbot Undercover]: https://brickipedia.fandom.com/wiki/Junkbot_Undercover
+[Lego Creator]: https://brickipedia.fandom.com/wiki/5700_LEGO_Creator
 [Three.js]: https://threejs.org/
 [LDrawLoader]: https://threejs.org/examples/webgl_loader_ldraw.html
 [oblique projection]: https://en.wikipedia.org/wiki/Oblique_projection
