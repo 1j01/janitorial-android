@@ -1318,6 +1318,28 @@ const routingTests = [
 			wantsEdit: true,
 		},
 	},
+	{
+		hash: "#local/levels/page-1/art-in-the-lobby-1",
+		expected: {
+			game: GAME_USER_CREATED,
+			levelSlug: "art-in-the-lobby-1",
+			levelGroup: undefined, // ignore/strip "page-1" since it's an un-paginated listing
+			screen: SCREEN_LEVEL,
+			canonicalHash: "#local/levels/art-in-the-lobby-1",
+			wantsEdit: false,
+		},
+	},
+	{
+		hash: "#local/levels/",
+		expected: {
+			game: GAME_USER_CREATED,
+			levelSlug: undefined,
+			levelGroup: undefined,
+			screen: SCREEN_LEVEL_SELECT,
+			canonicalHash: "#local/levels",
+			wantsEdit: false,
+		},
+	},
 	// edge case: if you name a level "edit", "/edit" should be treated as the level name, not the edit mode
 	{
 		hash: "#local/levels/edit",
@@ -5581,6 +5603,7 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 	levelSelectScreen.hidden = false;
 
 	let levelNamesToShow = [];
+	let paginated = true;
 	let levelGroupNumber = parseInt((levelGroupName ?? "").replace(/\D/g, ""), 10);
 	if (isNaN(levelGroupNumber)) {
 		levelGroupNumber = 1;
@@ -5588,6 +5611,9 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 	for (const list of getLevelLists(resources)) {
 		if (gameNameToSlug(game) === gameNameToSlug(list.game)) {
 			levelNamesToShow = list.levelNames.slice((levelGroupNumber - 1) * list.levelsPerPage, levelGroupNumber * list.levelsPerPage);
+			if (list.levelsPerPage === Infinity) {
+				paginated = false;
+			}
 			break;
 		}
 	}
@@ -5625,7 +5651,11 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 		const li = document.createElement("li");
 		li.className = "level-list-item";
 		const a = document.createElement("a");
-		a.href = `#${gameNameToSlug(game)}/levels/${levelGroupToSlug(`${levelGroupNumber}`, game)}/${levelNameToSlug(levelName)}`;
+		if (paginated) {
+			a.href = `#${gameNameToSlug(game)}/levels/${levelGroupToSlug(`${levelGroupNumber}`, game)}/${levelNameToSlug(levelName)}`;
+		} else {
+			a.href = `#${gameNameToSlug(game)}/levels/${levelNameToSlug(levelName)}`;
+		}
 		let completedInMoves;
 		try {
 			if (game !== GAME_USER_CREATED) {
@@ -6723,6 +6753,10 @@ const parseRoute = (hash) => {
 
 	let canonicalHash = `#${gameNameToSlug(game)}`;
 	let screen = SCREEN_TITLE;
+	const paginated = game !== GAME_USER_CREATED && game !== GAME_TEST_CASES;
+	if (!paginated) {
+		levelGroup = undefined;
+	}
 	let levelGroupSlug = levelGroup ? levelGroupToSlug(levelGroup, game) : undefined;
 
 	if (levelName) {
@@ -6747,10 +6781,12 @@ const parseRoute = (hash) => {
 		screen = SCREEN_LEVEL_SELECT;
 		if (levelGroupSlug) {
 			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}`;
-		} else {
+		} else if (paginated) {
 			levelGroup = "1";
 			levelGroupSlug = levelGroupToSlug(levelGroup, game);
 			canonicalHash = `#${gameNameToSlug(game)}/levels/${levelGroupSlug}`;
+		} else {
+			canonicalHash = `#${gameNameToSlug(game)}/levels`;
 		}
 	}
 
