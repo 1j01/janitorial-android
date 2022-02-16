@@ -428,6 +428,46 @@ const showPrompt = (message, defaultText = "") => {
 	});
 };
 
+const showErrorMessage = (message, error) => {
+	const content = document.createElement("div");
+	// content.style.maxWidth = "600px";
+	content.innerHTML = "<p></p>";
+	if (error) {
+		content.innerHTML += "<details><summary><span>Details</span></summary><pre></details>";
+
+		// Chrome includes the error message in the error.stack string, whereas Firefox doesn't.
+		// Also note that there can be Exception objects that don't have a message (empty string) but a name,
+		// for instance Exception { message: "", name: "NS_ERROR_FAILURE", ... } for running out of memory in Firefox.
+		let errorString = error.stack;
+		if (!errorString) {
+			errorString = error.toString();
+		} else if (error.message && errorString.indexOf(error.message) === -1) {
+			errorString = `${error.toString()}\n\n${errorString}`;
+		} else if (error.name && errorString.indexOf(error.name) === -1) {
+			errorString = `${error.name}\n\n${errorString}`;
+		}
+		const pre = content.querySelector("pre");
+		pre.textContent = errorString;
+		pre.style.background = "white";
+		pre.style.color = "#333";
+		// pre.style.background = "#A00";
+		// pre.style.color = "white";
+		pre.style.fontFamily = "monospace";
+		pre.style.width = "500px";
+		pre.style.maxWidth = "100%";
+		pre.style.overflow = "auto";
+	}
+	content.querySelector("p").textContent = message;
+
+	showMessageBox([content]);
+
+	if (error) {
+		window.console?.error?.("(Showing error message box for:)", message, error);
+	} else {
+		window.console?.error?.("(Showing error message box for:)", message);
+	}
+};
+
 const levelNameToSlug = (levelName) => levelName
 	.replace(/'/g, "") // remove apostrophes (because "don-t" and "it-s" look stupid)
 	.replace(/[^a-z0-9]/gi, "-") // replace non-alphanumeric characters with dashes
@@ -1624,7 +1664,7 @@ const serializeLevel = (level) => {
 		}
 	}
 	if (unknownTypeMappings.length) {
-		showMessageBox(`Unknown type mappings for entity types:\n\n${unknownTypeMappings.join("\n")}`);
+		showErrorMessage(`Unknown type mappings for entity types:\n\n${unknownTypeMappings.join("\n")}`);
 	}
 	const stringifyDecals = (decals = []) => decals.map(({ x, y, name }) => `${x};${y};${name}`).join(",");
 	return `[info]
@@ -2090,7 +2130,12 @@ let loadedResources = 0;
 const loadResources = async (resourcePathsByID) => {
 	const entries = Object.entries(resourcePathsByID);
 	return Object.fromEntries(await Promise.all(entries.map(async ([id, path]) => {
-		const resource = await loadResource(path);
+		let resource;
+		try {
+			resource = await loadResource(path);
+		} catch (error) {
+			showErrorMessage(`Failed to load resource '${path}'`, error);
+		}
 		loadedResources += 1;
 		if (loadedResources / totalResources * numProgressBricks > progressBricks.length) {
 			const progressBrick = document.createElement("div");
@@ -2782,7 +2827,7 @@ const save = () => {
 				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
 			}
 		} catch (error) {
-			showMessageBox(`Couldn't save level.\nAllow local storage (sometimes called 'cookies') to enable autosave.\n\n${error}`);
+			showErrorMessage("Couldn't save level.\nAllow local storage (sometimes called 'cookies') to enable autosave.", error);
 		}
 	}
 };
@@ -2791,8 +2836,9 @@ const toggleShowDebug = () => {
 	showDebug = !showDebug;
 	try {
 		localStorage[storageKeys.showDebug] = showDebug;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
+	} catch (error) {
+		// no problem
+	}
 };
 const updateMuteButton = () => {
 	toggleMuteButton.ariaPressed = muted;
@@ -2817,8 +2863,9 @@ const toggleMute = ({ savePreference = true } = {}) => {
 		if (savePreference) {
 			localStorage[storageKeys.muteSoundEffects] = muted;
 		}
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
+	} catch (error) {
+		// that's okay
+	}
 	if (muted) {
 		audioCtx.suspend();
 	} else {
@@ -2833,8 +2880,9 @@ const setVolume = (volume) => {
 	updateMuteButton();
 	try {
 		localStorage[storageKeys.volume] = volume;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
+	} catch (error) {
+		// no big deal
+	}
 };
 const togglePause = () => {
 	paused = !paused;
@@ -2977,11 +3025,11 @@ const openFromFile = (file) => {
 			currentLevel.title = currentLevel.title || file.name.replace(/\.(json|txt)$/, "");
 			save();
 		} catch (error) {
-			showMessageBox(`Failed to load from file:\n\n${error}`);
+			showErrorMessage("Failed to load from file.", error);
 		}
 	};
 	reader.onerror = () => {
-		showMessageBox(`Failed to read file:\n\n${reader.error}`);
+		showErrorMessage("Failed to read file.", reader.error);
 	};
 	reader.readAsText(file, "UTF-8");
 };
@@ -3646,7 +3694,7 @@ const startGrab = (grab, {
 }) => {
 	if (!grab) {
 		if (duringPlayback) {
-			// showMessageBox("Grab is not possible. Something must be different from the recording during playback, or some other bug has occurred.");
+			// showErrorMessage("Grab is not possible. Something must be different from the recording during playback, or some other bug has occurred.");
 			desynchronized = true;
 		}
 		return;
@@ -3891,7 +3939,7 @@ const finishDrag = ({
 } = {}) => {
 	if (!canRelease()) {
 		if (duringPlayback) {
-			// showMessageBox("Cannot release held block. Something must be different from the recording during playback, or some other bug has occurred.");
+			// showErrorMessage("Cannot release held block. Something must be different from the recording during playback, or some other bug has occurred.");
 			desynchronized = true;
 		}
 		return;
@@ -4692,7 +4740,7 @@ const handlePlayback = () => {
 				if (currentLevel.name !== playbackLevel.name) {
 					desynchronized = true;
 					paused = true;
-					showMessageBox("Wrong level for playback.");
+					showErrorMessage("Wrong level for playback.");
 					return;
 				}
 				const misplacedInSimulation = findMisplacedEntities(entities, playbackLevel.entities);
@@ -4703,7 +4751,7 @@ const handlePlayback = () => {
 						entity.misplaced = true;
 					}
 					// paused = true;
-					// showMessageBox("Desynchronized playback.");
+					// showErrorMessage("Desynchronized playback.");
 					// return;
 				}
 			}
@@ -4725,7 +4773,7 @@ const handlePlayback = () => {
 					// @TODO: this should play a sound, right?
 					// playSound("blockClick");
 				} else {
-					// showMessageBox("Something must be different between recording and playback.");
+					// showErrorMessage("Something must be different between recording and playback.");
 					desynchronized = true;
 				}
 			} else if (event.type === "place") {
@@ -5437,9 +5485,9 @@ const checkLevelEnd = () => {
 							}
 						}
 					} catch (error) {
-						showMessageBox("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.");
+						showErrorMessage("Couldn't save level progress.\nAllow local storage (sometimes called 'cookies') to save progress.", error);
 						// eslint-disable-next-line no-console
-						console.log(error, "New solution was:", JSON.stringify(playthroughEvents));
+						console.log("New solution was:", JSON.stringify(playthroughEvents));
 					}
 					// eslint-disable-next-line no-use-before-define
 					showLevelWinUI();
@@ -5557,7 +5605,7 @@ const showTitleScreen = (showIntro) => {
 			// rufflePlayer.readyState is 0 regardless until later...
 
 			if (!window.monkeyPatchedRuffleLoaded) {
-				showMessageBox("If updating the Ruffle library, note that it was patched before!");
+				showErrorMessage("A problem occurred with SWF integration. (If updating the Ruffle library, note that it was patched before!)");
 			}
 			// The Junkbot intro Flash animations execute some lingo code via URIs,
 			// which Ruffle by default treats like any URI and does location.assign() here:
@@ -5633,7 +5681,7 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 		tab.classList.toggle("selected", i === levelGroupNumber - 1);
 	}
 	if (levelNamesToShow.length === 0) {
-		showMessageBox(`No levels found for game "${game}" and group "${levelGroupName}"`, {
+		showErrorMessage(`No levels found for game "${game}" and group "${levelGroupName}"`, {
 			buttons: [
 				{
 					label: "Title Screen",
@@ -6305,7 +6353,7 @@ const initEditorUI = () => {
 				}
 				canvas.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, ctrlKey, shiftKey, bubbles: true }));
 			} else {
-				showMessageBox("Oops! Something went wrong. Please report this bug.");
+				showErrorMessage("Oops! Something went wrong. Please report this bug.");
 			}
 		});
 	}
@@ -6407,9 +6455,9 @@ const goToNextLevel = () => {
 				return;
 			}
 		}
-		showMessageBox("Don't know how to go to next level from here.");
+		showErrorMessage("Don't know how to go to next level from here.");
 	} else {
-		showMessageBox("Can't go to next level.");
+		showErrorMessage("Can't go to next level.");
 	}
 };
 
@@ -6884,7 +6932,7 @@ const loadFromHash = async () => {
 					dragging = entities.filter((entity) => entity.grabbed);
 					editorLevelState = serializeToJSON(currentLevel);
 				} catch (error) {
-					showMessageBox(`Failed to load local level for editing ("${levelSlug}")\n\n${error}`);
+					showErrorMessage(`Failed to load local level for editing ("${levelSlug}")`, error);
 					location.hash = "#junkbot/levels";
 					return;
 				}
@@ -6898,7 +6946,7 @@ const loadFromHash = async () => {
 						initLevel(level);
 						editorLevelState = serializeToJSON(currentLevel);
 					} catch (error) {
-						showMessageBox(`Failed to load level:\n\n${error}`);
+						showErrorMessage(`Failed to load level "${levelSlug}"`, error);
 						location.hash = "#junkbot/levels";
 						return;
 					}
@@ -6908,11 +6956,11 @@ const loadFromHash = async () => {
 						levelDropdown.selectedIndex = 0;
 						levelDropdown.value = levelSlug; // names should be unique across games
 						if (levelDropdown.selectedIndex <= 0) { // 0 = "Custom World", -1 = no items
-							showMessageBox(`Level "${levelSlug}" not found in dropdown.`);
+							showErrorMessage(`Level "${levelSlug}" not found in dropdown.`);
 						}
 					}
 				} catch (error) {
-					showMessageBox(`Failed to load level "${levelSlug}"\n\n${error}`);
+					showErrorMessage(`Failed to load level "${levelSlug}"`, error);
 					location.hash = "#junkbot/levels";
 					return;
 				}
@@ -7177,8 +7225,10 @@ const main = async () => {
 			volume = 0.5;
 		}
 		mainGain.gain.value = volume;
-		// eslint-disable-next-line no-empty
-	} catch (error) { }
+	} catch (error) {
+		// eslint-disable-next-line no-console
+		console.error("Couldn't initialize preferences:", error);
+	}
 
 	initUI();
 
