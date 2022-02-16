@@ -1,7 +1,6 @@
 # [Janitorial Android][play Junkbot]
 
-An HTML5 remake of [Junkbot][] and [Junkbot Undercover][], maybe a sequel / spinoff?
-Not sure what direction this project will take.
+An HTML5 remake of [Junkbot][] and [Junkbot Undercover][], nearly complete!
 
 [![](images/teaser.png)][play Junkbot]
 
