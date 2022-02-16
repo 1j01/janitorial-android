@@ -478,6 +478,7 @@ const storageKeys = {
 
 	// level editor auto-save
 	level: (levelName) => `janitorial-android:level:${levelNameToSlug(levelName)}`,
+	levelPrefix: "janitorial-android:level:", // for enumeration
 
 	// settings
 	muteSoundEffects: "janitorial-android:mute-sound-effects",
@@ -5627,7 +5628,9 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 		a.href = `#${gameNameToSlug(game)}/levels/${levelGroupToSlug(`${levelGroupNumber}`, game)}/${levelNameToSlug(levelName)}`;
 		let completedInMoves;
 		try {
-			completedInMoves = localStorage[storageKeys.score(levelName)];
+			if (game !== GAME_USER_CREATED) {
+				completedInMoves = localStorage[storageKeys.score(levelName)];
+			}
 		} catch (error) {
 			// no score tracking :/
 			// @TODO: unlock all levels if there's an error? um, once there's any locking.
@@ -5647,7 +5650,11 @@ const showLevelSelectScreen = (game, levelGroupName) => {
 		const title = document.createElement("span");
 		title.className = "level-list-item-title";
 		title.textContent = levelName;
-		a.append(completedImg, goldAwardImg, title, score);
+		if (game !== GAME_USER_CREATED) {
+			a.append(completedImg, goldAwardImg, title, score);
+		} else {
+			a.append(title);
+		}
 
 		if (completedInMoves) {
 			loadLevelByName({ game, levelName }).then((level) => {
@@ -5807,23 +5814,50 @@ const initUI = () => {
 	}
 };
 
-const getLevelLists = (resources) => [
-	{
-		game: GAME_JUNKBOT,
-		levelNames: resources.levelNames,
-		levelsPerPage: 15,
-	},
-	{
-		game: GAME_JUNKBOT_UNDERCOVER,
-		levelNames: resources.levelNamesUndercover,
-		levelsPerPage: 15,
-	},
-	{
-		game: GAME_TEST_CASES,
-		levelNames: tests.map((test) => test.name),
-		levelsPerPage: Infinity,
-	},
-];
+const getLevelLists = (resources) => {
+	const localLevels = [];
+	try {
+		// look through localStorage to find levels
+		for (const key of Object.keys(localStorage)) {
+			if (key.startsWith(storageKeys.levelPrefix)) {
+				// localLevels.push(key.replace(storageKeys.levelPrefix, ""));
+				const name = JSON.parse(localStorage[key]).level.title;
+				if (name) {
+					localLevels.push(name);
+				} else {
+					// eslint-disable-next-line no-console
+					console.warn("No name found in locally stored level", key, localStorage[key]);
+				}
+			}
+		}
+	} catch (error) {
+		// eslint-disable-next-line no-console
+		console.error(error);
+	}
+
+	return [
+		{
+			game: GAME_JUNKBOT,
+			levelNames: resources.levelNames,
+			levelsPerPage: 15,
+		},
+		{
+			game: GAME_JUNKBOT_UNDERCOVER,
+			levelNames: resources.levelNamesUndercover,
+			levelsPerPage: 15,
+		},
+		{
+			game: GAME_TEST_CASES,
+			levelNames: tests.map((test) => test.name),
+			levelsPerPage: Infinity,
+		},
+		{
+			game: GAME_USER_CREATED,
+			levelNames: localLevels,
+			levelsPerPage: Infinity,
+		},
+	];
+};
 
 const whereLevelIsInTheGame = (level, game) => {
 	const gameSlug = gameNameToSlug(game);
