@@ -6496,7 +6496,7 @@ const testRouting = () => {
 	for (const { hash, expected } of routingTests) {
 		// const { game, levelName, levelSection, screen, canonicalHash, wantsEdit } = parseHash(hash);
 		const actual = parseRoute(hash);
-		const mismatched = Object.keys(expected).filter(key => actual[key] !== expected[key]);
+		const mismatched = Object.keys(expected).filter((key) => actual[key] !== expected[key]);
 		if (mismatched.length) {
 			// eslint-disable-next-line no-console
 			console.warn(`Routing test failed for hash ${hash}\n`, ...mismatched.map((key) => `"${key}": expected ${JSON.stringify(expected[key])} but got ${JSON.stringify(actual[key])}\n`));
@@ -6747,13 +6747,14 @@ const runTests = async () => {
 //
 // Notes:
 // - I'm using "junkbot2" rather than "junkbot-uc" or similar, so that if I make a sequel, there's an easy working title, "junkbot3" ;)
-// - I might get rid of locally stored levels, in favor of data in the URL (like beepbox.co and some other web apps).
 // - I automatically canonicalize URLs (letter case, etc.) with replaceState
-//   - I could allow the game to be omitted, so you can type e.g. "#descent" instead of "#junkbot2/levels/basement-1/descent".
-//   - I can support synonyms: "junkbot2"/"junkbot-uc"/"junkbot-undercover", "_"/"-"/"", "edit"/"editor"/"editing"/"edit-mode"/"ed"/"e"
+//   - I support some synonyms: "junkbot2"/"junkbot-uc"/"junkbot-undercover", "edit"/"editor"/"editing"/"edit-mode"/"ed"/"e"
 //   - #edit/<level> is synonymous with #<level>/edit
+//   - I could synonymize "_"/"-"/"" (I do in some cases, like for game names)
+//   - I could allow the game to be omitted, so you can type e.g. "#descent" instead of "#junkbot2/levels/basement-1/descent".
+// - Some unmatched routes show an error
 // - Should I include the slash at the start? "#/foo/bar" vs "#foo/bar"
-// - Should unmatched routes show an error?
+// - I might get rid of locally stored levels, in favor of data in the URL (like beepbox.co and some other web apps).
 
 const parseRoute = (hash) => {
 	hash = hash.replace(/^#?\/?/, "").replace(/\/$/, "");
@@ -7107,7 +7108,7 @@ const gatherStatistics = async (games) => {
 const renderBannerComment = (sectionName) => {
 	// This generates a code heading comment, using the game's pixel font.
 	// You can use `console.log(renderBannerComment("Meta"))`
-	// to generate a comment, but I use a VS Code extension Banner Comment + to do it quicker.
+	// to generate a comment, but I use a VS Code extension "Banner Comments +" to do it quicker.
 	// I made the font into a figlet font in order to be compatible; see below FIGlet font generation.
 	const canvas = document.createElement("canvas");
 	canvas.width = 80;
@@ -7134,7 +7135,7 @@ ${textArt.replace(/\s+$/gm, "")}
 // eslint-disable-next-line no-unused-vars
 const renderFIGletFont = () => {
 	// Generate a FIGlet font (.flf) from the Junkbot font.
-	// This can be used with the Banner Comment + VS Code extension,
+	// This can be used with the "Banner Comments +" VS Code extension,
 	// or other software.
 	// A configuration is provided in the workspace to generate banner comments in this project's style.
 	// It should work automatically if you install the extension:
