@@ -5,7 +5,13 @@ Not sure what direction this project will take.
 
 [![](images/teaser.png)][demo]
 
-[Try it out here!][demo]
+- [**Play LEGO Junkbot**][demo]
+
+- [**Play LEGO Junkbot Undercover**][sequel demo]
+
+- [**Run automated tests**][tests]
+
+- [**Level editor**][level editor]
 
 All mechanics from the original games are implemented:
 - Dragging bricks, and handling grabs that are ambiguous until you drag up or down, with cursors for different dragging options (up, down, or either)
@@ -25,7 +31,15 @@ All mechanics from the original games are implemented:
 	- Rectangular selection, select all, copy, cut, paste, delete, undo, redo, autosave, save to file, open from file, insert entities via a palette
 	- With additional sound effects taken from Lego Creator
 
-- I've started making a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo]; I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
+## 3D Renderer
+
+I've made a thing to render LDraw models into the [oblique projection][] that Junkbot uses, using [Three.js][]'s [LDrawLoader][]; you can check that out [here][3D demo].
+
+I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
+
+Regarding the rendering: Unfortunately, whilst the scale appears correct, the pixels are **aliased inconsistently**, which means I can't do a simple image-based find and replace to convert studs to a matching style.
+I might be able to either: 1. replace the stud sub-part with something that renders a single pixel to search for, 2. render at a higher resolution or with antialiasing, and use some image processing to reduce it to pixel art, 3. use a completely different rendering technology (I've started looking into Blender).
+
 
 ## Controls
 
@@ -109,8 +123,13 @@ All mechanics from the original games are implemented:
 
 ## Credits
 
+### Web Remake
+
+Isaiah Odhner
+
 ### Ripping resources
-- [Rory Fewell](https://github.com/rozniak) and [TommytheJerk](https://github.com/TommytheJerk), via [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
+- [Rory Fewell](https://github.com/rozniak) and [TommytheJerk](https://github.com/TommytheJerk), via project [rozniak/Junkbot](https://github.com/rozniak/Junkbot)
+- Tools: CastRipperTool (Nosamu), SharpExport (Werner), swfExport Xtra (Valentin Schmidt), MP3 Xtra (Valentin Schmidt)
 
 ### Some sounds taken from
 - Lego Creator (editor sounds)
@@ -218,7 +237,10 @@ Steps
 [Node.js]: https://nodejs.org/
 [Git]: https://git-scm.org/
 [git clone]: https://help.github.com/articles/cloning-a-repository/
-[demo]: https://1j01.github.io/janitorial-android/
+[demo]: https://1j01.github.io/janitorial-android/#junkbot
+[sequel demo]: https://1j01.github.io/janitorial-android/#junkbot-undercover
+[tests]: https://1j01.github.io/janitorial-android/#tests
+[level editor]: https://1j01.github.io/janitorial-android/#level-editor
 [3D demo]: https://1j01.github.io/janitorial-android/three
 [Junkbot]: https://brickipedia.fandom.com/wiki/Junkbot
 [Junkbot Undercover]: https://brickipedia.fandom.com/wiki/Junkbot_Undercover
