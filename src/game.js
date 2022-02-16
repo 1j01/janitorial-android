@@ -2752,7 +2752,8 @@ const save = () => {
 				}
 				editorLevelState = serializeToJSON(currentLevel); // for title update
 				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
-				location.hash = `#local/levels/${levelNameToSlug(currentLevel.title)}/edit`;
+				// use pushState instead of setting location.hash so that undo history is preserved
+				history.pushState(null, null, `#local/levels/${levelNameToSlug(currentLevel.title)}/edit`);
 				updateEditorUIForLevelChange(currentLevel); // for title update
 			} else {
 				localStorage[storageKeys.level(currentLevel.title)] = editorLevelState;
