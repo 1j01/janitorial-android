@@ -1965,7 +1965,7 @@ const hotResourcePaths = {
 	backgrounds: "images/spritesheets/backgrounds.png",
 	backgroundsAtlas: "images/spritesheets/backgrounds.json",
 	junkbotAnimations: "junkbot-animations.json",
-	font: "images/font.png",
+	font: "font/font.png",
 	turn: "audio/sound-effects/turn1.ogg",
 	blockPickUp: "audio/sound-effects/blockpickup.ogg",
 	// blockPickUpFromAir: "audio/sound-effects/custom/pick-up-from-air.wav",
@@ -7161,7 +7161,8 @@ const renderFIGletFont = () => {
 	const headroom = 5;
 	const maxLineLength = (maxCharWidth + headroom) * fillCharByteLength + 2; // +2 for "@@"
 	const oldLayout = 15; // http://www.jave.de/figlet/figfont.html#interpretlayout
-	const comment = "Font from Junkbot & Junkbot Undercover games, extended by Isaiah Odhner.";
+	const comment = `04B_08 font as seen in Junkbot & Junkbot Undercover games, extended by Isaiah Odhner.
+Some characters might be different from the original 04B_08 font since literally only the characters AS-SEEN in the games were copied exactly, before knowing of the original font.`;
 	const commentLineCount = comment.split("\n").length;
 	const printDirection = 0; // 0 = left to right, 1 = right to left
 	const fullLayout = 143; // http://www.jave.de/figlet/figfont.html#interpretlayout

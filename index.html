@@ -285,6 +285,7 @@
 
 		#level-dropdown {
 			margin-top: 2px;
+			max-width: 300px;
 		}
 
 		#open-world {
@@ -302,7 +303,7 @@
 		}
 
 		#editor-ui .label-input-row label {
-			width: 50px;
+			width: 64px;
 			align-self: center;
 		}
 
@@ -594,6 +595,9 @@
 			/* for text-only tabs (placeholder for the sequel) */
 			text-align: center;
 			line-height: 24px;
+			font-size: 8px;
+			text-decoration: none;
+			color: white;
 		}
 
 		@media (max-width: 450px) {
@@ -666,10 +670,45 @@
 		.level-info-title {
 			margin: 0;
 			color: white;
-			/* @TODO: pixel font, here and other places */
-			font-family: sans-serif;
-			font-size: 18px;
 		}
+
+		/* FONT */
+
+		@font-face {
+			font-family: "04B_08";
+			font-weight: normal;
+			src:
+				url("font/04B_08__.woff2") format("woff2"),
+				url("font/04B_08__.TTF") format("truetype");
+		}
+
+		@font-face {
+			/* disable faux-bolding */
+			font-family: "04B_08";
+			font-weight: bold;
+			src:
+				url("font/04B_08__.woff2") format("woff2"),
+				url("font/04B_08__.TTF") format("truetype");
+		}
+
+		body,
+		button,
+		select,
+		input,
+		.dialog-container h2 {
+			font-family: "04B_08";
+			font-size: 16px;
+		}
+
+		.dialog-container h1 {
+			font-family: "04B_08";
+			font-size: 32px;
+		}
+
+		button {
+			font-size: 8px;
+		}
+
 
 		/* NETWORK ORDER */
 
