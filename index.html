@@ -547,6 +547,17 @@
 			box-shadow: #000 -1px 0 0 12px;
 		}
 
+		#intro-container.undercover-intro ruffle-player {
+			/* the sequel's intro has a different aspect ratio */
+			width: 548px;
+			height: 401px;
+			/* scale that down for now; @TODO: Junkbot Undercover's title screen layout */
+			transform: scale(0.9);
+			transform-origin: left top;
+			left: 0;
+			top: 30px;
+		}
+
 		/* LEVEL SELECT SCREEN */
 
 		#level-select-screen {

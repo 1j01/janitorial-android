@@ -5605,8 +5605,9 @@ const showTitleScreen = (showIntro) => {
 		}
 		replayIntroButton.hidden = false;
 		rufflePlayer = ruffle.createPlayer();
-		rufflePlayer.classList.add("metal-border");
+		rufflePlayer.classList.toggle("metal-border", game === GAME_JUNKBOT);
 		introContainer.appendChild(rufflePlayer);
+		introContainer.classList.toggle("undercover-intro", game === GAME_JUNKBOT_UNDERCOVER);
 		const swf = game === GAME_JUNKBOT_UNDERCOVER ? "flash/junkbot_undercover_intro.swf" : "flash/junkbot_intro.swf";
 		rufflePlayer.load(swf).then(() => {
 			// Note: It may not actually be loaded!
