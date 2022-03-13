@@ -320,12 +320,16 @@ const showMessageBox = (message, {
 			action: () => { /* the message box will close */ },
 		}
 	],
+	className,
 } = {}) => {
 	// @TODO: support Esc, Enter, etc.
 	const messageBoxContainer = document.createElement("div");
 	messageBoxContainer.className = "dialog-container";
 	const messageBox = document.createElement("div");
 	messageBox.className = "dialog metal-border";
+	if (className) {
+		messageBox.classList.add(className);
+	}
 	const messageContentEl = document.createElement("div");
 	messageContentEl.className = "message-content";
 	if (typeof message === "string") {
@@ -372,6 +376,7 @@ const showMessageBox = (message, {
 			action?.();
 		};
 		if (isDefault) {
+			button.classList.add("default-button");
 			button.focus();
 		}
 		button.textContent = label;
@@ -6369,8 +6374,8 @@ const showLevelLoseUI = () => {
 	const message = messages[Math.floor(Math.random() * messages.length)];
 	const div = document.createElement("div");
 	div.innerHTML = `
-		<img src="images/menus/level_lose.png" draggable="false">
-		<p>${message}</p>
+		<img src="images/menus/level_lose.png" draggable="false" class="level-lose-image">
+		<p class="level-lose-message">${message}</p>
 	`;
 	nonErrorDialogs.push(showMessageBox([div], {
 		buttons: [
@@ -6406,7 +6411,8 @@ const showLevelLoseUI = () => {
 				},
 				isDefault: true,
 			},
-		]
+		],
+		className: "level-lose",
 	}));
 };
 
@@ -6432,7 +6438,7 @@ const showGameWinUI = (game) => {
 			},
 		});
 	}
-	nonErrorDialogs.push(showMessageBox([win], { buttons }));
+	nonErrorDialogs.push(showMessageBox([win], { buttons, className: "game-win" }));
 };
 
 const canGoToNextLevel = () => {
@@ -6479,6 +6485,7 @@ const showLevelWinUI = () => {
 				isDefault: true,
 			},
 		],
+		className: "level-win",
 	}));
 };
 
@@ -7012,7 +7019,7 @@ const loadFromHash = async () => {
 					}
 					levelInfoContent.querySelector(".level-info-title").textContent = `Level ${levelNumber}: ${currentLevel.title.toLocaleUpperCase()}`;
 
-					const toast = showMessageBox([levelInfoContent], { buttons: [] });
+					const toast = showMessageBox([levelInfoContent], { buttons: [], className: "level-info-toast" });
 					nonErrorDialogs.push(toast);
 					// Don't await this delay, because we want the animation loop to start so the level gets rendered.
 					setTimeout(async () => {

@@ -188,6 +188,10 @@
 			min-width: 100px;
 		}
 
+		.dialog .generic-button:not(.default-button) {
+			color: #808080;
+		}
+
 		.generic-button {
 			border-image-slice: 6 17 8 9 fill;
 			border-image-width: 6px 17px 8px 9px;
@@ -236,6 +240,31 @@
 
 		button {
 			user-select: none;
+		}
+
+		.level-lose {
+			padding: 5px;
+		}
+
+		.level-lose-image {
+			margin-left: 4px;
+		}
+
+		.level-lose-message {
+			color: white;
+			position: absolute;
+			left: 56px;
+			top: 34px;
+			margin: 0;
+		}
+
+		.level-lose .generic-button {
+			font-size: 16px;
+			width: 77px;
+			min-width: 0;
+			height: 34px;
+			padding-left: 0;
+			padding-right: 0;
 		}
 
 		/* TEST RUNNER UI */
