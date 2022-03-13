@@ -6391,19 +6391,20 @@ const showLevelLoseUI = () => {
 			{
 				label: "Get Hint",
 				action: () => {
-					let message = currentLevel.hint;
+					const heading = document.createElement("div"); // yep not semantic
 					let positionInfo;
 					try {
 						positionInfo = whereLevelIsInTheGame(currentLevel)?.levelNumber;
 					} catch (error) {
+						// eslint-disable-next-line no-console
 						console.error("Error looking up position of level within the game:", error);
 					}
 					if (positionInfo) {
-						message = `Level ${positionInfo.levelNumber} hint:\n${message}`;
+						heading.textContent = `Level ${positionInfo.levelNumber} hint:`;
 					} else {
-						message = `Hint:\n${message}`;
+						heading.textContent = "Hint:";
 					}
-					showMessageBox(message, {
+					showMessageBox([heading, currentLevel.hint], {
 						buttons: [
 							{
 								label: "OK",
