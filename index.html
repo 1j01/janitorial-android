@@ -184,6 +184,10 @@
 			border-image-source: url("images/menus/dBox_sm.png");
 		}
 
+		.dialog .generic-button {
+			min-width: 100px;
+		}
+
 		.generic-button {
 			border-image-slice: 6 17 8 9 fill;
 			border-image-width: 6px 17px 8px 9px;
@@ -192,6 +196,15 @@
 			border-image-source: url("images/menus/custom/generic_button_default.png");
 			background: none;
 			padding: 2px 10px;
+			min-height: 20px;
+			line-height: 12px;
+		}
+
+		/* additive padding-top for generic buttons, to balance the border */
+		.generic-button::before {
+			content: "";
+			display: block;
+			height: 3px;
 		}
 
 		.generic-button:hover {
@@ -696,12 +709,12 @@
 		button,
 		select,
 		input,
-		.dialog-container h2 {
+		.dialog h2 {
 			font-family: "04B_08";
 			font-size: 16px;
 		}
 
-		.dialog-container h1 {
+		.dialog h1 {
 			font-family: "04B_08";
 			font-size: 32px;
 		}
@@ -709,7 +722,6 @@
 		button {
 			font-size: 8px;
 		}
-
 
 		/* NETWORK ORDER */
 
