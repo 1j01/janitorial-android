@@ -379,6 +379,9 @@ const showMessageBox = (message, {
 			button.classList.add("default-button");
 			button.focus();
 		}
+		if (label === "OK") {
+			button.classList.add("ok-button");
+		}
 		button.textContent = label;
 		button.style.margin = "10px";
 		button.style.marginTop = "20px";
@@ -6388,7 +6391,19 @@ const showLevelLoseUI = () => {
 			{
 				label: "Get Hint",
 				action: () => {
-					showMessageBox(currentLevel.hint, {
+					let message = currentLevel.hint;
+					let positionInfo;
+					try {
+						positionInfo = whereLevelIsInTheGame(currentLevel)?.levelNumber;
+					} catch (error) {
+						console.error("Error looking up position of level within the game:", error);
+					}
+					if (positionInfo) {
+						message = `Level ${positionInfo.levelNumber} hint:\n${message}`;
+					} else {
+						message = `Hint:\n${message}`;
+					}
+					showMessageBox(message, {
 						buttons: [
 							{
 								label: "OK",
@@ -6397,8 +6412,10 @@ const showLevelLoseUI = () => {
 									loadFromHash();
 									paused = false;
 								},
+								isDefault: true,
 							}
 						],
+						className: "hint-dialog",
 					});
 				},
 			},
