@@ -6,8 +6,8 @@
 	"private": true,
 	"scripts": {
 		"build": "pug src -o build --pretty && stylus src -o build",
-		"start": "run-p -l live-server watch:\\*\\*",
-		"watch": "run-p -l watch:\\*\\*",
+		"start": "run-p live-server watch:\\*\\*",
+		"watch": "run-p watch:\\*\\*",
 		"watch:pug": "pug src -o build --pretty --watch",
 		"watch:stylus": "stylus src -o build --watch",
 		"live-server": "live-server --open=build/css3d.html --ignore=\\*\\*/node_modules/\\*\\*,\\*\\*/src/\\*\\*.styl,\\*\\*/src/\\*\\*.pug"
