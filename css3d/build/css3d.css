@@ -231,11 +231,8 @@ a {
   height: 12.8vmin;
   background: linear-gradient(var(--body-detail), var(--body-detail) 30%, var(--body-four) 30%, var(--body-four)) 50% 25%/75% 13%;
   background-position: 0 calc(var(--lid-open, 0) * -100% + 18%);
-  -webkit-clip-path: inset(0% 0% calc(var(--lid-open, 0) * 91% + 15%) 0%);
-          clip-path: inset(0% 0% calc(var(--lid-open, 0) * 91% + 15%) 0%);
-  transition: background-position 0.5s ease-in-out, -webkit-clip-path 0.5s ease-in-out;
+  clip-path: inset(0% 0% calc(var(--lid-open, 0) * 91% + 15%) 0%);
   transition: background-position 0.5s ease-in-out, clip-path 0.5s ease-in-out;
-  transition: background-position 0.5s ease-in-out, clip-path 0.5s ease-in-out, -webkit-clip-path 0.5s ease-in-out;
   bottom: 20%;
   transform-origin: 50% 100%;
   transform: rotateX(calc(var(--rotate, 1) * 51.75deg));
@@ -407,8 +404,7 @@ a {
   left: 50%;
 }
 .leg .cuboid__side:nth-of-type(3) {
-  -webkit-clip-path: inset(30% 0% 0% 0%);
-          clip-path: inset(30% 0% 0% 0%);
+  clip-path: inset(30% 0% 0% 0%);
 }
 .leg .cuboid__side:nth-of-type(5) {
   display: none;
@@ -435,8 +431,7 @@ a {
   background: var(--legs-one);
 }
 
-.hip.cylinder .cylinder__side:not(:nth-last-child(-n+6)),
-.crotch.cylinder .cylinder__side:not(:nth-child(-n+9)) {
+.hip.cylinder .cylinder__side:not(:nth-last-child(-n+6)),.crotch.cylinder .cylinder__side:not(:nth-child(-n+9)) {
   background: hsl(0, 0%, var(--lightness));
   --lightness: calc(var(--angle) / 360 * 60% + 20%)
 }
@@ -461,8 +456,7 @@ a {
   transform: rotateY(90deg) translate3d(0, 0, 10vmin) rotateZ(-90deg);
   border: calc(var(--wireframe) * 1vmin) solid rgba(0,102,153,0.75);
   background: var(--body-four);
-  -webkit-clip-path: inset(41% 10% 10% 10%);
-          clip-path: inset(41% 10% 10% 10%);
+  clip-path: inset(41% 10% 10% 10%);
 }
 .mouth {
   position: absolute;
