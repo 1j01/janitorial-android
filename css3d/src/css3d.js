@@ -3,11 +3,7 @@
 
 const sceneEl = document.querySelector(".scene");
 
-const {
-	dat: { GUI },
-} = window;
-
-const gui = new GUI();
+const gui = new window.dat.GUI();
 const config = {
 	"rotate-x": -31,
 	"rotate-y": -119,
