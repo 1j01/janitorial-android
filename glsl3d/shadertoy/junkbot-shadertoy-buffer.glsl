@@ -1,5 +1,7 @@
 // Lego Junkbot by Isaiah Odhner - 2020-11-9
-// Based on "Go Go LegoMan !" by Sebastien Durand - 01/2014
+// https://www.shadertoy.com/view/wdcfDH (including tilt shift effect)
+// https://glslsandbox.com/e#79774.2 (no tilt shift effect)
+// Based on "Go Go LegoMan !" by sebastien durand - 01/2014
 // https://www.shadertoy.com/view/MsB3zK
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 

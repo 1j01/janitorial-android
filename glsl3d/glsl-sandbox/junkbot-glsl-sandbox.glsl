@@ -1,22 +1,11 @@
-#extension GL_OES_standard_derivatives : enable
-
-precision highp float;
-
-uniform float time;
-uniform vec2 mouse;
-uniform vec2 resolution;
-
 // Lego Junkbot by Isaiah Odhner - 2020-11-9
+// https://glslsandbox.com/e#79774.2
+// https://www.shadertoy.com/view/wdcfDH (featuring tilt shift effect)
 // Based on "Go Go LegoMan !" by sebastien durand - 01/2014
 // https://www.shadertoy.com/view/MsB3zK
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
-//#define ANTIALIASING
-const float AA = 3.; // Anti-Aliasing Level (uncomment #define ANTIALIASING to use)
-
-//#define DYNAMIC_WRAP_INTERVAL
-//#define RUBBISH
-//#define DEBUG_RECYCLING_SYMBOL
+// For antialiasing, uncomment #define ANTIALIASING below.
 
 // Possible Improvements:
 // - Get brick proportions just right; I think the sloped brick is a little too tall, and maybe the square brick is a little short?
@@ -29,6 +18,21 @@ const float AA = 3.; // Anti-Aliasing Level (uncomment #define ANTIALIASING to u
 //   Note that texturing the legs currently duplicates code for rotation based on the animation.
 // - Better camera control
 // - Of course other elements from the game could be added, even interactivity.
+
+#extension GL_OES_standard_derivatives : enable
+
+precision highp float;
+
+uniform float time;
+uniform vec2 mouse;
+uniform vec2 resolution;
+
+//#define ANTIALIASING
+const float AA = 3.; // Anti-Aliasing Level (uncomment #define ANTIALIASING to use)
+
+//#define DYNAMIC_WRAP_INTERVAL
+//#define RUBBISH
+//#define DEBUG_RECYCLING_SYMBOL
 
 #define TAU 6.28318530718
 #define NB_ITER 120
