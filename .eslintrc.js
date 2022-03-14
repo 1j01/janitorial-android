@@ -272,7 +272,6 @@ module.exports = {
 		"radix": "error",
 		"require-atomic-updates": "error",
 		"require-await": "error",
-		"require-jsdoc": "error",
 		"require-unicode-regexp": "off",
 		"rest-spread-spacing": [
 			"error",
