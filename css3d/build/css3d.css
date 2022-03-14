@@ -345,7 +345,7 @@ a {
   width: 10vmin;
   height: 15vmin;
   transform: translateZ(0.2vmin);
-  background: radial-gradient(circle at 50% 30%, transparent 10%, var(--leg-detail) 10%, var(--leg-detail) 15%, transparent 15%, transparent 20%, var(--leg-detail) 20%, var(--leg-detail) 25%, transparent 25%), linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 58%/30% 5% no-repeat, linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 71%/30% 5% no-repeat, linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 84%/30% 5% no-repeat, linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 97%/30% 5% no-repeat, linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 95%/7% 48% no-repeat;
+  background: radial-gradient(circle at 50% 30%, transparent 10%, var(--leg-detail) 10%, var(--leg-detail) 15%, transparent 15%, transparent 20%, var(--leg-detail) 20%, var(--leg-detail) 25%, transparent 25%), linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 70%/30% 5% no-repeat, linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 80%/30% 5% no-repeat, linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 90%/30% 5% no-repeat, linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 100%/30% 5% no-repeat, linear-gradient(var(--leg-detail), var(--leg-detail)) 50% 95%/7% 48% no-repeat;
 }
 .left .leg .cuboid__side:nth-of-type(2)::after {
   right: 0;
