@@ -30,7 +30,7 @@ const float AA = 3.; // Anti-Aliasing Level (uncomment #define ANTIALIASING to u
 // - Better camera control
 // - Of course other elements from the game could be added, even interactivity.
 
-#define TAO 6.28318530718
+#define TAU 6.28318530718
 #define NB_ITER 120
 #define MAX_DIST 400.
 #define PRECISION .002
@@ -45,9 +45,9 @@ const vec2
     hand2 = vec2(-.1,.25);	
 
 const vec3
-    bhat = vec3(.47*4.*.392,.14,.45),
-    bbody = vec3(.47*4.*.392,.14*3.,.45*2.),
-    bbody1 = vec3(.75,.6,1.),
+    bHat = vec3(.47*4.*.392,.14,.45),
+    bBody = vec3(.47*4.*.392,.14*3.,.45*2.),
+    bBody1 = vec3(.75,.6,1.),
     v0 = vec3(0),
     body0 = vec3(0,-.15,0),
     head0 = vec3(0,body0.y-1.05,0),
@@ -70,21 +70,21 @@ const vec3 recycling_bin_offset =
     ;
 
 const lowp float 
-    legh = 1., 
-    lege=.34, 
-    legx=.31, 
-    handa = -.7;
+    legH = 1., 
+    legE=.34, 
+    legX=.31, 
+    handA = -.7;
 //face_a = 1.1;
 //face_r = 27.;
 
 const float 
-    face_x = 30.,    //27.*0.453596121, //face_r*cos(a); // precalcul
-    face_y = -27.*0.89120736; //face_r*sin(a); // precalcul
+    face_x = 30.,    //27.*0.453596121, //face_r*cos(a); // precalculated
+    face_y = -27.*0.89120736; //face_r*sin(a); // precalculated
 
 // Global variables
 float time420simultaneousEarthRotation;
-vec3 sunLight, deltaMan;//, armn;
-//mat2 handmat;
+vec3 sunLight, deltaMan;//, armN;
+//mat2 handMat;
 vec2 fCoord;
 int scene;
 float anim;
@@ -100,13 +100,13 @@ float hash( const in vec3 p ) {
     float h = dot(p,vec3(127.1,311.7,758.5453123));	
     return fract(sin(h)*43758.5453123);
 }
-float hashsym( const in vec3 p ) {
+float hashSym( const in vec3 p ) {
     return hash(p) * 2.0 - 1.0;
 }
 
 float dot2( in vec2 v ) { return dot(v,v); }
 float dot2( in vec3 v ) { return dot(v,v); }
-float ndot( in vec2 a, in vec2 b ) { return a.x*b.x - a.y*b.y; }
+float nDot( in vec2 a, in vec2 b ) { return a.x*b.x - a.y*b.y; }
 
 float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
 {
@@ -209,16 +209,16 @@ float sdCappedCylinder( vec3 p, vec2 h )
 float hat(in vec3 p) {
     // yellow topper
 
-    vec3 vd = abs(p) - bbody1;
+    vec3 vd = abs(p) - bBody1;
     p.x = abs(p.x);
-    float d = length(max(abs(p)-bhat,0.0));//-.05;
+    float d = length(max(abs(p)-bHat,0.0));//-.05;
     return max(abs(p.z)-.392, d);
 }
 
 float head(in vec3 p) {
     // orange sloped brick
 
-    vec3 vd = abs(p) - bbody1;
+    vec3 vd = abs(p) - bBody1;
     vd.z -= 0.16;
     float d = min(max(vd.x,max(vd.y,vd.z)),0.0) + length(max(vd,0.0));
     p.z = -p.z;
@@ -231,10 +231,10 @@ float head(in vec3 p) {
 float body(in vec3 p) {
     // orange square brick
 
-    vec3 vd = abs(p) - bbody1;
+    vec3 vd = abs(p) - bBody1;
     p.x = abs(p.x);
     p.z += .392;
-    float d = length(max(abs(p)-bbody,0.0))-.025;
+    float d = length(max(abs(p)-bBody,0.0))-.025;
     return max(abs(p.z)-2.*.392, d);
 }
 
@@ -254,13 +254,13 @@ float faceSticker(in vec3 p) {
 }
 
 float leg(in vec3 p) {
-    float d = length(p.zy)-lege;
-    d = min(d, length(max(abs(p+vec3(0.,legh*.5,-.08))-vec3(legx,legh*.5,lege-.08),0.)));
-    d = min(d, length(max(abs(p+vec3(0.,legh,.02))-vec3(legx,.15,lege+.02),0.)));
-    d = max(abs(p.x)-legx, d)-.02;
-    vec3 dd = abs(p+vec3(0.,legh,-.08))-vec3(legx-.1,legh+.2,lege-.18);
+    float d = length(p.zy)-legE;
+    d = min(d, length(max(abs(p+vec3(0.,legH*.5,-.08))-vec3(legX,legH*.5,legE-.08),0.)));
+    d = min(d, length(max(abs(p+vec3(0.,legH,.02))-vec3(legX,.15,legE+.02),0.)));
+    d = max(abs(p.x)-legX, d)-.02;
+    vec3 dd = abs(p+vec3(0.,legH,-.08))-vec3(legX-.1,legH+.2,legE-.18);
     float d2 = min(max(dd.x,max(dd.y,dd.z)),0.) + length(max(dd,0.));
-    dd = abs(p+vec3(0.,legh+.1,.02))-vec3(legx-.1,.15,lege-.98);
+    dd = abs(p+vec3(0.,legH+.1,.02))-vec3(legX-.1,.15,legE-.98);
     d2 = min(d2, min(max(dd.x,max(dd.y,dd.z)),0.0) + length(max(dd,0.)));
     d2 = min(d2, max(-p.z-.05, length(p.xy-leg1)-.24));
     d2 = min(d2, max(-p.z-.05, length(p.xy-leg2)-.24));
@@ -278,7 +278,7 @@ ivec2 getId(in vec3 p) {
     )-100;
 }
 
-vec2 legoman(in vec3 p, in ivec2 id) {
+vec2 minifig(in vec3 p, in ivec2 id) {
 
     float a, bodyA;
     vec3 p0 = p;
@@ -358,14 +358,14 @@ float recycling_bin(in vec3 pos, ivec2 id) {
         d = min(d,
                 udQuad(
                     q - vec3(
-                        hashsym(vec3(i, id)) * 0.1,
-                        hashsym(vec3(i+30., id)) * 0.1 - 0.2,
-                        hashsym(vec3(i+60., id)) * 0.1
+                        hashSym(vec3(i, id)) * 0.1,
+                        hashSym(vec3(i+30., id)) * 0.1 - 0.2,
+                        hashSym(vec3(i+60., id)) * 0.1
                     ),
-                    vec3(hashsym(vec3(i+0.1, id)), hashsym(vec3(i+0.2, id)), hashsym(vec3(i+0.3, id))) * 0.4,
-                    vec3(hashsym(vec3(i+0.4, id))*0.1, hashsym(vec3(i+0.5, id)), hashsym(vec3(i+0.6, id))) * 0.4,
-                    vec3(hashsym(vec3(i+0.7, id))*0.1, hashsym(vec3(i-0.1, id))*0.1, hashsym(vec3(i-0.2, id))) * 0.4,
-                    vec3(hashsym(vec3(i-0.3, id)), hashsym(vec3(i-0.4, id))*0.1, hashsym(vec3(i-0.5, id))) * 0.4
+                    vec3(hashSym(vec3(i+0.1, id)), hashSym(vec3(i+0.2, id)), hashSym(vec3(i+0.3, id))) * 0.4,
+                    vec3(hashSym(vec3(i+0.4, id))*0.1, hashSym(vec3(i+0.5, id)), hashSym(vec3(i+0.6, id))) * 0.4,
+                    vec3(hashSym(vec3(i+0.7, id))*0.1, hashSym(vec3(i-0.1, id))*0.1, hashSym(vec3(i-0.2, id))) * 0.4,
+                    vec3(hashSym(vec3(i-0.3, id)), hashSym(vec3(i-0.4, id))*0.1, hashSym(vec3(i-0.5, id))) * 0.4
                 ) - paperThickness
                );
     }
@@ -377,7 +377,7 @@ float recycling_bin(in vec3 pos, ivec2 id) {
 vec2 DE(in vec3 p) {
     ivec2 id = getId(p);
     p.xz = mod(p.xz, wrapInterval)-0.5*wrapInterval;
-    vec2 obj = minObj(legoman(p, id), vec2(p.y+1.93,10.));
+    vec2 obj = minObj(minifig(p, id), vec2(p.y+1.93,10.));
     if (hash(vec3(id, 0.)) < 0.2 && scene != 1) {
         obj = minObj(obj, vec2(recycling_bin(p + recycling_bin_offset, id), 333.));
     }
@@ -408,10 +408,10 @@ vec3 Normal(in vec3 p, in vec3 ray, in float t) {
 
 
 
-float softshadow(in vec3 ro, in vec3 rd, in float mint, in float maxt, in float k) {
-    float res = 1.0, h, t = mint+.1*hash(ro+rd);
+float softShadow(in vec3 ro, in vec3 rd, in float minT, in float maxT, in float k) {
+    float res = 1.0, h, t = minT+.1*hash(ro+rd);
     for( int i=0; i<48; i++ ) {
-        //  if (t < maxt) {
+        //  if (t < maxT) {
         h = DE( ro + rd*t ).x;
         res = min( res, k*h/t );
         t += .1;
@@ -421,14 +421,14 @@ float softshadow(in vec3 ro, in vec3 rd, in float mint, in float maxt, in float 
 }
 
 float calcAO(in vec3 pos, in vec3 nor) {
-    float dd, hr=.01, totao=.0, sca=1.;
+    float dd, hr=.01, totalAO=.0, sca=1.;
     for(int aoi=0; aoi<5; aoi++ ) {
         dd = DE(nor * hr + pos).x;
-        totao += -(dd-hr)*sca;
+        totalAO += -(dd-hr)*sca;
         sca *= .7;
         hr += .05;
     }
-    return clamp(1.-4.*totao, 0., 1.);
+    return clamp(1.-4.*totalAO, 0., 1.);
 }
 
 float recycling_symbol(in vec2 p, bool reverse_arrow_direction) {
@@ -538,8 +538,8 @@ vec3 getTexture(in vec3 p, in float m) {
         v = clamp(v, 0., 1.);
         c = mix(vec3(.3, .1, 0.), c, v);
 
-        float g = mod(time, TAO*3.);
-        //if (id.x==0 && id.y==0 && g > 2.5*TAO) {
+        float g = mod(time, TAU*3.);
+        //if (id.x==0 && id.y==0 && g > 2.5*TAU) {
         //    R(p.xz, -.8*cos(2.*g+1.57));
         //}
         if (p.z<-1.1) {
@@ -553,7 +553,7 @@ vec3 getTexture(in vec3 p, in float m) {
             float eye_spacing = face_x;
             float eye_y = -face_y*1.1;
             float eye_gaze_x = -7.;
-            if (id.x==0 && id.y==0 && g > 2.5*TAO) {
+            if (id.x==0 && id.y==0 && g > 2.5*TAU) {
                 eye_gaze_x = -7. * cos(2.*g+1.57);
             }
             float px = abs(p2.x);
@@ -673,7 +673,7 @@ vec3 Render(in vec3 p, in vec3 rd, in float t, in float m) {
         dif = clamp(dot( nor, sunLight ), 0., 1.),
         bac = clamp(dot( nor, normalize(vec3(-sunLight.x,0.,-sunLight.z))), 0., 1.)*clamp( 1.0-p.y,0.0,1.0);
 
-    if( dif>.02 ) { sh = softshadow( p, sunLight, .02, 10., 12.); dif *= (.1+sh); }
+    if( dif>.02 ) { sh = softShadow( p, sunLight, .02, 10., 12.); dif *= (.1+sh); }
 
     vec3 brdf = vec3(0.0);
     brdf += .2*ao*amb*vec3(0.10,0.11,0.13);
@@ -689,15 +689,15 @@ vec3 Render(in vec3 p, in vec3 rd, in float t, in float m) {
 }
 
 
-mat3 lookat(in vec3 ro, in vec3 up){
+mat3 lookAt(in vec3 ro, in vec3 up){
     vec3 fw=normalize(ro),
         rt=normalize(cross(fw,up));
     return mat3(rt, cross(rt,fw),fw);
 }
 
 vec3 RD(in vec3 ro, in vec3 cp) {
-    // return lookat(cp-ro, V01.xyx)*normalize(vec3(((mouse.z > 0. ? 1. : 2.)*fCoord-resolution.xy)/resolution.y, 12.0));
-    return lookat(cp-ro, V01.xyx)*normalize(vec3((2.*fCoord-resolution.xy)/resolution.y, 12.0));
+    // return lookAt(cp-ro, V01.xyx)*normalize(vec3(((mouse.z > 0. ? 1. : 2.)*fCoord-resolution.xy)/resolution.y, 12.0));
+    return lookAt(cp-ro, V01.xyx)*normalize(vec3((2.*fCoord-resolution.xy)/resolution.y, 12.0));
 } 
 
 void main() {
@@ -713,8 +713,8 @@ void main() {
     time420simultaneousEarthRotation = 3.14+12.*time;
     sunLight = normalize(vec3(-10.25,30.33,-7.7));
     deltaMan = vec3(0,.05*sin(1.72+time420simultaneousEarthRotation),0);
-    //armn = normalize(arm2 - arm1);
-    //handmat = mat2(cos(handa), -sin(handa), sin(handa), cos(handa));
+    //armN = normalize(arm2 - arm1);
+    //handMat = mat2(cos(handA), -sin(handA), sin(handA), cos(handA));
 
     float tAnim = mod(time, 3.14*9.);  
     scene = tAnim > 3.14*9. ? 1:
@@ -741,8 +741,8 @@ void main() {
         ro = 45.*vec3(-cos(mouse.x), max(.8,mouse.x-2.+sin(mouse.x)*cos(mouse.y)), -.5-sin(mouse.y)),
         rd, cp = V01.xxx;
 
-    vec3 ctot = vec3(0);
-    float ttot = 0.;
+    vec3 cTotal = vec3(0);
+    float tTotal = 0.;
 
     #ifdef ANTIALIASING 
     for (float i=0.;i<AA;i++) 
@@ -770,16 +770,16 @@ void main() {
 
         // Render colors
         if(t<MAX_DIST){// if we hit a surface color it
-            ctot += Render(ro + rd*t, rd,t, m);
-            ttot += t;
+            cTotal += Render(ro + rd*t, rd,t, m);
+            tTotal += t;
         }
         #ifdef ANTIALIASING 		
     }
-    ctot /= AA;
-    ttot /= AA;
+    cTotal /= AA;
+    tTotal /= AA;
     #endif 
-    ctot = pow(ctot, vec3(.6));
-    ctot *= pow(16.*q.x*q.y*(1.-q.x)*(1.-q.y), .11); // vignetting
-    gl_FragColor = vec4(ctot,ttot);
+    cTotal = pow(cTotal, vec3(.6));
+    cTotal *= pow(16.*q.x*q.y*(1.-q.x)*(1.-q.y), .11); // vignetting
+    gl_FragColor = vec4(cTotal,tTotal);
 
 }
