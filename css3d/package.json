@@ -6,11 +6,11 @@
 	"private": true,
 	"scripts": {
 		"build": "pug src -o build --pretty && stylus src -o build",
-		"start": "run-p serve watch",
-		"watch": "run-p watch-pug watch-stylus",
-		"watch-pug": "pug src -o build --pretty --watch",
-		"watch-stylus": "stylus src -o build --watch",
-		"serve": "live-server --open=build/css3d.html --ignore=\\*\\*/node_modules/\\*\\*,\\*\\*/src/\\*\\*.styl,\\*\\*/src/\\*\\*.pug"
+		"start": "run-p -l live-server watch:\\*\\*",
+		"watch": "run-p -l watch:\\*\\*",
+		"watch:pug": "pug src -o build --pretty --watch",
+		"watch:stylus": "stylus src -o build --watch",
+		"live-server": "live-server --open=build/css3d.html --ignore=\\*\\*/node_modules/\\*\\*,\\*\\*/src/\\*\\*.styl,\\*\\*/src/\\*\\*.pug"
 	},
 	"devDependencies": {
 		"live-server": "^1.2.1",
