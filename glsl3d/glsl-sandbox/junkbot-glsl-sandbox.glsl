@@ -1,5 +1,5 @@
 // Lego Junkbot by Isaiah Odhner - 2020-11-9
-// https://glslsandbox.com/e#79774.2
+// https://glslsandbox.com/e#79774.3
 // https://www.shadertoy.com/view/wdcfDH (featuring tilt shift effect)
 // Based on "Go Go LegoMan !" by sebastien durand - 01/2014
 // https://www.shadertoy.com/view/MsB3zK
@@ -701,7 +701,7 @@ mat3 lookAt(in vec3 ro, in vec3 up){
 
 vec3 RD(in vec3 ro, in vec3 cp) {
     // return lookAt(cp-ro, V01.xyx)*normalize(vec3(((mouse.z > 0. ? 1. : 2.)*fCoord-resolution.xy)/resolution.y, 12.0));
-    return lookAt(cp-ro, V01.xyx)*normalize(vec3((2.*fCoord-resolution.xy)/resolution.y, 12.0));
+    return lookAt(cp-ro, V01.xyx)*normalize(vec3((1.*fCoord-resolution.xy)/resolution.y, 12.0));
 } 
 
 void main() {
@@ -738,11 +738,11 @@ void main() {
 
     vec2 
         obj, 
-        mouse = (mouse.xy/resolution.xy)*6.28,
+        mousePos = (mouse.xy)*6.28,
         q = gl_FragCoord.xy/resolution.xy;
 
     vec3 
-        ro = 45.*vec3(-cos(mouse.x), max(.8,mouse.x-2.+sin(mouse.x)*cos(mouse.y)), -.5-sin(mouse.y)),
+        ro = 45.*vec3(-cos(mousePos.x), max(.8,mousePos.x-2.+sin(mousePos.x)*cos(mousePos.y)), -.5-sin(mousePos.y)),
         rd, cp = V01.xxx;
 
     vec3 cTotal = vec3(0);
