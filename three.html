@@ -22,14 +22,17 @@
 </head>
 
 <body>
+	<script src="./three-stuff/spector.bundle.js"></script>
 	<script type="module">
-
 		import * as THREE from './three-stuff/three.module.js';
 
 		import { GUI } from './three-stuff/dat.gui.module.js';
 
 		import { OrbitControls } from './three-stuff/OrbitControls.js';
 		import { LDrawLoader } from './three-stuff/LDrawLoader.js';
+
+		var spector = new SPECTOR.Spector();
+		spector.displayUI();
 
 		var container, progressBarDiv;
 
@@ -460,7 +463,13 @@
 			});
 
 			gui.add(guiData, 'pixelScanner').name('Pixel Scanner (measurement tool)').onChange(function changePixelScanner(value) {
-				scanningCanvas.hidden = !value;
+				// scanningCanvas.hidden = !value;
+				// remove from DOM instead of hiding it so it doesn't show up in the Spector canvas dropdown
+				if (value) {
+					document.body.appendChild(scanningCanvas);
+				} else {
+					scanningCanvas.remove();
+				}
 			});
 
 			gui.add(guiData, 'exportImages').name('Export Image(s)');
@@ -540,7 +549,7 @@
 		}
 
 		var scanningCanvas = document.createElement('canvas');
-		document.body.appendChild(scanningCanvas);
+		// document.body.appendChild(scanningCanvas); // appended conditionally
 		scanningCanvas.style.position = 'absolute';
 		scanningCanvas.style.top = '0px';
 		scanningCanvas.style.left = '0px';
