@@ -22,6 +22,7 @@
 </head>
 
 <body>
+	<script src="./three-stuff/spector.bundle.js"></script>
 	<script type="module">
 		import * as THREE from './three-stuff/three.module.js';
 
@@ -31,6 +32,9 @@
 		import { LDrawLoader } from './three-stuff/LDrawLoader.js';
 
 		import CustomShaderMaterial from "./three-stuff/three-custom-shader-material-3.2.12-vanilla.js";
+
+		var spector = new SPECTOR.Spector();
+		spector.displayUI();
 
 		var container, progressBarDiv;
 
