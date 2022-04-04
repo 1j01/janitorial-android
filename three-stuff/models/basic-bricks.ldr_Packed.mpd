@@ -1,7 +1,7 @@
 0 LDraw.org Configuration File
 0 Name: LDConfig.ldr
 0 Author: LDraw.org
-0 !LDRAW_ORG Configuration UPDATE 2019-12-14
+0 !LDRAW_ORG Configuration UPDATE 2020-05-11
 
 0 // * LDraw and BrickLink mostly share naming conventions for their colours.
 0 // * Where possible LEGO colour numbers were used.
@@ -21,6 +21,9 @@
 0 // * Edge colours for speckle colours are defined by the value of the MATERIAL colour.
 0 // * Rubber colours got their value from the corresponding solid or transparent colour. This applies
 0 //   also to the edge colours.
+0 // * Material Glitter colours were calculated the following way:
+0 //   The lightness value L and the hue value H in the HSL colours system was lowered by 20 percentage
+0 //   points and 20 degree. 
 
 
 0 // LDraw Solid Colours
@@ -99,17 +102,17 @@
 0                              // LEGOID 223 - Light Pink
 0 !COLOUR Light_Pink                                            CODE  77   VALUE #FECCCF   EDGE #333333
 0                              // LEGOID 283 - Light Nougat
-0 !COLOUR Light_Flesh                                           CODE  78   VALUE #FFC995   EDGE #333333
+0 !COLOUR Light_Nougat                                          CODE  78   VALUE #FFC995   EDGE #333333
 0                              // LEGOID 312 - Medium Nougat
-0 !COLOUR Medium_Dark_Flesh                                     CODE  84   VALUE #AA7D55   EDGE #333333
+0 !COLOUR Medium_Nougat                                         CODE  84   VALUE #AA7D55   EDGE #333333
 0                              // LEGOID 268 - Medium Lilac
 0 !COLOUR Medium_Lilac                                          CODE  85   VALUE #441A91   EDGE #333333
 0                              // LEGOID 128 - Dark Nougat
-0 !COLOUR Dark_Flesh                                            CODE  86   VALUE #AD6140   EDGE #333333
+0 !COLOUR Medium_Brown                                          CODE  86   VALUE #7B5D41   EDGE #333333
 0                              // LEGOID 195 - Medium Royal Blue
 0 !COLOUR Blue_Violet                                           CODE  89   VALUE #1C58A7   EDGE #333333
 0                              // LEGOID  18 - Nougat
-0 !COLOUR Flesh                                                 CODE  92   VALUE #BB805A   EDGE #333333
+0 !COLOUR Nougat                                                CODE  92   VALUE #BB805A   EDGE #333333
 0                              // LEGOID 100 - Light Red
 0 !COLOUR Light_Salmon                                          CODE 100   VALUE #F9B7A5   EDGE #333333
 0                              // LEGOID 110 - Bright Bluish Violet
@@ -247,7 +250,6 @@
 
 
 
-
 0 // LDraw Chrome Colours
 0                              // LEGOID 310 - Metalized Gold
 0 !COLOUR Chrome_Gold                                           CODE 334   VALUE #DFC176   EDGE #C2982E                               CHROME
@@ -298,7 +300,7 @@
 0                              // LEGOID 149 - Metallic Black
 0 !COLOUR Metallic_Black                                        CODE  83   VALUE #0A1327   EDGE #333333                               METAL
 0                              // LEGOID 337 - Titanium
-0 !COLOUR Metallic_Dark_Grey                                    CODE  87   VALUE #6D6E5C   EDGE #333333                               METAL
+0 !COLOUR Metallic_Dark_Grey                                    CODE  87   VALUE #3E3C39   EDGE #333333                               METAL
 0                              // LEGOID 300 / 334 - Copper Drum Lacq / Copper Ink
 0 !COLOUR Metallic_Copper                                       CODE 300   VALUE #C27F53   EDGE #333333                               METAL
 0                              // LEGOID 184 - Metallic Bright Red
@@ -320,15 +322,25 @@
 
 0 // LDraw Glitter Colours
 0                              // LEGOID 114 - Tr. Medium Reddish-Violet w. Glitter 2%
-0 !COLOUR Glitter_Trans_Dark_Pink                               CODE 114   VALUE #DF6695   EDGE #B9275F   ALPHA 128                   MATERIAL GLITTER VALUE #923978 FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0 !COLOUR Glitter_Trans_Dark_Pink                               CODE 114   VALUE #DF6695   EDGE #B9275F   ALPHA 128                   MATERIAL GLITTER VALUE #B92790 FRACTION 0.17 VFRACTION 0.2 SIZE 1
 0                              // LEGOID 117 - Transparent Glitter
 0 !COLOUR Glitter_Trans_Clear                                   CODE 117   VALUE #EEEEEE   EDGE #BABABA   ALPHA 128                   MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.08 VFRACTION 0.1 SIZE 1
 0                              // LEGOID 129 - Tr. Bright Bluish Violet w. Glitter 2%
-0 !COLOUR Glitter_Trans_Purple                                  CODE 129   VALUE #640061   EDGE #000000   ALPHA 128                   MATERIAL GLITTER VALUE #8C00FF FRACTION 0.3 VFRACTION 0.4 SIZE 1
-0                              // LEGOID 302  Tr. Light Blue with Glitter 2%
-0 !COLOUR Glitter_Trans_Light_Blue                              CODE 302   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128                   MATERIAL GLITTER VALUE #923978 FRACTION 0.17 VFRACTION 0.2 SIZE 1
-0                              // LEGOID 339  Tr Fluorescent Green with Glitter 2%
-0 !COLOUR Glitter_Trans_Neon_Green                              CODE 339   VALUE #C0FF00   EDGE #739900   ALPHA 128                   MATERIAL GLITTER VALUE #923978 FRACTION 0.17 VFRACTION 0.2 SIZE 1 
+0 !COLOUR Glitter_Trans_Purple                                  CODE 129   VALUE #640061   EDGE #000000   ALPHA 128                   MATERIAL GLITTER VALUE #8F00CC FRACTION 0.03 VFRACTION 0.4 SIZE 1
+0                              // LEGOID 302 - Tr. Light Blue with Glitter 2%
+0 !COLOUR Glitter_Trans_Light_Blue                              CODE 302   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128                   MATERIAL GLITTER VALUE #59DEBF FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0                              // LEGOID 339 - Tr. Fluorescent Green with Glitter 2%
+0 !COLOUR Glitter_Trans_Neon_Green                              CODE 339   VALUE #C0FF00   EDGE #739900   ALPHA 128                   MATERIAL GLITTER VALUE #998C00 FRACTION 0.17 VFRACTION 0.2 SIZE 1 
+0                              // LEGOID 341 - Tr. Bright Orange with Glitter 2%
+0 !COLOUR Glitter_Trans_Orange                                  CODE 341   VALUE #F08F1C   EDGE #9E5C0A   ALPHA 128                   MATERIAL GLITTER VALUE #9E2A0A FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0                              // LEGOID 360 - Transparent Clear Opal
+0 !COLOUR Opal_Trans_Clear                                      CODE 360   VALUE #FCFCFC   EDGE #C9C9C9   ALPHA 240   LUMINANCE 5     MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 362 - Transparent Blue Opal
+0 !COLOUR Opal_Trans_Light_Blue                                 CODE 362   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #59DEBF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 364 - Tr. Medium Reddish Violet Opal
+0 !COLOUR Opal_Trans_Dark_Pink                                  CODE 364   VALUE #DF6695   EDGE #B9275F   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #B92790 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 351 - Tr. Bright Green with Glitter 2%
+0 !COLOUR Glitter_Trans_Bright_Green                            CODE 10351 VALUE #56E646   EDGE #27AF18   ALPHA 128                   MATERIAL GLITTER VALUE #59AF18 FRACTION 0.17 VFRACTION 0.2 SIZE 1
 
 
 0 // LDraw Speckle Colours
@@ -341,8 +353,6 @@
 
 0 // LDraw Rubber Colours
 0 !COLOUR Rubber_Yellow                                         CODE  65   VALUE #FAC80A   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Trans_Yellow                                   CODE  66   VALUE #F5CD2F   EDGE #B49208   ALPHA 128                   RUBBER
-0 !COLOUR Rubber_Trans_Clear                                    CODE  67   VALUE #FCFCFC   EDGE #C9C9C9   ALPHA 128                   RUBBER
 0 !COLOUR Rubber_Black                                          CODE 256   VALUE #1B2A34   EDGE #808080                               RUBBER
 0 !COLOUR Rubber_Blue                                           CODE 273   VALUE #1E5AA8   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Red                                            CODE 324   VALUE #B40000   EDGE #333333                               RUBBER
@@ -354,18 +364,29 @@
 0 !COLOUR Rubber_Light_Bluish_Grey                              CODE 496   VALUE #969696   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Flat_Silver                                    CODE 504   VALUE #898788   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_White                                          CODE 511   VALUE #F4F4F4   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Bright_Green                                   CODE 10002 VALUE #58AB41   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Green                                          CODE 10002 VALUE #00852B   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Bright_Green                                   CODE 10010 VALUE #58AB41   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Magenta                                        CODE 10026 VALUE #901F76   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Medium_Lavender                                CODE 10030 VALUE #A06EB9   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Lavender                                       CODE 10031 VALUE #CDA4DE   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Reddish_Brown                                  CODE 10070 VALUE #5F3109   EDGE #808080                               RUBBER
+0 !COLOUR Rubber_Medium_Blue                                    CODE 10073 VALUE #7396C8   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Bright_Light_Yellow                            CODE 10226 VALUE #FFEC6C   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Dark_Brown                                     CODE 10308 VALUE #352100   EDGE #808080                               RUBBER
 0 !COLOUR Rubber_Dark_Red                                       CODE 10320 VALUE #720012   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Dark_Azure                                     CODE 10321 VALUE #469BC3   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Medium_Azure                                   CODE 10322 VALUE #68C3E2   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Light_Aqua                                     CODE 10323 VALUE #D3F2EA   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Sand_Green                                     CODE 10378 VALUE #708E7C   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Dark_Orange                                    CODE 10484 VALUE #91501C   EDGE #333333                               RUBBER
+
+
+0 // LDraw Transparent Rubber Colours
+0 !COLOUR Rubber_Trans_Yellow                                   CODE 66    VALUE #F5CD2F   EDGE #B49208   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Clear                                    CODE 67    VALUE #FCFCFC   EDGE #C9C9C9   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Bright_Green                             CODE 10035 VALUE #56E646   EDGE #27AF18   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Red                                      CODE 10036 VALUE #C91A09   EDGE #660D05   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Light_Blue                               CODE 10043 VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128                   RUBBER
 
 
 0 // LDraw Internal Common Material Colours
@@ -428,6 +449,13 @@
 1 1 -90 -24 80 1 0 0 0 1 0 0 0 1 parts/3002.dat
 1 14 -90 -24 -60 1 0 0 0 1 0 0 0 1 parts/3002.dat
 1 71 -90 -24 -200 1 0 0 0 1 0 0 0 1 parts/3002.dat
+1 42 0 -24 -340 1 0 0 0 1 0 0 0 1 parts/3001.dat
+1 42 -160 -24 -340 1 0 0 0 1 0 0 0 1 parts/3003.dat
+1 42 120 -24 -340 1 0 0 0 1 0 0 0 1 parts/2456.dat
+1 42 -210 -24 -340 0 0 1 0 1 0 -1 0 0 parts/3004.dat
+1 42 480 -24 -340 1 0 0 0 1 0 0 0 1 parts/3006.dat
+1 42 280 -24 -340 1 0 0 0 1 0 0 0 1 parts/3007.dat
+1 42 -90 -24 -340 1 0 0 0 1 0 0 0 1 parts/3002.dat
 
 0 FILE parts/3002.dat
 0 Brick  2 x  3
