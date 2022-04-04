@@ -32,7 +32,43 @@
 		import { LDrawLoader } from './three-stuff/LDrawLoader.js';
 
 		var spector = new SPECTOR.Spector();
-		spector.displayUI();
+		// spector.displayUI();
+
+		function stringifyMatrix(elements) {
+			const rowSize = elements.length / 3 === 3 ? 3 : 4;
+			const rows = [];
+			for (let i = 0; i < elements.length; i += rowSize) {
+				const row = elements.slice(i, i + rowSize);
+				rows.push(row.join(', '));
+			}
+			return '[' + rows.join(',\n ') + ']';
+		}
+		function logMatrix(elements) {
+			const rowSize = elements.length / 3 === 3 ? 3 : 4;
+			const rows = [];
+			for (let i = 0; i < elements.length; i += rowSize) {
+				const row = elements.slice(i, i + rowSize);
+				rows.push(row);
+			}
+			console.table(rows);
+		}
+
+		spector.onCapture.add((capture) => {
+			console.log(capture);
+			for (const command of capture.commands) {
+				if (command.text.startsWith("drawArrays: TRIANGLES")) {
+					// console.log(command);
+					const uniforms = command.DrawCall.uniforms;
+					for (const uniform of uniforms) {
+						if (uniform.name.includes("Matrix")) {
+							// console.log(uniform.name, uniform.type, "\n" + stringifyMatrix(uniform.value));
+							console.log(`%c${uniform.name} %c${uniform.type}`, "font-size: x-large", "color: #0f0; font-size: large");
+							logMatrix(uniform.value);
+						}
+					}
+				}
+			}
+		});
 
 		var container, progressBarDiv;
 
@@ -403,6 +439,9 @@
 
 			renderer.setSize(...renderSize);
 
+			setTimeout(() => {
+				spector.captureCanvas(renderer.domElement);
+			}, 10);
 		}
 
 		function createGUI() {
