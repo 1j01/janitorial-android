@@ -683,6 +683,9 @@
 			screenCoord.y -= transformedPosition.z * sin(uTime * 0.01);
 		}
 		void main() {
+			// main() must include the string: "csm_Position" (this comment suffices)
+			// in order for the template replacement code to kick in, as it works now
+			// This is so stupid, but I've given up on (improving) this library for now.
 		}
 	</script>
 	<script type="text/x-shader" id="fragmentShader">
