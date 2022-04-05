@@ -1,6 +1,5 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-console */
-/* global SPECTOR */
 /* eslint-disable func-style */
 import * as THREE from "./three.module.js";
 
@@ -10,8 +9,8 @@ import { LDrawLoader } from "./LDrawLoader.js";
 
 import CustomShaderMaterial from "./three-custom-shader-material-3.2.12-modified-vanilla.js";
 
-const spector = new SPECTOR.Spector();
-spector.displayUI();
+// const spector = new SPECTOR.Spector();
+// spector.displayUI();
 
 let container, progressBarDiv;
 
