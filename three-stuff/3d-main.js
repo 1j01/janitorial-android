@@ -1,32 +1,32 @@
-import * as THREE from './three.module.js';
+import * as THREE from "./three.module.js";
 
-import { GUI } from './dat.gui.module.js';
+import { GUI } from "./dat.gui.module.js";
 
-import { OrbitControls } from './OrbitControls.js';
-import { LDrawLoader } from './LDrawLoader.js';
+import { OrbitControls } from "./OrbitControls.js";
+import { LDrawLoader } from "./LDrawLoader.js";
 
 import CustomShaderMaterial from "./three-custom-shader-material-3.2.12-modified-vanilla.js";
 
-var spector = new SPECTOR.Spector();
+const spector = new SPECTOR.Spector();
 spector.displayUI();
 
-var container, progressBarDiv;
+let container, progressBarDiv;
 
-var camera, scene, renderer, controls, gui, guiData;
+let camera, scene, renderer, controls, gui, guiData;
 
-var model, textureCube, gridHelper;
+let model, textureCube, gridHelper;
 
-var matMap;
+let matMap;
 
 // var ldrawPath = 'models/ldraw/officialLibrary/';
-var ldrawPath = 'three-stuff/';
+const ldrawPath = "three-stuff/";
 
-var modelFileList = {
-	'Car': 'models/car.ldr_Packed.mpd',
-	'Basic Bricks': 'models/basic-bricks.ldr_Packed.mpd',
-	'Bots': 'models/bots.ldr_Packed.mpd',
-	'Misc': 'models/misc.ldr_Packed.mpd',
-	'Much Stuff': 'models/much-stuff.ldr_Packed.mpd',
+const modelFileList = {
+	"Car": "models/car.ldr_Packed.mpd",
+	"Basic Bricks": "models/basic-bricks.ldr_Packed.mpd",
+	"Bots": "models/bots.ldr_Packed.mpd",
+	"Misc": "models/misc.ldr_Packed.mpd",
+	"Much Stuff": "models/much-stuff.ldr_Packed.mpd",
 	// 'Lunar Vehicle': 'models/1621-1-LunarMPVVehicle.mpd_Packed.mpd',
 	// 'Radar Truck': 'models/889-1-RadarTruck.mpd_Packed.mpd',
 	// 'Trailer': 'models/4838-1-MiniVehicles.mpd_Packed.mpd',
@@ -55,7 +55,9 @@ animate();
 
 let tweening = false;
 function tween(object, to, from) {
-	if (tweening) return;
+	if (tweening) {
+		return;
+	}
 	tweening = true;
 	if (!from) {
 		from = {};
@@ -83,11 +85,11 @@ function tween(object, to, from) {
 
 function init() {
 
-	container = document.createElement('div');
+	container = document.createElement("div");
 	document.body.appendChild(container);
 
 	// camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
-	camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, -10000, 100000);
+	camera = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, -10000, 100000);
 	// camera.position.set( 150, 200, 250 );
 	camera.position.set(0, 0, 250);
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -99,11 +101,11 @@ function init() {
 	scene = new THREE.Scene();
 	// scene.background = new THREE.Color( 0xdeebed );
 
-	var ambientLight = new THREE.AmbientLight(0xdedede, 0.8);
+	const ambientLight = new THREE.AmbientLight(0xdedede, 0.8);
 	scene.add(ambientLight);
 
-	var directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-	directionalLight.position.set(- 1000, 3200, 1500);
+	const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+	directionalLight.position.set(-1000, 3200, 1500);
 	scene.add(directionalLight);
 
 	const divisions = 100;
@@ -123,7 +125,7 @@ function init() {
 	//
 
 	guiData = {
-		modelFileName: modelFileList['Basic Bricks'],
+		modelFileName: modelFileList["Basic Bricks"],
 		envMapActivated: false,
 		customShaderActivated: true,
 		separateObjects: false,
@@ -135,14 +137,14 @@ function init() {
 		grid: false,
 		obliqueProjection: false,
 		pixelScanner: false,
-		exportImages: exportImages,
+		exportImages,
 	};
 
 	setupProjection();
 
-	window.addEventListener('resize', setupProjection, false);
+	window.addEventListener("resize", setupProjection, false);
 
-	window.addEventListener('keydown', (event) => {
+	window.addEventListener("keydown", (event) => {
 		if (event.code === "KeyI") {
 			tween(model.rotation, { x: model.rotation.x - Math.PI / 2 });
 		}
@@ -188,7 +190,7 @@ function init() {
 		}
 	});
 
-	progressBarDiv = document.createElement('div');
+	progressBarDiv = document.createElement("div");
 	progressBarDiv.innerText = "Loading...";
 	progressBarDiv.style.fontSize = "3em";
 	progressBarDiv.style.color = "#888";
@@ -211,7 +213,7 @@ window.addEventListener("scroll", () => {
 
 function updateObjectsVisibility() {
 
-	model.traverse(c => {
+	model.traverse((c) => {
 
 		if (c.isLineSegments) {
 
@@ -225,8 +227,7 @@ function updateObjectsVisibility() {
 
 			}
 
-		}
-		else if (c.isGroup) {
+		} else if (c.isGroup) {
 
 			// Hide objects with construction step > gui setting
 			c.visible = c.userData.constructionStep <= guiData.constructionStep;
@@ -252,12 +253,12 @@ function reloadObject(resetCamera) {
 	updateProgressBar(0);
 	showProgressBar();
 
-	var lDrawLoader = new LDrawLoader();
+	const lDrawLoader = new LDrawLoader();
 	lDrawLoader.separateObjects = guiData.separateObjects;
 	lDrawLoader.smoothNormals = guiData.smoothNormals;
 	lDrawLoader
 		.setPath(ldrawPath)
-		.load(guiData.modelFileName, function (group2) {
+		.load(guiData.modelFileName, (group2) => {
 
 			if (model) {
 
@@ -282,7 +283,7 @@ function reloadObject(resetCamera) {
 					matMap.set(material, new CustomShaderMaterial(
 						THREE.MeshPhysicalMaterial, // base material, could get from material.type
 						null, // fragment shader
-						document.getElementById('vertexShader').textContent,
+						document.getElementById("vertexShader").textContent,
 						{
 							// uniforms
 							uTime: {
@@ -304,13 +305,13 @@ function reloadObject(resetCamera) {
 
 				console.log(lDrawLoader.materials, matMap);
 
-				model.traverse(c => {
+				model.traverse((c) => {
 					console.log("material", c.material);
 
 					if (c.isMesh) {
 
 						if (c.material instanceof Array) {
-							c.material = c.material.map(m => matMap.get(m));
+							c.material = c.material.map((m) => matMap.get(m));
 						} else {
 							c.material = matMap.get(c.material) ?? c.material;
 						}
@@ -321,25 +322,27 @@ function reloadObject(resetCamera) {
 
 			} else {
 
-				var materials = lDrawLoader.materials;
+				const materials = lDrawLoader.materials;
 
 				if (guiData.envMapActivated) {
 
 					if (!textureCube) {
 
 						// Envmap texture
-						var r = "textures/cube/Bridge2/";
-						var urls = [r + "posx.jpg", r + "negx.jpg",
-						r + "posy.jpg", r + "negy.jpg",
-						r + "posz.jpg", r + "negz.jpg"];
+						const r = "textures/cube/Bridge2/";
+						const urls = [
+							`${r}posx.jpg`, `${r}negx.jpg`,
+							`${r}posy.jpg`, `${r}negy.jpg`,
+							`${r}posz.jpg`, `${r}negz.jpg`
+						];
 						textureCube = new THREE.CubeTextureLoader().load(urls);
 						textureCube.mapping = THREE.CubeReflectionMapping;
 
 					}
 
-					for (var i = 0, n = materials.length; i < n; i++) {
+					for (let i = 0, n = materials.length; i < n; i++) {
 
-						var material = materials[i];
+						const material = materials[i];
 
 						if (material.userData.canHaveEnvMap) {
 
@@ -359,9 +362,9 @@ function reloadObject(resetCamera) {
 
 			// Adjust camera and light
 
-			var bbox = new THREE.Box3().setFromObject(model);
-			var size = bbox.getSize(new THREE.Vector3());
-			var radius = Math.max(size.x, Math.max(size.y, size.z)) * 0.5;
+			const bbox = new THREE.Box3().setFromObject(model);
+			const size = bbox.getSize(new THREE.Vector3());
+			const radius = Math.max(size.x, Math.max(size.y, size.z)) * 0.5;
 
 			if (resetCamera) {
 
@@ -382,10 +385,10 @@ function reloadObject(resetCamera) {
 function setupProjection() {
 
 	camera.aspect = renderSize[0] / renderSize[1];
-	camera.left = - frustumSize * camera.aspect / 2;
+	camera.left = -frustumSize * camera.aspect / 2;
 	camera.right = frustumSize * camera.aspect / 2;
 	camera.top = frustumSize / 2;
-	camera.bottom = - frustumSize / 2;
+	camera.bottom = -frustumSize / 2;
 	// camera.left = 0;
 	// camera.right = frustumSize * camera.aspect;
 	// camera.top = frustumSize;
@@ -396,16 +399,16 @@ function setupProjection() {
 	if (guiData.obliqueProjection) {
 		// code based on https://stackoverflow.com/a/26060068/2624876
 		// Create shear matrix for oblique projection
-		var alpha = Math.PI / 4;
+		const alpha = Math.PI / 4;
 
-		var Syx = 0,
-			Szx = - 0.5 * Math.cos(alpha),
+		const Syx = 0,
+			Szx = -0.5 * Math.cos(alpha),
 			Sxy = 0,
-			Szy = - 0.5 * Math.sin(alpha),
+			Szy = -0.5 * Math.sin(alpha),
 			Sxz = 0,
 			Syz = 0;
 
-		var matrix = new THREE.Matrix4();
+		const matrix = new THREE.Matrix4();
 
 		matrix.set(1, Syx, Szx, 0,
 			Sxy, 1, Szy, 0,
@@ -440,71 +443,83 @@ function createGUI() {
 
 	gui = new GUI();
 
-	gui.add(guiData, 'modelFileName', modelFileList).name('Model').onFinishChange(function () {
+	gui.add(guiData, "modelFileName", modelFileList).name("Model")
+		.onFinishChange(() => {
 
-		reloadObject(true);
+			reloadObject(true);
 
-	});
+		});
 
-	gui.add(guiData, 'separateObjects').name('Separate Objects').onChange(function (value) {
+	gui.add(guiData, "separateObjects").name("Separate Objects")
+		.onChange((value) => {
 
-		reloadObject(false);
+			reloadObject(false);
 
-	});
+		});
 
 	if (guiData.separateObjects) {
 
 		if (model.userData.numConstructionSteps > 1) {
 
-			gui.add(guiData, 'constructionStep', 0, model.userData.numConstructionSteps - 1).step(1).name('Construction step').onChange(updateObjectsVisibility);
+			gui.add(guiData, "constructionStep", 0, model.userData.numConstructionSteps - 1).step(1)
+				.name("Construction step")
+				.onChange(updateObjectsVisibility);
 
-		}
-		else {
+		} else {
 
-			gui.add(guiData, 'noConstructionSteps').name('Construction step').onChange(updateObjectsVisibility);
+			gui.add(guiData, "noConstructionSteps").name("Construction step")
+				.onChange(updateObjectsVisibility);
 
 		}
 	}
 
-	gui.add(guiData, 'envMapActivated').name('Env. map').onChange(function changeEnvMap(value) {
+	gui.add(guiData, "envMapActivated").name("Env. map")
+		.onChange((value) => {
 
-		reloadObject(false);
+			reloadObject(false);
 
-	});
+		});
 
-	gui.add(guiData, 'customShaderActivated').name('Custom shader').onChange(function changeShader(value) {
+	gui.add(guiData, "customShaderActivated").name("Custom shader")
+		.onChange((value) => {
 
-		reloadObject(false);
+			reloadObject(false);
 
-	});
+		});
 
-	gui.add(guiData, 'smoothNormals').name('Smooth Normals').onChange(function changeNormals(value) {
+	gui.add(guiData, "smoothNormals").name("Smooth Normals")
+		.onChange((value) => {
 
-		reloadObject(false);
+			reloadObject(false);
 
-	});
+		});
 
-	gui.add(guiData, 'displayLines').name('Display Lines').onChange(updateObjectsVisibility);
-	gui.add(guiData, 'conditionalLines').name('Conditional Lines').onChange(updateObjectsVisibility);
+	gui.add(guiData, "displayLines").name("Display Lines")
+		.onChange(updateObjectsVisibility);
+	gui.add(guiData, "conditionalLines").name("Conditional Lines")
+		.onChange(updateObjectsVisibility);
 
-	gui.add(guiData, 'grid').name('Grid').onChange(updateObjectsVisibility);
+	gui.add(guiData, "grid").name("Grid")
+		.onChange(updateObjectsVisibility);
 
-	gui.add(guiData, 'obliqueProjection').name('Oblique Projection').onChange(function changeProjection(value) {
-		setupProjection();
-	});
+	gui.add(guiData, "obliqueProjection").name("Oblique Projection")
+		.onChange((value) => {
+			setupProjection();
+		});
 
-	gui.add(guiData, 'pixelScanner').name('Pixel Scanner (measurement tool)').onChange(function changePixelScanner(value) {
-		// scanningCanvas.hidden = !value;
-		// remove from DOM instead of hiding it so it doesn't show up in the Spector canvas dropdown
-		// Spector is a WebGL debugging tool, available as a browser extension or library.
-		if (value) {
-			document.body.appendChild(scanningCanvas);
-		} else {
-			scanningCanvas.remove();
-		}
-	});
+	gui.add(guiData, "pixelScanner").name("Pixel Scanner (measurement tool)")
+		.onChange((value) => {
+			// scanningCanvas.hidden = !value;
+			// remove from DOM instead of hiding it so it doesn't show up in the Spector canvas dropdown
+			// Spector is a WebGL debugging tool, available as a browser extension or library.
+			if (value) {
+				document.body.appendChild(scanningCanvas);
+			} else {
+				scanningCanvas.remove();
+			}
+		});
 
-	gui.add(guiData, 'exportImages').name('Export Image(s)');
+	gui.add(guiData, "exportImages").name("Export Image(s)");
 
 }
 
@@ -535,7 +550,7 @@ function onProgress(xhr) {
 
 		updateProgressBar(xhr.loaded / xhr.total);
 
-		console.log(Math.round(xhr.loaded / xhr.total * 100, 2) + '% downloaded');
+		console.log(`${Math.round(xhr.loaded / xhr.total * 100, 2)}% downloaded`);
 
 	}
 
@@ -543,7 +558,7 @@ function onProgress(xhr) {
 
 function onError() {
 
-	var message = "Error loading model";
+	const message = "Error loading model";
 	progressBarDiv.innerText = message;
 	console.log(message);
 
@@ -563,7 +578,7 @@ function hideProgressBar() {
 
 function updateProgressBar(fraction) {
 
-	progressBarDiv.innerText = 'Loading... ' + Math.round(fraction * 100, 2) + '%';
+	progressBarDiv.innerText = `Loading... ${Math.round(fraction * 100, 2)}%`;
 
 }
 
@@ -578,7 +593,7 @@ function exportImages() {
 		document.body.appendChild(a);
 		console.log("In case download is blocked by browser, save this manually:", blobURL);
 		a.click();
-		setTimeout(function () {
+		setTimeout(() => {
 			document.body.removeChild(a);
 			window.URL.revokeObjectURL(blobURL);
 		}, 0);
@@ -586,11 +601,11 @@ function exportImages() {
 
 }
 
-var scanningCanvas = document.createElement('canvas');
+var scanningCanvas = document.createElement("canvas");
 // document.body.appendChild(scanningCanvas); // appended conditionally
-scanningCanvas.style.position = 'absolute';
-scanningCanvas.style.top = '0px';
-scanningCanvas.style.left = '0px';
+scanningCanvas.style.position = "absolute";
+scanningCanvas.style.top = "0px";
+scanningCanvas.style.left = "0px";
 
 function scanPixels() {
 	if (tweening || !guiData.pixelScanner) {
@@ -598,31 +613,31 @@ function scanPixels() {
 	}
 	scanningCanvas.width = renderSize[0];
 	scanningCanvas.height = renderSize[1];
-	var context = scanningCanvas.getContext('2d');
+	const context = scanningCanvas.getContext("2d");
 	context.drawImage(renderer.domElement, 0, 0);
-	var imageData = context.getImageData(0, 0, renderSize[0], renderSize[1]);
-	var data = imageData.data;
-	var buckets = [];
+	const imageData = context.getImageData(0, 0, renderSize[0], renderSize[1]);
+	const data = imageData.data;
+	const buckets = [];
 	for (var x = 0; x < imageData.width; x++) {
 		buckets[x] = 0;
 		for (var y = 0; y < imageData.height; y++) {
 			var index = (y * imageData.width + x) * 4;
-			var alpha = data[index + 3];
+			const alpha = data[index + 3];
 			buckets[x] += alpha;
 		}
 		buckets[x] /= imageData.height;
 	}
-	var transitions = [];
+	const transitions = [];
 	for (var x = 0; x < imageData.width - 1; x++) {
 		if (Math.abs(buckets[x] - buckets[x + 1]) > 1) {
 			transitions.push(x);
 		}
 	}
-	var distances = [];
+	const distances = [];
 	for (var i = 0; i < transitions.length - 1; i++) {
 		distances.push(transitions[i + 1] - transitions[i]);
 	}
-	var averageDistance = distances.reduce((a, b) => a + b, 0) / distances.length;
+	const averageDistance = distances.reduce((a, b) => a + b, 0) / distances.length;
 	console.log({ transitions, distances, averageDistance });
 
 	for (const transitionX of transitions) {
@@ -638,9 +653,9 @@ function scanPixels() {
 
 	for (var i = 0; i < distances.length; i++) {
 		var x = transitions[i];
-		var distance = distances[i];
+		const distance = distances[i];
 		var y = scanningCanvas.height / 2 + (x * 50) % 500;
-		context.fillStyle = 'red';
+		context.fillStyle = "red";
 		context.font = "20px Arial";
 		context.fillText(distance, x, y);
 	}
