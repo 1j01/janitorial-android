@@ -1,3 +1,5 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-console */
 /* global SPECTOR */
 /* eslint-disable func-style */
 import * as THREE from "./three.module.js";
@@ -158,7 +160,12 @@ function init() {
 		if (event.code === "KeyL") {
 			tween(model.rotation, { y: model.rotation.y + Math.PI / 2 });
 		}
-		const moveSpeed = event.shiftKey ? 10 : event.ctrlKey ? 0.01 : 1;
+		let moveSpeed = 1;
+		if (event.ctrlKey) {
+			moveSpeed = 0.01;
+		} else if (event.shiftKey) {
+			moveSpeed = 10;
+		}
 		if (event.key === "ArrowUp") {
 			model.position.y += moveSpeed;
 		}
@@ -363,9 +370,9 @@ function reloadObject(resetCamera) {
 
 			// Adjust camera and light
 
-			const bbox = new THREE.Box3().setFromObject(model);
-			const size = bbox.getSize(new THREE.Vector3());
-			const radius = Math.max(size.x, Math.max(size.y, size.z)) * 0.5;
+			// const bbox = new THREE.Box3().setFromObject(model);
+			// const size = bbox.getSize(new THREE.Vector3());
+			// const radius = Math.max(size.x, Math.max(size.y, size.z)) * 0.5;
 
 			if (resetCamera) {
 
@@ -449,7 +456,7 @@ function createGUI() {
 		});
 
 	gui.add(guiData, "separateObjects").name("Separate Objects")
-		.onChange((value) => {
+		.onChange(() => {
 
 			reloadObject(false);
 
@@ -472,21 +479,21 @@ function createGUI() {
 	}
 
 	gui.add(guiData, "envMapActivated").name("Env. map")
-		.onChange((value) => {
+		.onChange(() => {
 
 			reloadObject(false);
 
 		});
 
 	gui.add(guiData, "customShaderActivated").name("Custom shader")
-		.onChange((value) => {
+		.onChange(() => {
 
 			reloadObject(false);
 
 		});
 
 	gui.add(guiData, "smoothNormals").name("Smooth Normals")
-		.onChange((value) => {
+		.onChange(() => {
 
 			reloadObject(false);
 
@@ -501,7 +508,7 @@ function createGUI() {
 		.onChange(updateObjectsVisibility);
 
 	gui.add(guiData, "obliqueProjection").name("Oblique Projection")
-		.onChange((value) => {
+		.onChange(() => {
 			setupProjection();
 		});
 
