@@ -299,13 +299,7 @@ function reloadObject(resetCamera) {
 						},
 						{
 							// options
-							flatShading: true,
-							color: material.color,
-							opacity: material.opacity,
-							transparent: material.transparent,
-							side: material.side,
-							envMap: material.envMap,
-							name: material.name,
+							...material
 						}
 					));
 				}
