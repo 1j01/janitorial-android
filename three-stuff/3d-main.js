@@ -288,7 +288,7 @@ function reloadObject(resetCamera) {
 
 				for (const material of lDrawLoader.materials) {
 					matMap.set(material, new CustomShaderMaterial(
-						THREE.MeshPhysicalMaterial, // base material, could get from material.type
+						THREE[material.type], // base material
 						null, // fragment shader
 						document.getElementById("vertexShader").textContent,
 						{
@@ -315,15 +315,15 @@ function reloadObject(resetCamera) {
 				model.traverse((c) => {
 					console.log("material", c.material);
 
-					if (c.isMesh) {
+					// if (c.isMesh) {
 
-						if (c.material instanceof Array) {
-							c.material = c.material.map((m) => matMap.get(m));
-						} else {
-							c.material = matMap.get(c.material) ?? c.material;
-						}
-
+					if (c.material instanceof Array) {
+						c.material = c.material.map((m) => matMap.get(m) ?? m);
+					} else {
+						c.material = matMap.get(c.material) ?? c.material;
 					}
+
+					// }
 
 				});
 
