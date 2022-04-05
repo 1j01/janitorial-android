@@ -1,8 +1,9 @@
+/* global SPECTOR */
+/* eslint-disable func-style */
 import * as THREE from "./three.module.js";
 
 import { GUI } from "./dat.gui.module.js";
 
-import { OrbitControls } from "./OrbitControls.js";
 import { LDrawLoader } from "./LDrawLoader.js";
 
 import CustomShaderMaterial from "./three-custom-shader-material-3.2.12-modified-vanilla.js";
@@ -12,13 +13,13 @@ spector.displayUI();
 
 let container, progressBarDiv;
 
-let camera, scene, renderer, controls, gui, guiData;
+let camera, scene, renderer, gui, guiData;
 
 let model, textureCube, gridHelper;
 
 let matMap;
 
-// var ldrawPath = 'models/ldraw/officialLibrary/';
+// const ldrawPath = 'models/ldraw/officialLibrary/';
 const ldrawPath = "three-stuff/";
 
 const modelFileList = {
@@ -74,9 +75,9 @@ function tween(object, to, from) {
 			tweening = false;
 			timeFraction = 1;
 		}
-		for (const [key, to_value] of Object.entries(to)) {
-			const from_value = from[key];
-			const value = from_value + (to_value - from_value) * timeFraction;
+		for (const [key, toValue] of Object.entries(to)) {
+			const fromValue = from[key];
+			const value = fromValue + (toValue - fromValue) * timeFraction;
 			object[key] = value;
 		}
 	}
@@ -412,7 +413,7 @@ function setupProjection() {
 
 		matrix.set(1, Syx, Szx, 0, Sxy, 1, Szy, 0, Sxz, Syz, 1, 0, 0, 0, 0, 1);
 
-		// var matrix = new THREE.Matrix4();
+		// const matrix = new THREE.Matrix4();
 		// 1. result of the above code
 		// matrix.fromArray([1, 0, 0, 0, 0, 1, 0, 0, -0.3535533905932738, -0.35355339059327373, 1, 0, 0, 0, 0, 1]);
 		// 2. try using the same number since they're similar
@@ -598,7 +599,7 @@ function exportImages() {
 
 }
 
-var scanningCanvas = document.createElement("canvas");
+const scanningCanvas = document.createElement("canvas");
 // document.body.appendChild(scanningCanvas); // appended conditionally
 scanningCanvas.style.position = "absolute";
 scanningCanvas.style.top = "0px";
@@ -615,31 +616,31 @@ function scanPixels() {
 	const imageData = context.getImageData(0, 0, renderSize[0], renderSize[1]);
 	const data = imageData.data;
 	const buckets = [];
-	for (var x = 0; x < imageData.width; x++) {
+	for (let x = 0; x < imageData.width; x++) {
 		buckets[x] = 0;
-		for (var y = 0; y < imageData.height; y++) {
-			var index = (y * imageData.width + x) * 4;
+		for (let y = 0; y < imageData.height; y++) {
+			const index = (y * imageData.width + x) * 4;
 			const alpha = data[index + 3];
 			buckets[x] += alpha;
 		}
 		buckets[x] /= imageData.height;
 	}
 	const transitions = [];
-	for (var x = 0; x < imageData.width - 1; x++) {
+	for (let x = 0; x < imageData.width - 1; x++) {
 		if (Math.abs(buckets[x] - buckets[x + 1]) > 1) {
 			transitions.push(x);
 		}
 	}
 	const distances = [];
-	for (var i = 0; i < transitions.length - 1; i++) {
+	for (let i = 0; i < transitions.length - 1; i++) {
 		distances.push(transitions[i + 1] - transitions[i]);
 	}
 	const averageDistance = distances.reduce((a, b) => a + b, 0) / distances.length;
 	console.log({ transitions, distances, averageDistance });
 
 	for (const transitionX of transitions) {
-		for (var y = 0; y < imageData.height; y++) {
-			var index = (y * imageData.width + transitionX) * 4;
+		for (let y = 0; y < imageData.height; y++) {
+			const index = (y * imageData.width + transitionX) * 4;
 			data[index + 3] = 255;
 			data[index + 2] = 255;
 			data[index + 1] = 255;
@@ -648,10 +649,10 @@ function scanPixels() {
 	}
 	context.putImageData(imageData, 0, 0);
 
-	for (var i = 0; i < distances.length; i++) {
-		var x = transitions[i];
+	for (let i = 0; i < distances.length; i++) {
+		const x = transitions[i];
 		const distance = distances[i];
-		var y = scanningCanvas.height / 2 + (x * 50) % 500;
+		const y = scanningCanvas.height / 2 + (x * 50) % 500;
 		context.fillStyle = "red";
 		context.font = "20px Arial";
 		context.fillText(distance, x, y);
