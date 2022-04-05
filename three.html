@@ -38,8 +38,6 @@
 
 		var model, textureCube, gridHelper;
 
-		var envMapActivated = false;
-		var customShaderActivated = false;
 		var customShaderMaterial;
 
 		// var ldrawPath = 'models/ldraw/officialLibrary/';
@@ -149,9 +147,9 @@
 			guiData = {
 				modelFileName: modelFileList['Basic Bricks'],
 				envMapActivated: false,
-				customShaderActivated: false,
+				customShaderActivated: true,
 				separateObjects: false,
-				displayLines: true,
+				displayLines: false,
 				conditionalLines: false,
 				smoothNormals: false,
 				constructionStep: 0,
@@ -298,7 +296,7 @@
 
 					// Adjust materials
 
-					if (customShaderActivated) {
+					if (guiData.customShaderActivated) {
 
 						customShaderMaterial = new CustomShaderMaterial(
 							THREE.MeshPhysicalMaterial, // base material
@@ -331,7 +329,7 @@
 
 						var materials = lDrawLoader.materials;
 
-						if (envMapActivated) {
+						if (guiData.envMapActivated) {
 
 							if (!textureCube) {
 
@@ -476,14 +474,12 @@
 
 			gui.add(guiData, 'envMapActivated').name('Env. map').onChange(function changeEnvMap(value) {
 
-				envMapActivated = value;
 				reloadObject(false);
 
 			});
 
-			gui.add(guiData, 'customShaderActivated').name('Custom shader').onChange(function changeEnvMap(value) {
+			gui.add(guiData, 'customShaderActivated').name('Custom shader').onChange(function changeShader(value) {
 
-				customShaderActivated = value;
 				reloadObject(false);
 
 			});
