@@ -155,7 +155,7 @@
 				constructionStep: 0,
 				noConstructionSteps: "No steps.",
 				grid: false,
-				obliqueProjection: true,
+				obliqueProjection: false,
 				pixelScanner: false,
 				exportImages: exportImages,
 			};
@@ -674,7 +674,9 @@
 	<script type="text/x-shader" id="vertexShader">
 		uniform float uTime;
 		void main() {
-		  csm_Position = position + sin(uTime + position) * 2.0;
+			csm_Position = position;
+			csm_Position.x += csm_Position.z * sin(uTime * 0.01);
+			csm_Position.y -= csm_Position.z * sin(uTime * 0.01);
 		}
 	</script>
 	<script type="text/x-shader" id="fragmentShader">
