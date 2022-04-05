@@ -678,9 +678,9 @@
 	<script type="text/x-shader" id="vertexShader">
 		#define SCREEN_SPACE_TRANSFORM 1
 		uniform float uTime;
-		void screenSpaceTransform(inout vec2 screenCoord, in vec4 position, in vec4 transformedPosition) {
-			screenCoord.x += transformedPosition.z * sin(uTime * 0.01);
-			screenCoord.y -= transformedPosition.z * sin(uTime * 0.01);
+		void screenSpaceTransform(inout vec4 position, in vec3 transformedPosition) {
+			position.x += transformedPosition.z * sin(uTime * 0.01);
+			position.y -= transformedPosition.z * sin(uTime * 0.01);
 		}
 		void main() {
 			// main() must include the string: "csm_Position" (this comment suffices)
