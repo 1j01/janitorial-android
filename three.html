@@ -674,8 +674,7 @@
 	<script type="text/x-shader" id="vertexShader">
 		uniform float uTime;
 		void main() {
-		  csm_Position = position;
-		  //csm_Normal = recalcNormals(csm_Position);
+		  csm_Position = position * sin(uTime);
 		}
 		
 	</script>
