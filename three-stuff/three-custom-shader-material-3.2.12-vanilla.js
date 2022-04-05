@@ -1,7 +1,7 @@
-import { Material } from 'three';
+import { Material } from './three.module.js';
 
 var keywords = {
-  positon: 'csm_Position',
+  position: 'csm_Position',
   emissive: 'csm_Emissive',
   normal: 'csm_Normal',
   pointSize: 'csm_PointSize',
@@ -32,9 +32,9 @@ const VERT = {
     #endif
     `
   },
-  [`${keywords.positon}`]: {
+  [`${keywords.position}`]: {
     '#include <project_vertex>': `
-    transformed = ${keywords.positon};
+    transformed = ${keywords.position};
     #include <project_vertex>
   `
   },
@@ -85,8 +85,8 @@ class CustomShaderMaterial extends Material {
   }
 
   generateMaterial(fragmentShader, vertexShader, uniforms) {
-    const parsedFragmentShdaer = this.parseShader(fragmentShader);
-    const parsedVertexShdaer = this.parseShader(vertexShader);
+    const parsedFragmentShader = this.parseShader(fragmentShader);
+    const parsedVertexShader = this.parseShader(vertexShader);
     this.uniforms = uniforms || {};
 
     this.customProgramCacheKey = () => {
@@ -94,14 +94,14 @@ class CustomShaderMaterial extends Material {
     };
 
     this.onBeforeCompile = shader => {
-      if (parsedFragmentShdaer) {
-        const patchedFragmentShdaer = this.patchShader(parsedFragmentShdaer, shader.fragmentShader, FRAG);
-        shader.fragmentShader = patchedFragmentShdaer;
+      if (parsedFragmentShader) {
+        const patchedFragmentShader = this.patchShader(parsedFragmentShader, shader.fragmentShader, FRAG);
+        shader.fragmentShader = patchedFragmentShader;
       }
 
-      if (parsedVertexShdaer) {
-        const patchedVertexShdaer = this.patchShader(parsedVertexShdaer, shader.vertexShader, VERT);
-        shader.vertexShader = '#define IS_VERTEX;\n' + patchedVertexShdaer;
+      if (parsedVertexShader) {
+        const patchedVertexShader = this.patchShader(parsedVertexShader, shader.vertexShader, VERT);
+        shader.vertexShader = '#define IS_VERTEX;\n' + patchedVertexShader;
       }
 
       shader.uniforms = {

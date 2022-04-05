@@ -30,6 +30,8 @@
 		import { OrbitControls } from './three-stuff/OrbitControls.js';
 		import { LDrawLoader } from './three-stuff/LDrawLoader.js';
 
+		import CustomShaderMaterial from "./three-stuff/three-custom-shader-material-3.2.12-vanilla.js";
+
 		var container, progressBarDiv;
 
 		var camera, scene, renderer, controls, gui, guiData;
@@ -298,10 +300,22 @@
 
 					if (customShaderActivated) {
 
-						customShaderMaterial = new THREE.ShaderMaterial({
-							vertexShader: document.getElementById('vertexShader').textContent,
-							fragmentShader: document.getElementById('fragmentShader').textContent
-						});
+						customShaderMaterial = new CustomShaderMaterial(
+							THREE.MeshPhysicalMaterial, // base material
+							null, // fragment shader
+							document.getElementById('vertexShader').textContent,
+							{
+								// uniforms
+								uTime: {
+									value: 0,
+								},
+							},
+							{
+								// options
+								flatShading: true,
+								color: 0xff00ff,
+							}
+						);
 
 						model.traverse(c => {
 
@@ -515,6 +529,12 @@
 
 		function render() {
 
+			if (customShaderMaterial) {
+
+				customShaderMaterial.uniforms.uTime.value = performance.now() / 1000;
+
+			}
+
 			renderer.render(scene, camera);
 
 		}
@@ -640,39 +660,52 @@
 
 	</script>
 	<script type="text/x-shader" id="vertexShader">
-		attribute float vertexDisplacement;
-		uniform float delta;
-		varying float vOpacity;
-		varying vec3 vUv;
-
-		void main() 
-		{
-			vUv = position;
-			vOpacity = vertexDisplacement;
-
-			vec3 p = position;
-
-			p.x += sin(vertexDisplacement) * 50.0;
-			p.y += cos(vertexDisplacement) * 50.0;
-
-			vec4 modelViewPosition = modelViewMatrix * vec4(p, 1.0);
-			gl_Position = projectionMatrix * modelViewPosition;
+		uniform float uTime;
+		const float uHeight = 1.0;
+		const float vHeight = 1.0;
+		vec3 displace(vec3 point) {
+		  vec3 p = point;
+		  p.y += uTime * 2.0;
+		  gln_tFBMOpts fbmOpts = gln_tFBMOpts(1.0, 0.4, 2.3, 0.4, 1.0, 5, false, false);
+		  gln_tGerstnerWaveOpts A = gln_tGerstnerWaveOpts(vec2(0.0, -1.0), 0.5, 2.0);
+		  gln_tGerstnerWaveOpts B = gln_tGerstnerWaveOpts(vec2(0.0, 1.0), 0.25, 4.0);
+		  gln_tGerstnerWaveOpts C = gln_tGerstnerWaveOpts(vec2(1.0, 1.0), 0.15, 6.0);
+		  gln_tGerstnerWaveOpts D = gln_tGerstnerWaveOpts(vec2(1.0, 1.0), 0.4, 2.0);
+		  vec3 n = vec3(0.0);
+		  if(p.z >= uHeight / 2.0) {
+			  n.z += gln_normalize(gln_pfbm(p.xy + (uTime * 0.5), fbmOpts));
+			  n += gln_GerstnerWave(p, A, uTime).xzy;
+			  n += gln_GerstnerWave(p, B, uTime).xzy * 0.5;
+			  n += gln_GerstnerWave(p, C, uTime).xzy * 0.25;
+			  n += gln_GerstnerWave(p, D, uTime).xzy * 0.2;
+		  }
+		  vHeight = n.z;
+		  return point + n;
+		}  
+		vec3 orthogonal(vec3 v) {
+		  return normalize(abs(v.x) > abs(v.z) ? vec3(-v.y, v.x, 0.0)
+		  : vec3(0.0, -v.z, v.y));
 		}
+		vec3 recalcNormals(vec3 newPos) {
+		  float offset = 0.001;
+		  vec3 tangent = orthogonal(normal);
+		  vec3 bitangent = normalize(cross(normal, tangent));
+		  vec3 neighbour1 = position + tangent * offset;
+		  vec3 neighbour2 = position + bitangent * offset;
+		  vec3 displacedNeighbour1 = displace(neighbour1);
+		  vec3 displacedNeighbour2 = displace(neighbour2);
+		  vec3 displacedTangent = displacedNeighbour1 - newPos;
+		  vec3 displacedBitangent = displacedNeighbour2 - newPos;
+		  return normalize(cross(displacedTangent, displacedBitangent));
+		}
+		void main() {
+		  csm_Position = displace(position);
+		  csm_Normal = recalcNormals(csm_Position);
+		}
+		
 	</script>
 	<script type="text/x-shader" id="fragmentShader">
-		uniform float delta;
-		varying float vOpacity;
-		varying vec3 vUv;
-		
-		void main() {
-		
-			float r = 1.0 + cos(vUv.x * delta);
-			float g = 0.5 + sin(delta) * 0.5;
-			float b = 0.0;
-			vec3 rgb = vec3(r, g, b);
-		
-			gl_FragColor = vec4(rgb, vOpacity);
-		}
+		<!-- not used yet -->
 	</script>
 
 	<!-- LDraw.org CC BY 2.0 Parts Library attribution -->
