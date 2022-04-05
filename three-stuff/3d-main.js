@@ -410,10 +410,7 @@ function setupProjection() {
 
 		const matrix = new THREE.Matrix4();
 
-		matrix.set(1, Syx, Szx, 0,
-			Sxy, 1, Szy, 0,
-			Sxz, Syz, 1, 0,
-			0, 0, 0, 1);
+		matrix.set(1, Syx, Szx, 0, Sxy, 1, Szy, 0, Sxz, Syz, 1, 0, 0, 0, 0, 1);
 
 		// var matrix = new THREE.Matrix4();
 		// 1. result of the above code
