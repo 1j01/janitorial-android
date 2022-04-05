@@ -674,9 +674,8 @@
 	<script type="text/x-shader" id="vertexShader">
 		uniform float uTime;
 		void main() {
-		  csm_Position = position * sin(uTime);
+		  csm_Position = position + sin(uTime + position) * 2.0;
 		}
-		
 	</script>
 	<script type="text/x-shader" id="fragmentShader">
 		<!-- not used yet -->
