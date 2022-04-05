@@ -39,8 +39,15 @@ I've made a thing to render LDraw models into the [oblique projection][] that Ju
 
 I've put together models including Basic Bricks for comparison to the original sprites, and Junkbot and some other bots, and miscellaneous objects that might be interesting to add to the game. This will probably be useful as a pipeline for jump-starting artwork to bring new pieces into the game, but if I got it good enough, it could open the possibility of running the game in 3D... it could have like a Fez moment... but 3D probably wouldn't fit in to the gameplay mechanics nicely.
 
-Regarding the rendering: Unfortunately, whilst the scale appears correct, the pixels are **aliased inconsistently**, which means I can't do a simple image-based find and replace to convert studs to a matching style.
-I might be able to either: 1. replace the stud sub-part with something that renders a single pixel to search for, 2. render at a higher resolution or with antialiasing, and use some image processing to reduce it to pixel art, 3. use a completely different rendering technology (I've started looking into Blender).
+Regarding the rendering: Unfortunately, even though the scale is correct, the pixels are **aliased inconsistently**.
+When moving the view by less than a pixel, objects snap to a new row of pixels at different times, in waves, rather than all at the same time which is what they should do, for a consistent grid. (At least the same parts of different objects should move at the same time).
+Aside from looking a little janky, this means I can't do a simple image-based find and replace to convert studs to a matching style that matches the pixel art (the studs look different from each other).
+I might be able to either: 1. replace the stud sub-part in the model with something that renders a single pixel in a particular color to search for, 2. render at a higher resolution and/or with antialiasing, and use some image processing to reduce it to pixel art, 3. use a completely different rendering technology.
+
+I've started looking into Blender. Blender doesn't support oblique projection, but there's a nice [ImportLDraw plugin](https://github.com/TobyLobster/ImportLDraw) for it, and there's a [workaround for the projection](https://blenderartists.org/t/oblique-camera-projection-possible/673635/4) using a Lattice modifier.
+Blender isn't especially geared towards pixel art, but Sam Drost's oblique projection emulation is also for the purpose of new creating pixel art for an old game, so the template might help for more than just the projection.
+That said, Blender is pretty hard to learn, and the Lattice modifier has some problems, creating serious lighting artifacts since it's changing the geometry not the camera.
+If I run into the same problem I had with Three.js I'll be pretty sad, so I should prove that concept probably before working out the kinks of the Lattice modifier.
 
 
 ## Controls
