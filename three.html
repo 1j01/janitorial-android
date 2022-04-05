@@ -38,7 +38,7 @@
 
 		var model, textureCube, gridHelper;
 
-		var customShaderMaterial;
+		var matMap;
 
 		// var ldrawPath = 'models/ldraw/officialLibrary/';
 		var ldrawPath = 'three-stuff/';
@@ -298,28 +298,44 @@
 
 					if (guiData.customShaderActivated) {
 
-						customShaderMaterial = new CustomShaderMaterial(
-							THREE.MeshPhysicalMaterial, // base material
-							null, // fragment shader
-							document.getElementById('vertexShader').textContent,
-							{
-								// uniforms
-								uTime: {
-									value: 0,
+						matMap = new Map();
+
+						for (const material of lDrawLoader.materials) {
+							matMap.set(material, new CustomShaderMaterial(
+								THREE.MeshPhysicalMaterial, // base material, could get from material.type
+								null, // fragment shader
+								document.getElementById('vertexShader').textContent,
+								{
+									// uniforms
+									uTime: {
+										value: 0,
+									},
 								},
-							},
-							{
-								// options
-								flatShading: true,
-								color: 0xff00ff,
-							}
-						);
+								{
+									// options
+									flatShading: true,
+									color: material.color,
+									opacity: material.opacity,
+									transparent: material.transparent,
+									side: material.side,
+									envMap: material.envMap,
+									name: material.name,
+								}
+							));
+						}
+
+						console.log(lDrawLoader.materials, matMap);
 
 						model.traverse(c => {
+							console.log("material", c.material);
 
 							if (c.isMesh) {
 
-								c.material = customShaderMaterial;
+								if (c.material instanceof Array) {
+									c.material = c.material.map(m => matMap.get(m));
+								} else {
+									c.material = matMap.get(c.material) ?? c.material;
+								}
 
 							}
 
@@ -525,10 +541,10 @@
 
 		function render() {
 
-			if (customShaderMaterial) {
-
-				customShaderMaterial.uniforms.uTime.value = performance.now() / 1000;
-
+			if (matMap) {
+				for (const mat of matMap.values()) {
+					mat.uniforms.uTime.value = performance.now() / 1000;
+				}
 			}
 
 			renderer.render(scene, camera);
