@@ -36,6 +36,11 @@ const VERT = {
     '#include <project_vertex>': `
     transformed = ${keywords.position};
     #include <project_vertex>
+    // Why does this seem to do nothing? I need to see the full code. Can use Spector to do that.
+    gl_Position *= 50.;
+    #ifdef SCREEN_SPACE_TRANSFORM
+      screenSpaceTransform( gl_Position, transformed );
+    #endif
   `
   },
   [`${keywords.pointSize}`]: {
