@@ -259,6 +259,7 @@ const brickColorNames = [
 	"blue",
 	"yellow",
 	"gray",
+	"trans_green",
 ];
 const brickWidthsInStuds = [1, 2, 3, 4, 6, 8];
 
@@ -947,6 +948,23 @@ const makeDroplet = ({ x, y }) => {
 	};
 };
 
+const makeTransientBrick = ({ x, y, widthInStuds, on, switchID }) => {
+	return {
+		id: getID(),
+		type: "transient",
+		x,
+		y,
+		widthInStuds,
+		width: widthInStuds * 15,
+		height: 18,
+		on,
+		switchID,
+		animationFrame: 0,
+		colorName: "trans_green",
+		fixed: false,
+	};
+};
+
 // #endregion
 //
 // █████ █████ █████ █████    █████ █████ █████ █████ █████             ◢◼◤/            ◢◼◤/            ◢◼◤/
@@ -1597,6 +1615,9 @@ const serializeLevel = (level) => {
 		let type;
 		if (entity.type === "brick") {
 			type = `brick_${String(entity.widthInStuds).padStart(2, "0")}`;
+		} else if (entity.type === "transient") {
+			// custom bespoke entity type
+			type = `brick_transient_${String(entity.widthInStuds).padStart(2, "0")}`;
 		} else if (entity.type === "jump") {
 			type = `${entity.fixed ? "haz" : "brick"}_slickjump`;
 		} else if (entity.type === "shield") {
@@ -1899,9 +1920,16 @@ const loadLevelFromText = (levelData, game) => {
 				}
 				const brickMatch = typeName.match(/brick_(\d+)/i);
 				if (brickMatch) {
-					entities.push(makeBrick({
-						x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
-					}));
+					if (typeName.match(/trans_/i)) {
+						entities.push(makeTransientBrick({
+							x, y, colorName, widthInStuds: parseInt(brickMatch[1], 10),
+							switchID: e[6], on: animationName === "on" || animationName === "none",
+						}));
+					} else {
+						entities.push(makeBrick({
+							x, y, colorName, fixed: colorName === "gray", widthInStuds: parseInt(brickMatch[1], 10)
+						}));
+					}
 				} else if (typeName === "minifig") {
 					entities.push(makeJunkbot({ x, y: y - 18 * 3, facing }));
 				} else if (typeName === "haz_walker") {
@@ -1970,6 +1998,8 @@ let resources;
 const hotResourcePaths = {
 	sprites: "images/spritesheets/sprites.png",
 	spritesAtlas: "images/spritesheets/sprites.json",
+	customSprites: "images/spritesheets/custom/sprites.png",
+	customSpritesAtlas: "images/spritesheets/custom/sprites.json",
 	backgrounds: "images/spritesheets/backgrounds.png",
 	backgroundsAtlas: "images/spritesheets/backgrounds.json",
 	junkbotAnimations: "junkbot-animations.json",
@@ -2368,10 +2398,13 @@ const drawDecal = (ctx, x, y, name, game) => {
 	ctx.drawImage(image, left, top, width, height, x, y, width, height);
 };
 
-const drawBrick = (ctx, brick) => {
-	const frame = resources.spritesAtlas[`brick_${(brick.colorName || "gray") === "gray" ? "immobile" : brick.colorName}_${brick.widthInStuds || 2}`];
+const drawBrick = (ctx, brick, customSpriteSheet = false) => {
+	const atlas = customSpriteSheet ? resources.customSpritesAtlas : resources.spritesAtlas;
+	const sprites = resources[customSpriteSheet ? "customSprites" : "sprites"];
+	const colorFileNamePart = (brick.colorName || "gray") === "gray" ? "immobile" : brick.colorName.replace("trans_", "transparent_");
+	const frame = atlas[`brick_${colorFileNamePart}_${brick.widthInStuds || 2}`];
 	const [left, top, width, height] = frame.bounds;
-	ctx.drawImage(resources.sprites, left, top, width, height, brick.x, brick.y + brick.height - height - 1, width, height);
+	ctx.drawImage(sprites, left, top, width, height, brick.x, brick.y + brick.height - height - 1, width, height);
 };
 
 const drawBin = (ctx, bin) => {
@@ -2696,6 +2729,12 @@ const drawEntity = (ctx, entity, hilight) => {
 		case "brick":
 			drawBrick(ctx, entity);
 			break;
+		case "transient":
+			ctx.save();
+			ctx.globalAlpha = entity.on ? 1 : 0.5;
+			drawBrick(ctx, entity, true);
+			ctx.restore();
+			break;
 		case "junkbot":
 			// aJunkbot = entity;
 			drawJunkbot(ctx, entity);
@@ -2753,7 +2792,8 @@ const drawEntity = (ctx, entity, hilight) => {
 	if (hilight) {
 		ctx.save();
 		ctx.globalAlpha = 0.5;
-		drawSelectionHilight(ctx, entity.x, entity.y, entity.width, entity.height, 10, entity.type === "brick");
+		const studsOnTop = entity.type === "brick" || entity.type === "transient";
+		drawSelectionHilight(ctx, entity.x, entity.y, entity.width, entity.height, 10, studsOnTop);
 		ctx.restore();
 	}
 };
@@ -3601,11 +3641,11 @@ const possibleGrabs = ({ worldX, worldY } = mouse) => {
 			if (
 				entity !== brick &&
 				// for things that aren't bricks, check above, in case someone's standing on these blocks
-				connects(brick, entity, entity.type === "brick" ? direction : -1) &&
+				connects(brick, entity, (entity.type === "brick" || entity.type === "transient") ? direction : -1) &&
 				// prevent heavy recursion when e.g. there's a pyramid of blocks
 				attached.indexOf(entity) === -1
 			) {
-				if (entity.fixed || entity.type !== "brick") {
+				if (entity.fixed || (entity.type !== "brick" && entity.type !== "transient")) {
 					// can't drag in this direction (e.g. the block might be sandwiched) or
 					// junkbot or an enemy might be standing on these blocks
 					return false;
@@ -3627,7 +3667,12 @@ const possibleGrabs = ({ worldX, worldY } = mouse) => {
 				for (const entity of entitiesToCheck2) {
 					if (
 						!entity.fixed &&
-						(entity.type === "brick" || entity.type === "jump" || entity.type === "shield") &&
+						(
+							entity.type === "brick" ||
+							entity.type === "transient" ||
+							entity.type === "jump" ||
+							entity.type === "shield"
+						) &&
 						brick.x + brick.width > entity.x &&
 						brick.x < entity.x + entity.width &&
 						attached.indexOf(entity) === -1 &&
@@ -3635,7 +3680,7 @@ const possibleGrabs = ({ worldX, worldY } = mouse) => {
 					) {
 						const entitiesToCheck3 = entitiesByBottomY[entity.y] || [];
 						for (const junk of entitiesToCheck3) {
-							if (junk.type !== "brick") {
+							if (junk.type !== "brick" && junk.type !== "transient") {
 								if (
 									entity.x + entity.width > junk.x &&
 									entity.x < junk.x + junk.width
@@ -3668,7 +3713,7 @@ const possibleGrabs = ({ worldX, worldY } = mouse) => {
 		grabs.push(grabs.selection);
 		return grabs;
 	}
-	if (brick.fixed || (brick.type !== "brick" && brick.type !== "jump" && brick.type !== "shield")) {
+	if (brick.fixed || (brick.type !== "brick" && brick.type !== "transient" && brick.type !== "jump" && brick.type !== "shield")) {
 		if (editing) {
 			grabs.push([brick]);
 			return grabs;
@@ -3926,7 +3971,7 @@ const canRelease = () => {
 					return false;
 				}
 				if (
-					otherEntity.type === "brick" &&
+					(otherEntity.type === "brick" || otherEntity.type === "transient") &&
 					connectedToFixed.indexOf(otherEntity) !== -1
 				) {
 					if (connects(entity, otherEntity, -1)) {
@@ -5003,11 +5048,11 @@ const detectProblems = () => {
 			problems.push({ message: `Invalid size (width/height) for entity ${JSON.stringify(entity, null, "\t")}\n` });
 			continue;
 		}
-		if (entity.type === "brick" && !isNum(entity.widthInStuds)) {
+		if ((entity.type === "brick" || entity.type === "transient") && !isNum(entity.widthInStuds)) {
 			problems.push({ message: `Invalid widthInStuds for entity ${JSON.stringify(entity, null, "\t")}\n` });
 			continue;
 		}
-		if (entity.type === "brick" && entity.width !== 15 * entity.widthInStuds) {
+		if ((entity.type === "brick" || entity.type === "transient") && entity.width !== 15 * entity.widthInStuds) {
 			problems.push({ message: `width doesn't match widthInStuds * 15 for entity ${JSON.stringify(entity, null, "\t")}\n` });
 			continue;
 		}
@@ -6148,13 +6193,24 @@ const initEditorUI = () => {
 
 	for (const colorName of brickColorNames) {
 		for (const widthInStuds of brickWidthsInStuds) {
-			makeInsertEntityButton(makeBrick({
-				colorName,
-				widthInStuds,
-				fixed: colorName === "gray",
-				x: 0,
-				y: 0,
-			}));
+			if (colorName.includes("trans_")) {
+				makeInsertEntityButton(makeTransientBrick({
+					colorName,
+					widthInStuds,
+					x: 0,
+					y: 0,
+					switchID: "switch1",
+					on: true,
+				}));
+			} else {
+				makeInsertEntityButton(makeBrick({
+					colorName,
+					widthInStuds,
+					fixed: colorName === "gray",
+					x: 0,
+					y: 0,
+				}));
+			}
 		}
 	}
 
