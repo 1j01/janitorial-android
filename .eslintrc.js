@@ -294,7 +294,7 @@ module.exports = {
 		"sort-keys": "off",
 		"sort-vars": "off",
 		"space-before-blocks": "error",
-		"space-before-function-paren": ["error", "never"],
+		"space-before-function-paren": { "anonymous": "always", "named": "never", "asyncArrow": "always" },
 		"space-in-parens": [
 			"error",
 			"never"

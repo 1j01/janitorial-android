@@ -24,6 +24,39 @@
 
 <body>
 	<script src="./three-stuff/spector.bundle.js"></script>
+	<script src="./three-stuff/zip.min.js"></script>
+	<div id="zip-dialog">
+		<label>
+			<span class="form-label">choose deflate implementation</span>
+			<select id="deflate-implementation-input">
+				<option>zip.js</option>
+				<option>fflate</option>
+				<option>pako</option>
+			</select>
+		</label>
+		<label>
+			<span class="form-label">set a password (optional)</span>
+			<input type="password" id="password-input" value="">
+		</label>
+		<label>
+			<span class="form-label">add files into the zip</span>
+			<button id="file-input-button">Add...</button>
+			<input type="file" multiple id="file-input" hidden>
+		</label>
+		<label>
+			<span class="form-label">view zip content</span>
+			<ul id="file-list" class="empty">
+			</ul>
+		</label>
+		<label>
+			<span class="form-label">set zip file name</span>
+			<input type="text" id="filename-input" value="Example.zip">
+		</label>
+		<label>
+			<span class="form-label">download the zip file</span>
+			<button id="download-button" disabled>Download</button>
+		</label>
+	</div>
 	<script type="module" src="./three-stuff/3d-main.js"></script>
 	<script type="text/x-shader" id="vertexShader">
 		#define SCREEN_SPACE_TRANSFORM 1
