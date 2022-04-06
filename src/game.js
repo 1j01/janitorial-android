@@ -2731,8 +2731,12 @@ const drawEntity = (ctx, entity, hilight) => {
 			break;
 		case "transient":
 			ctx.save();
-			ctx.globalAlpha = entity.on ? 1 : 0.5;
+			ctx.globalAlpha *= entity.on ? 1 : (0.4 + Math.sin(performance.now() / 500) * 0.1);
 			drawBrick(ctx, entity, true);
+			// if (!entity.on) {
+			// 	ctx.globalAlpha = 0.1;
+			// 	drawSelectionHilight(ctx, entity.x, entity.y, entity.width, entity.height, 10, false);
+			// }
 			ctx.restore();
 			break;
 		case "junkbot":
