@@ -595,6 +595,7 @@ function sleep(ms) {
 let addFilesToZipUI;
 let cancelExportingSprites = false;
 (() => {
+	zip.configure({ workerScripts: { deflate: ["z-worker.js"] } });
 
 	let zipWriter;
 	function startNewZip() {
@@ -641,11 +642,7 @@ let cancelExportingSprites = false;
 				zipDialog.hidden = true;
 			}, 500);
 		});
-		// const deflateImplementationInput = document.getElementById("deflate-implementation-input");
 		downloadButton.addEventListener("click", onDownloadButtonClick, false);
-		// deflateImplementationInput.onchange = selectDeflateImplementation;
-		// selectDeflateImplementation();
-		zip.configure({ workerScripts: { deflate: ["z-worker.js"] } });
 
 		addFilesToZipUI = async (fileItems) => {
 			zipDialog.hidden = false;
@@ -659,11 +656,6 @@ let cancelExportingSprites = false;
 				zipProgress.remove();
 			}
 		};
-
-		// function selectDeflateImplementation() {
-		// 	const deflateImplementation = DEFLATE_IMPLEMENTATIONS[deflateImplementationInput.value];
-		// 	zip.configure({ workerScripts: { deflate: deflateImplementation } });
-		// }
 
 		async function addFiles(fileItems) {
 			downloadButton.disabled = true;
