@@ -83,3 +83,31 @@ a, button, input, select {
 	margin-top: 20px;
 	padding: 10px;
 }
+
+/* Zip File UI */
+
+#zip-dialog:not([hidden]) {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0,0,0,0.7);
+}
+#file-list {
+	display: flex;
+	flex-direction: column;
+	width: 1000px;
+	max-width: 80vw;
+	max-height: 80vh;
+	overflow-y: auto;
+}
+#file-list li {
+	display: flex;
+	padding: 10px;
+	border-bottom: 1px solid #aaa;
+}

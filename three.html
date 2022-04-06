@@ -25,8 +25,8 @@
 <body>
 	<script src="./three-stuff/spector.bundle.js"></script>
 	<script src="./three-stuff/zip.min.js"></script>
-	<div id="zip-dialog">
-		<label>
+	<div id="zip-dialog" hidden>
+		<!-- <label>
 			<span class="form-label">choose deflate implementation</span>
 			<select id="deflate-implementation-input">
 				<option>zip.js</option>
@@ -42,20 +42,18 @@
 			<span class="form-label">add files into the zip</span>
 			<button id="file-input-button">Add...</button>
 			<input type="file" multiple id="file-input" hidden>
-		</label>
+		</label> -->
 		<label>
-			<span class="form-label">view zip content</span>
+			<span class="form-label">zip file contents</span>
 			<ul id="file-list" class="empty">
 			</ul>
 		</label>
 		<label>
-			<span class="form-label">set zip file name</span>
-			<input type="text" id="filename-input" value="Example.zip">
+			<span class="form-label">zip file name</span>
+			<input type="text" id="filename-input" value="Rendered Sprites.zip">
 		</label>
-		<label>
-			<span class="form-label">download the zip file</span>
-			<button id="download-button" disabled>Download</button>
-		</label>
+		<button id="download-button" disabled>Download zip file</button>
+		<button id="close-zip-dialog-button">Close</button>
 	</div>
 	<script type="module" src="./three-stuff/3d-main.js"></script>
 	<script type="text/x-shader" id="vertexShader">

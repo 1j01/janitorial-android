@@ -627,18 +627,20 @@ let addFilesToZipUI;
 
 	(() => {
 
+		const zipDialog = document.getElementById("zip-dialog");
+		const closeZipDialogButton = document.getElementById("close-zip-dialog-button");
 		const zipProgress = document.createElement("progress");
 		const downloadButton = document.getElementById("download-button");
 		const fileList = document.getElementById("file-list");
 		const filenameInput = document.getElementById("filename-input");
-		const passwordInput = document.getElementById("password-input");
-		const deflateImplementationInput = document.getElementById("deflate-implementation-input");
+		// const deflateImplementationInput = document.getElementById("deflate-implementation-input");
 		downloadButton.addEventListener("click", onDownloadButtonClick, false);
 		// deflateImplementationInput.onchange = selectDeflateImplementation;
 		// selectDeflateImplementation();
 		zip.configure({ workerScripts: { deflate: ["z-worker.js"] } });
 
 		addFilesToZipUI = async (files) => {
+			zipDialog.hidden = false;
 			try {
 				await addFiles(files);
 				downloadButton.disabled = false;
@@ -683,7 +685,6 @@ let addFilesToZipUI;
 				try {
 					const entry = await model.addFile(file, {
 						bufferedWrite: true,
-						password: passwordInput.value,
 						signal,
 						onprogress: (index, max) => {
 							li.classList.remove("pending");
