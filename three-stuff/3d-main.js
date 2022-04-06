@@ -593,11 +593,11 @@ async function exportSprites() {
 			toExport.push(object);
 		}
 	});
-	toExport = toExport.slice(0, 3);
+	// toExport = toExport.slice(0, 3);
 	for (const object of toExport) {
 		exportSprite(object);
 		// eslint-disable-next-line no-await-in-loop
-		await sleep(1000);
+		await sleep(10);
 	}
 }
 // ctx is the 2d context of the canvas to be trimmed
