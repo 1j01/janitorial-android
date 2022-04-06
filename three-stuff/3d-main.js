@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-console */
 /* eslint-disable func-style */
+/* globals zip */
 import * as THREE from "./three.module.js";
 
 import { GUI } from "./dat.gui.module.js";
@@ -591,17 +592,9 @@ function sleep(ms) {
 	});
 }
 
-/* globals zip, document, URL, MouseEvent, AbortController, alert */
-
 let addFilesToZipUI;
 let cancelExportingSprites = false;
 (() => {
-
-	// const DEFLATE_IMPLEMENTATIONS = {
-	// 	"zip.js": ["z-worker.js"],
-	// 	"fflate": ["z-worker-fflate.js", "fflate.min.js"],
-	// 	"pako": ["z-worker-pako.js", "pako_deflate.min.js"],
-	// };
 
 	const model = (() => {
 
@@ -654,11 +647,12 @@ let cancelExportingSprites = false;
 				await addFiles(fileItems);
 				downloadButton.disabled = false;
 			} catch (error) {
-				alert(error);
+				console.error("Failed to add files", error);
+				alert(`Failed to add files:\n\n${error}`);
 			} finally {
 				zipProgress.remove();
 			}
-		}
+		};
 
 		// function selectDeflateImplementation() {
 		// 	const deflateImplementation = DEFLATE_IMPLEMENTATIONS[deflateImplementationInput.value];
@@ -728,7 +722,8 @@ let cancelExportingSprites = false;
 			try {
 				blobURL = await model.getBlobURL();
 			} catch (error) {
-				alert(error);
+				console.error("Failed to get blob URL", error);
+				alert(`Failed to get blob URL:\n\n${error}`);
 			}
 			if (blobURL) {
 				const anchor = document.createElement("a");
@@ -856,7 +851,6 @@ function exportSprite(subject) {
 					});
 				}
 			}
-			// console.log("visible", object.visible, { object, subject });
 		}
 	});
 	// center camera on subject
@@ -866,13 +860,7 @@ function exportSprite(subject) {
 	camera.lookAt(subject.position);
 	camera.position.x += 500;
 
-	// render the scene to a canvas
-	// subject.geometry.computeBoundingBox();
-	// canvas.width = subject.geometry.boundingBox.max.x - subject.geometry.boundingBox.min.x;
-	// canvas.height = subject.geometry.boundingBox.max.y - subject.geometry.boundingBox.min.y;
-	// const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-	// renderer.setSize(canvas.width, canvas.height);
-	// renderer.render(scene, camera);
+	// render the scene, and copy it to a canvas
 	render();
 
 	const canvas = document.createElement("canvas");
@@ -882,9 +870,6 @@ function exportSprite(subject) {
 	ctx.drawImage(renderer.domElement, 0, 0);
 	if (trimCanvas(ctx)) {
 		// has pixels, good!
-		// show the canvas
-		// document.querySelector(".dg.main").appendChild(canvas);
-		// console.log(canvas);
 		canvas.toBlob((blob) => {
 			const file = new File([blob], `${subject.name || subject.id}.png`, { type: "image/png" });
 			const previewImage = document.createElement("img");
@@ -894,10 +879,12 @@ function exportSprite(subject) {
 				// not revoking, so that you can save individual sprites
 				// (and it's probably not worth revoking on dialog close)
 			};
-			addFilesToZipUI([{
-				file,
-				previewImage,
-			}]);
+			addFilesToZipUI([
+				{
+					file,
+					previewImage,
+				}
+			]);
 		});
 	} else {
 		console.warn("no non-transparent (or non-transparent) pixels in canvas", canvas, subject);
