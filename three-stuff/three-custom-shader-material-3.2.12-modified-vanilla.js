@@ -38,7 +38,7 @@ const VERT = {
     transformed = ${keywords.position};
     #include <project_vertex>
     #ifdef SCREEN_SPACE_TRANSFORM
-      screenSpaceTransform( gl_Position, transformed );
+      screenSpaceTransform( gl_Position, mvPosition );
     #endif
   `
   },
