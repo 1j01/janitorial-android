@@ -103,7 +103,7 @@ a, button, input, select {
 	flex-direction: column;
 	width: 1000px;
 	max-width: 80vw;
-	max-height: 80vh;
+	height: 80vh;
 	overflow-y: auto;
 }
 #file-list li {

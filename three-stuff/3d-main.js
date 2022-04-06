@@ -637,6 +637,10 @@ let cancelExportingSprites = false;
 		closeZipDialogButton.addEventListener("click", () => {
 			zipDialog.hidden = true;
 			cancelExportingSprites = true;
+			// TODO: cancel async operations instead of hiding twice
+			setTimeout(() => {
+				zipDialog.hidden = true;
+			}, 500);
 		});
 		// const deflateImplementationInput = document.getElementById("deflate-implementation-input");
 		downloadButton.addEventListener("click", onDownloadButtonClick, false);
