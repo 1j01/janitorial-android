@@ -604,20 +604,21 @@ async function exportSprites() {
 // This function will return false if the canvas contains no or no non transparent pixels.
 // Returns true if the canvas contains non transparent pixels
 function trimCanvas(ctx) { // removes transparent edges
-	let x, y, w, h, top, left, right, bottom, data, idx1, idx2, found, imgData;
+	let x, y, w, h, top, left, right, bottom, idx1, idx2, found;
 	w = ctx.canvas.width;
 	h = ctx.canvas.height;
 	if (!w && !h) {
 		return false;
 	}
-	imgData = ctx.getImageData(0, 0, w, h);
-	data = new Uint32Array(imgData.data.buffer);
+	const imgData = ctx.getImageData(0, 0, w, h);
+	const data = new Uint32Array(imgData.data.buffer);
 	idx1 = 0;
 	idx2 = w * h - 1;
 	found = false;
 	// search from top and bottom to find first rows containing a non transparent pixel.
 	for (y = 0; y < h && !found; y += 1) {
 		for (x = 0; x < w; x += 1) {
+			// eslint-disable-next-line no-plusplus
 			if (data[idx1++] && !top) {
 				top = y + 1;
 				if (bottom) { // top and bottom found then stop the search
@@ -625,6 +626,7 @@ function trimCanvas(ctx) { // removes transparent edges
 					break;
 				}
 			}
+			// eslint-disable-next-line no-plusplus
 			if (data[idx2--] && !bottom) {
 				bottom = h - y - 1;
 				if (top) { // top and bottom found then stop the search
@@ -706,7 +708,14 @@ function exportSprite(subject) {
 	canvas.width = renderer.domElement.width;
 	canvas.height = renderer.domElement.height;
 	ctx.drawImage(renderer.domElement, 0, 0);
-	trimCanvas(ctx);
+	if (trimCanvas(ctx)) {
+		// has pixels, good!
+		// show the canvas
+		document.querySelector(".dg.main").appendChild(canvas);
+		console.log(canvas);
+	} else {
+		console.warn("no non-transparent (or non-transparent) pixels in canvas", canvas, subject);
+	}
 
 	// restore visibility
 	// scene.traverse((object) => {
@@ -714,10 +723,6 @@ function exportSprite(subject) {
 	// 		object.visible = oldVisibility.get(object);
 	// 	}
 	// });
-
-	// show the canvas
-	document.querySelector(".dg.main").appendChild(canvas);
-	console.log(canvas);
 
 	// save the canvas to a file
 	// canvas.toBlob((blob) => {
