@@ -5,10 +5,16 @@ const packer = require("gamefroot-texture-packer");
 
 let waiting = 0;
 for (const name of ["backgrounds", "menus", "sprites"]) {
-	for (const subfolderName of ["", "Undercover Exclusive/"]) {
+	const subFolders = ["", "Undercover Exclusive/"];
+	if (name === "sprites") {
+		subFolders.push("custom/");
+	}
+	for (const subfolderName of subFolders) {
 		const inFolderPath = `images/${name}/${subfolderName}`;
 		const outFolderPath = `images/spritesheets/${subfolderName}`;
 		waiting += 1;
+		console.log(`Packing ${inFolderPath} to ${outFolderPath}...`);
+
 		packer(`${inFolderPath}*.png`, {
 			format: "easel.js",
 			name,
