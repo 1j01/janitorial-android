@@ -139,7 +139,7 @@ function init() {
 		grid: false,
 		obliqueProjection: false,
 		pixelScanner: false,
-		exportImages,
+		exportSprites,
 	};
 
 	setupProjection();
@@ -517,7 +517,7 @@ function createGUI() {
 			}
 		});
 
-	gui.add(guiData, "exportImages").name("Export Image(s)");
+	gui.add(guiData, "exportSprites").name("Export Sprites");
 
 }
 
@@ -580,22 +580,81 @@ function updateProgressBar(fraction) {
 
 }
 
-function exportImages() {
-
-	renderer.domElement.toBlob((blob) => {
-		const blobURL = URL.createObjectURL(blob);
-		// someEl.innerHTML = `<a href="${blobURL}" download="${guiData.modelFileName}.png">Download Image</a>`;
-		const a = document.createElement("a");
-		a.href = blobURL;
-		a.download = `${guiData.modelFileName}.png`;
-		document.body.appendChild(a);
-		console.log("In case download is blocked by browser, save this manually:", blobURL);
-		a.click();
-		setTimeout(() => {
-			document.body.removeChild(a);
-			window.URL.revokeObjectURL(blobURL);
-		}, 0);
+async function exportSprites() {
+	let toExport = [];
+	scene.traverse((object) => {
+		if (object.isMesh) {
+			toExport.push(object);
+		}
 	});
+	toExport = toExport.slice(0, 3);
+	for (const object of toExport) {
+		exportSprite(object);
+		await sleep(1000);
+	}
+}
+
+async function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function exportSprite(subject) {
+	// hide all objects except the subject, keeping track of the original visibility
+	const oldVisibility = new Map();
+	scene.traverse((object) => {
+		if ("visible" in object) {
+			oldVisibility.set(object, object.visible);
+			object.visible = object === subject;
+			if (object.visible) {
+				object.traverseAncestors((ancestor) => {
+					ancestor.visible = true;
+				});
+			}
+			console.log("visible", object.visible, { object, subject });
+		}
+	});
+
+	// render the scene to a canvas
+	// subject.geometry.computeBoundingBox();
+	// canvas.width = subject.geometry.boundingBox.max.x - subject.geometry.boundingBox.min.x;
+	// canvas.height = subject.geometry.boundingBox.max.y - subject.geometry.boundingBox.min.y;
+	// const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+	// renderer.setSize(canvas.width, canvas.height);
+	// renderer.render(scene, camera);
+	render();
+
+	const canvas = document.createElement("canvas");
+	const ctx = canvas.getContext("2d");
+	canvas.width = renderer.domElement.width;
+	canvas.height = renderer.domElement.height;
+	ctx.drawImage(renderer.domElement, 0, 0);
+
+	// restore visibility
+	// scene.traverse((object) => {
+	// 	if ("visible" in object) {
+	// 		object.visible = oldVisibility.get(object);
+	// 	}
+	// });
+
+	// show the canvas
+	document.querySelector(".dg.main").appendChild(canvas);
+	console.log(canvas);
+
+	// save the canvas to a file
+	// canvas.toBlob((blob) => {
+	// 	const blobURL = URL.createObjectURL(blob);
+	// 	// someEl.innerHTML = `<a href="${blobURL}" download="${guiData.modelFileName}.png">Download Image</a>`;
+	// 	const a = document.createElement("a");
+	// 	a.href = blobURL;
+	// 	a.download = `${guiData.modelFileName}.png`;
+	// 	document.body.appendChild(a);
+	// 	console.log("In case download is blocked by browser, save this manually:", blobURL);
+	// 	a.click();
+	// 	setTimeout(() => {
+	// 		document.body.removeChild(a);
+	// 		window.URL.revokeObjectURL(blobURL);
+	// 	}, 0);
+	// });
 
 }
 
