@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Material } from './three.module.js';
 
 var keywords = {

@@ -9,8 +9,8 @@ import { LDrawLoader } from "./LDrawLoader.js";
 
 import CustomShaderMaterial from "./three-custom-shader-material-3.2.12-modified-vanilla.js";
 
-// const spector = new SPECTOR.Spector();
-// spector.displayUI();
+const spector = new SPECTOR.Spector();
+spector.displayUI();
 
 let container, progressBarDiv;
 
@@ -130,7 +130,7 @@ function init() {
 		modelFileName: modelFileList["Basic Bricks"],
 		envMapActivated: false,
 		customShaderActivated: true,
-		separateObjects: false,
+		separateObjects: true,
 		displayLines: false,
 		conditionalLines: false,
 		smoothNormals: false,
@@ -587,7 +587,7 @@ function sleep(ms) {
 }
 
 async function exportSprites() {
-	let toExport = [];
+	const toExport = [];
 	scene.traverse((object) => {
 		if (object.isMesh) {
 			toExport.push(object);
