@@ -648,10 +648,10 @@ let cancelExportingSprites = false;
 		// selectDeflateImplementation();
 		zip.configure({ workerScripts: { deflate: ["z-worker.js"] } });
 
-		addFilesToZipUI = async (files) => {
+		addFilesToZipUI = async (fileItems) => {
 			zipDialog.hidden = false;
 			try {
-				await addFiles(files);
+				await addFiles(fileItems);
 				downloadButton.disabled = false;
 			} catch (error) {
 				alert(error);
@@ -665,9 +665,10 @@ let cancelExportingSprites = false;
 		// 	zip.configure({ workerScripts: { deflate: deflateImplementation } });
 		// }
 
-		async function addFiles(files) {
+		async function addFiles(fileItems) {
 			downloadButton.disabled = true;
-			await Promise.all(Array.from(files).map(async (file) => {
+			await Promise.all(Array.from(fileItems).map(async (fileItem) => {
+				const { file, previewImage } = fileItem;
 				const li = document.createElement("li");
 				const filenameContainer = document.createElement("span");
 				const filename = document.createElement("span");
@@ -676,6 +677,9 @@ let cancelExportingSprites = false;
 				li.appendChild(filenameContainer);
 				filename.classList.add("filename");
 				filename.textContent = file.name;
+				if (previewImage) {
+					li.appendChild(previewImage.cloneNode(true));
+				}
 				filenameContainer.appendChild(filename);
 				zipProgress.value = 0;
 				zipProgress.max = 0;
@@ -877,7 +881,15 @@ function exportSprite(subject) {
 		// console.log(canvas);
 		canvas.toBlob((blob) => {
 			const file = new File([blob], `${subject.name || subject.id}.png`, { type: "image/png" });
-			addFilesToZipUI([file]);
+			const previewImage = document.createElement("img");
+			previewImage.src = URL.createObjectURL(file);
+			previewImage.onload = () => {
+				URL.revokeObjectURL(previewImage.src);
+			};
+			addFilesToZipUI([{
+				file,
+				previewImage,
+			}]);
 		});
 	} else {
 		console.warn("no non-transparent (or non-transparent) pixels in canvas", canvas, subject);
