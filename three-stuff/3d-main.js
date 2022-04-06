@@ -859,6 +859,12 @@ function exportSprite(subject) {
 			// console.log("visible", object.visible, { object, subject });
 		}
 	});
+	// center camera on subject
+	const oldPosition = camera.position.clone();
+	camera.position.copy(subject.position);
+	camera.position.z += 100;
+	camera.lookAt(subject.position);
+	camera.position.x += 500;
 
 	// render the scene to a canvas
 	// subject.geometry.computeBoundingBox();
@@ -895,29 +901,13 @@ function exportSprite(subject) {
 		console.warn("no non-transparent (or non-transparent) pixels in canvas", canvas, subject);
 	}
 
-	// restore visibility
+	// restore visibility (disable for debug or mildly fun animation)
 	scene.traverse((object) => {
 		if ("visible" in object) {
 			object.visible = oldVisibility.get(object);
 		}
 	});
-
-	// save the canvas to a file
-	// canvas.toBlob((blob) => {
-	// 	const blobURL = URL.createObjectURL(blob);
-	// 	// someEl.innerHTML = `<a href="${blobURL}" download="${guiData.modelFileName}.png">Download Image</a>`;
-	// 	const a = document.createElement("a");
-	// 	a.href = blobURL;
-	// 	a.download = `${guiData.modelFileName}.png`;
-	// 	document.body.appendChild(a);
-	// 	console.log("In case download is blocked by browser, save this manually:", blobURL);
-	// 	a.click();
-	// 	setTimeout(() => {
-	// 		document.body.removeChild(a);
-	// 		window.URL.revokeObjectURL(blobURL);
-	// 	}, 0);
-	// });
-
+	camera.position.copy(oldPosition);
 }
 
 const scanningCanvas = document.createElement("canvas");
