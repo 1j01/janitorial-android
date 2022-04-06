@@ -111,3 +111,7 @@ a, button, input, select {
 	padding: 10px;
 	border-bottom: 1px solid #aaa;
 }
+#file-list li img {
+	/* prevent stretching on preview images */
+	align-self: start;
+}
