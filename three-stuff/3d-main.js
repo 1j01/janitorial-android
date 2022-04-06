@@ -725,6 +725,7 @@ let addFilesToZipUI;
 				anchor.dispatchEvent(clickEvent);
 				fileList.innerHTML = "";
 				fileList.classList.add("empty");
+				zipDialog.hidden = true;
 			}
 			downloadButton.disabled = true;
 			event.preventDefault();
