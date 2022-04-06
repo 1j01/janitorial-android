@@ -594,6 +594,7 @@ function sleep(ms) {
 /* globals zip, document, URL, MouseEvent, AbortController, alert */
 
 let addFilesToZipUI;
+let cancelExportingSprites = false;
 (() => {
 
 	// const DEFLATE_IMPLEMENTATIONS = {
@@ -633,6 +634,10 @@ let addFilesToZipUI;
 		const downloadButton = document.getElementById("download-button");
 		const fileList = document.getElementById("file-list");
 		const filenameInput = document.getElementById("filename-input");
+		closeZipDialogButton.addEventListener("click", () => {
+			zipDialog.hidden = true;
+			cancelExportingSprites = true;
+		});
 		// const deflateImplementationInput = document.getElementById("deflate-implementation-input");
 		downloadButton.addEventListener("click", onDownloadButtonClick, false);
 		// deflateImplementationInput.onchange = selectDeflateImplementation;
@@ -736,6 +741,7 @@ let addFilesToZipUI;
 })();
 
 async function exportSprites() {
+	cancelExportingSprites = false;
 	const toExport = [];
 	scene.traverse((object) => {
 		if (object.isMesh) {
@@ -747,6 +753,9 @@ async function exportSprites() {
 		exportSprite(object);
 		// eslint-disable-next-line no-await-in-loop
 		await sleep(10);
+		if (cancelExportingSprites) {
+			break;
+		}
 	}
 }
 // ctx is the 2d context of the canvas to be trimmed
