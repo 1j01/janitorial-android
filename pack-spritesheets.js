@@ -5,16 +5,22 @@ const packer = require("gamefroot-texture-packer");
 
 let waiting = 0;
 for (const name of ["backgrounds", "menus", "sprites"]) {
-	for (const undercover of ["", "Undercover Exclusive/"]) {
+	for (const subfolderName of ["", "Undercover Exclusive/"]) {
+		const inFolderPath = `images/${name}/${subfolderName}`;
+		const outFolderPath = `images/spritesheets/${subfolderName}`;
 		waiting += 1;
-		// eslint-disable-next-line no-loop-func
-		packer(`images/${name}/${undercover}*.png`, { format: "easel.js", name, path: `images/spritesheets/${undercover}` }, (err) => {
+		packer(`${inFolderPath}*.png`, {
+			format: "easel.js",
+			name,
+			path: outFolderPath,
+			// eslint-disable-next-line no-loop-func
+		}, (err) => {
 			if (err) {
 				throw err;
 			}
 			console.log(`${name} spritesheet successfully generated`);
 
-			fs.readFile(`images/spritesheets/${undercover}${name}-1.json`, "utf8", (err, json) => {
+			fs.readFile(`${outFolderPath}${name}-1.json`, "utf8", (err, json) => {
 				if (err) {
 					throw err;
 				}
@@ -22,15 +28,15 @@ for (const name of ["backgrounds", "menus", "sprites"]) {
 				json = json.replace(/:\[/g, ": ["); // add whitespace
 				json = json.replace(/\t\t\t\t?/g, "\t\t"); // fix indentation
 				json = json.replace(/"images": \["[^"]*"\]/g, `"images": ["${name}.png"]`); // update filename reference
-				fs.writeFile(`images/spritesheets/${undercover}${name}.json`, json, (err) => {
+				fs.writeFile(`${outFolderPath}${name}.json`, json, (err) => {
 					if (err) {
 						throw err;
 					}
-					fs.unlink(`images/spritesheets/${undercover}${name}-1.json`, (err) => {
+					fs.unlink(`${outFolderPath}${name}-1.json`, (err) => {
 						if (err) {
 							throw err;
 						}
-						fs.rename(`images/spritesheets/${undercover}${name}-1.png`, `images/spritesheets/${undercover}${name}.png`, (err) => {
+						fs.rename(`${outFolderPath}${name}-1.png`, `${outFolderPath}${name}.png`, (err) => {
 							if (err) {
 								throw err;
 							}
