@@ -890,7 +890,9 @@ function exportSprite(subject) {
 			const previewImage = document.createElement("img");
 			previewImage.src = URL.createObjectURL(file);
 			previewImage.onload = () => {
-				URL.revokeObjectURL(previewImage.src);
+				// URL.revokeObjectURL(previewImage.src);
+				// not revoking, so that you can save individual sprites
+				// (and it's probably not worth revoking on dialog close)
 			};
 			addFilesToZipUI([{
 				file,
