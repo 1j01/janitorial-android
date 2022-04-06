@@ -625,8 +625,16 @@ let cancelExportingSprites = false;
 		const downloadButton = document.getElementById("download-button");
 		const fileList = document.getElementById("file-list");
 		const filenameInput = document.getElementById("filename-input");
-		closeZipDialogButton.addEventListener("click", () => {
+
+		function clearAndCloseZipDialog() {
+			fileList.innerHTML = "";
+			fileList.classList.add("empty");
 			zipDialog.hidden = true;
+			startNewZip();
+		}
+
+		closeZipDialogButton.addEventListener("click", () => {
+			clearAndCloseZipDialog();
 			cancelExportingSprites = true;
 			// TODO: cancel async operations instead of hiding twice
 			setTimeout(() => {
@@ -729,9 +737,7 @@ let cancelExportingSprites = false;
 				anchor.href = blobURL;
 				anchor.download = filenameInput.value || "rendered-sprites.zip";
 				anchor.dispatchEvent(clickEvent);
-				fileList.innerHTML = "";
-				fileList.classList.add("empty");
-				zipDialog.hidden = true;
+				clearAndCloseZipDialog();
 			}
 			downloadButton.disabled = true;
 			event.preventDefault();
