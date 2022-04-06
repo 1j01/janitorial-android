@@ -580,6 +580,12 @@ function updateProgressBar(fraction) {
 
 }
 
+function sleep(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
+
 async function exportSprites() {
 	let toExport = [];
 	scene.traverse((object) => {
@@ -590,12 +596,9 @@ async function exportSprites() {
 	toExport = toExport.slice(0, 3);
 	for (const object of toExport) {
 		exportSprite(object);
+		// eslint-disable-next-line no-await-in-loop
 		await sleep(1000);
 	}
-}
-
-async function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function exportSprite(subject) {
@@ -604,13 +607,15 @@ function exportSprite(subject) {
 	scene.traverse((object) => {
 		if ("visible" in object) {
 			oldVisibility.set(object, object.visible);
-			object.visible = object === subject;
-			if (object.visible) {
-				object.traverseAncestors((ancestor) => {
-					ancestor.visible = true;
-				});
+			if (object.isMesh) {
+				object.visible = object === subject;
+				if (object.visible) {
+					object.traverseAncestors((ancestor) => {
+						ancestor.visible = true;
+					});
+				}
 			}
-			console.log("visible", object.visible, { object, subject });
+			// console.log("visible", object.visible, { object, subject });
 		}
 	});
 
