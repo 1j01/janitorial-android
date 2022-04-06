@@ -309,15 +309,20 @@ function reloadObject(resetCamera) {
 				model.traverse((c) => {
 					console.log("material", c.material);
 
-					// if (c.isMesh) {
-
 					if (c.material instanceof Array) {
 						c.material = c.material.map((m) => matMap.get(m) ?? m);
 					} else {
 						c.material = matMap.get(c.material) ?? c.material;
 					}
 
-					// }
+					// Frustum culling doesn't understand my custom projection done in the vertex shader.
+					// I may be able to enable the projection matrix, for Three.js to do culling with,
+					// but it's too imprecise for pixel art rendering, and I would have to
+					// force the shader to ignore the projection matrix.
+					// (And I'm not 100% sure it would work nicely anyway.)
+					if (c.frustumCulled) {
+						c.frustumCulled = false;
+					}
 
 				});
 
