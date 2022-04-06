@@ -596,28 +596,26 @@ let addFilesToZipUI;
 let cancelExportingSprites = false;
 (() => {
 
-	const model = (() => {
+	let zipWriter;
+	function startNewZip() {
+		zipWriter = new zip.ZipWriter(new zip.BlobWriter("application/zip"));
+	}
 
-		let zipWriter;
-		return {
-			addFile(file, options) {
-				if (!zipWriter) {
-					zipWriter = new zip.ZipWriter(new zip.BlobWriter("application/zip"));
-				}
-				return zipWriter.add(file.name, new zip.BlobReader(file), options);
-			},
-			async getBlobURL() {
-				if (zipWriter) {
-					const blobURL = URL.createObjectURL(await zipWriter.close());
-					zipWriter = null;
-					return blobURL;
-				} else {
-					throw new Error("Zip file closed");
-				}
-			}
-		};
-
-	})();
+	function addFile(file, options) {
+		if (!zipWriter) {
+			startNewZip();
+		}
+		return zipWriter.add(file.name, new zip.BlobReader(file), options);
+	}
+	async function getBlobURL() {
+		if (zipWriter) {
+			const blobURL = URL.createObjectURL(await zipWriter.close());
+			zipWriter = null;
+			return blobURL;
+		} else {
+			throw new Error("Zip file closed");
+		}
+	}
 
 	(() => {
 
@@ -690,7 +688,7 @@ let cancelExportingSprites = false;
 				abortButton.title = "Abort";
 				filenameContainer.appendChild(abortButton);
 				try {
-					const entry = await model.addFile(file, {
+					const entry = await addFile(file, {
 						bufferedWrite: true,
 						signal,
 						onprogress: (index, max) => {
@@ -720,7 +718,7 @@ let cancelExportingSprites = false;
 		async function onDownloadButtonClick(event) {
 			let blobURL;
 			try {
-				blobURL = await model.getBlobURL();
+				blobURL = await getBlobURL();
 			} catch (error) {
 				console.error("Failed to get blob URL", error);
 				alert(`Failed to get blob URL:\n\n${error}`);
