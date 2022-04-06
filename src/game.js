@@ -3713,7 +3713,12 @@ const possibleGrabs = ({ worldX, worldY } = mouse) => {
 		grabs.push(grabs.selection);
 		return grabs;
 	}
-	if (brick.fixed || (brick.type !== "brick" && brick.type !== "transient" && brick.type !== "jump" && brick.type !== "shield")) {
+	if (brick.fixed || (
+		brick.type !== "brick" &&
+		brick.type !== "transient" &&
+		brick.type !== "jump" &&
+		brick.type !== "shield"
+	)) {
 		if (editing) {
 			grabs.push([brick]);
 			return grabs;
@@ -3903,22 +3908,32 @@ canvas.addEventListener("contextmenu", async (event) => {
 	}
 });
 
-// i.e. space generally free; filter for tangible entities
-const notDroplet = (entity) => (
+// collision filter for block placement (drag and drop)
+// transient bricks are considered tangible here, since you can build with them even when they're "off"
+const tangibleForPlacement = (entity) => (
 	entity.type !== "droplet"
+);
+// collision filter for Junkbot's movement, and other bots' movement
+// transient bricks are intangible when "off"
+const physicallyTangible = (entity) => (
+	entity.type !== "droplet" &&
+	(entity.type !== "transient" || entity.on)
 );
 // i.e. space generally free for junkbot walking
+// TODO: vet this for new transient bricks
+// how does this differ semantically from both "physicallyTangible" and "groundToWalkOn"?
 const notBinOrDroplet = (entity) => (
 	entity.type !== "bin" &&
-	entity.type !== "droplet"
+	entity.type !== "droplet" &&
+	(entity.type !== "transient" || entity.on)
 );
-// i.e. ground to walk on
-const notBinOrDropletOrEnemyBot = (entity) => (
+const groundToWalkOn = (entity) => (
 	notBinOrDroplet(entity) &&
 	entity.type !== "gearbot" &&
 	entity.type !== "climbbot" &&
 	entity.type !== "flybot" &&
-	entity.type !== "eyebot"
+	entity.type !== "eyebot" &&
+	(entity.type !== "transient" || entity.on)
 );
 
 const updateDrag = (mouse) => {
@@ -3945,7 +3960,7 @@ const canRelease = () => {
 	const connectedToFixed = allConnectedToFixed();
 
 	const someCollision = dragging.some((entity) => (
-		entityCollisionTest(entity.x, entity.y, entity, notDroplet)
+		entityCollisionTest(entity.x, entity.y, entity, tangibleForPlacement)
 	));
 	if (someCollision) {
 		return false;
@@ -4058,9 +4073,17 @@ const simulateGravity = () => {
 				!rectangleLevelBoundsCollisionTest(entity.x, entity.y + 1, entity.width, entity.height) &&
 				!connectsToFixed(entity, { direction: (entity.type === "junkbot" || entity.type === "gearbot" || entity.type === "crate" || entity.type === "bin") ? 1 : 0 })
 			) {
+				// TODO: this is probably silly; vet this.
+				// I think all bricks should collide with transient bricks
+				// and bots should fall through transient bricks that are in the off state
+				const tangibleForGravity = (otherEntity) => (
+					physicallyTangible(otherEntity) ||
+					(otherEntity.type === "transient" && entity.type === "transient")
+				);
+
 				// just for dinosaur test case level,
 				// where there are some blocks meant to stick inside the ceiling
-				if (entityCollisionTest(entity.x, entity.y, entity, notDroplet)) {
+				if (entityCollisionTest(entity.x, entity.y, entity, tangibleForGravity)) {
 					debug("GRAVITY COLLISION", `${entity.type} stuck in ground at ${entity.x}, ${entity.y}`);
 					return;
 				}
@@ -4069,7 +4092,7 @@ const simulateGravity = () => {
 				// then reign it in if there's a collision
 				const cellDownY = entity.y + 18;
 				// find highest up collision (if any)
-				const ground = entityCollisionAll(entity.x, cellDownY + 1, entity, notDroplet)
+				const ground = entityCollisionAll(entity.x, cellDownY + 1, entity, tangibleForGravity)
 					.sort((a, b) => a.y - b.y)[0];
 				debug("GRAVITY COLLISION", `ground: ${JSON.stringify(ground, null, "\t")}`);
 				if (ground) {
@@ -4122,7 +4145,7 @@ const hurtJunkbot = (junkbot, cause) => {
 
 const walk = (junkbot) => {
 	const posInFront = { x: junkbot.x + junkbot.facing * 15, y: junkbot.y };
-	const stepOrWall = entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDropletOrEnemyBot);
+	const stepOrWall = entityCollisionTest(posInFront.x, posInFront.y, junkbot, groundToWalkOn);
 	if (stepOrWall) {
 		// can we step up?
 		const posStepUp = { x: posInFront.x, y: stepOrWall.y - junkbot.height };
@@ -4139,7 +4162,7 @@ const walk = (junkbot) => {
 		}
 	}
 	// is there solid ground ahead to walk on?
-	const ground = entityCollisionTest(posInFront.x, posInFront.y + 1, junkbot, notBinOrDropletOrEnemyBot);
+	const ground = entityCollisionTest(posInFront.x, posInFront.y + 1, junkbot, groundToWalkOn);
 	if (
 		ground &&
 		!entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDroplet)
@@ -4150,13 +4173,13 @@ const walk = (junkbot) => {
 		entityMoved(junkbot);
 		return;
 	}
-	let step = entityCollisionAll(posInFront.x, posInFront.y + 18 + 1, junkbot, notBinOrDropletOrEnemyBot)
+	let step = entityCollisionAll(posInFront.x, posInFront.y + 18 + 1, junkbot, groundToWalkOn)
 		.sort((a, b) => a.y - b.y)[0];
 	if (step) {
 		// can we step down?
 		// debug("JUNKBOT", `step: ${JSON.stringify(step, null, "\t")}`);
 		const posStepDown = { x: posInFront.x, y: step.y - junkbot.height };
-		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, notBinOrDropletOrEnemyBot)
+		step = entityCollisionAll(posStepDown.x, posStepDown.y + 1, junkbot, groundToWalkOn)
 			.sort((a, b) => a.y - b.y)[0];
 		if (
 			posStepDown.y - junkbot.y <= 18 &&
@@ -4186,7 +4209,7 @@ const findLinkedTeleport = (teleport) => (
 );
 
 const simulateJunkbot = (junkbot) => {
-	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, notDroplet);
+	const aboveHead = entityCollisionTest(junkbot.x, junkbot.y - 1, junkbot, physicallyTangible);
 	const headLoaded = aboveHead && (
 		junkbot.floating || (
 			!aboveHead.fixed &&
@@ -4235,14 +4258,14 @@ const simulateJunkbot = (junkbot) => {
 			return;
 		}
 	}
-	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, notDroplet);
+	const inside = entityCollisionTest(junkbot.x, junkbot.y, junkbot, physicallyTangible);
 	if (inside) {
 		debug("JUNKBOT", "STUCK IN WALL");
 		return;
 	}
 	if (junkbot.floating) {
 		const abovePos = { x: junkbot.x, y: junkbot.y - 18 };
-		const aboveHead = entityCollisionTest(abovePos.x, abovePos.y, junkbot, notDroplet);
+		const aboveHead = entityCollisionTest(abovePos.x, abovePos.y, junkbot, physicallyTangible);
 		if (aboveHead) {
 			debug("JUNKBOT", "FLOATING - CAN'T GO UP");
 		} else {
@@ -4261,7 +4284,7 @@ const simulateJunkbot = (junkbot) => {
 	}
 	junkbot.momentumX = Math.min(5, Math.max(-5, junkbot.momentumX));
 	junkbot.momentumY = Math.min(5, Math.max(-5, junkbot.momentumY));
-	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, notDroplet);
+	const inAir = !entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, physicallyTangible);
 	const unaligned = junkbot.x % 15 !== 0;
 	const jumpStarting = junkbot.momentumY < -2;
 	if (inAir || jumpStarting || unaligned) {
@@ -4279,12 +4302,12 @@ const simulateJunkbot = (junkbot) => {
 		const dirY = Math.sign(junkbot.momentumY);
 		const newX = junkbot.x + dirX * 15;
 		const newY = junkbot.y + dirY * 18;
-		if (entityCollisionTest(newX, newY, junkbot, notDroplet)) {
-			if (!entityCollisionTest(junkbot.x, newY, junkbot, notDroplet)) {
+		if (entityCollisionTest(newX, newY, junkbot, physicallyTangible)) {
+			if (!entityCollisionTest(junkbot.x, newY, junkbot, physicallyTangible)) {
 				// moving Y only is not a collision
 				junkbot.momentumX = 0;
 				junkbot.y = newY;
-			} else if (!entityCollisionTest(newX, junkbot.y, junkbot, notDroplet)) {
+			} else if (!entityCollisionTest(newX, junkbot.y, junkbot, physicallyTangible)) {
 				// moving X only is not a collision
 				junkbot.momentumY = 0;
 				junkbot.x = newX;
@@ -4308,7 +4331,7 @@ const simulateJunkbot = (junkbot) => {
 		}
 
 		const jumpBrick = entityCollisionTest(junkbot.x, junkbot.y + 1, junkbot, (brick) => brick.type === "jump");
-		const ahead = entityCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot, notDroplet);
+		const ahead = entityCollisionTest(junkbot.x + junkbot.facing * 15, junkbot.y, junkbot, physicallyTangible);
 		if (
 			jumpBrick &&
 			jumpBrick.x <= junkbot.x &&
@@ -4338,7 +4361,7 @@ const simulateJunkbot = (junkbot) => {
 				junkbot.x + junkbot.width <= otherEntity.x
 			)
 		));
-		if (cratesInFront.every((crate) => !entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, notDroplet))) {
+		if (cratesInFront.every((crate) => !entityCollisionTest(crate.x + junkbot.facing * 15, crate.y, crate, physicallyTangible))) {
 			for (const crate of cratesInFront) {
 				crate.x += junkbot.facing * 15;
 			}
@@ -4422,8 +4445,8 @@ const simulateGearbot = (gearbot) => {
 	if (gearbot.animationFrame > 2) {
 		gearbot.animationFrame = 0;
 		const aheadPos = { x: gearbot.x + gearbot.facing * 15, y: gearbot.y };
-		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, gearbot, notDroplet);
-		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, notDroplet);
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, gearbot, physicallyTangible);
+		const groundAhead = rectangleCollisionTest(gearbot.x + ((gearbot.facing === -1) ? -15 : gearbot.width), gearbot.y + 1, 15, gearbot.height, physicallyTangible);
 		if (ahead) {
 			if (ahead.type === "junkbot" && !ahead.dying && !ahead.dead) {
 				hurtJunkbot(ahead, "bot");
@@ -4452,7 +4475,7 @@ const simulateScaredy = (bin) => {
 		if (junkbot) {
 			bin.facing = junkbot.x > bin.x ? -1 : 1;
 			const aheadPos = { x: bin.x + bin.facing * 15, y: bin.y };
-			const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, bin, notDroplet);
+			const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, bin, physicallyTangible);
 			if (ahead) {
 				bin.facing = 0;
 			} else {
@@ -4540,11 +4563,11 @@ const simulateClimbbot = (climbbot) => {
 		const behindHorizontallyPos = { x: climbbot.x + climbbot.facing * -15, y: climbbot.y };
 		const aheadPos = climbbot.facingY === 0 ? asidePos : { x: climbbot.x, y: climbbot.y + climbbot.facingY * 18 };
 		const belowPos = { x: climbbot.x, y: climbbot.y + 18 };
-		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, notDroplet);
+		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, physicallyTangible);
 		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, notBinOrDroplet);
-		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, notDroplet);
-		const behindHorizontally = entityCollisionTest(behindHorizontallyPos.x, behindHorizontallyPos.y, climbbot, notDroplet);
-		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, notDroplet);
+		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, physicallyTangible);
+		const behindHorizontally = entityCollisionTest(behindHorizontallyPos.x, behindHorizontallyPos.y, climbbot, physicallyTangible);
+		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, physicallyTangible);
 
 		if (ahead && ahead.type === "junkbot") {
 			hurtJunkbot(ahead, "bot");
