@@ -3912,27 +3912,29 @@ canvas.addEventListener("contextmenu", async (event) => {
 	}
 });
 
-// collision filter for block placement (drag and drop)
+// Collision filter for block placement (drag and drop)
 // transient bricks are considered tangible here, since you can build with them even when they're "off"
 const tangibleForPlacement = (entity) => (
 	entity.type !== "droplet"
 );
-// collision filter for Junkbot's movement, and other bots' movement
+// Collision filter for Junkbot's movement, and other bots' movement
 // transient bricks are intangible when "off"
 const physicallyTangible = (entity) => (
 	entity.type !== "droplet" &&
 	(entity.type !== "transient" || entity.on)
 );
-// i.e. space generally free for junkbot walking
+// Collision filter for Junkbot walking,
+// different from ballistic motion because Junkbot is allowed to collect bins.
+// Also used by climbbot because climbbots aren't allowed to go over bins even though they can go up 3 bricks.
 // TODO: vet this for new transient bricks
 // how does this differ semantically from both "physicallyTangible" and "groundToWalkOn"?
-const notBinOrDroplet = (entity) => (
-	entity.type !== "bin" &&
-	entity.type !== "droplet" &&
-	(entity.type !== "transient" || entity.on)
+const physicallyTangibleAndNotABin = (entity) => (
+	physicallyTangible(entity) &&
+	entity.type !== "bin"
 );
+// Collision filter for Junkbot walking,
 const groundToWalkOn = (entity) => (
-	notBinOrDroplet(entity) &&
+	physicallyTangibleAndNotABin(entity) &&
 	entity.type !== "gearbot" &&
 	entity.type !== "climbbot" &&
 	entity.type !== "flybot" &&
@@ -4156,7 +4158,7 @@ const walk = (junkbot) => {
 		if (
 			posStepUp.y - junkbot.y >= -18 &&
 			posStepUp.y - junkbot.y < 0 &&
-			!entityCollisionTest(posStepUp.x, posStepUp.y, junkbot, notBinOrDroplet)
+			!entityCollisionTest(posStepUp.x, posStepUp.y, junkbot, physicallyTangibleAndNotABin)
 		) {
 			debug("JUNKBOT", "STEP UP");
 			junkbot.x = posStepUp.x;
@@ -4169,7 +4171,7 @@ const walk = (junkbot) => {
 	const ground = entityCollisionTest(posInFront.x, posInFront.y + 1, junkbot, groundToWalkOn);
 	if (
 		ground &&
-		!entityCollisionTest(posInFront.x, posInFront.y, junkbot, notBinOrDroplet)
+		!entityCollisionTest(posInFront.x, posInFront.y, junkbot, physicallyTangibleAndNotABin)
 	) {
 		debug("JUNKBOT", "WALK");
 		junkbot.x = posInFront.x;
@@ -4189,7 +4191,7 @@ const walk = (junkbot) => {
 			posStepDown.y - junkbot.y <= 18 &&
 			posStepDown.y - junkbot.y > 0 &&
 			step &&
-			!entityCollisionTest(posStepDown.x, posStepDown.y, junkbot, notBinOrDroplet)
+			!entityCollisionTest(posStepDown.x, posStepDown.y, junkbot, physicallyTangibleAndNotABin)
 		) {
 			debug("JUNKBOT", "STEP DOWN");
 			junkbot.x = posStepDown.x;
@@ -4568,7 +4570,7 @@ const simulateClimbbot = (climbbot) => {
 		const aheadPos = climbbot.facingY === 0 ? asidePos : { x: climbbot.x, y: climbbot.y + climbbot.facingY * 18 };
 		const belowPos = { x: climbbot.x, y: climbbot.y + 18 };
 		const aside = entityCollisionTest(asidePos.x, asidePos.y, climbbot, physicallyTangible);
-		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, notBinOrDroplet);
+		const groundAside = entityCollisionTest(groundAsidePos.x, groundAsidePos.y, climbbot, physicallyTangibleAndNotABin);
 		const ahead = entityCollisionTest(aheadPos.x, aheadPos.y, climbbot, physicallyTangible);
 		const behindHorizontally = entityCollisionTest(behindHorizontallyPos.x, behindHorizontallyPos.y, climbbot, physicallyTangible);
 		const below = entityCollisionTest(belowPos.x, belowPos.y, climbbot, physicallyTangible);
