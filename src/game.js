@@ -5858,7 +5858,7 @@ const getTitleScreenURL = () => {
 	return `#${gameNameToSlug(game)}`;
 };
 
-const initUI = () => {
+const initGUI = () => {
 	document.body.addEventListener("pointerdown", (event) => {
 		const button = event.target.closest(".generic-sound");
 		if (button) {
@@ -7360,7 +7360,7 @@ const main = async () => {
 		console.error("Couldn't initialize preferences:", error);
 	}
 
-	initUI();
+	initGUI();
 
 	winLoseState = winOrLose(); // prevent pausing in checkLevelEnd before level is loaded
 
