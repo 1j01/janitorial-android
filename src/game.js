@@ -3919,12 +3919,13 @@ canvas.addEventListener("contextmenu", async (event) => {
 });
 
 // Collision filter for block placement (drag and drop)
-// transient bricks are considered tangible here, since you can build with them even when they're "off"
+// Tests whether an entity is capable of preventing placement of blocks in the space it occupies.
+// Transient bricks are considered tangible here, since you can build with them even when they're "off"
 const tangibleForPlacement = (entity) => (
 	entity.type !== "droplet"
 );
 // Collision filter for Junkbot's movement, and other bots' movement
-// transient bricks are intangible when "off"
+// Transient bricks are intangible when "off"
 const physicallyTangible = (entity) => (
 	entity.type !== "droplet" &&
 	(entity.type !== "transient" || entity.on)
