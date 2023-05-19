@@ -45,7 +45,7 @@ I want to make it match Junkbot's art style better, in particular with the studs
 2. Or I could replace the stud sub-part with a customized 3D stud model designed to render nicely in pixel art with a toon shader.
 
 I also looked into Blender. Blender doesn't support oblique projection, but there's a nice [ImportLDraw plugin](https://github.com/TobyLobster/ImportLDraw) for it, and there's a [workaround for the projection](https://blenderartists.org/t/oblique-camera-projection-possible/673635/4) using a Lattice modifier.
-Blender isn't especially geared towards pixel art, but Sam Drost's oblique projection emulation is *also* for the purpose of new creating pixel art for an old game, so the template might help for more than just the projection.
+Blender isn't especially geared towards pixel art, but Sam Drost's oblique projection emulation is *also* for the purpose of creating new pixel art for an old game, so the template might help for more than just the projection.
 That said, Blender is pretty hard to learn, and the Lattice modifier has some problems, creating serious lighting artifacts since it's changing the geometry not the camera.
 
 
@@ -222,7 +222,7 @@ Tomas Clark
 	- Interludes when entering an area for the first time
 		- Quotes from Robert Frost to make it more dramatic
 		- Kipling, who wrote like the national poem of England, if that's a thing, I don't know if it is but if so he wrote it
-	- Vending machines where you can buy snacks, which Junkbot then opens, throws in the trash, and then eats the trash can
+	- Vending machines where you can buy snacks, which Junkbot then opens, throws in the trash, and then eats, trash can and all
 		- Also maybe a paint job, sunglasses (most expensive), etc.
 		- When Junkbot purchases the final item, he crushes the vending machine and eats it
 - For the level editor, maybe some more rustling sound effects from:
