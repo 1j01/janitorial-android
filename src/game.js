@@ -6351,7 +6351,11 @@ const initEditorUI = () => {
 
 	for (const button of editorControlsBar.querySelectorAll("button")) {
 		button.addEventListener("click", () => {
-			const match = button.ariaKeyShortcuts?.match(/(Ctrl\s*\+\s*)?(Shift\s*\+\s*)?(\S+)/);
+			// button.ariaKeyShortcuts isn't supported in Firefox.
+			// Also, note that this only handles the first shortcut in the string,
+			// and only syntax needed for the current set of buttons.
+			const ariaKeyShortcuts = button.getAttribute("aria-keyshortcuts");
+			const match = ariaKeyShortcuts?.match(/(Ctrl\s*\+\s*)?(Shift\s*\+\s*)?(\S+)/);
 			if (match) {
 				const ctrlKey = Boolean(match[1]);
 				const shiftKey = Boolean(match[2]);
