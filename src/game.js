@@ -439,7 +439,7 @@ const showPrompt = (message, defaultText = "") => {
 const showErrorMessage = (message, error) => {
 	const content = document.createElement("div");
 	// content.style.maxWidth = "600px";
-	content.innerHTML = "<p></p>";
+	content.innerHTML = "<p style='white-space: pre-wrap;'></p>";
 	if (error) {
 		content.innerHTML += "<details><summary><span>Details</span></summary><pre></details>";
 
@@ -2144,12 +2144,25 @@ let loadedResources = 0;
 // will be indicated for the total set of resources.
 const loadResources = async (resourcePathsByID) => {
 	const entries = Object.entries(resourcePathsByID);
+	let silenceErrors = false;
 	return Object.fromEntries(await Promise.all(entries.map(async ([id, path]) => {
 		let resource;
 		try {
 			resource = await loadResource(path);
 		} catch (error) {
-			showErrorMessage(`Failed to load resource '${path}'`, error);
+			if (!silenceErrors) {
+				if (location.protocol === "file:") {
+					// This case is handled only if there was an error, because
+					// technically you can disable security features in your browser
+					// to allow loading local files, but it's not recommended.
+					showErrorMessage(`This page must be served by a web server,\nin order to load files needed for the game.`, error);
+					silenceErrors = true;
+				} else {
+					showErrorMessage(`Failed to load resource '${path}'`, error);
+					// allow further errors so you can know what specific resources failed
+					// (a single dialog box with a list would be better, but this is easier)
+				}
+			}
 		}
 		loadedResources += 1;
 		if (loadedResources / totalResources * numProgressBricks > progressBricks.length) {
