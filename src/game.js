@@ -6065,8 +6065,11 @@ const initEditorUI = () => {
 		});
 		let previewEntity = getEntityCopy();
 		previewEntity.isPreviewEntity = true;
-		buttonCanvas.width = previewEntity.width + 15 * 1;
-		buttonCanvas.height = previewEntity.height + 18 * 2;
+		buttonCanvas.width = previewEntity.width + 15 * 5;
+		buttonCanvas.height = previewEntity.height + 18 * 3;
+		const startingAnimationFrame = previewEntity.animationFrame;
+		const capturedFrames = [];
+		let capturing = true;
 		const drawPreview = () => {
 			buttonCtx.clearRect(0, 0, buttonCanvas.width, buttonCanvas.height);
 			buttonCtx.save();
@@ -6132,7 +6135,9 @@ const initEditorUI = () => {
 				playbackEvents = [];
 				levelLastFrame = {};
 				frameCounter = 0;
-				simulate([previewEntity]);
+				if (!capturing || capturedFrames.length > 1) {
+					simulate([previewEntity]);
+				}
 				({
 					muted,
 					paused,
@@ -6153,6 +6158,38 @@ const initEditorUI = () => {
 				previewEntity.x = prev.x;
 				previewEntity.y = prev.y;
 				drawPreview();
+				if (capturing) {
+
+					if (previewEntity.bigWin && capturedFrames.length === 1) {
+						previewEntity.collectingBin = true;
+						previewEntity.animationFrame = 0;
+					}
+
+					// add background under transparent pixels
+					// to compensate for UPNG.js layering frames on top of previous frames
+					// This is fine except for the one translucent sprite, the teleporter effect.
+					buttonCtx.globalCompositeOperation = "destination-over";
+					buttonCtx.fillStyle = "#f0f";
+					buttonCtx.fillRect(0, 0, buttonCanvas.width, buttonCanvas.height);
+					buttonCtx.globalCompositeOperation = "source-over";
+
+					capturedFrames.push(buttonCtx.getImageData(0, 0, buttonCanvas.width, buttonCanvas.height).data);
+					if (/*previewEntity.animationFrame === startingAnimationFrame ||*/ capturedFrames.length > 30) {
+						capturing = false;
+						const delays = Array.from({ length: capturedFrames.length }, () => 1000 / 15);
+						const apngArrayBuffer = window.UPNG.encode(capturedFrames, buttonCanvas.width, buttonCanvas.height, 0, delays);
+						const a = document.createElement("a");
+						a.href = URL.createObjectURL(new Blob([apngArrayBuffer], { type: "image/apng" }));
+						a.download = `${previewEntity.type}.png`;
+						button.append(a);
+						a.textContent = "Download APNG";
+						// a.style.display = "block";
+						a.style.position = "absolute";
+						a.style.top = "0";
+						a.style.left = "0";
+						button.style.position = "relative";
+					}
+				}
 			}, 1000 / 15);
 		});
 		button.addEventListener("mouseleave", () => {
@@ -6178,10 +6215,18 @@ const initEditorUI = () => {
 	}
 
 	makeInsertEntityButton(makeJunkbot({
-		x: 0,
+		x: 15,
 		y: 0,
 		facing: 1,
 	}));
+
+	const successBot = makeJunkbot({
+		x: 15,
+		y: 18,
+		facing: 1,
+	});
+	successBot.bigWin = true;
+	makeInsertEntityButton(successBot);
 
 	makeInsertEntityButton(makeBin({
 		x: 0,
